@@ -3,36 +3,32 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { InstagramIcon } from "@/components/ui/icons";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/site";
 
+// Fotos reales del feed @ponelapava_yerbas (no stock).
 const instagramPosts = [
   {
     id: "1",
-    image: "/product_mate_calabaza_1786546121145.png",
-    alt: "Mate de calabaza artesanal",
+    image: "/ig_storefront.jpg",
+    alt: "Local de Poné La Pava en Catriel",
   },
   {
     id: "2",
-    image: "/category_yerbas_1786545980521.png",
-    alt: "Selección de yerbas",
+    image: "/ig_shelf.jpg",
+    alt: "Estantería de accesorios en el local",
   },
   {
     id: "3",
-    image: "/product_combo_kit_1786546132809.png",
-    alt: "Kit matero completo",
+    image: "/ig_termos.jpg",
+    alt: "Termos Stanley en exhibición",
   },
   {
     id: "4",
-    image: "/category_mates_1786545993698.png",
-    alt: "Colección de mates",
+    image: "/ig_sara.jpg",
+    alt: "Yerbas Sara en el local",
   },
   {
     id: "5",
-    image: "/about_section_1786546070863.png",
-    alt: "Compartiendo mate",
-  },
-  {
-    id: "6",
-    image: "/category_combos_1786546035458.png",
-    alt: "Combos de regalo",
+    image: "/ig_bombillas.jpg",
+    alt: "Mates con virola en exhibición",
   },
 ];
 
@@ -71,19 +67,14 @@ export default function InstagramSection() {
         </ScrollReveal>
 
         <ScrollReveal direction="scale">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:h-[32rem] lg:grid-cols-12 lg:grid-rows-2 lg:gap-4">
-            {instagramPosts.map((post, index) => (
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-5 lg:gap-4">
+            {instagramPosts.map((post) => (
               <a
                 key={post.id}
                 href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={
-                  "group relative block aspect-square overflow-hidden bg-pava-brown " +
-                  (index < 2
-                    ? "lg:col-span-4 lg:row-span-2 lg:aspect-auto"
-                    : "lg:col-span-2 lg:aspect-auto")
-                }
+                className="group relative block aspect-square overflow-hidden bg-pava-brown"
                 aria-label={post.alt}
               >
                 <Image
@@ -91,11 +82,7 @@ export default function InstagramSection() {
                   alt={post.alt}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-                  sizes={
-                    index < 2
-                      ? "(max-width: 1024px) 50vw, 33vw"
-                      : "(max-width: 1024px) 50vw, 17vw"
-                  }
+                  sizes="(max-width: 1024px) 50vw, 20vw"
                 />
                 <div className="absolute inset-0 flex items-end justify-end bg-gradient-to-t from-pava-brown/80 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:p-4">
                   <span className="text-xs text-pava-gold">Ver post ↗</span>

@@ -16,20 +16,12 @@ export default function FeaturedProducts() {
       id="productos-destacados"
       className="relative overflow-hidden bg-pava-cream py-24 sm:py-28 lg:py-36"
     >
-      {/* Subtle ambient orb */}
-      <div
-        className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-pava-gold/7 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute right-0 bottom-1/4 h-56 w-56 rounded-full bg-pava-terracotta/5 blur-3xl"
-        aria-hidden="true"
-      />
-
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-
         {/* Header — asimétrico */}
-        <ScrollReveal direction="up" className="mb-14 grid gap-6 lg:grid-cols-12 lg:items-end lg:mb-18">
+        <ScrollReveal
+          direction="up"
+          className="mb-14 grid gap-6 lg:grid-cols-12 lg:items-end lg:mb-18"
+        >
           <div className="lg:col-span-7">
             <div className="mb-5 flex items-center gap-3">
               <span className="h-px w-9 bg-pava-terracotta" />
@@ -38,7 +30,8 @@ export default function FeaturedProducts() {
               </span>
             </div>
             <h2 className="font-display text-4xl font-bold leading-[0.93] tracking-tight text-pava-brown sm:text-5xl lg:text-6xl">
-              Para hacer del mate<br />
+              Para hacer del mate
+              <br />
               <em className="not-italic text-pava-green">un mejor ritual.</em>
             </h2>
           </div>
@@ -51,7 +44,9 @@ export default function FeaturedProducts() {
               className="group inline-flex shrink-0 items-center gap-2 border-b border-pava-green pb-0.5 text-sm font-semibold text-pava-green transition-all hover:text-pava-terracotta hover:border-pava-terracotta"
             >
               Todo el catálogo
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">
+                →
+              </span>
             </Link>
           </div>
         </ScrollReveal>
@@ -61,18 +56,30 @@ export default function FeaturedProducts() {
           <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
             {/* Large card */}
             {first && (
-              <ScrollReveal direction="up" delay={0} className="sm:col-span-2 lg:col-span-5">
+              <ScrollReveal
+                direction="up"
+                delay={0}
+                className="sm:col-span-2 lg:col-span-5"
+              >
                 <ProductCard product={first} featured />
               </ScrollReveal>
             )}
             {/* Two medium cards */}
             {second && (
-              <ScrollReveal direction="up" delay={80} className="lg:col-span-3 lg:col-start-6">
+              <ScrollReveal
+                direction="up"
+                delay={80}
+                className="lg:col-span-3 lg:col-start-6"
+              >
                 <ProductCard product={second} />
               </ScrollReveal>
             )}
             {third && (
-              <ScrollReveal direction="up" delay={160} className="lg:col-span-4 lg:col-start-9">
+              <ScrollReveal
+                direction="up"
+                delay={160}
+                className="lg:col-span-4 lg:col-start-9"
+              >
                 <ProductCard product={third} />
               </ScrollReveal>
             )}
@@ -91,7 +98,11 @@ export default function FeaturedProducts() {
         )}
 
         {/* Bottom CTA */}
-        <ScrollReveal direction="up" delay={100} className="mt-14 text-center sm:mt-16">
+        <ScrollReveal
+          direction="up"
+          delay={100}
+          className="mt-14 text-center sm:mt-16"
+        >
           <Link
             href="/catalogo"
             id="featured-cta"

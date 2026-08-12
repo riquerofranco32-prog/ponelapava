@@ -69,10 +69,18 @@ export default function AboutSection() {
               </em>
             </h2>
 
-            {/* Pull quote — handwritten accent */}
-            <p className="font-script mb-7 border-l-2 border-pava-gold pl-5 text-3xl leading-snug text-pava-brown-mid/85 sm:text-4xl">
-              &ldquo;El mate no se toma solo. Y tampoco se elige solo.&rdquo;
-            </p>
+            {/* Pull quote — oversized quotation mark instead of a template-style border accent */}
+            <div className="relative mb-7">
+              <span
+                aria-hidden="true"
+                className="font-display pointer-events-none absolute -left-2 -top-6 select-none text-[5.5rem] leading-none text-pava-gold/20 sm:-top-8 sm:text-[7rem]"
+              >
+                &ldquo;
+              </span>
+              <p className="font-script relative pl-6 text-3xl leading-snug text-pava-brown-mid/85 sm:pl-8 sm:text-4xl">
+                El mate no se toma solo. Y tampoco se elige solo.
+              </p>
+            </div>
 
             {/* Body text */}
             <div className="space-y-4 text-[15px] leading-relaxed text-pava-brown-mid/70">
@@ -89,24 +97,29 @@ export default function AboutSection() {
               </p>
             </div>
 
-            {/* Stats */}
-            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-pava-brown/8 pt-8 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            {/* Stats — divided bar, echoes the thin-rule language used in the Hero */}
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-6 border-t border-pava-brown/8 pt-8">
               {[
                 { value: "100%", label: "Artesanal" },
                 { value: "Premium", label: "Selección" },
                 { value: "Local", label: "Argentino" },
                 { value: "Ritual", label: "Compartido" },
-              ].map(({ value, label }) => (
-                <div
-                  key={label}
-                  className="border-l-2 border-pava-terracotta pl-4"
-                >
-                  <div className="font-display text-2xl font-bold text-pava-brown">
-                    {value}
+              ].map(({ value, label }, i) => (
+                <div key={label} className="flex items-center gap-8">
+                  <div>
+                    <div className="font-display text-2xl font-bold text-pava-brown">
+                      {value}
+                    </div>
+                    <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-brown-mid/55">
+                      {label}
+                    </div>
                   </div>
-                  <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-brown-mid/55">
-                    {label}
-                  </div>
+                  {i < 3 && (
+                    <span
+                      className="hidden h-9 w-px bg-pava-brown/12 sm:block"
+                      aria-hidden="true"
+                    />
+                  )}
                 </div>
               ))}
             </div>

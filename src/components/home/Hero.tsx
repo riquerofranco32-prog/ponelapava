@@ -72,8 +72,9 @@ export default function Hero() {
       </div>
 
       {/* Main content — fills screen, content at bottom; shallower parallax depth than bg */}
+      {/* pt matches Navbar's initial height (h-20 lg:h-24) so content never renders under the fixed header on short viewports */}
       <div
-        className="relative z-10 flex flex-1 flex-col justify-end transition-transform duration-300 ease-out"
+        className="relative z-10 flex flex-1 flex-col justify-end pt-20 transition-transform duration-300 ease-out lg:pt-24"
         style={{
           transform: `translate(${parallax.x * 6}px, ${parallax.y * 6}px)`,
         }}

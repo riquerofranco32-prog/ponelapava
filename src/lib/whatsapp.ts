@@ -2,10 +2,9 @@ import { WhatsAppOrderData } from "@/types";
 import { formatPrice } from "./utils";
 
 // ── Configuration ──────────────────────────────────────
-// Replace with the real WhatsApp number when available
 // Format: country code + number without + or spaces
-// Example: "5491112345678" for +54 9 11 1234-5678
-export const WHATSAPP_NUMBER = "5491100000000"; // ← PLACEHOLDER: replace with real number
+// Número temporal de Simón (dueño); reemplazar por WhatsApp de empresa cuando esté listo
+export const WHATSAPP_NUMBER = "5492994650177";
 export const WHATSAPP_BASE_URL = "https://wa.me";
 
 /**

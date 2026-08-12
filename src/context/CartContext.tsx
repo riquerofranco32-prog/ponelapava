@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from "react";
 import { CartItem, Product } from "@/types";
 
@@ -32,7 +33,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "ADD_ITEM": {
       const qty = action.quantity ?? 1;
       const existing = state.items.find(
-        (item) => item.product.id === action.product.id
+        (item) => item.product.id === action.product.id,
       );
       if (existing) {
         return {
@@ -40,7 +41,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           items: state.items.map((item) =>
             item.product.id === action.product.id
               ? { ...item, quantity: item.quantity + qty }
-              : item
+              : item,
           ),
         };
       }
@@ -54,7 +55,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         ...state,
         items: state.items.filter(
-          (item) => item.product.id !== action.productId
+          (item) => item.product.id !== action.productId,
         ),
       };
 
@@ -63,7 +64,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         return {
           ...state,
           items: state.items.filter(
-            (item) => item.product.id !== action.productId
+            (item) => item.product.id !== action.productId,
           ),
         };
       }
@@ -72,7 +73,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         items: state.items.map((item) =>
           item.product.id === action.productId
             ? { ...item, quantity: action.quantity }
-            : item
+            : item,
         ),
       };
     }
@@ -131,8 +132,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Persist to localStorage on change
+  // Persist to localStorage on change — skip the initial mount, whose state
+  // is still the empty default and would otherwise overwrite the stored
+  // cart before the hydrate effect's dispatch has a chance to land.
+  const didMountRef = useRef(false);
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.items));
     } catch {
@@ -142,16 +150,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const itemCount = useMemo(
     () => state.items.reduce((acc, item) => acc + item.quantity, 0),
-    [state.items]
+    [state.items],
   );
 
   const subtotal = useMemo(
     () =>
       state.items.reduce(
         (acc, item) => acc + item.product.price * item.quantity,
-        0
+        0,
       ),
-    [state.items]
+    [state.items],
   );
 
   const addItem = useCallback((product: Product, quantity?: number) => {

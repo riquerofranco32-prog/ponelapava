@@ -1,10 +1,13 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-// ponytail: monograma provisorio con los colores de marca hasta tener el
-// logo/isotipo definitivo (ver tarea "Conseguir logo y archivos maestros
-// definitivos" en Notion). Reemplazar este archivo cuando llegue.
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
+
+const logoBase64 = readFileSync(
+  join(process.cwd(), "public", "logo.png"),
+).toString("base64");
 
 export default function Icon() {
   return new ImageResponse(
@@ -13,22 +16,17 @@ export default function Icon() {
         width: "100%",
         height: "100%",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#2c4a2e",
-        borderRadius: 6,
+        borderRadius: "50%",
+        overflow: "hidden",
       }}
     >
-      <span
-        style={{
-          fontSize: 20,
-          fontWeight: 700,
-          color: "#f5f0e8",
-          fontFamily: "serif",
-        }}
-      >
-        P
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`data:image/png;base64,${logoBase64}`}
+        width={32}
+        height={32}
+        alt=""
+      />
     </div>,
     size,
   );

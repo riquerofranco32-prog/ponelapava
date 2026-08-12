@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* ── Brand Colors ─────────────────────────────── */
-  --color-pava-green: #2c4a2e;
-  --color-pava-green-light: #3d6b40;
-  --color-pava-green-dark: #1a2e1b;
-  --color-pava-olive: #6b6b32;
-  --color-pava-olive-light: #8c8c4a;
-  --color-pava-cream: #f5f0e8;
-  --color-pava-cream-dark: #ede5d4;
-  --color-pava-terracotta: #b85c38;
-  --color-pava-terracotta-light: #d4724e;
-  --color-pava-brown: #1c1209;
+  /* ── Brand Colors — from the Poné La Pava brand book ────
+     pava-brown keeps its historical role (darkest surface /
+     headline accent) but now holds the brand's actual dark
+     green, #26402E, instead of a generic near-black. */
+  --color-pava-green: #26402e;
+  --color-pava-green-light: #35573c;
+  --color-pava-green-dark: #182a1c;
+  --color-pava-olive: #6b7b4f;
+  --color-pava-olive-light: #8b9a6e;
+  --color-pava-cream: #e9e2d1;
+  --color-pava-cream-dark: #ddd3bc;
+  --color-pava-terracotta: #7a5a3a;
+  --color-pava-terracotta-light: #96775a;
+  --color-pava-brown: #26402e;
   --color-pava-brown-mid: #4a3728;
-  --color-pava-gold: #c4952a;
-  --color-pava-gold-light: #d9ae4a;
+  --color-pava-gold: #c7a67a;
+  --color-pava-gold-light: #d8c093;
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1ebe5d;
 
   /* ── Typography ───────────────────────────────── */
   --font-display: var(--font-playfair);
-  --font-body: var(--font-inter);
+  --font-body: var(--font-montserrat);
   --font-script: var(--font-caveat);
 
   /* ── Spacing Scale ────────────────────────────── */
@@ -28,8 +31,8 @@
   --spacing-section-sm: 4rem;
 
   /* ── Shadows ──────────────────────────────────── */
-  --shadow-card: 0 16px 40px -20px rgba(28, 18, 9, 0.5);
-  --shadow-card-hover: 0 22px 48px -22px rgba(28, 18, 9, 0.65);
+  --shadow-card: 0 16px 40px -20px rgba(38, 64, 46, 0.5);
+  --shadow-card-hover: 0 22px 48px -22px rgba(38, 64, 46, 0.65);
 }
 
 /* ── Base Reset ───────────────────────────────────── */
@@ -53,9 +56,9 @@ html {
 }
 
 body {
-  background-color: #f5f0e8;
-  color: #1c1209;
-  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  background-color: #e9e2d1;
+  color: #26402e;
+  font-family: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -71,17 +74,17 @@ body {
   width: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #ede5d4;
+  background: #ddd3bc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c4a2e;
+  background: #26402e;
   border-radius: 3px;
 }
 
 /* ── Selection ────────────────────────────────────── */
 ::selection {
-  background: #2c4a2e;
-  color: #f5f0e8;
+  background: #26402e;
+  color: #e9e2d1;
 }
 
 /* ══════════════════════════════════════════════════
@@ -323,14 +326,14 @@ body {
 .section-divider {
   width: 48px;
   height: 2px;
-  background: #2c4a2e;
+  background: #26402e;
   margin: 0 auto 1.5rem;
 }
 
 .section-divider-left {
   width: 48px;
   height: 2px;
-  background: #2c4a2e;
+  background: #26402e;
   margin-bottom: 1.5rem;
 }
 
@@ -360,7 +363,7 @@ body {
 
 /* ── Focus styles ─────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid #2c4a2e;
+  outline: 2px solid #26402e;
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -392,7 +395,7 @@ body {
   left: calc(100% - 0.5rem);
   width: calc(100% - 1rem);
   height: 1px;
-  background: linear-gradient(to right, #2c4a2e30, transparent);
+  background: linear-gradient(to right, #26402e30, transparent);
 }
 
 /* ── Hide scrollbar on horizontal touch scrollers ───── */
@@ -408,18 +411,18 @@ body {
 .cat-overlay {
   background: linear-gradient(
     to top,
-    rgba(28, 18, 9, 0.92) 0%,
-    rgba(28, 18, 9, 0.35) 50%,
-    rgba(28, 18, 9, 0.05) 100%
+    rgba(38, 64, 46, 0.92) 0%,
+    rgba(38, 64, 46, 0.35) 50%,
+    rgba(38, 64, 46, 0.05) 100%
   );
   transition: background 0.4s ease;
 }
 .category-card:hover .cat-overlay {
   background: linear-gradient(
     to top,
-    rgba(28, 18, 9, 0.8) 0%,
-    rgba(28, 18, 9, 0.3) 50%,
-    rgba(28, 18, 9, 0.08) 100%
+    rgba(38, 64, 46, 0.8) 0%,
+    rgba(38, 64, 46, 0.3) 50%,
+    rgba(38, 64, 46, 0.08) 100%
   );
 }
 
@@ -427,7 +430,7 @@ body {
 .spotlight-overlay {
   background: radial-gradient(
     260px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(196, 149, 42, 0.4),
+    rgba(199, 166, 122, 0.4),
     transparent 70%
   );
   mix-blend-mode: soft-light;

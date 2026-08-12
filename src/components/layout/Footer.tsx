@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, MapPin, Clock } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/icons";
@@ -29,12 +30,23 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="block mb-4">
-              <span className="font-display text-2xl font-bold text-pava-cream">
-                Poné La Pava
+            <Link href="/" className="mb-4 flex items-center gap-2.5">
+              <span className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                />
               </span>
-              <span className="block text-[10px] tracking-[0.2em] uppercase text-pava-cream/50 mt-0.5">
-                Yerbas & Accesorios
+              <span className="flex flex-col leading-none">
+                <span className="font-display text-2xl font-bold text-pava-cream">
+                  Poné La Pava
+                </span>
+                <span className="mt-0.5 block text-[10px] tracking-[0.2em] uppercase text-pava-cream/50">
+                  Yerbas & Accesorios
+                </span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-pava-cream/60 max-w-xs">
@@ -71,7 +83,7 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-3">
               {NAV_LINKS.map(({ href, label }) => (
-                <li key={href}>
+                <li key={label}>
                   <Link
                     href={href}
                     className="text-sm text-pava-cream/60 hover:text-pava-cream transition-colors duration-200"

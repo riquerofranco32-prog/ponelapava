@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag } from "lucide-react";
@@ -61,26 +62,39 @@ export default function Navbar() {
             {/* Logo */}
             <Link
               href="/"
-              className="group flex flex-col leading-none"
+              className="group flex items-center gap-2.5"
               aria-label="Poné La Pava — Inicio"
             >
-              <span
-                className={cn(
-                  "font-display font-bold tracking-tight transition-all duration-300",
-                  isScrolled
-                    ? "text-xl text-pava-green lg:text-[1.4rem]"
-                    : "text-2xl text-pava-cream lg:text-[1.65rem]",
-                )}
-              >
-                Poné La Pava
+              <span className="relative block h-9 w-9 shrink-0 overflow-hidden rounded-full lg:h-10 lg:w-10">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                />
               </span>
-              <span
-                className={cn(
-                  "mt-0.5 text-[9px] font-semibold uppercase tracking-[0.26em] transition-colors duration-300",
-                  isScrolled ? "text-pava-brown-mid/60" : "text-pava-cream/55",
-                )}
-              >
-                Yerbas &amp; Accesorios
+              <span className="flex flex-col leading-none">
+                <span
+                  className={cn(
+                    "font-display font-bold tracking-tight transition-all duration-300",
+                    isScrolled
+                      ? "text-xl text-pava-green lg:text-[1.4rem]"
+                      : "text-2xl text-pava-cream lg:text-[1.65rem]",
+                  )}
+                >
+                  Poné La Pava
+                </span>
+                <span
+                  className={cn(
+                    "mt-0.5 text-[9px] font-semibold uppercase tracking-[0.26em] transition-colors duration-300",
+                    isScrolled
+                      ? "text-pava-brown-mid/60"
+                      : "text-pava-cream/55",
+                  )}
+                >
+                  Yerbas &amp; Accesorios
+                </span>
               </span>
             </Link>
 
@@ -92,7 +106,7 @@ export default function Navbar() {
             >
               {mainLinks.map(({ href, label }) => (
                 <Link
-                  key={href}
+                  key={label}
                   href={href}
                   className={cn(
                     "nav-link text-[13px] font-medium tracking-wide transition-colors duration-200",
@@ -211,13 +225,24 @@ export default function Navbar() {
         >
           {/* Panel header */}
           <div className="flex items-center justify-between border-b border-pava-brown/8 px-6 py-5">
-            <div>
-              <span className="font-display text-lg font-bold text-pava-green">
-                Poné La Pava
+            <div className="flex items-center gap-2.5">
+              <span className="relative block h-9 w-9 shrink-0 overflow-hidden rounded-full">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
               </span>
-              <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-brown-mid/50">
-                Yerbas &amp; Accesorios
-              </span>
+              <div>
+                <span className="font-display text-lg font-bold text-pava-green">
+                  Poné La Pava
+                </span>
+                <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-brown-mid/50">
+                  Yerbas &amp; Accesorios
+                </span>
+              </div>
             </div>
             <button
               onClick={() => setIsMobileOpen(false)}
@@ -236,7 +261,7 @@ export default function Navbar() {
           >
             {mainLinks.map(({ href, label }) => (
               <Link
-                key={href}
+                key={label}
                 href={href}
                 onClick={() => setIsMobileOpen(false)}
                 className="border-b border-pava-brown/8 py-4 text-base font-medium text-pava-brown/80 hover:text-pava-green transition-colors duration-150"

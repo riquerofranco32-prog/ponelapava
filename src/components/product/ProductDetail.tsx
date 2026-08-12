@@ -3,19 +3,29 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, MessageCircle, ChevronLeft } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  ShoppingBag,
+  MessageCircle,
+  ChevronLeft,
+} from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
+import { whatsappChatUrl } from "@/lib/whatsapp";
 
 interface ProductDetailProps {
   product: Product;
   related: Product[];
 }
 
-export default function ProductDetail({ product, related }: ProductDetailProps) {
+export default function ProductDetail({
+  product,
+  related,
+}: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
@@ -37,11 +47,21 @@ export default function ProductDetail({ product, related }: ProductDetailProps) 
     <div className="bg-pava-cream min-h-screen">
       {/* Breadcrumb */}
       <div className="bg-pava-cream-dark border-b border-pava-brown/8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-20">
-          <nav className="flex items-center gap-2 text-sm text-pava-brown/50" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-pava-green transition-colors">Inicio</Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-28 lg:pt-32">
+          <nav
+            className="flex items-center gap-2 text-sm text-pava-brown/50"
+            aria-label="Breadcrumb"
+          >
+            <Link href="/" className="hover:text-pava-green transition-colors">
+              Inicio
+            </Link>
             <span>/</span>
-            <Link href="/catalogo" className="hover:text-pava-green transition-colors">Catálogo</Link>
+            <Link
+              href="/catalogo"
+              className="hover:text-pava-green transition-colors"
+            >
+              Catálogo
+            </Link>
             <span>/</span>
             <Link
               href={`/catalogo?cat=${product.category}`}
@@ -116,9 +136,7 @@ export default function ProductDetail({ product, related }: ProductDetailProps) 
               {product.status === "featured" && (
                 <Badge variant="featured">Destacado</Badge>
               )}
-              {isOutOfStock && (
-                <Badge variant="out_of_stock">Sin stock</Badge>
-              )}
+              {isOutOfStock && <Badge variant="out_of_stock">Sin stock</Badge>}
             </div>
 
             {/* Name */}
@@ -146,7 +164,9 @@ export default function ProductDetail({ product, related }: ProductDetailProps) 
                     <span className="text-[10px] tracking-[0.15em] uppercase text-pava-brown/50 font-medium block mb-0.5">
                       Marca
                     </span>
-                    <span className="text-sm font-medium text-pava-brown">{product.brand}</span>
+                    <span className="text-sm font-medium text-pava-brown">
+                      {product.brand}
+                    </span>
                   </div>
                 )}
                 {product.weight && (
@@ -154,7 +174,9 @@ export default function ProductDetail({ product, related }: ProductDetailProps) 
                     <span className="text-[10px] tracking-[0.15em] uppercase text-pava-brown/50 font-medium block mb-0.5">
                       Peso
                     </span>
-                    <span className="text-sm font-medium text-pava-brown">{product.weight}</span>
+                    <span className="text-sm font-medium text-pava-brown">
+                      {product.weight}
+                    </span>
                   </div>
                 )}
                 {product.tags && product.tags.length > 0 && (
@@ -225,12 +247,12 @@ export default function ProductDetail({ product, related }: ProductDetailProps) 
 
             {/* WhatsApp */}
             <a
-              href={`https://wa.me/5491100000000?text=${encodeURIComponent(
-                `Hola! Me interesa el producto: ${product.name} (${formatPrice(product.price)})`
-              )}`}
+              href={whatsappChatUrl(
+                `Hola! Me interesa el producto: ${product.name} (${formatPrice(product.price)})`,
+              )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white text-sm font-semibold border-2 border-[#25D366] hover:bg-[#1ebe5d] hover:border-[#1ebe5d] transition-colors duration-200"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors duration-200"
             >
               <MessageCircle size={16} />
               Consultar por WhatsApp

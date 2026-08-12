@@ -9,12 +9,14 @@ interface AddToCartButtonProps {
   product: Product;
   disabled?: boolean;
   size?: "sm" | "md";
+  overlay?: boolean;
 }
 
 export default function AddToCartButton({
   product,
   disabled = false,
   size = "sm",
+  overlay = false,
 }: AddToCartButtonProps) {
   const { addItem, setDrawer } = useCart();
   const [added, setAdded] = useState(false);
@@ -33,9 +35,37 @@ export default function AddToCartButton({
     return (
       <button
         disabled
-        className="flex w-full items-center justify-center gap-2 border border-pava-brown/10 bg-pava-cream-dark py-3 text-xs font-medium tracking-[0.08em] text-pava-brown-mid/50 cursor-not-allowed"
+        className={`flex w-full items-center justify-center gap-2 border border-pava-brown/10 py-3 text-xs font-medium tracking-[0.08em] text-pava-brown-mid/50 cursor-not-allowed ${
+          overlay ? "bg-pava-cream/80 backdrop-blur-sm" : "bg-pava-cream-dark"
+        }`}
       >
         Sin stock
+      </button>
+    );
+  }
+
+  if (overlay) {
+    return (
+      <button
+        onClick={handleAdd}
+        className={`flex w-full items-center justify-center gap-2 py-2.5 text-[12px] font-semibold tracking-wide transition-all duration-200 active:scale-[0.98] ${
+          added
+            ? "bg-pava-green text-pava-cream"
+            : "bg-pava-cream/95 text-pava-green hover:bg-pava-gold hover:text-pava-brown backdrop-blur-sm"
+        }`}
+        aria-label={added ? "Producto agregado al carrito" : `Agregar ${product.name} al carrito`}
+      >
+        {added ? (
+          <>
+            <Check size={13} />
+            Agregado
+          </>
+        ) : (
+          <>
+            <ShoppingBag size={13} />
+            Agregar al carrito
+          </>
+        )}
       </button>
     );
   }

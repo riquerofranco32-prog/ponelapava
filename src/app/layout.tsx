@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Playfair_Display, Caveat } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
+import { SITE_URL, STORE_ADDRESS_LINE, STORE_ADDRESS_CITY } from "@/lib/site";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,7 +20,15 @@ const playfair = Playfair_Display({
   style: ["normal", "italic"],
 });
 
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-caveat",
+  display: "swap",
+  weight: ["500", "600", "700"],
+});
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Poné La Pava — Yerbas, Mates y Accesorios Premium",
     template: "%s | Poné La Pava",
@@ -63,14 +72,35 @@ export const metadata: Metadata = {
   },
 };
 
+const businessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Store",
+  name: "Poné La Pava",
+  description:
+    "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos y bombillas.",
+  url: SITE_URL,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: STORE_ADDRESS_LINE,
+    addressCountry: STORE_ADDRESS_CITY,
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
+    <html
+      lang="es"
+      className={`${inter.variable} ${playfair.variable} ${caveat.variable}`}
+    >
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+        />
         <CartProvider>
           <Navbar />
           <CartDrawer />

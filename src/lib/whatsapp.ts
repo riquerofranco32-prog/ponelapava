@@ -17,7 +17,7 @@ export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
   const itemLines = items
     .map(
       ({ product, quantity }) =>
-        `• ${product.name} x${quantity} — ${formatPrice(product.price * quantity)}`
+        `• ${product.name} x${quantity} — ${formatPrice(product.price * quantity)}`,
     )
     .join("\n");
 
@@ -46,6 +46,15 @@ export function buildWhatsAppUrl(data: WhatsAppOrderData): string {
   const message = generateWhatsAppMessage(data);
   const encoded = encodeURIComponent(message);
   return `${WHATSAPP_BASE_URL}/${WHATSAPP_NUMBER}?text=${encoded}`;
+}
+
+/**
+ * Builds a wa.me link with an optional pre-filled message.
+ * Use for static hrefs (e.g. "consult about this product" links).
+ */
+export function whatsappChatUrl(message?: string): string {
+  const encoded = message ? `?text=${encodeURIComponent(message)}` : "";
+  return `${WHATSAPP_BASE_URL}/${WHATSAPP_NUMBER}${encoded}`;
 }
 
 /**

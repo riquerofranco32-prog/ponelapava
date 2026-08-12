@@ -8,33 +8,42 @@ import AddToCartButton from "./AddToCartButton";
 interface ProductCardProps {
   product: Product;
   view?: "grid" | "list";
+  featured?: boolean;
 }
 
-export default function ProductCard({ product, view = "grid" }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  view = "grid",
+  featured = false,
+}: ProductCardProps) {
   const isOutOfStock = product.status === "out_of_stock";
   const isFeatured = product.status === "featured";
 
   if (view === "list") {
     return (
-      <article className="group flex gap-4 border border-pava-brown/10 bg-white p-4 shadow-[0_10px_30px_-26px_rgba(28,18,9,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:border-pava-brown/20 hover:shadow-[0_20px_40px_-26px_rgba(28,18,9,0.8)] sm:p-5">
-        <div className="relative w-24 h-24 shrink-0 overflow-hidden">
+      <article className="group flex gap-4 border border-pava-brown/8 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)] sm:p-5">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden">
           <Image
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             sizes="96px"
           />
           {isOutOfStock && (
             <div className="absolute inset-0 bg-pava-brown/50 flex items-center justify-center">
-              <span className="text-[10px] text-white font-semibold">Agotado</span>
+              <span className="text-[10px] text-white font-semibold">
+                Agotado
+              </span>
             </div>
           )}
         </div>
         <div className="flex-1 min-w-0 flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Badge variant="category">{getCategoryLabel(product.category)}</Badge>
+              <Badge variant="category">
+                {getCategoryLabel(product.category)}
+              </Badge>
               {isFeatured && <Badge variant="featured">Destacado</Badge>}
             </div>
             <Link href={`/producto/${product.id}`}>
@@ -42,14 +51,20 @@ export default function ProductCard({ product, view = "grid" }: ProductCardProps
                 {product.name}
               </h3>
             </Link>
-            <p className="text-xs text-pava-brown-mid/60 mt-1">{truncate(product.description, 80)}</p>
+            <p className="text-xs text-pava-brown-mid/60 mt-1">
+              {truncate(product.description, 80)}
+            </p>
           </div>
           <div className="flex items-center justify-between mt-3">
             <span className="font-display text-lg font-bold text-pava-green">
               {formatPrice(product.price)}
             </span>
             <div className="w-32">
-              <AddToCartButton product={product} disabled={isOutOfStock} size="sm" />
+              <AddToCartButton
+                product={product}
+                disabled={isOutOfStock}
+                size="sm"
+              />
             </div>
           </div>
         </div>
@@ -57,52 +72,90 @@ export default function ProductCard({ product, view = "grid" }: ProductCardProps
     );
   }
 
+  // Grid view — with premium hover states
+  const imageAspect = featured ? "aspect-[4/3]" : "aspect-[5/4]";
+
   return (
-    <article className="group overflow-hidden border border-pava-brown/10 bg-white shadow-[0_14px_34px_-30px_rgba(28,18,9,0.9)] transition-all duration-300 hover:-translate-y-1 hover:border-pava-brown/20 hover:shadow-[0_24px_45px_-28px_rgba(28,18,9,0.85)]">
-      {/* Image */}
-      <div className="relative aspect-[5/4] overflow-hidden bg-pava-cream-dark">
-        <Link href={`/producto/${product.id}`} aria-label={`Ver ${product.name}`}>
+    <article className="product-card group overflow-hidden border border-pava-brown/8 bg-white transition-all duration-350 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]">
+      {/* Image area */}
+      <div
+        className={`relative ${imageAspect} overflow-hidden bg-pava-cream-dark`}
+      >
+        <Link
+          href={`/producto/${product.id}`}
+          aria-label={`Ver ${product.name}`}
+          tabIndex={-1}
+        >
           <Image
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            sizes={
+              featured
+                ? "(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 42vw"
+                : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            }
           />
         </Link>
+
+        {/* Badges */}
         {isFeatured && !isOutOfStock && (
           <div className="absolute left-3 top-3">
             <Badge variant="featured">Destacado</Badge>
           </div>
         )}
         {isOutOfStock && (
-          <div className="absolute inset-0 bg-pava-brown/50 flex items-center justify-center">
-            <span className="bg-pava-cream text-pava-brown text-xs font-semibold tracking-wider uppercase px-4 py-2">
+          <div className="absolute inset-0 flex items-center justify-center bg-pava-brown/55">
+            <span className="bg-pava-cream px-4 py-2 text-xs font-semibold uppercase tracking-wider text-pava-brown">
               Agotado
             </span>
+          </div>
+        )}
+
+        {/* Hover overlay with quick-add — slides up from bottom */}
+        {!isOutOfStock && (
+          <div className="product-card-btn absolute inset-x-0 bottom-0 p-3">
+            <AddToCartButton
+              product={product}
+              disabled={false}
+              size="sm"
+              overlay
+            />
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-5 sm:p-6">
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-2 flex items-start justify-between gap-3">
           <Badge variant="category">{getCategoryLabel(product.category)}</Badge>
-          <span className="font-display shrink-0 text-xl font-bold leading-none text-pava-green">
+          <span
+            className={`font-display shrink-0 text-lg font-bold leading-none ${
+              isFeatured ? "text-pava-gold" : "text-pava-green"
+            }`}
+          >
             {formatPrice(product.price)}
           </span>
         </div>
-        <div className="mb-2 flex items-start justify-between gap-2">
-          <Link href={`/producto/${product.id}`}>
-            <h3 className="font-display text-xl font-bold leading-tight text-pava-brown transition-colors hover:text-pava-green">
-              {product.name}
-            </h3>
-          </Link>
-        </div>
-        <p className="mb-5 min-h-10 text-sm leading-relaxed text-pava-brown-mid/70">
-          {truncate(product.description, 70)}
+
+        <Link href={`/producto/${product.id}`}>
+          <h3 className="font-display mb-1.5 text-[1.1rem] font-bold leading-tight text-pava-brown transition-colors hover:text-pava-green">
+            {product.name}
+          </h3>
+        </Link>
+
+        <p className="mb-5 min-h-9 text-[13px] leading-relaxed text-pava-brown-mid/65">
+          {truncate(product.description, 72)}
         </p>
-        <AddToCartButton product={product} disabled={isOutOfStock} />
+
+        {/* Desktop fallback button (always visible, not overlaid) */}
+        <div className="group-hover:hidden">
+          <AddToCartButton product={product} disabled={isOutOfStock} />
+        </div>
+        <div className="hidden group-hover:block">
+          <AddToCartButton product={product} disabled={isOutOfStock} />
+        </div>
       </div>
     </article>
   );

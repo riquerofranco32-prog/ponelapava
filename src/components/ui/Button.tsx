@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "whatsapp";
   size?: "sm" | "md" | "lg";
-  asChild?: boolean;
   href?: string;
   target?: string;
   rel?: string;
@@ -20,7 +20,7 @@ const variantClasses: Record<string, string> = {
   ghost:
     "bg-transparent text-pava-brown hover:bg-pava-cream-dark border-2 border-transparent",
   whatsapp:
-    "bg-[#25D366] text-white hover:bg-[#1ebe5d] border-2 border-[#25D366] hover:border-[#1ebe5d]",
+    "bg-whatsapp text-white hover:bg-whatsapp-dark border-2 border-whatsapp hover:border-whatsapp-dark",
 };
 
 const sizeClasses: Record<string, string> = {
@@ -46,10 +46,19 @@ export default function Button({
     baseClasses,
     variantClasses[variant],
     sizeClasses[size],
-    className
+    className,
   );
 
   if (href) {
+    // Internal links use next/link for client-side navigation; external
+    // links (WhatsApp, Instagram, maps) stay as plain anchors.
+    if (href.startsWith("/") && !target) {
+      return (
+        <Link href={href} className={classes}>
+          {children}
+        </Link>
+      );
+    }
     return (
       <a href={href} target={target} rel={rel} className={classes}>
         {children}

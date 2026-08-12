@@ -1,31 +1,30 @@
+import Link from "next/link";
+import ScrollReveal from "@/components/ui/ScrollReveal";
+
 const steps = [
   {
     number: "01",
-    title: "Elegí tus productos",
+    title: "Elegí",
     description:
-      "Navegá nuestro catálogo y encontrá las yerbas, mates, termos y accesorios que más te gustan.",
-    icon: "🌿",
+      "Navegá nuestro catálogo y encontrá yerbas, mates, termos y accesorios.",
   },
   {
     number: "02",
     title: "Armá tu pedido",
     description:
-      "Agregá los productos al carrito y revisá tu selección antes de continuar.",
-    icon: "🛒",
+      "Agregá los productos al carrito y revisá tu selección.",
   },
   {
     number: "03",
-    title: "Enviá por WhatsApp",
+    title: "Mandalo por WhatsApp",
     description:
-      "Con un clic se genera un mensaje con tu pedido completo listo para enviarnos.",
-    icon: "💬",
+      "Con un clic se genera un mensaje con tu pedido listo para enviarnos.",
   },
   {
     number: "04",
-    title: "Coordinamos la entrega",
+    title: "Coordinamos",
     description:
-      "Acordamos la entrega o retiro en el local. Fácil, rápido y sin complicaciones.",
-    icon: "📦",
+      "Acordamos la entrega o retiro en el local. Sin vueltas.",
   },
 ];
 
@@ -33,65 +32,74 @@ export default function HowToBuy() {
   return (
     <section
       id="como-comprar"
-      className="py-20 lg:py-28 bg-pava-cream"
+      className="bg-pava-cream-dark py-24 lg:py-32"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+
         {/* Header */}
-        <div className="mb-14 lg:mb-20 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="w-8 h-px bg-pava-green" />
-            <span className="text-xs tracking-[0.2em] uppercase text-pava-green font-medium">
-              Proceso
+        <ScrollReveal direction="up" className="mb-16 lg:mb-20 max-w-2xl">
+          <div className="mb-5 flex items-center gap-3">
+            <span className="h-px w-9 bg-pava-green" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-green">
+              Proceso de compra
             </span>
-            <span className="w-8 h-px bg-pava-green" />
           </div>
-          <h2 className="font-display text-4xl lg:text-5xl font-bold text-pava-brown">
-            ¿Cómo comprás?
+          <h2 className="font-display text-4xl font-bold leading-[0.93] tracking-tight text-pava-brown sm:text-5xl lg:text-6xl">
+            Simple, rápido<br />
+            <em className="not-italic text-pava-green">y sin registro.</em>
           </h2>
-          <p className="mt-4 text-pava-brown-mid/70 max-w-md mx-auto">
-            Simple, rápido y sin registrarte. Todo por WhatsApp.
+          <p className="mt-5 text-sm leading-relaxed text-pava-brown-mid/60 max-w-md">
+            Todo por WhatsApp. Sin formularios, sin cuentas, sin complicaciones.
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+        <div className="relative grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
-            <div key={step.number} className="relative group">
-              {/* Connector line (desktop) */}
+            <ScrollReveal
+              key={step.number}
+              direction="up"
+              delay={index * 90}
+              className="relative"
+            >
+              {/* Connector line — desktop only */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-8 left-full w-full h-px bg-pava-brown/10 z-0 -translate-y-1/2" />
+                <div
+                  className="step-connector hidden lg:block"
+                  aria-hidden="true"
+                />
               )}
 
-              <div className="relative z-10">
-                {/* Number + icon */}
-                <div className="flex items-center gap-4 mb-5">
-                  <span className="font-display text-5xl font-bold text-pava-brown/10 leading-none">
-                    {step.number}
-                  </span>
-                  <span className="text-3xl">{step.icon}</span>
+              <div className="border-t-2 border-pava-green/15 pt-8 pr-8 pb-8">
+                {/* Number — decorative large */}
+                <div
+                  className="font-display mb-6 text-[5rem] font-bold leading-none tracking-tighter text-pava-green/10 select-none lg:text-[6rem]"
+                  aria-hidden="true"
+                >
+                  {step.number}
                 </div>
 
-                {/* Content */}
-                <h3 className="font-display text-xl font-bold text-pava-brown mb-3">
+                <h3 className="font-display mb-3 text-2xl font-bold text-pava-brown">
                   {step.title}
                 </h3>
-                <p className="text-sm text-pava-brown-mid/70 leading-relaxed">
+                <p className="text-[14px] leading-relaxed text-pava-brown-mid/60">
                   {step.description}
                 </p>
               </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
 
         {/* CTA */}
-        <div className="mt-14 lg:mt-20 text-center">
-          <a
+        <ScrollReveal direction="up" delay={200} className="mt-14 lg:mt-18">
+          <Link
             href="/catalogo"
-            className="inline-flex items-center gap-3 px-10 py-4 bg-transparent text-pava-green text-sm font-semibold tracking-wide border-2 border-pava-green hover:bg-pava-green hover:text-pava-cream transition-all duration-200 active:scale-[0.98]"
+            id="howtobuy-cta"
+            className="inline-flex items-center gap-3 border-2 border-pava-green bg-transparent px-10 py-4 text-sm font-semibold tracking-wide text-pava-green transition-all duration-200 hover:bg-pava-green hover:text-pava-cream active:scale-[0.98]"
           >
-            Empezar a elegir →
-          </a>
-        </div>
+            Empezar a elegir <span aria-hidden="true">→</span>
+          </Link>
+        </ScrollReveal>
       </div>
     </section>
   );

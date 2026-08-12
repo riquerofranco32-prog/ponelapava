@@ -1,68 +1,20 @@
 import Image from "next/image";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default function AboutSection() {
   return (
     <section
       id="nosotros"
-      className="overflow-hidden bg-pava-cream py-20 sm:py-24 lg:py-32"
+      className="overflow-hidden bg-pava-cream py-24 sm:py-28 lg:py-36"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-24">
-          {/* Text */}
-          <div className="order-2 lg:order-1">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="w-8 h-px bg-pava-terracotta" />
-              <span className="text-xs tracking-[0.2em] uppercase text-pava-terracotta font-medium">
-                Nosotros
-              </span>
-            </div>
-            <h2 className="font-display mb-7 text-4xl font-bold leading-[0.98] tracking-tight text-pava-brown sm:text-5xl lg:text-6xl">
-              Más que una yerba.{" "}
-              <em className="not-italic text-pava-terracotta">
-                Una forma de compartir.
-              </em>
-            </h2>
-            <div className="max-w-xl space-y-4 text-pava-brown-mid/75 leading-relaxed">
-              <p>
-                En Poné La Pava creemos que el mate no es solo una bebida: es
-                un ritual, un pretexto para estar juntos, para bajar el ritmo
-                y conectar.
-              </p>
-              <p>
-                Nacimos con la misión de reunir todo lo que necesitás para vivir
-                ese ritual como se merece. Desde la yerba más cuidadosamente
-                seleccionada hasta el mate que se convierte en tuyo con el
-                tiempo.
-              </p>
-              <p>
-                Cada producto que ofrecemos fue elegido con criterio, porque
-                sabemos que detrás de cada mate hay una historia.
-              </p>
-            </div>
-
-            {/* Values */}
-            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-7 border-t border-pava-brown/10 pt-7 sm:grid-cols-4">
-              {[
-                { value: "100%", label: "Artesanal" },
-                { value: "Premium", label: "Selección" },
-                { value: "Local", label: "Argentino" },
-                { value: "Ritual", label: "Matero" },
-              ].map(({ value, label }) => (
-                <div key={label} className="border-l-2 border-pava-terracotta pl-4">
-                  <div className="font-display text-2xl font-bold text-pava-brown">
-                    {value}
-                  </div>
-                  <div className="text-xs tracking-[0.15em] uppercase text-pava-brown-mid/60 mt-0.5">
-                    {label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className="relative order-1 lg:order-2">
-            <div className="relative aspect-[4/5] overflow-hidden bg-pava-brown">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-2 lg:gap-20">
+          {/* Image column — full height, editorial */}
+          <ScrollReveal
+            direction="left"
+            className="relative order-1 lg:order-1"
+          >
+            <div className="relative aspect-[3/4] overflow-hidden bg-pava-brown lg:aspect-auto lg:h-full lg:min-h-[580px]">
               <Image
                 src="/about_section_1786546070863.png"
                 alt="Compartiendo mate — Poné La Pava"
@@ -70,15 +22,95 @@ export default function AboutSection() {
                 className="object-cover transition-transform duration-700 hover:scale-[1.02]"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
+              {/* Subtle dark overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-pava-brown/20" />
             </div>
-            {/* Accent decoration */}
-            <div className="absolute bottom-4 left-4 border border-pava-cream/30 bg-pava-brown/75 px-4 py-3 text-pava-cream backdrop-blur-sm sm:bottom-6 sm:left-6">
-              <span className="block text-[9px] font-semibold uppercase tracking-[0.2em] text-pava-gold">Desde Argentina</span>
-              <span className="mt-1 block font-display text-lg font-bold">Para cada ronda</span>
+
+            {/* Floating card */}
+            <div className="absolute bottom-5 right-0 translate-x-4 border border-pava-cream/30 bg-pava-brown/80 px-5 py-4 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:translate-x-6 lg:translate-x-8">
+              <span className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-gold">
+                Desde Argentina
+              </span>
+              <span className="mt-1 block font-display text-lg font-bold">
+                Para cada ronda
+              </span>
             </div>
-            <div className="absolute -bottom-6 -left-6 -z-10 hidden h-32 w-32 bg-pava-terracotta/10 lg:block" />
-            <div className="absolute -right-6 -top-6 -z-10 hidden h-20 w-20 bg-pava-gold/15 lg:block" />
-          </div>
+
+            {/* Background geometry — desktop only */}
+            <div
+              className="absolute -bottom-6 -left-5 -z-10 hidden h-40 w-40 bg-pava-terracotta/8 lg:block"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute -right-5 -top-5 -z-10 hidden h-24 w-24 bg-pava-olive/15 lg:block"
+              aria-hidden="true"
+            />
+          </ScrollReveal>
+
+          {/* Text column */}
+          <ScrollReveal
+            direction="right"
+            delay={120}
+            className="order-2 flex flex-col justify-center lg:order-2"
+          >
+            {/* Label */}
+            <div className="mb-7 flex items-center gap-3">
+              <span className="h-px w-8 bg-pava-terracotta" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-pava-terracotta">
+                Nosotros
+              </span>
+            </div>
+
+            {/* Headline */}
+            <h2 className="font-display mb-8 text-4xl font-bold leading-[0.96] tracking-tight text-pava-brown sm:text-5xl lg:text-[3.25rem]">
+              Más que una yerba.{" "}
+              <em className="not-italic text-pava-terracotta">
+                Una forma de compartir.
+              </em>
+            </h2>
+
+            {/* Pull quote — handwritten accent */}
+            <p className="font-script mb-7 border-l-2 border-pava-gold pl-5 text-3xl leading-snug text-pava-brown-mid/85 sm:text-4xl">
+              &ldquo;El mate no se toma solo. Y tampoco se elige solo.&rdquo;
+            </p>
+
+            {/* Body text */}
+            <div className="space-y-4 text-[15px] leading-relaxed text-pava-brown-mid/70">
+              <p>
+                En Poné La Pava creemos que el mate no es solo una bebida: es un
+                ritual, un pretexto para estar juntos, para bajar el ritmo y
+                conectar.
+              </p>
+              <p>
+                Nacimos con la misión de reunir todo lo que necesitás para vivir
+                ese ritual como se merece. Desde la yerba más cuidadosamente
+                seleccionada hasta el mate que se convierte en tuyo con el
+                tiempo.
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-pava-brown/8 pt-8 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+              {[
+                { value: "100%", label: "Artesanal" },
+                { value: "Premium", label: "Selección" },
+                { value: "Local", label: "Argentino" },
+                { value: "Ritual", label: "Compartido" },
+              ].map(({ value, label }) => (
+                <div
+                  key={label}
+                  className="border-l-2 border-pava-terracotta pl-4"
+                >
+                  <div className="font-display text-2xl font-bold text-pava-brown">
+                    {value}
+                  </div>
+                  <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-brown-mid/55">
+                    {label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

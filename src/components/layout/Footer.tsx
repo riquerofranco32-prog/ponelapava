@@ -1,23 +1,14 @@
 import Link from "next/link";
 import { MessageCircle, MapPin, Clock } from "lucide-react";
-
-function InstagramIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-    </svg>
-  );
-}
-
-const navLinks = [
-  { href: "/", label: "Inicio" },
-  { href: "/catalogo", label: "Catálogo" },
-  { href: "/#nosotros", label: "Nosotros" },
-  { href: "/#el-local", label: "El local" },
-  { href: "/#como-comprar", label: "Cómo comprar" },
-];
+import { InstagramIcon } from "@/components/ui/icons";
+import { NAV_LINKS } from "@/lib/nav";
+import {
+  INSTAGRAM_URL,
+  STORE_ADDRESS_LINE,
+  STORE_ADDRESS_CITY,
+  STORE_HOURS,
+} from "@/lib/site";
+import { whatsappChatUrl } from "@/lib/whatsapp";
 
 const categories = [
   { href: "/catalogo?cat=yerbas", label: "Yerbas" },
@@ -47,13 +38,13 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-pava-cream/60 max-w-xs">
-              Especialistas en la cultura del mate. Yerbas seleccionadas,
-              mates artesanales y todo lo que necesitás para el mate perfecto.
+              Especialistas en la cultura del mate. Yerbas seleccionadas, mates
+              artesanales y todo lo que necesitás para el mate perfecto.
             </p>
             {/* Social */}
             <div className="flex items-center gap-3 mt-6">
               <a
-                href="https://www.instagram.com/ponelapava_yerbas/"
+                href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-9 h-9 border border-pava-cream/20 hover:border-pava-cream/50 hover:text-pava-cream transition-all duration-200"
@@ -62,10 +53,10 @@ export default function Footer() {
                 <InstagramIcon size={16} />
               </a>
               <a
-                href="https://wa.me/5491100000000"
+                href={whatsappChatUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-9 h-9 border border-pava-cream/20 hover:border-[#25D366] hover:text-[#25D366] transition-all duration-200"
+                className="flex items-center justify-center w-9 h-9 border border-pava-cream/20 hover:border-whatsapp hover:text-whatsapp transition-all duration-200"
                 aria-label="WhatsApp de Poné La Pava"
               >
                 <MessageCircle size={16} />
@@ -79,7 +70,7 @@ export default function Footer() {
               Navegación
             </h3>
             <ul className="flex flex-col gap-3">
-              {navLinks.map(({ href, label }) => (
+              {NAV_LINKS.map(({ href, label }) => (
                 <li key={href}>
                   <Link
                     href={href}
@@ -118,26 +109,34 @@ export default function Footer() {
             </h3>
             <div className="flex flex-col gap-4">
               <div className="flex items-start gap-3 text-sm text-pava-cream/60">
-                <MapPin size={15} className="mt-0.5 shrink-0 text-pava-cream/40" />
+                <MapPin
+                  size={15}
+                  className="mt-0.5 shrink-0 text-pava-cream/40"
+                />
                 <span>
-                  {/* PLACEHOLDER: reemplazar con la dirección real */}
-                  Dirección a confirmar<br />
-                  Argentina
+                  {STORE_ADDRESS_LINE}
+                  <br />
+                  {STORE_ADDRESS_CITY}
                 </span>
               </div>
               <div className="flex items-start gap-3 text-sm text-pava-cream/60">
-                <Clock size={15} className="mt-0.5 shrink-0 text-pava-cream/40" />
+                <Clock
+                  size={15}
+                  className="mt-0.5 shrink-0 text-pava-cream/40"
+                />
                 <span>
-                  {/* PLACEHOLDER: reemplazar con los horarios reales */}
-                  Lun–Vie: 9:00 – 19:00<br />
-                  Sáb: 9:00 – 14:00
+                  {STORE_HOURS.map(({ days, hours }) => (
+                    <span key={days} className="block">
+                      {days}: {hours}
+                    </span>
+                  ))}
                 </span>
               </div>
               <a
-                href="https://wa.me/5491100000000"
+                href={whatsappChatUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-[#25D366] hover:text-[#1ebe5d] transition-colors duration-200 font-medium"
+                className="inline-flex items-center gap-2 text-sm text-whatsapp hover:text-whatsapp-dark transition-colors duration-200 font-medium"
               >
                 <MessageCircle size={15} />
                 Escribinos por WhatsApp

@@ -3,13 +3,22 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle, ChevronLeft } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ShoppingBag,
+  MessageCircle,
+  ChevronLeft,
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
+  const { items, updateQuantity, removeItem, clearCart, total, itemCount } =
+    useCart();
   const [customerName, setCustomerName] = useState("");
   const [comment, setComment] = useState("");
 
@@ -48,23 +57,11 @@ export default function CartPage() {
 
   return (
     <div className="bg-pava-cream min-h-screen">
-      {/* Header */}
-      <div className="bg-pava-green py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="w-8 h-px bg-pava-gold" />
-            <span className="text-xs tracking-[0.2em] uppercase text-pava-gold font-medium">
-              Tu selección
-            </span>
-          </div>
-          <h1 className="font-display text-5xl lg:text-6xl font-bold text-pava-cream">
-            Carrito
-          </h1>
-          <p className="mt-2 text-pava-cream/60">
-            {itemCount} producto{itemCount !== 1 ? "s" : ""} en tu carrito
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Tu selección"
+        title="Carrito"
+        description={`${itemCount} producto${itemCount !== 1 ? "s" : ""} en tu carrito`}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
@@ -115,7 +112,9 @@ export default function CartPage() {
                       {/* Quantity */}
                       <div className="flex items-center border border-pava-brown/15">
                         <button
-                          onClick={() => updateQuantity(product.id, quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(product.id, quantity - 1)
+                          }
                           className="flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
                           aria-label="Reducir cantidad"
                         >
@@ -125,7 +124,9 @@ export default function CartPage() {
                           {quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(product.id, quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(product.id, quantity + 1)
+                          }
                           className="flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
                           aria-label="Aumentar cantidad"
                         >
@@ -170,7 +171,10 @@ export default function CartPage() {
               {/* Line items */}
               <div className="space-y-3 mb-5 pb-5 border-b border-pava-brown/10">
                 {items.map(({ product, quantity }) => (
-                  <div key={product.id} className="flex justify-between text-sm">
+                  <div
+                    key={product.id}
+                    className="flex justify-between text-sm"
+                  >
                     <span className="text-pava-brown-mid/70 line-clamp-1 flex-1 mr-2">
                       {product.name} x{quantity}
                     </span>
@@ -229,7 +233,7 @@ export default function CartPage() {
               <button
                 onClick={handleWhatsApp}
                 disabled={!customerName.trim()}
-                className="flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] text-white text-sm font-semibold border-2 border-[#25D366] hover:bg-[#1ebe5d] hover:border-[#1ebe5d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 w-full py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageCircle size={18} />
                 Enviar pedido por WhatsApp

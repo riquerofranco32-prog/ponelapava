@@ -85,6 +85,7 @@ export default function ProductCard({
           href={`/producto/${product.id}`}
           aria-label={`Ver ${product.name}`}
           tabIndex={-1}
+          className="relative block h-full w-full"
         >
           <Image
             src={product.images[0]}

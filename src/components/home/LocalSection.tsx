@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { MapPin, Clock, MessageCircle, ExternalLink } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { whatsappChatUrl } from "@/lib/whatsapp";
+import { whatsappChatUrl, WHATSAPP_DISPLAY } from "@/lib/whatsapp";
 import {
   STORE_ADDRESS_LINE,
   STORE_ADDRESS_CITY,
@@ -106,7 +106,7 @@ export default function LocalSection() {
                     rel="noopener noreferrer"
                     className="mt-1 block font-medium text-pava-cream transition-colors hover:text-whatsapp"
                   >
-                    +54 9 11 XXXX-XXXX
+                    {WHATSAPP_DISPLAY}
                   </a>
                 </div>
               </div>

@@ -5,6 +5,8 @@ import { formatPrice } from "./utils";
 // Format: country code + number without + or spaces
 // Número temporal de Simón (dueño); reemplazar por WhatsApp de empresa cuando esté listo
 export const WHATSAPP_NUMBER = "5492994650177";
+// Misma línea, formateada para mostrar en pantalla.
+export const WHATSAPP_DISPLAY = "+54 9 2994 65-0177";
 export const WHATSAPP_BASE_URL = "https://wa.me";
 
 /**

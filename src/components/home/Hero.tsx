@@ -5,74 +5,71 @@ export default function Hero() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-end overflow-hidden"
+      className="grain-overlay relative flex min-h-[42rem] items-end overflow-hidden sm:min-h-[46rem] lg:min-h-screen"
       aria-label="Bienvenida a Poné La Pava"
     >
-      {/* Background image */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/hero_background_1786545961305.png"
-          alt="Mate en mesa de madera — Poné La Pava"
+          alt="Mate servido sobre una mesa de madera"
           fill
           priority
           quality={90}
-          className="object-cover object-center"
+          className="object-cover object-[58%_center] sm:object-center"
           sizes="100vw"
         />
-        {/* Gradient overlay: bottom-heavy, editorial */}
-        <div className="absolute inset-0 bg-gradient-to-t from-pava-brown via-pava-brown/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-pava-brown via-pava-brown/60 to-pava-brown/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/70 via-pava-brown/20 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-pava-brown/55 to-transparent" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 lg:pb-28 pt-32">
-        <div className="max-w-2xl">
-          {/* Label */}
-          <div className="animate-fade-in-up animate-delay-100 inline-flex items-center gap-2 mb-6">
-            <span className="w-6 h-px bg-pava-gold" />
-            <span className="text-xs tracking-[0.25em] uppercase font-medium text-pava-gold">
-              Yerbas · Mates · Accesorios
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-14 pt-32 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24">
+        <div className="max-w-3xl">
+          <div className="animate-fade-in-up animate-delay-100 mb-7 flex items-center gap-3">
+            <span className="h-px w-10 bg-pava-gold" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.27em] text-pava-gold sm:text-xs">
+              Poné La Pava · Tienda matera
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 className="animate-fade-in-up animate-delay-200 font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-pava-cream leading-[0.9] tracking-tight mb-6">
-            El ritual <br />
-            <em className="not-italic text-pava-gold">del mate</em>
-            <br />
+          <h1 className="animate-fade-in-up animate-delay-200 font-display text-[3.5rem] font-bold leading-[0.88] tracking-[-0.045em] text-pava-cream sm:text-7xl lg:text-8xl xl:text-[6.6rem]">
+            El ritual<br />
+            <em className="not-italic text-pava-gold">del mate</em><br />
             es tuyo.
           </h1>
 
-          {/* Subheadline */}
-          <p className="animate-fade-in-up animate-delay-300 text-base sm:text-lg text-pava-cream/75 leading-relaxed mb-10 max-w-md">
-            Yerbas seleccionadas, mates artesanales, termos y todo lo que
-            necesitás para vivir el mate como se merece.
-          </p>
+          <div className="animate-fade-in-up animate-delay-300 mt-7 flex max-w-xl flex-col gap-5 sm:mt-8 sm:flex-row sm:items-end sm:gap-7">
+            <p className="max-w-md text-base leading-relaxed text-pava-cream/80 sm:text-lg">
+              Yerbas seleccionadas, mates artesanales y accesorios para
+              acompañar cada ronda.
+            </p>
+            <span className="hidden h-11 w-px bg-pava-cream/25 sm:block" />
+            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-pava-cream/55 sm:w-28">
+              Hecho para compartir
+            </p>
+          </div>
 
-          {/* CTAs */}
-          <div className="animate-fade-in-up animate-delay-400 flex flex-wrap gap-4">
+          <div className="animate-fade-in-up animate-delay-400 mt-9 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
             <Link
               href="/catalogo"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-pava-gold text-pava-brown text-sm font-semibold tracking-wide border-2 border-pava-gold hover:bg-pava-gold-light hover:border-pava-gold-light transition-all duration-200 active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-3 border-2 border-pava-gold bg-pava-gold px-7 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:border-pava-gold-light hover:bg-pava-gold-light active:scale-[0.98] sm:px-8"
             >
-              Ver catálogo
+              Explorar el catálogo <span aria-hidden="true">→</span>
             </Link>
             <Link
               href="/#el-local"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-pava-cream text-sm font-semibold tracking-wide border-2 border-pava-cream/40 hover:border-pava-cream hover:bg-pava-cream/10 transition-all duration-200 active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 border border-pava-cream/40 bg-pava-brown/10 px-7 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[2px] transition-all duration-200 hover:border-pava-cream hover:bg-pava-cream/10"
             >
               Conocé nuestro local
             </Link>
           </div>
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-fade-in animate-delay-600 hidden sm:flex flex-col items-center gap-2">
-        <span className="text-[10px] tracking-[0.2em] uppercase text-pava-cream/40">
-          Scroll
-        </span>
-        <div className="w-px h-8 bg-gradient-to-b from-pava-cream/40 to-transparent" />
+        <div className="animate-fade-in animate-delay-600 mt-12 flex items-center gap-4 border-t border-pava-cream/20 pt-4 text-[10px] font-medium uppercase tracking-[0.18em] text-pava-cream/55 sm:mt-16 sm:max-w-md">
+          <span>Argentina</span>
+          <span className="h-1 w-1 rounded-full bg-pava-gold" />
+          <span>Yerbas · Mates · Accesorios</span>
+        </div>
       </div>
     </section>
   );

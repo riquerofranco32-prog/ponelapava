@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
@@ -19,20 +18,15 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { itemCount, toggleDrawer } = useCart();
-  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [pathname]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -46,23 +40,23 @@ export default function Navbar() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           isScrolled
-            ? "bg-pava-cream/95 backdrop-blur-md shadow-sm border-b border-pava-brown/10"
+            ? "border-b border-pava-brown/10 bg-pava-cream/95 shadow-[0_8px_28px_-18px_rgba(28,18,9,0.65)] backdrop-blur-md"
             : "bg-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex h-[4.5rem] items-center justify-between lg:h-20">
             {/* Logo */}
             <Link
               href="/"
-              className="flex flex-col leading-none group"
+              className="group flex flex-col leading-none"
               aria-label="Poné La Pava — Inicio"
             >
               <span
                 className={cn(
-                  "font-display text-xl lg:text-2xl font-bold tracking-tight transition-colors duration-200",
+                  "font-display text-xl font-bold tracking-tight transition-colors duration-200 lg:text-2xl",
                   isScrolled ? "text-pava-green" : "text-pava-cream"
                 )}
               >
@@ -70,7 +64,7 @@ export default function Navbar() {
               </span>
               <span
                 className={cn(
-                  "text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-200",
+                  "mt-1 text-[9px] font-semibold uppercase tracking-[0.23em] transition-colors duration-200",
                   isScrolled ? "text-pava-brown-mid" : "text-pava-cream/70"
                 )}
               >
@@ -97,15 +91,15 @@ export default function Navbar() {
             </nav>
 
             {/* Right actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               {/* Cart button */}
               <button
                 onClick={toggleDrawer}
                 className={cn(
-                  "relative flex items-center justify-center w-10 h-10 transition-colors duration-200",
+                  "relative flex h-11 w-11 items-center justify-center border transition-colors duration-200",
                   isScrolled
-                    ? "text-pava-brown hover:text-pava-green"
-                    : "text-pava-cream hover:text-pava-cream/70"
+                    ? "border-pava-brown/10 text-pava-brown hover:border-pava-green/30 hover:text-pava-green"
+                    : "border-pava-cream/25 text-pava-cream hover:border-pava-cream/60 hover:text-pava-cream/70"
                 )}
                 aria-label={`Carrito, ${itemCount} productos`}
               >
@@ -121,7 +115,7 @@ export default function Navbar() {
               <Link
                 href="/catalogo"
                 className={cn(
-                  "hidden lg:flex items-center gap-2 px-5 py-2.5 text-sm font-medium tracking-wide transition-all duration-200 border-2",
+                  "hidden lg:flex items-center gap-2 border px-5 py-3 text-sm font-semibold tracking-wide transition-all duration-200",
                   isScrolled
                     ? "bg-pava-green text-pava-cream border-pava-green hover:bg-pava-green-light"
                     : "bg-pava-cream text-pava-green border-pava-cream hover:bg-pava-cream/90"
@@ -134,10 +128,10 @@ export default function Navbar() {
               <button
                 onClick={() => setIsMobileOpen(!isMobileOpen)}
                 className={cn(
-                  "flex lg:hidden items-center justify-center w-10 h-10 transition-colors duration-200",
+                  "flex h-11 w-11 items-center justify-center border transition-colors duration-200 lg:hidden",
                   isScrolled
-                    ? "text-pava-brown hover:text-pava-green"
-                    : "text-pava-cream hover:text-pava-cream/70"
+                    ? "border-pava-brown/10 text-pava-brown hover:border-pava-green/30 hover:text-pava-green"
+                    : "border-pava-cream/25 text-pava-cream hover:border-pava-cream/60 hover:text-pava-cream/70"
                 )}
                 aria-label={isMobileOpen ? "Cerrar menú" : "Abrir menú"}
                 aria-expanded={isMobileOpen}
@@ -165,12 +159,12 @@ export default function Navbar() {
         {/* Panel */}
         <div
           className={cn(
-            "absolute top-0 right-0 h-full w-72 bg-pava-cream shadow-2xl transition-transform duration-300 flex flex-col",
+            "absolute top-0 right-0 flex h-full w-[86vw] max-w-sm flex-col bg-pava-cream shadow-2xl transition-transform duration-300",
             isMobileOpen ? "translate-x-0" : "translate-x-full"
           )}
         >
           {/* Panel header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-pava-brown/10">
+          <div className="flex items-center justify-between border-b border-pava-brown/10 px-6 py-6">
             <span className="font-display text-lg font-bold text-pava-green">
               Menú
             </span>
@@ -189,6 +183,7 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
+                onClick={() => setIsMobileOpen(false)}
                 className="py-3 px-2 text-base font-medium text-pava-brown hover:text-pava-green border-b border-pava-brown/10 transition-colors duration-200"
               >
                 {label}
@@ -200,7 +195,7 @@ export default function Navbar() {
           <div className="px-6 pb-8">
             <Link
               href="/catalogo"
-              className="flex items-center justify-center w-full py-3 bg-pava-green text-pava-cream text-sm font-medium tracking-wide border-2 border-pava-green hover:bg-pava-green-light transition-colors duration-200"
+              className="flex w-full items-center justify-center border-2 border-pava-green bg-pava-green py-3.5 text-sm font-semibold tracking-wide text-pava-cream transition-colors duration-200 hover:bg-pava-green-light"
             >
               Ver catálogo
             </Link>
@@ -208,7 +203,7 @@ export default function Navbar() {
               href="https://wa.me/5491100000000"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center w-full py-3 mt-3 bg-[#25D366] text-white text-sm font-medium tracking-wide border-2 border-[#25D366] hover:bg-[#1ebe5d] transition-colors duration-200"
+              className="mt-3 flex w-full items-center justify-center border-2 border-[#25D366] bg-[#25D366] py-3.5 text-sm font-semibold tracking-wide text-white transition-colors duration-200 hover:bg-[#1ebe5d]"
             >
               💬 WhatsApp
             </a>

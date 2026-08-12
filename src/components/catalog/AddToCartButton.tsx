@@ -33,7 +33,7 @@ export default function AddToCartButton({
     return (
       <button
         disabled
-        className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-medium tracking-wide text-pava-brown-mid/50 bg-pava-cream-dark border border-pava-brown/10 cursor-not-allowed"
+        className="flex w-full items-center justify-center gap-2 border border-pava-brown/10 bg-pava-cream-dark py-3 text-xs font-medium tracking-[0.08em] text-pava-brown-mid/50 cursor-not-allowed"
       >
         Sin stock
       </button>
@@ -44,11 +44,11 @@ export default function AddToCartButton({
     <button
       onClick={handleAdd}
       className={`w-full flex items-center justify-center gap-2 ${
-        size === "sm" ? "py-2.5 text-xs" : "py-3 text-sm"
-      } font-medium tracking-wide transition-all duration-200 border-2 ${
+        size === "sm" ? "py-3 text-xs" : "py-3.5 text-sm"
+      } border border-pava-green font-semibold tracking-[0.08em] transition-all duration-200 ${
         added
           ? "bg-pava-green text-pava-cream border-pava-green"
-          : "bg-transparent text-pava-green border-pava-green hover:bg-pava-green hover:text-pava-cream"
+          : "bg-transparent text-pava-green hover:bg-pava-green hover:text-pava-cream"
       } active:scale-[0.98]`}
       aria-label={added ? "Producto agregado al carrito" : `Agregar ${product.name} al carrito`}
     >

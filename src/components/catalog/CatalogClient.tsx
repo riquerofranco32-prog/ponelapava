@@ -7,24 +7,25 @@ import { categories } from "@/data/categories";
 import { ProductCategory } from "@/types";
 import ProductCard from "@/components/catalog/ProductCard";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 type SortOption = "default" | "price-asc" | "price-desc" | "name";
 
 export default function CatalogClient() {
   const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("cat");
+  const initialCategory =
+    categoryParam &&
+    ["yerbas", "mates", "bombillas", "termos", "accesorios", "combos"].includes(
+      categoryParam
+    )
+      ? (categoryParam as ProductCategory)
+      : "all";
   const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">("all");
+  const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">(
+    initialCategory
+  );
   const [sort, setSort] = useState<SortOption>("default");
   const [view, setView] = useState<"grid" | "list">("grid");
-
-  // Initialize category from URL params
-  useEffect(() => {
-    const cat = searchParams.get("cat");
-    if (cat && ["yerbas","mates","bombillas","termos","accesorios","combos"].includes(cat)) {
-      setActiveCategory(cat as ProductCategory);
-    }
-  }, [searchParams]);
 
   const filtered = useMemo(() => {
     let result = [...products];

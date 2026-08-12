@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function FinalCTA() {
   return (
-    <section className="relative py-24 lg:py-36 overflow-hidden">
+    <section className="grain-overlay relative overflow-hidden py-24 sm:py-28 lg:py-40">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -14,7 +14,8 @@ export default function FinalCTA() {
           sizes="100vw"
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-pava-brown/75" />
+        <div className="absolute inset-0 bg-pava-brown/80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/60 via-transparent to-pava-brown/45" />
       </div>
 
       {/* Content */}
@@ -26,7 +27,7 @@ export default function FinalCTA() {
           <span className="w-12 h-px bg-pava-gold/50" />
         </div>
 
-        <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-pava-cream leading-tight mb-6">
+        <h2 className="font-display mb-7 text-5xl font-bold leading-[0.92] tracking-tight text-pava-cream sm:text-6xl lg:text-7xl xl:text-8xl">
           ¿Ya sabés qué vas<br />
           a poner en la{" "}
           <em className="not-italic text-pava-gold">pava?</em>
@@ -40,7 +41,7 @@ export default function FinalCTA() {
         <div className="flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/catalogo"
-            className="inline-flex items-center gap-3 px-10 py-4 bg-pava-gold text-pava-brown text-sm font-semibold tracking-wide border-2 border-pava-gold hover:bg-pava-gold-light hover:border-pava-gold-light transition-all duration-200 active:scale-[0.98]"
+          className="inline-flex items-center gap-3 border-2 border-pava-gold bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:border-pava-gold-light hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
           >
             Ver catálogo
           </Link>
@@ -48,7 +49,7 @@ export default function FinalCTA() {
             href="https://wa.me/5491100000000"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-10 py-4 bg-[#25D366] text-white text-sm font-semibold tracking-wide border-2 border-[#25D366] hover:bg-[#1ebe5d] transition-all duration-200 active:scale-[0.98]"
+          className="inline-flex items-center gap-3 border border-pava-cream/35 bg-pava-cream/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-sm transition-all duration-200 hover:border-[#25D366] hover:bg-[#25D366] sm:px-10"
           >
             💬 Consultar por WhatsApp
           </a>

@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from "@/data/categories";
@@ -52,6 +54,9 @@ export default function Categories() {
               />
             </div>
           ))}
+          <div className="w-[78vw] shrink-0 snap-start sm:w-[46vw]">
+            <CatalogCTATile stacked className="aspect-[3/4]" />
+          </div>
         </div>
 
         {/* Desktop — asymmetric mosaic */}
@@ -140,9 +145,45 @@ export default function Categories() {
               size="small"
             />
           </ScrollReveal>
+
+          {/* CTA — closes the grid, invites straight to the full catalog */}
+          <ScrollReveal
+            direction="up"
+            delay={240}
+            className="category-card lg:col-span-12 lg:row-start-3"
+          >
+            <CatalogCTATile className="lg:h-24" />
+          </ScrollReveal>
         </div>
       </div>
     </section>
+  );
+}
+
+function CatalogCTATile({
+  className,
+  stacked = false,
+}: {
+  className: string;
+  stacked?: boolean;
+}) {
+  return (
+    <Link
+      href="/catalogo"
+      className={`group flex items-center gap-4 border border-pava-cream/15 px-5 py-6 transition-colors duration-300 hover:border-pava-gold/50 sm:px-6 ${
+        stacked
+          ? "h-full flex-col justify-center text-center"
+          : "justify-between"
+      } ${className}`}
+    >
+      <span className="font-display text-xl font-bold text-pava-cream sm:text-2xl">
+        ¿Ya sabés qué buscás?{" "}
+        <em className="not-italic text-pava-gold">Ver el catálogo completo.</em>
+      </span>
+      <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-pava-gold transition-all duration-200 group-hover:gap-2.5">
+        Explorar todo <span aria-hidden="true">→</span>
+      </span>
+    </Link>
   );
 }
 
@@ -162,14 +203,25 @@ function CategoryCard({
   return (
     <Link
       href={`/catalogo?cat=${cat.slug}`}
-      className={`group relative block h-full overflow-hidden bg-pava-brown-mid ${className}`}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty(
+          "--mx",
+          `${((e.clientX - rect.left) / rect.width) * 100}%`,
+        );
+        e.currentTarget.style.setProperty(
+          "--my",
+          `${((e.clientY - rect.top) / rect.height) * 100}%`,
+        );
+      }}
+      className={`group relative block h-full overflow-hidden bg-pava-brown-mid shadow-[var(--shadow-card)] transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[var(--shadow-card-hover)] ${className}`}
       aria-label={`Ver categoría ${cat.name}`}
     >
       <Image
         src={cat.image}
         alt={cat.name}
         fill
-        className="object-cover opacity-85 transition-all duration-700 ease-out group-hover:scale-[1.055] group-hover:opacity-100"
+        className="object-cover opacity-85 grayscale-[55%] transition-all duration-700 ease-out group-hover:scale-[1.055] group-hover:opacity-100 group-hover:grayscale-0"
         sizes={
           size === "large"
             ? "(max-width: 1024px) 78vw, 34vw"
@@ -180,6 +232,26 @@ function CategoryCard({
       />
       {/* Gradient overlay */}
       <div className="cat-overlay absolute inset-0" />
+
+      {/* Cursor-tracked spotlight — 21st.dev style */}
+      <div
+        className="spotlight-overlay pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        aria-hidden="true"
+      />
+
+      {/* Category glyph — oversized, rotates in on hover (bento-card icon pattern) */}
+      <span
+        className="pointer-events-none absolute -right-2 -top-2 text-6xl opacity-0 -rotate-12 scale-75 transition-all duration-500 ease-out group-hover:opacity-25 group-hover:rotate-0 group-hover:scale-100 sm:text-7xl"
+        aria-hidden="true"
+      >
+        {cat.icon}
+      </span>
+
+      {/* Product count — live badge */}
+      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 border border-pava-cream/20 bg-pava-brown/40 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-pava-cream/80 backdrop-blur-sm sm:left-5 sm:top-5">
+        <span className="h-1 w-1 rounded-full bg-pava-gold" />
+        {cat.productCount} productos
+      </span>
 
       {/* Index number — editorial marker, consistent across all sizes */}
       <span className="absolute right-4 top-4 font-display text-xs font-bold text-pava-cream/50 sm:right-5 sm:top-5">

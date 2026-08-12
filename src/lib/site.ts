@@ -4,9 +4,11 @@ export const SITE_URL = "https://ponelapava.com.ar";
 export const INSTAGRAM_HANDLE = "ponelapava_yerbas";
 export const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}/`;
 
-// ← PLACEHOLDER: replace with the real store address once confirmed
-export const STORE_ADDRESS_LINE = "Dirección a confirmar";
-export const STORE_ADDRESS_CITY = "Argentina";
+export const STORE_ADDRESS_LINE = "Avenida San Martín 475";
+export const STORE_ADDRESS_CITY = "Catriel, Río Negro";
+export const STORE_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${STORE_ADDRESS_LINE}, ${STORE_ADDRESS_CITY}`,
+)}`;
 
 // ← PLACEHOLDER: replace with real opening hours once confirmed
 export const STORE_HOURS = [

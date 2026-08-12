@@ -423,6 +423,16 @@ body {
   );
 }
 
+/* ── Cursor-tracked spotlight (category cards) ────── */
+.spotlight-overlay {
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(196, 149, 42, 0.4),
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+}
+
 /* ── Clip path decorative ─────────────────────────── */
 .clip-diagonal {
   clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);

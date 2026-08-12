@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
+import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
 import { SITE_URL, STORE_ADDRESS_LINE, STORE_ADDRESS_CITY } from "@/lib/site";
 
 const inter = Inter({
@@ -82,7 +83,8 @@ const businessJsonLd = {
   address: {
     "@type": "PostalAddress",
     streetAddress: STORE_ADDRESS_LINE,
-    addressCountry: STORE_ADDRESS_CITY,
+    addressLocality: STORE_ADDRESS_CITY,
+    addressCountry: "AR",
   },
 };
 
@@ -106,6 +108,7 @@ export default function RootLayout({
           <CartDrawer />
           <main>{children}</main>
           <Footer />
+          <WhatsAppFAB />
         </CartProvider>
       </body>
     </html>

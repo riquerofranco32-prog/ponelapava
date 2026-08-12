@@ -6,6 +6,7 @@ import {
   STORE_ADDRESS_LINE,
   STORE_ADDRESS_CITY,
   STORE_HOURS,
+  STORE_MAPS_URL,
 } from "@/lib/site";
 
 export default function LocalSection() {
@@ -113,7 +114,7 @@ export default function LocalSection() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
-                href="https://maps.google.com"
+                href={STORE_MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 border-2 border-pava-gold bg-pava-gold px-5 py-3 text-sm font-semibold tracking-wide text-pava-brown transition-colors hover:border-pava-gold-light hover:bg-pava-gold-light"

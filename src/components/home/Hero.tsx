@@ -6,20 +6,36 @@ import { useEffect, useState } from "react";
 
 export default function Hero() {
   const [loaded, setLoaded] = useState(false);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 60);
     return () => clearTimeout(timer);
   }, []);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setParallax({
+      x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
+      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
+    });
+  };
+
   return (
     <section
       id="inicio"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setParallax({ x: 0, y: 0 })}
       className="grain-overlay relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label="Bienvenida a Poné La Pava"
     >
-      {/* Background image */}
-      <div className="absolute inset-0 z-0">
+      {/* Background image — mouse-driven parallax depth layer */}
+      <div
+        className="absolute inset-0 z-0 transition-transform duration-300 ease-out"
+        style={{
+          transform: `scale(1.06) translate(${parallax.x * -10}px, ${parallax.y * -10}px)`,
+        }}
+      >
         <Image
           src="/hero_background_1786545961305.png"
           alt="Mate servido sobre mesa de madera"
@@ -55,8 +71,13 @@ export default function Hero() {
         <span className="block h-16 w-px bg-pava-cream/40" />
       </div>
 
-      {/* Main content — fills screen, content at bottom */}
-      <div className="relative z-10 flex flex-1 flex-col justify-end">
+      {/* Main content — fills screen, content at bottom; shallower parallax depth than bg */}
+      <div
+        className="relative z-10 flex flex-1 flex-col justify-end transition-transform duration-300 ease-out"
+        style={{
+          transform: `translate(${parallax.x * 6}px, ${parallax.y * 6}px)`,
+        }}
+      >
         <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
           {/* Tag line */}
           <div

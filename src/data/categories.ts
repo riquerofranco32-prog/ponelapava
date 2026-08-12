@@ -1,0 +1,58 @@
+import { Category } from "@/types";
+
+export const categories: Category[] = [
+  {
+    id: "1",
+    name: "Yerbas",
+    slug: "yerbas",
+    description: "Las mejores yerbas del mercado, seleccionadas con criterio.",
+    image: "/category_yerbas_1786545980521.png",
+    icon: "🌿",
+    productCount: 12,
+  },
+  {
+    id: "2",
+    name: "Mates",
+    slug: "mates",
+    description: "Mates de calabaza, madera, acero y más.",
+    image: "/category_mates_1786545993698.png",
+    icon: "🫙",
+    productCount: 8,
+  },
+  {
+    id: "3",
+    name: "Bombillas",
+    slug: "bombillas",
+    description: "Bombillas de alpaca, acero y filtrantes.",
+    image: "/category_bombillas_1786546023442.png",
+    icon: "✨",
+    productCount: 6,
+  },
+  {
+    id: "4",
+    name: "Termos",
+    slug: "termos",
+    description: "Termos Stanley, Lumilagro y más marcas premium.",
+    image: "/category_termos_1786546003986.png",
+    icon: "🌡️",
+    productCount: 5,
+  },
+  {
+    id: "5",
+    name: "Accesorios",
+    slug: "accesorios",
+    description: "Todo lo que necesitás para el mate perfecto.",
+    image: "/about_section_1786546070863.png",
+    icon: "🎁",
+    productCount: 10,
+  },
+  {
+    id: "6",
+    name: "Combos",
+    slug: "combos",
+    description: "Kits completos para regalar o empezar.",
+    image: "/category_combos_1786546035458.png",
+    icon: "📦",
+    productCount: 4,
+  },
+];

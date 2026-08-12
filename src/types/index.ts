@@ -1,0 +1,87 @@
+// ── Product ────────────────────────────────────────────
+export type ProductCategory =
+  | "yerbas"
+  | "mates"
+  | "bombillas"
+  | "termos"
+  | "accesorios"
+  | "combos";
+
+export type ProductStatus = "available" | "out_of_stock" | "featured";
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  longDescription?: string;
+  price: number;
+  category: ProductCategory;
+  status: ProductStatus;
+  images: string[];
+  tags?: string[];
+  weight?: string;
+  brand?: string;
+  featured?: boolean;
+  createdAt?: string;
+}
+
+// ── Category ────────────────────────────────────────────
+export interface Category {
+  id: string;
+  name: string;
+  slug: ProductCategory;
+  description: string;
+  image: string;
+  icon: string;
+  productCount?: number;
+}
+
+// ── Cart ────────────────────────────────────────────────
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface Cart {
+  items: CartItem[];
+  total: number;
+  itemCount: number;
+}
+
+// ── Order ────────────────────────────────────────────────
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
+export interface Order {
+  id?: string;
+  customerName: string;
+  customerPhone?: string;
+  items: OrderItem[];
+  subtotal: number;
+  total: number;
+  comment?: string;
+  status: "pending" | "confirmed" | "delivered" | "cancelled";
+  createdAt: string;
+}
+
+// ── WhatsApp ────────────────────────────────────────────
+export interface WhatsAppOrderData {
+  customerName: string;
+  items: CartItem[];
+  total: number;
+  comment?: string;
+}
+
+// ── Admin ────────────────────────────────────────────────
+export interface AdminMetric {
+  label: string;
+  value: number | string;
+  change?: string;
+  trend?: "up" | "down" | "neutral";
+}

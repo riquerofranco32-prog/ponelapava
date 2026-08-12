@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import Hero from "@/components/home/Hero";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
+import Categories from "@/components/home/Categories";
+import AboutSection from "@/components/home/AboutSection";
+import LocalSection from "@/components/home/LocalSection";
+import HowToBuy from "@/components/home/HowToBuy";
+import FinalCTA from "@/components/home/FinalCTA";
+import InstagramSection from "@/components/home/InstagramSection";
+
+export const metadata: Metadata = {
+  title: "Poné La Pava — Yerbas, Mates y Accesorios Premium",
+  description:
+    "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos, bombillas y todo lo que necesitás para el mate perfecto. Local físico y envíos.",
+};
+
+export default function HomePage() {
+  return (
+    <>
+      <Hero />
+      <FeaturedProducts />
+      <Categories />
+      <AboutSection />
+      <LocalSection />
+      <HowToBuy />
+      <FinalCTA />
+      <InstagramSection />
+    </>
+  );
+}

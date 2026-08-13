@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import CatalogClient from "@/components/catalog/CatalogClient";
 import PageHeader from "@/components/layout/PageHeader";
+import { getProducts } from "@/lib/products";
+
+// Products come from Supabase and are editable from /admin — revalidate
+// periodically instead of baking them in at build time.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -9,7 +14,9 @@ export const metadata: Metadata = {
     "Explorá nuestro catálogo completo: yerbas, mates artesanales, termos, bombillas, accesorios y combos. Filtrá por categoría y encontrá lo que buscás.",
 };
 
-export default function CatalogPage() {
+export default async function CatalogPage() {
+  const products = await getProducts();
+
   return (
     <div className="bg-pava-cream min-h-screen">
       <PageHeader
@@ -32,7 +39,7 @@ export default function CatalogPage() {
             </div>
           }
         >
-          <CatalogClient />
+          <CatalogClient products={products} />
         </Suspense>
       </div>
     </div>

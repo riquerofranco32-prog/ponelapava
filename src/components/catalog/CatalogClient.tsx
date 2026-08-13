@@ -2,15 +2,18 @@
 
 import { useState, useMemo } from "react";
 import { Search, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
-import { products } from "@/data/products";
 import { categories } from "@/data/categories";
-import { ProductCategory } from "@/types";
+import { Product, ProductCategory } from "@/types";
 import ProductCard from "@/components/catalog/ProductCard";
 import { useSearchParams } from "next/navigation";
 
 type SortOption = "default" | "price-asc" | "price-desc" | "name";
 
-export default function CatalogClient() {
+interface CatalogClientProps {
+  products: Product[];
+}
+
+export default function CatalogClient({ products }: CatalogClientProps) {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("cat");
   const initialCategory =

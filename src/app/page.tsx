@@ -9,6 +9,10 @@ import HowToBuy from "@/components/home/HowToBuy";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
 
+// Products come from Supabase and are editable from /admin — revalidate
+// periodically instead of baking them in at build time.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Poné La Pava — Yerbas, Mates y Accesorios Premium",
   description:

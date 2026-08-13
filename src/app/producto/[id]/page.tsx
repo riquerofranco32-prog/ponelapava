@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProductById, getRelatedProducts } from "@/data/products";
+import { getProductById, getRelatedProducts } from "@/lib/products";
 import ProductDetail from "@/components/product/ProductDetail";
 import { SITE_URL } from "@/lib/site";
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
   if (!product) return { title: "Producto no encontrado" };
   return {
     title: product.name,
@@ -27,13 +27,13 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: PageProps) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     notFound();
   }
 
-  const related = getRelatedProducts(product, 4);
+  const related = await getRelatedProducts(product, 4);
 
   const jsonLd = {
     "@context": "https://schema.org",

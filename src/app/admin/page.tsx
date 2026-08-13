@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -8,51 +8,18 @@ import {
   Tag,
   ShoppingCart,
   Settings,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Clock,
   Plus,
   Edit2,
   Trash2,
   Search,
-  Database,
 } from "lucide-react";
-import { products } from "@/data/products";
+import { Product } from "@/types";
+import { ProductInput } from "@/lib/products";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
+import ProductForm from "@/components/admin/ProductForm";
 
-type AdminSection = "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
-
-const mockMetrics = [
-  {
-    label: "Total de productos",
-    value: 20,
-    icon: Package,
-    trend: "up" as const,
-    change: "+3 este mes",
-  },
-  {
-    label: "Pedidos del mes",
-    value: 47,
-    icon: ShoppingCart,
-    trend: "up" as const,
-    change: "+12% vs anterior",
-  },
-  {
-    label: "Productos agotados",
-    value: 1,
-    icon: AlertTriangle,
-    trend: "neutral" as const,
-    change: "Revisar stock",
-  },
-  {
-    label: "Pedidos pendientes",
-    value: 8,
-    icon: Clock,
-    trend: "down" as const,
-    change: "-2 hoy",
-  },
-];
+type AdminSection =
+  "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
 
 const navItems = [
   { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
@@ -65,11 +32,72 @@ const navItems = [
 export default function AdminPage() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
   const [searchProduct, setSearchProduct] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  async function loadProducts() {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/admin/products");
+      if (!res.ok) throw new Error("No se pudieron cargar los productos");
+      setProducts(await res.json());
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  async function handleCreate(input: ProductInput) {
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("No se pudo crear el producto");
+    setCreating(false);
+    await loadProducts();
+  }
+
+  async function handleUpdate(id: string, input: ProductInput) {
+    const res = await fetch(`/api/admin/products/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) throw new Error("No se pudo actualizar el producto");
+    setEditingProduct(null);
+    await loadProducts();
+  }
+
+  async function handleDelete(product: Product) {
+    if (
+      !confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)
+    ) {
+      return;
+    }
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      alert("No se pudo eliminar el producto");
+      return;
+    }
+    await loadProducts();
+  }
 
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      p.brand?.toLowerCase().includes(searchProduct.toLowerCase())
+      p.brand?.toLowerCase().includes(searchProduct.toLowerCase()),
   );
 
   return (
@@ -106,14 +134,6 @@ export default function AdminPage() {
           ))}
         </nav>
 
-        {/* Supabase note */}
-        <div className="px-4 py-4 border-t border-pava-cream/10">
-          <div className="flex items-center gap-2 text-xs text-pava-cream/30">
-            <Database size={13} />
-            <span>Conectar Supabase (próx.)</span>
-          </div>
-        </div>
-
         {/* Back to site */}
         <div className="px-3 pb-5">
           <Link
@@ -132,58 +152,66 @@ export default function AdminPage() {
           <h1 className="font-display text-xl font-bold text-pava-brown capitalize">
             {navItems.find((n) => n.id === activeSection)?.label}
           </h1>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-pava-brown/50">
-              Datos de prueba — conectar Supabase para datos reales
-            </span>
-          </div>
         </div>
 
         <div className="px-8 py-8">
+          {loadError && (
+            <div className="mb-6 bg-pava-terracotta/10 border border-pava-terracotta/30 px-4 py-3 text-sm text-pava-terracotta">
+              {loadError}
+            </div>
+          )}
+
           {/* ── DASHBOARD ── */}
           {activeSection === "dashboard" && (
             <div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-                {mockMetrics.map(({ label, value, icon: Icon, trend, change }) => (
-                  <div
-                    key={label}
-                    className="bg-white border border-pava-brown/8 p-5"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
-                        {label}
-                      </span>
-                      <Icon size={18} className="text-pava-brown/30" />
-                    </div>
-                    <div className="flex items-end justify-between">
-                      <span className="font-display text-3xl font-bold text-pava-brown">
-                        {value}
-                      </span>
-                      <div
-                        className={`flex items-center gap-1 text-xs font-medium ${
-                          trend === "up"
-                            ? "text-pava-green"
-                            : trend === "down"
-                            ? "text-pava-terracotta"
-                            : "text-pava-brown/50"
-                        }`}
-                      >
-                        {trend === "up" && <TrendingUp size={13} />}
-                        {trend === "down" && <TrendingDown size={13} />}
-                        {change}
-                      </div>
-                    </div>
+                <div className="bg-white border border-pava-brown/8 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
+                      Total de productos
+                    </span>
+                    <Package size={18} className="text-pava-brown/30" />
                   </div>
-                ))}
+                  <span className="font-display text-3xl font-bold text-pava-brown">
+                    {loading ? "…" : products.length}
+                  </span>
+                </div>
+                <div className="bg-white border border-pava-brown/8 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
+                      Destacados
+                    </span>
+                    <Package size={18} className="text-pava-brown/30" />
+                  </div>
+                  <span className="font-display text-3xl font-bold text-pava-brown">
+                    {loading ? "…" : products.filter((p) => p.featured).length}
+                  </span>
+                </div>
+                <div className="bg-white border border-pava-brown/8 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
+                      Agotados
+                    </span>
+                    <Package size={18} className="text-pava-brown/30" />
+                  </div>
+                  <span className="font-display text-3xl font-bold text-pava-brown">
+                    {loading
+                      ? "…"
+                      : products.filter((p) => p.status === "out_of_stock")
+                          .length}
+                  </span>
+                </div>
               </div>
 
               <div className="bg-white border border-pava-brown/8 p-6">
                 <h2 className="font-display text-lg font-bold text-pava-brown mb-4">
-                  Últimos productos agregados
+                  Últimos productos
                 </h2>
                 <ProductsTable
                   data={products.slice(0, 5)}
                   compact
+                  onEdit={setEditingProduct}
+                  onDelete={handleDelete}
                 />
               </div>
             </div>
@@ -195,7 +223,10 @@ export default function AdminPage() {
               {/* Actions bar */}
               <div className="flex items-center justify-between gap-4 mb-6">
                 <div className="relative flex-1 max-w-md">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-pava-brown/40" />
+                  <Search
+                    size={15}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-pava-brown/40"
+                  />
                   <input
                     type="search"
                     placeholder="Buscar producto..."
@@ -204,13 +235,26 @@ export default function AdminPage() {
                     className="w-full pl-9 pr-4 py-2.5 bg-white border border-pava-brown/15 text-pava-brown text-sm focus:outline-none focus:border-pava-green transition-colors"
                   />
                 </div>
-                <button className="flex items-center gap-2 px-5 py-2.5 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors">
+                <button
+                  onClick={() => setCreating(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
+                >
                   <Plus size={15} />
                   Nuevo producto
                 </button>
               </div>
 
-              <ProductsTable data={filteredProducts} />
+              {loading ? (
+                <p className="text-sm text-pava-brown/50">
+                  Cargando productos...
+                </p>
+              ) : (
+                <ProductsTable
+                  data={filteredProducts}
+                  onEdit={setEditingProduct}
+                  onDelete={handleDelete}
+                />
+              )}
             </div>
           )}
 
@@ -222,8 +266,8 @@ export default function AdminPage() {
                 Gestión de categorías
               </h2>
               <p className="text-pava-brown/50 text-sm max-w-md mx-auto">
-                Esta sección se habilitará al conectar Supabase. Las categorías
-                actuales están definidas en los datos estáticos.
+                Las categorías están definidas en el código del sitio. Gestión
+                editable próximamente.
               </p>
             </div>
           )}
@@ -231,13 +275,16 @@ export default function AdminPage() {
           {/* ── PEDIDOS ── */}
           {activeSection === "pedidos" && (
             <div className="bg-white border border-pava-brown/8 p-8 text-center">
-              <ShoppingCart size={32} className="mx-auto text-pava-brown/20 mb-4" />
+              <ShoppingCart
+                size={32}
+                className="mx-auto text-pava-brown/20 mb-4"
+              />
               <h2 className="font-display text-xl font-bold text-pava-brown mb-2">
                 Gestión de pedidos
               </h2>
               <p className="text-pava-brown/50 text-sm max-w-md mx-auto">
-                Los pedidos actuales llegan por WhatsApp. Esta sección
-                mostrará pedidos al conectar Supabase.
+                Los pedidos llegan por WhatsApp. Un panel de pedidos guardados
+                está planeado para más adelante.
               </p>
             </div>
           )}
@@ -246,42 +293,51 @@ export default function AdminPage() {
           {activeSection === "configuracion" && (
             <div className="space-y-5">
               {[
-                { label: "Nombre del negocio", value: "Poné La Pava", placeholder: "Nombre..." },
-                { label: "Número de WhatsApp", value: "+54 9 11 XXXX-XXXX", placeholder: "+549..." },
-                { label: "Dirección del local", value: "Dirección a confirmar", placeholder: "Dirección..." },
-                { label: "Horarios", value: "Lun–Vie: 9–19 · Sáb: 9–14", placeholder: "Horarios..." },
-              ].map(({ label, value, placeholder }) => (
-                <div key={label} className="bg-white border border-pava-brown/8 p-5">
+                { label: "Nombre del negocio", value: "Poné La Pava" },
+                { label: "Número de WhatsApp", value: "+54 9 2994 65-0177" },
+                {
+                  label: "Dirección del local",
+                  value: "Avenida San Martín 475, Catriel, Río Negro",
+                },
+                { label: "Horarios", value: "Lun–Vie: 9–19 · Sáb: 9–14" },
+              ].map(({ label, value }) => (
+                <div
+                  key={label}
+                  className="bg-white border border-pava-brown/8 p-5"
+                >
                   <label className="block text-xs font-medium text-pava-brown/60 uppercase tracking-wide mb-2">
                     {label}
                   </label>
                   <input
                     type="text"
                     defaultValue={value}
-                    placeholder={placeholder}
-                    className="w-full px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm focus:outline-none focus:border-pava-green transition-colors"
+                    className="w-full px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm"
                     readOnly
                   />
                   <p className="text-xs text-pava-brown/40 mt-1.5">
-                    Editable al conectar Supabase
+                    Definido en src/lib/site.ts y src/lib/whatsapp.ts — edición
+                    desde acá, próximamente.
                   </p>
                 </div>
               ))}
-              <div className="bg-pava-cream-dark border border-pava-brown/8 p-4 flex items-center gap-3">
-                <Database size={18} className="text-pava-brown/40 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-pava-brown">
-                    Conectar Supabase
-                  </p>
-                  <p className="text-xs text-pava-brown/50 mt-0.5">
-                    La configuración se guardará en la base de datos una vez conectada.
-                  </p>
-                </div>
-              </div>
             </div>
           )}
         </div>
       </main>
+
+      {creating && (
+        <ProductForm
+          onSave={handleCreate}
+          onCancel={() => setCreating(false)}
+        />
+      )}
+      {editingProduct && (
+        <ProductForm
+          product={editingProduct}
+          onSave={(input) => handleUpdate(editingProduct.id, input)}
+          onCancel={() => setEditingProduct(null)}
+        />
+      )}
     </div>
   );
 }
@@ -289,9 +345,13 @@ export default function AdminPage() {
 function ProductsTable({
   data,
   compact = false,
+  onEdit,
+  onDelete,
 }: {
-  data: typeof products;
+  data: Product[];
   compact?: boolean;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -312,11 +372,9 @@ function ProductsTable({
             <th className="text-left py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
               Estado
             </th>
-            {!compact && (
-              <th className="text-right py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-                Acciones
-              </th>
-            )}
+            <th className="text-right py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
+              Acciones
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -349,35 +407,35 @@ function ProductsTable({
                     product.status === "available"
                       ? "bg-pava-green/10 text-pava-green"
                       : product.status === "featured"
-                      ? "bg-pava-gold/15 text-pava-gold"
-                      : "bg-pava-terracotta/10 text-pava-terracotta"
+                        ? "bg-pava-gold/15 text-pava-gold"
+                        : "bg-pava-terracotta/10 text-pava-terracotta"
                   }`}
                 >
                   {product.status === "available"
                     ? "Disponible"
                     : product.status === "featured"
-                    ? "Destacado"
-                    : "Agotado"}
+                      ? "Destacado"
+                      : "Agotado"}
                 </span>
               </td>
-              {!compact && (
-                <td className="py-3 px-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-green hover:bg-pava-green/10 transition-colors"
-                      title="Editar"
-                    >
-                      <Edit2 size={13} />
-                    </button>
-                    <button
-                      className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-terracotta hover:bg-pava-terracotta/10 transition-colors"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </td>
-              )}
+              <td className="py-3 px-4">
+                <div className="flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => onEdit(product)}
+                    className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-green hover:bg-pava-green/10 transition-colors"
+                    title="Editar"
+                  >
+                    <Edit2 size={13} />
+                  </button>
+                  <button
+                    onClick={() => onDelete(product)}
+                    className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-terracotta hover:bg-pava-terracotta/10 transition-colors"
+                    title="Eliminar"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

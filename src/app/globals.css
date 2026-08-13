@@ -441,6 +441,11 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
 }
 
+/* ── Admin form inputs ─────────────────────────────── */
+.admin-input {
+  @apply w-full border border-pava-brown/15 bg-pava-cream px-3 py-2.5 text-sm text-pava-brown transition-colors focus:border-pava-green focus:outline-none;
+}
+
 /* ── Reduced motion ───────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

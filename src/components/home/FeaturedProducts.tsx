@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { featuredProducts } from "@/data/products";
+import { getFeaturedProducts } from "@/lib/products";
 import ProductCard from "@/components/catalog/ProductCard";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-export default function FeaturedProducts() {
+export default async function FeaturedProducts() {
   // Show up to 6 featured products
+  const featuredProducts = await getFeaturedProducts();
   const displayed = featuredProducts.slice(0, 6);
   const [first, ...rest] = displayed;
   const second = rest[0];

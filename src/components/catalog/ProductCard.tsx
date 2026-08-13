@@ -151,12 +151,7 @@ export default function ProductCard({
         </p>
 
         {/* Desktop fallback button (always visible, not overlaid) */}
-        <div className="group-hover:hidden">
-          <AddToCartButton product={product} disabled={isOutOfStock} />
-        </div>
-        <div className="hidden group-hover:block">
-          <AddToCartButton product={product} disabled={isOutOfStock} />
-        </div>
+        <AddToCartButton product={product} disabled={isOutOfStock} />
       </div>
     </article>
   );

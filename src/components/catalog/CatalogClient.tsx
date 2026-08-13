@@ -16,13 +16,13 @@ export default function CatalogClient() {
   const initialCategory =
     categoryParam &&
     ["yerbas", "mates", "bombillas", "termos", "accesorios", "combos"].includes(
-      categoryParam
+      categoryParam,
     )
       ? (categoryParam as ProductCategory)
       : "all";
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">(
-    initialCategory
+    initialCategory,
   );
   const [sort, setSort] = useState<SortOption>("default");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -43,7 +43,7 @@ export default function CatalogClient() {
           p.name.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
           p.brand?.toLowerCase().includes(q) ||
-          p.tags?.some((t) => t.toLowerCase().includes(q))
+          p.tags?.some((t) => t.toLowerCase().includes(q)),
       );
     }
 
@@ -92,6 +92,7 @@ export default function CatalogClient() {
           <input
             id="catalog-search"
             type="search"
+            aria-label="Buscar productos"
             placeholder="Buscar yerbas, mates, termos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -101,9 +102,13 @@ export default function CatalogClient() {
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={15} className="text-pava-brown/50 shrink-0" />
+          <SlidersHorizontal
+            size={15}
+            className="text-pava-brown/50 shrink-0"
+          />
           <select
             id="catalog-sort"
+            aria-label="Ordenar productos"
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
             className="bg-white border border-pava-brown/15 text-pava-brown text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors cursor-pointer"
@@ -190,7 +195,10 @@ export default function CatalogClient() {
             Probá con otro término o revisá todas las categorías
           </p>
           <button
-            onClick={() => { setSearch(""); setActiveCategory("all"); }}
+            onClick={() => {
+              setSearch("");
+              setActiveCategory("all");
+            }}
             className="mt-6 px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
           >
             Ver todos los productos

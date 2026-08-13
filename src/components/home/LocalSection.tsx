@@ -61,13 +61,13 @@ export default async function LocalSection() {
                   <MapPin size={18} className="text-pava-gold" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/50">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/65">
                     Dirección
                   </span>
                   <p className="mt-1 font-medium text-pava-cream">
                     {settings.addressLine}
                   </p>
-                  <p className="text-sm text-pava-cream/60">
+                  <p className="text-sm text-pava-cream/65">
                     {settings.addressCity}
                   </p>
                 </div>
@@ -77,7 +77,7 @@ export default async function LocalSection() {
                   <Clock size={18} className="text-pava-gold" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/50">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/65">
                     Horarios
                   </span>
                   <p className="mt-1 text-sm font-medium text-pava-cream">
@@ -93,7 +93,7 @@ export default async function LocalSection() {
                   <MessageCircle size={18} className="text-whatsapp" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/50">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/65">
                     WhatsApp
                   </span>
                   <a

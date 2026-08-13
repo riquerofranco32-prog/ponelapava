@@ -18,6 +18,10 @@
   --color-pava-brown-mid: #4a3728;
   --color-pava-gold: #c7a67a;
   --color-pava-gold-light: #d8c093;
+  /* Dorado para superficies claras: #c7a67a rinde 4.94:1 sobre verde pero
+     solo 1.5–2.3:1 sobre blanco/crema. Esta variante profunda pasa AA en
+     las tres superficies claras (blanco 6.72, crema 5.20, crema-dark 4.52). */
+  --color-pava-gold-deep: #775530;
   --color-whatsapp: #25d366;
   --color-whatsapp-dark: #1ebe5d;
 

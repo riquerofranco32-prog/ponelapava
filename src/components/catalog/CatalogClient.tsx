@@ -180,7 +180,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
       </div>
 
       {/* Results count */}
-      <p className="text-sm text-pava-brown-mid/60 mb-6">
+      <p className="text-sm text-pava-brown-mid/75 mb-6">
         {filtered.length === 0
           ? "No se encontraron productos"
           : `${filtered.length} producto${filtered.length !== 1 ? "s" : ""}`}
@@ -194,7 +194,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
           <p className="font-display text-xl text-pava-brown font-semibold mb-2">
             Sin resultados
           </p>
-          <p className="text-pava-brown-mid/60 text-sm">
+          <p className="text-pava-brown-mid/75 text-sm">
             Probá con otro término o revisá todas las categorías
           </p>
           <button

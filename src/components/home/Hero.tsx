@@ -118,7 +118,7 @@ export default function Hero() {
             </p>
             <div className="hidden items-center gap-4 sm:flex">
               <span className="h-10 w-px bg-pava-cream/20" />
-              <p className="max-w-[7rem] text-[10px] font-medium uppercase leading-relaxed tracking-[0.18em] text-pava-cream/45">
+              <p className="max-w-[7rem] text-[10px] font-medium uppercase leading-relaxed tracking-[0.18em] text-pava-cream/75">
                 Hecho para compartir
               </p>
             </div>
@@ -155,11 +155,11 @@ export default function Hero() {
               transition-all duration-700 ease-out delay-500
               ${loaded ? "opacity-100" : "opacity-0"}`}
           >
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-pava-cream/40">
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-pava-cream/75">
               Argentina
             </span>
             <span className="h-1 w-1 rounded-full bg-pava-gold/60" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-pava-cream/40">
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-pava-cream/75">
               Yerbas · Mates · Accesorios
             </span>
           </div>

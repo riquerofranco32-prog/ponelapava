@@ -57,9 +57,23 @@ export default function HowToBuy() {
         {/* Steps */}
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
           {steps.map((step, index) => (
-            <ScrollReveal key={step.title} direction="up" delay={index * 90}>
-              <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-pava-gold/40 text-pava-gold">
+            <ScrollReveal
+              key={step.title}
+              direction="up"
+              delay={index * 90}
+              className="relative"
+            >
+              <span className="relative z-10 mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-pava-gold/40 bg-pava-brown text-pava-gold">
                 <step.icon size={24} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              {index < steps.length - 1 && (
+                <span
+                  className="step-connector hidden lg:block"
+                  aria-hidden="true"
+                />
+              )}
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.2em] text-pava-gold/50">
+                Paso {String(index + 1).padStart(2, "0")}
               </span>
               <h3 className="font-display mb-2 text-xl font-bold text-pava-cream">
                 {step.title}

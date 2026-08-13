@@ -8,16 +8,22 @@ import {
   ShoppingCart,
   Settings,
   Plus,
-  Edit2,
-  Trash2,
   Search,
+  Star,
+  AlertTriangle,
+  PackageX,
 } from "lucide-react";
 import { Product } from "@/types";
 import { ProductInput } from "@/lib/products";
-import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import ProductForm from "@/components/admin/ProductForm";
 import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { TableSkeleton } from "@/components/admin/TableSkeleton";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
+import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import DashboardStats from "@/components/admin/DashboardStats";
 import OrdersTable from "@/components/admin/OrdersTable";
 import SettingsForm from "@/components/admin/SettingsForm";
@@ -41,6 +47,7 @@ export default function AdminPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
   async function loadProducts() {
     setLoading(true);
@@ -82,19 +89,24 @@ export default function AdminPage() {
     await loadProducts();
   }
 
+  // Mirrors ProductForm's stock/status link: 0 auto-marks out of stock,
+  // restocking from 0 auto-clears it back to available.
+  async function handleStockChange(product: Product, next: number) {
+    const qty = Math.max(0, next);
+    let status = product.status;
+    if (qty <= 0 && status !== "out_of_stock") status = "out_of_stock";
+    else if (qty > 0 && status === "out_of_stock") status = "available";
+
+    const { id, createdAt: _createdAt, ...rest } = product;
+    await handleUpdate(id, { ...rest, stock: qty, status });
+  }
+
   async function handleDelete(product: Product) {
-    if (
-      !confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)
-    ) {
-      return;
-    }
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: "DELETE",
     });
-    if (!res.ok) {
-      alert("No se pudo eliminar el producto");
-      return;
-    }
+    if (!res.ok) throw new Error("No se pudo eliminar el producto");
+    setDeletingProduct(null);
     await loadProducts();
   }
 
@@ -152,15 +164,18 @@ export default function AdminPage() {
               marginBottom: 20,
             }}
           >
-            <KpiCard
+            <AdminKpiCard
+              icon={Package}
               label="Total de productos"
               value={loading ? "…" : products.length}
             />
-            <KpiCard
+            <AdminKpiCard
+              icon={Star}
               label="Destacados"
               value={loading ? "…" : products.filter((p) => p.featured).length}
             />
-            <KpiCard
+            <AdminKpiCard
+              icon={PackageX}
               label="Agotados"
               value={
                 loading
@@ -168,9 +183,18 @@ export default function AdminPage() {
                   : products.filter((p) => p.status === "out_of_stock").length
               }
             />
+            <AdminKpiCard
+              icon={AlertTriangle}
+              label="Stock bajo (≤5)"
+              value={
+                loading
+                  ? "…"
+                  : products.filter((p) => p.stock > 0 && p.stock <= 5).length
+              }
+            />
           </div>
 
-          <Card>
+          <AdminCard>
             <h2
               style={{
                 fontFamily: "var(--font-playfair), Georgia, serif",
@@ -186,9 +210,10 @@ export default function AdminPage() {
               data={products.slice(0, 5)}
               compact
               onEdit={setEditingProduct}
-              onDelete={handleDelete}
+              onDelete={setDeletingProduct}
+              onStockChange={handleStockChange}
             />
-          </Card>
+          </AdminCard>
         </div>
       )}
 
@@ -232,14 +257,13 @@ export default function AdminPage() {
           </div>
 
           {loading ? (
-            <p style={{ fontSize: 14, color: "var(--dash-muted)" }}>
-              Cargando productos...
-            </p>
+            <TableSkeleton rows={6} />
           ) : (
             <ProductsTable
               data={filteredProducts}
               onEdit={setEditingProduct}
-              onDelete={handleDelete}
+              onDelete={setDeletingProduct}
+              onStockChange={handleStockChange}
             />
           )}
         </div>
@@ -273,100 +297,15 @@ export default function AdminPage() {
           onCancel={() => setEditingProduct(null)}
         />
       )}
+      {deletingProduct && (
+        <ConfirmDialog
+          title="Eliminar producto"
+          message={`¿Eliminar "${deletingProduct.name}"? Esta acción no se puede deshacer.`}
+          onConfirm={() => handleDelete(deletingProduct)}
+          onCancel={() => setDeletingProduct(null)}
+        />
+      )}
     </AdminShell>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        background: "var(--dash-surface)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 12,
-        padding: 20,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function KpiCard({ label, value }: { label: string; value: number | string }) {
-  return (
-    <Card>
-      <span
-        style={{
-          display: "block",
-          fontSize: 11,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
-          color: "var(--dash-muted)",
-          marginBottom: 10,
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 30,
-          fontWeight: 700,
-          color: "var(--dash-text)",
-        }}
-      >
-        {value}
-      </span>
-    </Card>
-  );
-}
-
-function EmptyState({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div
-      style={{
-        background: "var(--dash-surface)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 12,
-        padding: 40,
-        textAlign: "center",
-      }}
-    >
-      <Icon
-        size={32}
-        style={{ margin: "0 auto 16px", color: "var(--dash-muted)" }}
-      />
-      <h2
-        style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 18,
-          fontWeight: 700,
-          marginBottom: 8,
-          color: "var(--dash-text)",
-        }}
-      >
-        {title}
-      </h2>
-      <p
-        style={{
-          fontSize: 14,
-          color: "var(--dash-muted)",
-          maxWidth: 420,
-          margin: "0 auto",
-        }}
-      >
-        {description}
-      </p>
-    </div>
   );
 }
 
@@ -375,11 +314,13 @@ function ProductsTable({
   compact = false,
   onEdit,
   onDelete,
+  onStockChange,
 }: {
   data: Product[];
   compact?: boolean;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  onStockChange: (product: Product, next: number) => void;
 }) {
   const th: React.CSSProperties = {
     textAlign: "left",
@@ -390,150 +331,54 @@ function ProductsTable({
     letterSpacing: "0.05em",
     color: "var(--dash-muted)",
   };
-  const td: React.CSSProperties = {
-    padding: "12px 14px",
-    borderTop: "1px solid var(--dash-border)",
-  };
 
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table
-        style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
-      >
-        <thead>
-          <tr>
-            <th style={th}>Producto</th>
-            {!compact && <th style={th}>Categoría</th>}
-            <th style={th}>Precio</th>
-            <th style={th}>Estado</th>
-            <th style={{ ...th, textAlign: "right" }}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((product) => (
-            <tr key={product.id}>
-              <td style={td}>
-                <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
-                  {product.name}
-                </span>
-                {!compact && product.brand && (
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "var(--dash-muted)",
-                      marginTop: 2,
-                    }}
-                  >
-                    {product.brand}
-                  </span>
-                )}
-              </td>
-              {!compact && (
-                <td style={{ ...td, color: "var(--dash-muted)" }}>
-                  {getCategoryLabel(product.category)}
-                </td>
-              )}
-              <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
-                {formatPrice(product.price)}
-              </td>
-              <td style={td}>
-                <StatusBadge status={product.status} />
-              </td>
-              <td style={{ ...td, textAlign: "right" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    gap: 6,
-                  }}
-                >
-                  <IconButton
-                    onClick={() => onEdit(product)}
-                    title="Editar"
-                    icon={Edit2}
-                  />
-                  <IconButton
-                    onClick={() => onDelete(product)}
-                    title="Eliminar"
-                    icon={Trash2}
-                    danger
-                  />
-                </div>
-              </td>
+    <>
+      {/* Desktop — full table with an inline stock stepper per row */}
+      <div className="admin-desktop-only" style={{ overflowX: "auto" }}>
+        <table
+          style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
+        >
+          <thead>
+            <tr>
+              <th style={th}>Producto</th>
+              {!compact && <th style={th}>Categoría</th>}
+              <th style={th}>Precio</th>
+              {!compact && <th style={th}>Stock</th>}
+              <th style={th}>Estado</th>
+              <th style={{ ...th, textAlign: "right" }}>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+          </thead>
+          <tbody>
+            {data.map((product) => (
+              <ProductDesktopRow
+                key={product.id}
+                product={product}
+                compact={compact}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onStockChange={onStockChange}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-function StatusBadge({ status }: { status: Product["status"] }) {
-  const map = {
-    available: {
-      label: "Disponible",
-      color: "var(--dash-success)",
-      bg: "var(--dash-success-bg)",
-    },
-    featured: {
-      label: "Destacado",
-      color: "var(--dash-accent)",
-      bg: "rgba(199,166,122,0.12)",
-    },
-    out_of_stock: {
-      label: "Agotado",
-      color: "var(--dash-danger)",
-      bg: "var(--dash-danger-bg)",
-    },
-  } as const;
-  const { label, color, bg } = map[status];
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        padding: "3px 10px",
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 600,
-        color,
-        background: bg,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function IconButton({
-  onClick,
-  title,
-  icon: Icon,
-  danger = false,
-}: {
-  onClick: () => void;
-  title: string;
-  icon: React.ComponentType<{ size?: number }>;
-  danger?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      style={{
-        width: 30,
-        height: 30,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 6,
-        background: "var(--dash-surface-2)",
-        border: "1px solid var(--dash-border)",
-        color: danger ? "var(--dash-danger)" : "var(--dash-muted)",
-        cursor: "pointer",
-      }}
-    >
-      <Icon size={13} />
-    </button>
+      {/* Mobile — stacked cards, easier to tap and check stock from the counter */}
+      <div
+        className="admin-mobile-only"
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
+        {data.map((product) => (
+          <ProductMobileCard
+            key={product.id}
+            product={product}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onStockChange={onStockChange}
+          />
+        ))}
+      </div>
+    </>
   );
 }

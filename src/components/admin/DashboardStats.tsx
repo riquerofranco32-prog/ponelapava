@@ -10,8 +10,10 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { DollarSign, ShoppingCart, Receipt } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
+import { AdminCard, AdminKpiCard } from "./AdminCard";
 
 function formatDayLabel(iso: string): string {
   const d = new Date(iso + "T00:00:00");
@@ -64,26 +66,24 @@ export default function DashboardStats() {
           marginBottom: 20,
         }}
       >
-        <StatCard
+        <AdminKpiCard
+          icon={DollarSign}
           label="Ingresos (14 días)"
           value={stats ? formatPrice(stats.totalRevenue) : "…"}
         />
-        <StatCard label="Pedidos (14 días)" value={stats?.orderCount ?? "…"} />
-        <StatCard
+        <AdminKpiCard
+          icon={ShoppingCart}
+          label="Pedidos (14 días)"
+          value={stats?.orderCount ?? "…"}
+        />
+        <AdminKpiCard
+          icon={Receipt}
           label="Ticket promedio"
           value={stats ? formatPrice(stats.avgTicket) : "…"}
         />
       </div>
 
-      <div
-        style={{
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: 12,
-          padding: 20,
-          marginBottom: 20,
-        }}
-      >
+      <AdminCard style={{ marginBottom: 20 }}>
         <h2
           style={{
             fontFamily: "var(--font-playfair), Georgia, serif",
@@ -158,17 +158,10 @@ export default function DashboardStats() {
             </ResponsiveContainer>
           </div>
         )}
-      </div>
+      </AdminCard>
 
       {stats && stats.topProducts.length > 0 && (
-        <div
-          style={{
-            background: "var(--dash-surface)",
-            border: "1px solid var(--dash-border)",
-            borderRadius: 12,
-            padding: 20,
-          }}
-        >
+        <AdminCard>
           <h2
             style={{
               fontFamily: "var(--font-playfair), Georgia, serif",
@@ -203,45 +196,8 @@ export default function DashboardStats() {
               </div>
             ))}
           </div>
-        </div>
+        </AdminCard>
       )}
-    </div>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div
-      style={{
-        background: "var(--dash-surface)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 12,
-        padding: 20,
-      }}
-    >
-      <span
-        style={{
-          display: "block",
-          fontSize: 11,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.05em",
-          color: "var(--dash-muted)",
-          marginBottom: 10,
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 28,
-          fontWeight: 700,
-          color: "var(--dash-text)",
-        }}
-      >
-        {value}
-      </span>
     </div>
   );
 }

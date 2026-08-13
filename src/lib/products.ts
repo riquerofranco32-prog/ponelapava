@@ -10,6 +10,7 @@ interface ProductRow {
   price: number;
   category: string;
   status: string;
+  stock: number;
   images: string[];
   tags: string[];
   weight: string | null;
@@ -28,6 +29,7 @@ function fromRow(row: ProductRow): Product {
     price: row.price,
     category: row.category as ProductCategory,
     status: row.status as ProductStatus,
+    stock: row.stock,
     images: row.images,
     tags: row.tags,
     weight: row.weight ?? undefined,
@@ -109,6 +111,7 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       price: input.price,
       category: input.category,
       status: input.status,
+      stock: input.stock ?? 0,
       images: input.images,
       tags: input.tags ?? [],
       weight: input.weight ?? null,
@@ -135,6 +138,7 @@ export async function updateProduct(
       price: input.price,
       category: input.category,
       status: input.status,
+      stock: input.stock ?? 0,
       images: input.images,
       tags: input.tags ?? [],
       weight: input.weight ?? null,

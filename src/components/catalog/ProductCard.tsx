@@ -1,9 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel, truncate } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "./AddToCartButton";
+import QuickViewModal from "./QuickViewModal";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +21,7 @@ export default function ProductCard({
   view = "grid",
   featured = false,
 }: ProductCardProps) {
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
   const isOutOfStock = product.status === "out_of_stock";
   const isFeatured = product.status === "featured";
 
@@ -76,7 +82,8 @@ export default function ProductCard({
   const imageAspect = featured ? "aspect-[4/3]" : "aspect-[5/4]";
 
   return (
-    <article className="product-card group overflow-hidden border border-pava-brown/8 bg-white transition-all duration-350 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]">
+    <article className="product-card group relative border border-pava-brown/8 bg-white transition-all duration-350 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]">
+      <span className="product-card-glow" aria-hidden="true" />
       {/* Image area */}
       <div
         className={`relative ${imageAspect} overflow-hidden bg-pava-cream-dark`}
@@ -106,6 +113,15 @@ export default function ProductCard({
             <Badge variant="featured">Destacado</Badge>
           </div>
         )}
+
+        {/* Quick view trigger */}
+        <button
+          onClick={() => setQuickViewOpen(true)}
+          aria-label={`Vista rápida de ${product.name}`}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100"
+        >
+          <Eye size={14} />
+        </button>
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-pava-brown/55">
             <span className="bg-pava-cream px-4 py-2 text-xs font-semibold uppercase tracking-wider text-pava-brown">
@@ -149,6 +165,13 @@ export default function ProductCard({
         {/* Desktop fallback button (always visible, not overlaid) */}
         <AddToCartButton product={product} disabled={isOutOfStock} />
       </div>
+
+      {quickViewOpen && (
+        <QuickViewModal
+          product={product}
+          onClose={() => setQuickViewOpen(false)}
+        />
+      )}
     </article>
   );
 }

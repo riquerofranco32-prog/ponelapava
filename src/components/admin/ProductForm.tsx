@@ -60,6 +60,7 @@ export default function ProductForm({
   const [status, setStatus] = useState<ProductStatus>(
     product?.status ?? "available",
   );
+  const [stock, setStock] = useState(String(product?.stock ?? 0));
   const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [tags, setTags] = useState(product?.tags?.join(", ") ?? "");
   const [weight, setWeight] = useState(product?.weight ?? "");
@@ -67,6 +68,20 @@ export default function ProductForm({
   const [featured, setFeatured] = useState(product?.featured ?? false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Stock and availability are linked: hitting 0 auto-marks the product
+  // out of stock, and restocking auto-clears it — the owner can still
+  // override "Estado" by hand for anything the number alone can't capture
+  // (e.g. discontinuing a product that still has units on the shelf).
+  function handleStockChange(value: string) {
+    setStock(value);
+    const qty = Number(value);
+    if (qty <= 0 && status !== "out_of_stock") {
+      setStatus("out_of_stock");
+    } else if (qty > 0 && status === "out_of_stock") {
+      setStatus("available");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -85,6 +100,7 @@ export default function ProductForm({
         price: Number(price),
         category,
         status,
+        stock: Number(stock) || 0,
         images,
         tags: tags
           .split(",")
@@ -216,13 +232,28 @@ export default function ProductForm({
           </AdminField>
         </div>
 
-        <AdminField label="Marca (opcional)">
-          <input
-            value={brand}
-            onChange={(e) => setBrand(e.target.value)}
-            className="admin-input"
-          />
-        </AdminField>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
+        >
+          <AdminField label="Stock (unidades)">
+            <input
+              required
+              type="number"
+              min={0}
+              step={1}
+              value={stock}
+              onChange={(e) => handleStockChange(e.target.value)}
+              className="admin-input"
+            />
+          </AdminField>
+          <AdminField label="Marca (opcional)">
+            <input
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              className="admin-input"
+            />
+          </AdminField>
+        </div>
 
         <AdminField label="Tags (separados por coma, opcional)">
           <input

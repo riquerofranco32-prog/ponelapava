@@ -1,4 +1,5 @@
 import { Leaf, Heart, MessageCircle, MapPin } from "lucide-react";
+import OpenStatusBadge from "@/components/ui/OpenStatusBadge";
 
 const items = [
   {
@@ -14,7 +15,7 @@ const items = [
   {
     icon: MapPin,
     title: "Local en Catriel",
-    subtitle: "Vení a conocernos.",
+    subtitle: null,
   },
   {
     icon: MessageCircle,
@@ -23,25 +24,46 @@ const items = [
   },
 ];
 
+function TrustItem({ icon: Icon, title, subtitle }: (typeof items)[number]) {
+  return (
+    <div className="flex shrink-0 items-center gap-3.5 px-8">
+      <Icon
+        className="shrink-0 text-pava-gold"
+        size={22}
+        strokeWidth={1.5}
+        aria-hidden="true"
+      />
+      <div>
+        <div className="text-[13px] font-semibold whitespace-nowrap text-pava-cream">
+          {title}
+        </div>
+        {subtitle ? (
+          <div className="text-[11px] whitespace-nowrap text-pava-cream/65">
+            {subtitle}
+          </div>
+        ) : (
+          <OpenStatusBadge />
+        )}
+      </div>
+      <span
+        className="ml-4 h-1 w-1 shrink-0 rounded-full bg-pava-gold/40"
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
+
 export default function TrustBar() {
   return (
-    <section className="bg-pava-brown">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-y-8 px-5 py-10 sm:px-8 lg:grid-cols-4 lg:gap-y-0 lg:px-10 lg:py-8">
-        {items.map(({ icon: Icon, title, subtitle }) => (
-          <div key={title} className="flex items-center gap-3.5">
-            <Icon
-              className="shrink-0 text-pava-gold"
-              size={22}
-              strokeWidth={1.5}
-              aria-hidden="true"
-            />
-            <div>
-              <div className="text-[13px] font-semibold text-pava-cream">
-                {title}
-              </div>
-              <div className="text-[11px] text-pava-cream/65">{subtitle}</div>
-            </div>
-          </div>
+    <section className="overflow-hidden border-y border-pava-cream/10 bg-pava-brown py-7">
+      {/* Duplicated track for a seamless infinite loop; the copy is
+          aria-hidden since it repeats the same content for visual effect. */}
+      <div className="marquee-track">
+        {items.map((item) => (
+          <TrustItem key={item.title} {...item} />
+        ))}
+        {items.map((item) => (
+          <TrustItem key={`dup-${item.title}`} {...item} />
         ))}
       </div>
     </section>

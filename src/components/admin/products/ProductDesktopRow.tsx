@@ -1,0 +1,90 @@
+"use client";
+
+import { Edit2, Trash2 } from "lucide-react";
+import { Product } from "@/types";
+import { formatPrice, getCategoryLabel } from "@/lib/utils";
+import { ProductThumb } from "./ProductThumb";
+import { StockStepper } from "./StockStepper";
+import { StatusBadge } from "./StatusBadge";
+import { IconButton } from "./IconButton";
+
+const td: React.CSSProperties = {
+  padding: "10px 14px",
+  borderTop: "1px solid var(--dash-border)",
+  verticalAlign: "middle",
+};
+
+export function ProductDesktopRow({
+  product,
+  compact = false,
+  onEdit,
+  onDelete,
+  onStockChange,
+}: {
+  product: Product;
+  compact?: boolean;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
+  onStockChange: (product: Product, next: number) => void;
+}) {
+  return (
+    <tr>
+      <td style={td}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <ProductThumb src={product.images[0]} />
+          <div>
+            <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
+              {product.name}
+            </span>
+            {!compact && product.brand && (
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 12,
+                  color: "var(--dash-muted)",
+                  marginTop: 2,
+                }}
+              >
+                {product.brand}
+              </span>
+            )}
+          </div>
+        </div>
+      </td>
+      {!compact && (
+        <td style={{ ...td, color: "var(--dash-muted)" }}>
+          {getCategoryLabel(product.category)}
+        </td>
+      )}
+      <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
+        {formatPrice(product.price)}
+      </td>
+      {!compact && (
+        <td style={td}>
+          <StockStepper
+            value={product.stock}
+            onChange={(next) => onStockChange(product, next)}
+          />
+        </td>
+      )}
+      <td style={td}>
+        <StatusBadge status={product.status} />
+      </td>
+      <td style={{ ...td, textAlign: "right" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+          <IconButton
+            onClick={() => onEdit(product)}
+            title="Editar"
+            icon={Edit2}
+          />
+          <IconButton
+            onClick={() => onDelete(product)}
+            title="Eliminar"
+            icon={Trash2}
+            danger
+          />
+        </div>
+      </td>
+    </tr>
+  );
+}

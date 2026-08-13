@@ -3,13 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import MagneticButton from "@/components/ui/MagneticButton";
 
 export default function Hero() {
   const [loaded, setLoaded] = useState(false);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [allowVideo, setAllowVideo] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 60);
+    setAllowVideo(
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
     return () => clearTimeout(timer);
   }, []);
 
@@ -36,15 +41,28 @@ export default function Hero() {
           transform: `scale(1.06) translate(${parallax.x * -10}px, ${parallax.y * -10}px)`,
         }}
       >
-        <Image
-          src="/hero_background_1786545961305.png"
-          alt="Mate servido sobre mesa de madera"
-          fill
-          priority
-          quality={92}
-          className="object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
-          sizes="100vw"
-        />
+        {allowVideo ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/hero_background_1786545961305.png"
+            className="absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
+          >
+            <source src="/hero-mate-pour.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          <Image
+            src="/hero_background_1786545961305.png"
+            alt="Mate servido sobre mesa de madera"
+            fill
+            priority
+            quality={92}
+            className="object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
+            sizes="100vw"
+          />
+        )}
         {/* Multi-layer gradient for editorial feel */}
         <div className="absolute inset-0 bg-gradient-to-t from-pava-brown via-pava-brown/55 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/80 via-pava-brown/25 to-transparent" />
@@ -80,30 +98,49 @@ export default function Hero() {
         }}
       >
         <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
-          {/* Tag line */}
+          {/* Tag line — shimmer badge */}
           <div
             className={`mb-6 flex items-center gap-3 sm:mb-8
               transition-all duration-700 ease-out delay-100
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           >
             <span className="h-px w-10 bg-pava-gold" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold sm:text-[11px]">
+            <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-pava-gold/40 bg-pava-cream/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold backdrop-blur-[2px] sm:text-[11px]">
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-pava-gold animate-pulse-dot" />
               Poné La Pava · Tienda Matera
+              <span className="shine-sweep" aria-hidden="true" />
             </span>
           </div>
 
-          {/* Headline */}
+          {/* Headline — masked line reveal */}
           <h1
-            className={`font-display max-w-4xl leading-[0.87] tracking-[-0.04em] text-pava-cream
-              text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]
-              transition-all duration-800 ease-out delay-200
-              ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+            className="font-display max-w-4xl leading-[0.87] tracking-[-0.04em] text-pava-cream
+              text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]"
           >
-            El ritual
-            <br />
-            <em className="not-italic text-pava-gold">del mate</em>
-            <br />
-            es tuyo.
+            <span className="block overflow-hidden">
+              <span
+                className={`block transition-all duration-700 ease-out delay-200
+                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+              >
+                El ritual
+              </span>
+            </span>
+            <span className="block overflow-hidden">
+              <em
+                className={`not-italic block text-pava-gold transition-all duration-700 ease-out delay-300
+                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+              >
+                del mate
+              </em>
+            </span>
+            <span className="block overflow-hidden">
+              <span
+                className={`block transition-all duration-700 ease-out delay-400
+                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+              >
+                es tuyo.
+              </span>
+            </span>
           </h1>
 
           {/* Body + tagline row */}
@@ -130,23 +167,27 @@ export default function Hero() {
               transition-all duration-700 ease-out delay-400
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           >
-            <Link
-              href="/catalogo"
-              id="hero-cta-catalogo"
-              className="inline-flex items-center justify-center gap-3 bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
-            >
-              Explorar el catálogo
-              <span className="text-base" aria-hidden="true">
-                →
-              </span>
-            </Link>
-            <Link
-              href="/#el-local"
-              id="hero-cta-local"
-              className="inline-flex items-center justify-center gap-2 border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
-            >
-              Conocé el local
-            </Link>
+            <MagneticButton>
+              <Link
+                href="/catalogo"
+                id="hero-cta-catalogo"
+                className="inline-flex items-center justify-center gap-3 bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
+              >
+                Explorar el catálogo
+                <span className="text-base" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            </MagneticButton>
+            <MagneticButton>
+              <Link
+                href="/#el-local"
+                id="hero-cta-local"
+                className="inline-flex items-center justify-center gap-2 border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
+              >
+                Conocé el local
+              </Link>
+            </MagneticButton>
           </div>
 
           {/* Bottom meta bar */}

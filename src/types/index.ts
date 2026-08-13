@@ -1,11 +1,6 @@
 // ── Product ────────────────────────────────────────────
 export type ProductCategory =
-  | "yerbas"
-  | "mates"
-  | "bombillas"
-  | "termos"
-  | "accesorios"
-  | "combos";
+  "yerbas" | "mates" | "bombillas" | "termos" | "accesorios" | "combos";
 
 export type ProductStatus = "available" | "out_of_stock" | "featured";
 
@@ -18,6 +13,7 @@ export interface Product {
   price: number;
   category: ProductCategory;
   status: ProductStatus;
+  stock: number;
   images: string[];
   tags?: string[];
   weight?: string;

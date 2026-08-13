@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Clock, CheckCircle2, PackageCheck, ShoppingBag } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { AdminKpiCard } from "./AdminCard";
+import { TableSkeleton } from "./TableSkeleton";
+import { EmptyState } from "./EmptyState";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending: "Pendiente",
@@ -54,11 +58,7 @@ export default function OrdersTable() {
   }
 
   if (loading) {
-    return (
-      <p style={{ fontSize: 14, color: "var(--dash-muted)" }}>
-        Cargando pedidos...
-      </p>
-    );
+    return <TableSkeleton rows={5} />;
   }
 
   if (error) {
@@ -80,22 +80,17 @@ export default function OrdersTable() {
 
   if (orders.length === 0) {
     return (
-      <div
-        style={{
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: 12,
-          padding: 40,
-          textAlign: "center",
-        }}
-      >
-        <p style={{ fontSize: 14, color: "var(--dash-muted)" }}>
-          Todavía no llegó ningún pedido por acá. Se registran automáticamente
-          cuando un cliente completa el checkout en /carrito.
-        </p>
-      </div>
+      <EmptyState
+        icon={ShoppingBag}
+        title="Todavía no hay pedidos"
+        description="Se registran automáticamente cuando un cliente completa el checkout en /carrito."
+      />
     );
   }
+
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
+  const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
+  const deliveredCount = orders.filter((o) => o.status === "delivered").length;
 
   const th: React.CSSProperties = {
     textAlign: "left",
@@ -113,94 +108,122 @@ export default function OrdersTable() {
   };
 
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table
-        style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
+    <div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          gap: 16,
+          marginBottom: 20,
+        }}
       >
-        <thead>
-          <tr>
-            <th style={th}>Cliente</th>
-            <th style={th}>Productos</th>
-            <th style={th}>Total</th>
-            <th style={th}>Fecha</th>
-            <th style={th}>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td style={td}>
-                <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
-                  {order.customerName}
-                </span>
-                {order.comment && (
-                  <span
-                    style={{
-                      display: "block",
-                      fontSize: 12,
-                      color: "var(--dash-muted)",
-                      marginTop: 2,
-                      maxWidth: 220,
-                    }}
-                  >
-                    {order.comment}
+        <AdminKpiCard icon={ShoppingBag} label="Total" value={orders.length} />
+        <AdminKpiCard icon={Clock} label="Pendientes" value={pendingCount} />
+        <AdminKpiCard
+          icon={CheckCircle2}
+          label="Confirmados"
+          value={confirmedCount}
+        />
+        <AdminKpiCard
+          icon={PackageCheck}
+          label="Entregados"
+          value={deliveredCount}
+        />
+      </div>
+
+      <div style={{ overflowX: "auto" }}>
+        <table
+          style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
+        >
+          <thead>
+            <tr>
+              <th style={th}>Cliente</th>
+              <th style={th}>Productos</th>
+              <th style={th}>Total</th>
+              <th style={th}>Fecha</th>
+              <th style={th}>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr key={order.id}>
+                <td style={td}>
+                  <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
+                    {order.customerName}
                   </span>
-                )}
-              </td>
-              <td style={{ ...td, color: "var(--dash-muted)", maxWidth: 280 }}>
-                {order.items
-                  .map((i) => `${i.productName} x${i.quantity}`)
-                  .join(", ")}
-              </td>
-              <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
-                {formatPrice(order.total)}
-              </td>
-              <td
-                style={{
-                  ...td,
-                  color: "var(--dash-muted)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {new Date(order.createdAt).toLocaleDateString("es-AR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </td>
-              <td style={td}>
-                <select
-                  value={order.status}
-                  onChange={(e) =>
-                    handleStatusChange(
-                      order.id!,
-                      e.target.value as Order["status"],
-                    )
-                  }
+                  {order.comment && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: 12,
+                        color: "var(--dash-muted)",
+                        marginTop: 2,
+                        maxWidth: 220,
+                      }}
+                    >
+                      {order.comment}
+                    </span>
+                  )}
+                </td>
+                <td
+                  style={{ ...td, color: "var(--dash-muted)", maxWidth: 280 }}
+                >
+                  {order.items
+                    .map((i) => `${i.productName} x${i.quantity}`)
+                    .join(", ")}
+                </td>
+                <td
+                  style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}
+                >
+                  {formatPrice(order.total)}
+                </td>
+                <td
                   style={{
-                    ...STATUS_COLORS[order.status],
-                    border: "none",
-                    borderRadius: 999,
-                    padding: "3px 10px",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: "pointer",
+                    ...td,
+                    color: "var(--dash-muted)",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {(Object.keys(STATUS_LABELS) as Order["status"][]).map(
-                    (s) => (
-                      <option key={s} value={s}>
-                        {STATUS_LABELS[s]}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {new Date(order.createdAt).toLocaleDateString("es-AR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
+                <td style={td}>
+                  <select
+                    value={order.status}
+                    onChange={(e) =>
+                      handleStatusChange(
+                        order.id!,
+                        e.target.value as Order["status"],
+                      )
+                    }
+                    style={{
+                      ...STATUS_COLORS[order.status],
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "3px 10px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {(Object.keys(STATUS_LABELS) as Order["status"][]).map(
+                      (s) => (
+                        <option key={s} value={s}>
+                          {STATUS_LABELS[s]}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

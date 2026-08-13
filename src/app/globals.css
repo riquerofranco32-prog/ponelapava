@@ -353,6 +353,28 @@ body {
 }
 
 /* ── Product card hover ───────────────────────────── */
+.product-card {
+  isolation: isolate;
+}
+.product-card-glow {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  background: linear-gradient(
+    135deg,
+    var(--color-pava-gold) 0%,
+    transparent 45%,
+    transparent 55%,
+    var(--color-pava-green-light) 100%
+  );
+  opacity: 0;
+  filter: blur(16px);
+  transition: opacity 0.4s ease;
+}
+.product-card:hover .product-card-glow {
+  opacity: 0.55;
+}
+
 .product-card-btn {
   transform: translateY(6px);
   opacity: 0;
@@ -399,7 +421,7 @@ body {
   left: calc(100% - 0.5rem);
   width: calc(100% - 1rem);
   height: 1px;
-  background: linear-gradient(to right, #26402e30, transparent);
+  background: linear-gradient(to right, rgba(199, 166, 122, 0.35), transparent);
 }
 
 /* ── Hide scrollbar on horizontal touch scrollers ───── */
@@ -428,6 +450,30 @@ body {
     rgba(38, 64, 46, 0.3) 50%,
     rgba(38, 64, 46, 0.08) 100%
   );
+}
+
+/* ── Shine sweep (hero badge highlight) ───────────── */
+@keyframes shineSweep {
+  0% {
+    background-position: 200% 0;
+  }
+  60%,
+  100% {
+    background-position: -100% 0;
+  }
+}
+.shine-sweep {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  animation: shineSweep 3.5s ease-in-out infinite;
+  pointer-events: none;
 }
 
 /* ── Cursor-tracked spotlight (category cards) ────── */
@@ -487,6 +533,33 @@ body {
 }
 .admin-input:focus {
   border-color: var(--dash-accent);
+}
+
+@keyframes adminSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.admin-skeleton-row {
+  animation: adminSkeletonPulse 1.6s ease-in-out infinite;
+}
+
+/* Inline styles can't express breakpoints, so the admin's table↔card
+   split (like a physical store checking stock from a phone) leans on
+   these two utility classes instead. */
+@media (max-width: 720px) {
+  .admin-desktop-only {
+    display: none !important;
+  }
+}
+@media (min-width: 721px) {
+  .admin-mobile-only {
+    display: none !important;
+  }
 }
 
 .admin-nav-link:hover {

@@ -99,7 +99,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
             placeholder="Buscar yerbas, mates, termos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
+            className="w-full pl-10 pr-4 py-3 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
           />
         </div>
 
@@ -114,7 +114,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
             aria-label="Ordenar productos"
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
-            className="bg-white border border-pava-brown/15 text-pava-brown text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors cursor-pointer"
+            className="rounded-control bg-white border border-pava-brown/15 text-pava-brown text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors cursor-pointer"
           >
             <option value="default">Destacados</option>
             <option value="price-asc">Precio: menor a mayor</option>
@@ -123,7 +123,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
           </select>
 
           {/* View toggle */}
-          <div className="flex border border-pava-brown/15 bg-white">
+          <div className="flex overflow-hidden rounded-control border border-pava-brown/15 bg-white">
             <button
               onClick={() => setView("grid")}
               className={`flex items-center justify-center w-10 h-10 transition-colors ${
@@ -158,7 +158,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
           <button
             key={slug}
             onClick={() => setActiveCategory(slug as ProductCategory | "all")}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium border-2 transition-all duration-200 ${
+            className={`inline-flex items-center gap-1.5 rounded-control px-4 py-2 text-sm font-medium border-2 transition-all duration-200 ${
               activeCategory === slug
                 ? "bg-pava-green text-pava-cream border-pava-green"
                 : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green hover:text-pava-green"
@@ -202,7 +202,7 @@ export default function CatalogClient({ products }: CatalogClientProps) {
               setSearch("");
               setActiveCategory("all");
             }}
-            className="mt-6 px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
+            className="mt-6 rounded-control px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
           >
             Ver todos los productos
           </button>

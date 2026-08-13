@@ -177,7 +177,7 @@ export default function Navbar() {
                 href="/catalogo"
                 id="navbar-cta"
                 className={cn(
-                  "hidden lg:flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-200",
+                  "hidden lg:flex items-center gap-2 rounded-control px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-200",
                   isScrolled
                     ? "bg-pava-green text-pava-cream hover:bg-pava-green-light"
                     : "bg-pava-cream/10 border border-pava-cream/30 text-pava-cream hover:bg-pava-cream/18 hover:border-pava-cream/50 backdrop-blur-sm",
@@ -285,7 +285,7 @@ export default function Navbar() {
             <Link
               href="/catalogo"
               onClick={() => setIsMobileOpen(false)}
-              className="flex w-full items-center justify-center bg-pava-green py-4 text-sm font-semibold tracking-wide text-pava-cream transition-colors duration-200 hover:bg-pava-green-light"
+              className="flex w-full items-center justify-center rounded-control bg-pava-green py-4 text-sm font-semibold tracking-wide text-pava-cream transition-colors duration-200 hover:bg-pava-green-light"
             >
               Ver catálogo
             </Link>
@@ -293,7 +293,7 @@ export default function Navbar() {
               href={whatsappChatUrl(settings.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 bg-whatsapp py-4 text-sm font-semibold tracking-wide text-white transition-colors duration-200 hover:bg-whatsapp-dark"
+              className="flex w-full items-center justify-center gap-2 rounded-control bg-whatsapp py-4 text-sm font-semibold tracking-wide text-white transition-colors duration-200 hover:bg-whatsapp-dark"
             >
               Escribinos por WhatsApp
             </a>
@@ -301,7 +301,7 @@ export default function Navbar() {
               href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 border border-pava-brown/15 py-3.5 text-sm font-medium text-pava-brown/70 transition-colors duration-200 hover:text-pava-green"
+              className="flex w-full items-center justify-center gap-2 rounded-control border border-pava-brown/15 py-3.5 text-sm font-medium text-pava-brown/70 transition-colors duration-200 hover:text-pava-green"
             >
               <InstagramIcon size={15} />@{INSTAGRAM_HANDLE}
             </a>

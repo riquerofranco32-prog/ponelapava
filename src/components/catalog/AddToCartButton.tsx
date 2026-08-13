@@ -35,7 +35,7 @@ export default function AddToCartButton({
     return (
       <button
         disabled
-        className={`flex w-full items-center justify-center gap-2 border border-pava-brown/10 py-3 text-xs font-medium tracking-[0.08em] text-pava-brown-mid/50 cursor-not-allowed ${
+        className={`flex w-full items-center justify-center gap-2 rounded-control border border-pava-brown/10 py-3 text-xs font-medium tracking-[0.08em] text-pava-brown-mid/50 cursor-not-allowed ${
           overlay ? "bg-pava-cream/80 backdrop-blur-sm" : "bg-pava-cream-dark"
         }`}
       >
@@ -48,7 +48,7 @@ export default function AddToCartButton({
     return (
       <button
         onClick={handleAdd}
-        className={`flex w-full items-center justify-center gap-2 py-2.5 text-[12px] font-semibold tracking-wide transition-all duration-200 active:scale-[0.98] ${
+        className={`flex w-full items-center justify-center gap-2 rounded-control py-2.5 text-[12px] font-semibold tracking-wide transition-all duration-200 active:scale-[0.98] ${
           added
             ? "bg-pava-green text-pava-cream"
             : "bg-pava-cream/95 text-pava-green hover:bg-pava-gold hover:text-pava-brown backdrop-blur-sm"
@@ -73,7 +73,7 @@ export default function AddToCartButton({
   return (
     <button
       onClick={handleAdd}
-      className={`w-full flex items-center justify-center gap-2 ${
+      className={`w-full flex items-center justify-center gap-2 rounded-control ${
         size === "sm" ? "py-3 text-xs" : "py-3.5 text-sm"
       } border border-pava-green font-semibold tracking-[0.08em] transition-all duration-200 ${
         added

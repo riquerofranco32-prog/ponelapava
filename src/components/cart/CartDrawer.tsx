@@ -66,7 +66,7 @@ export default function CartDrawer() {
               <Link
                 href="/catalogo"
                 onClick={() => setDrawer(false)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
+                className="inline-flex items-center gap-2 rounded-control px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
               >
                 Ver catálogo
               </Link>
@@ -79,7 +79,7 @@ export default function CartDrawer() {
                   className="flex gap-3 pb-4 border-b border-pava-brown/8"
                 >
                   {/* Image */}
-                  <div className="relative w-16 h-16 shrink-0 overflow-hidden">
+                  <div className="relative w-16 h-16 shrink-0 overflow-hidden rounded-control">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
@@ -102,7 +102,7 @@ export default function CartDrawer() {
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() => updateQuantity(product.id, quantity - 1)}
-                        className="flex items-center justify-center w-6 h-6 border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
+                        className="flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
                         aria-label="Reducir cantidad"
                       >
                         <Minus size={11} />
@@ -112,7 +112,7 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="flex items-center justify-center w-6 h-6 border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
+                        className="flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
                         aria-label="Aumentar cantidad"
                       >
                         <Plus size={11} />
@@ -147,7 +147,7 @@ export default function CartDrawer() {
             <Link
               href="/carrito"
               onClick={() => setDrawer(false)}
-              className="flex items-center justify-center w-full py-3 bg-pava-green text-pava-cream text-sm font-semibold tracking-wide border-2 border-pava-green hover:bg-pava-green-light transition-colors"
+              className="flex items-center justify-center w-full rounded-control py-3 bg-pava-green text-pava-cream text-sm font-semibold tracking-wide border-2 border-pava-green hover:bg-pava-green-light transition-colors"
             >
               Ver carrito completo
             </Link>

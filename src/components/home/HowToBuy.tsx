@@ -90,7 +90,7 @@ export default function HowToBuy() {
           <Link
             href="/catalogo"
             id="howtobuy-cta"
-            className="inline-flex items-center gap-3 border-2 border-pava-gold bg-transparent px-10 py-4 text-sm font-semibold tracking-wide text-pava-gold transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown active:scale-[0.98]"
+            className="inline-flex items-center gap-3 rounded-control border-2 border-pava-gold bg-transparent px-10 py-4 text-sm font-semibold tracking-wide text-pava-gold transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown active:scale-[0.98]"
           >
             Empezar a elegir <span aria-hidden="true">→</span>
           </Link>

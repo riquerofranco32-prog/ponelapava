@@ -107,7 +107,7 @@ export default async function FeaturedProducts() {
           <Link
             href="/catalogo"
             id="featured-cta"
-            className="inline-flex items-center gap-3 border-2 border-pava-green bg-pava-green px-10 py-4 text-sm font-semibold tracking-wide text-pava-cream transition-all duration-200 hover:border-pava-green-light hover:bg-pava-green-light active:scale-[0.98]"
+            className="inline-flex items-center gap-3 rounded-control border-2 border-pava-green bg-pava-green px-10 py-4 text-sm font-semibold tracking-wide text-pava-cream transition-all duration-200 hover:border-pava-green-light hover:bg-pava-green-light active:scale-[0.98]"
           >
             Ver todos los productos <span aria-hidden="true">→</span>
           </Link>

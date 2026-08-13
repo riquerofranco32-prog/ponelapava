@@ -37,6 +37,15 @@
   /* ── Shadows ──────────────────────────────────── */
   --shadow-card: 0 16px 40px -20px rgba(38, 64, 46, 0.5);
   --shadow-card-hover: 0 22px 48px -22px rgba(38, 64, 46, 0.65);
+
+  /* ── Radii ────────────────────────────────────────
+     Escala aprobada 2026-08-13 (ver CLAUDE.md): card para
+     objetos grandes, control para botones/inputs/miniaturas,
+     chip para badges/tags y mini-controles. Nada estructural
+     ni pegado a un borde del viewport lleva radio. */
+  --radius-card: 14px;
+  --radius-control: 8px;
+  --radius-chip: 4px;
 }
 
 /* ── Base Reset ───────────────────────────────────── */
@@ -358,21 +367,17 @@ body {
 }
 .product-card-glow {
   position: absolute;
-  inset: -2px;
-  z-index: -1;
-  background: linear-gradient(
-    135deg,
-    var(--color-pava-gold) 0%,
-    transparent 45%,
-    transparent 55%,
-    var(--color-pava-green-light) 100%
-  );
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(199, 166, 122, 0.55),
+    inset 0 0 28px rgba(199, 166, 122, 0.16);
   opacity: 0;
-  filter: blur(16px);
   transition: opacity 0.4s ease;
 }
 .product-card:hover .product-card-glow {
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .product-card-btn {

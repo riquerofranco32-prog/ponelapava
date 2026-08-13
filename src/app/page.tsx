@@ -5,6 +5,7 @@ import FeaturedProducts from "@/components/home/FeaturedProducts";
 import Categories from "@/components/home/Categories";
 import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
+import GoogleReviews from "@/components/home/GoogleReviews";
 import HowToBuy from "@/components/home/HowToBuy";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
@@ -28,6 +29,7 @@ export default function HomePage() {
       <AboutSection />
       <Categories />
       <LocalSection />
+      <GoogleReviews />
       <HowToBuy />
       <FinalCTA />
       <InstagramSection />

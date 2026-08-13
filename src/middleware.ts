@@ -1,31 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
-// Gates /admin and its API routes behind HTTP Basic Auth — the dashboard
-// has no auth of its own. If ADMIN_PASSWORD isn't set, /admin 404s instead
-// of silently staying open.
-export function middleware(request: NextRequest) {
-  const adminUser = process.env.ADMIN_USER || "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD;
+// Gates /admin and its API routes behind a real Supabase Auth session
+// (replaces the old shared-password HTTP Basic Auth). Single-owner store,
+// so any authenticated user in this Supabase project is the admin — no
+// roles/tenants to check.
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request });
 
-  if (!adminPassword) {
-    return new NextResponse("Not found", { status: 404 });
-  }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
 
-  const authHeader = request.headers.get("authorization");
-  if (authHeader) {
-    const [scheme, encoded] = authHeader.split(" ");
-    if (scheme === "Basic" && encoded) {
-      const [user, password] = atob(encoded).split(":");
-      if (user === adminUser && password === adminPassword) {
-        return NextResponse.next();
-      }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    if (request.nextUrl.pathname.startsWith("/api/admin")) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  return new NextResponse("Autenticación requerida.", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Admin"' },
-  });
+  return response;
 }
 
 export const config = {

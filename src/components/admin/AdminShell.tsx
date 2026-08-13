@@ -6,8 +6,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
+import { useAdminUserEmail } from "@/context/AdminUserContext";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export interface AdminNavItem {
   id: string;
@@ -35,6 +38,13 @@ export default function AdminShell({
 }: AdminShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const email = useAdminUserEmail();
+
+  async function handleLogout() {
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  }
 
   useEffect(() => {
     if (localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true") {
@@ -191,6 +201,25 @@ export default function AdminShell({
           <ExternalLink size={14} />
           Ver sitio
         </Link>
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "12px 14px",
+            borderRadius: 8,
+            fontSize: 13,
+            color: "var(--dash-danger)",
+            background: "none",
+            border: "none",
+            textAlign: "left",
+            cursor: "pointer",
+          }}
+        >
+          <LogOut size={14} />
+          Cerrar sesión
+        </button>
       </nav>
 
       {/* ── MOBILE BOTTOM NAV ── */}
@@ -339,6 +368,21 @@ export default function AdminShell({
             borderTop: "1px solid var(--dash-border)",
           }}
         >
+          {!collapsed && (
+            <div
+              style={{
+                padding: "0 12px 8px",
+                fontSize: 11,
+                color: "var(--dash-muted)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+              title={email}
+            >
+              {email}
+            </div>
+          )}
           <Link
             href="/"
             title={collapsed ? "Ver sitio" : undefined}
@@ -357,6 +401,27 @@ export default function AdminShell({
             <ExternalLink size={14} />
             {!collapsed && "Ver sitio"}
           </Link>
+          <button
+            onClick={handleLogout}
+            title={collapsed ? "Cerrar sesión" : undefined}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              width: "100%",
+              padding: collapsed ? "10px 0" : "10px 12px",
+              justifyContent: collapsed ? "center" : "flex-start",
+              borderRadius: 8,
+              fontSize: 13,
+              color: "var(--dash-danger)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            <LogOut size={14} />
+            {!collapsed && "Cerrar sesión"}
+          </button>
         </div>
       </aside>
 

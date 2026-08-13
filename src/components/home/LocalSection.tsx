@@ -2,11 +2,27 @@ import Image from "next/image";
 import { MapPin, Clock, MessageCircle, ExternalLink } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { whatsappChatUrl } from "@/lib/whatsapp";
-import { getSiteSettings, buildMapsUrl } from "@/lib/settings";
+import {
+  getSiteSettings,
+  buildMapsUrl,
+  buildMapsEmbedUrl,
+} from "@/lib/settings";
+
+// Real photos of the store (same ones used in InstagramSection) — not
+// stock, matches what visitors actually find on the Google Maps listing.
+const LOCAL_PHOTOS = [
+  { src: "/ig_storefront.jpg", alt: "Frente del local Poné La Pava" },
+  { src: "/ig_shelf.jpg", alt: "Estantería de accesorios en el local" },
+  { src: "/local_store_1786546091007.png", alt: "Interior del local" },
+];
 
 export default async function LocalSection() {
   const settings = await getSiteSettings();
   const mapsUrl = buildMapsUrl(settings.addressLine, settings.addressCity);
+  const mapsEmbedUrl = buildMapsEmbedUrl(
+    settings.addressLine,
+    settings.addressCity,
+  );
 
   return (
     <section
@@ -16,23 +32,59 @@ export default async function LocalSection() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
           <ScrollReveal direction="left" className="relative lg:col-span-7">
-            <div className="relative aspect-[4/5] overflow-hidden bg-pava-green-dark sm:aspect-[5/4]">
-              <Image
-                src="/local_store_1786546091007.png"
-                alt="Interior del local Poné La Pava"
-                fill
-                className="object-cover transition-transform duration-700 hover:scale-[1.025]"
-                sizes="(max-width: 1024px) 100vw, 58vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-pava-green-dark/55 via-transparent to-transparent" />
-            </div>
-            <div className="absolute bottom-4 left-4 border border-pava-cream/25 bg-pava-green-dark/80 px-4 py-3 backdrop-blur-sm sm:bottom-6 sm:left-6">
-              <span className="block text-[9px] font-semibold uppercase tracking-[0.2em] text-pava-gold">
-                Nuestro espacio
-              </span>
-              <span className="mt-1 block text-sm font-medium text-pava-cream">
-                Mate, charla y cercanía
-              </span>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Live map — desaturated + brand-tinted until hovered */}
+              <div className="local-map-frame group relative col-span-3 aspect-[16/10] overflow-hidden rounded-card bg-pava-green-dark sm:aspect-[16/9]">
+                <iframe
+                  src={mapsEmbedUrl}
+                  title="Ubicación de Poné La Pava en el mapa"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="local-map-iframe h-full w-full border-0"
+                />
+                <div
+                  className="local-map-tint pointer-events-none absolute inset-0"
+                  aria-hidden="true"
+                />
+                {/* Decorative brand pin — the real Google pin already marks
+                    the exact spot; this just carries the brand mark. */}
+                <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-full">
+                  <span className="local-map-pin relative flex flex-col items-center">
+                    <span className="whitespace-nowrap rounded-full bg-pava-brown px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-cream shadow-lg">
+                      Poné La Pava
+                    </span>
+                    <span className="-mt-[3px] h-2.5 w-2.5 rotate-45 bg-pava-brown" />
+                  </span>
+                </div>
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-control bg-pava-brown/90 px-3 py-2 text-[11px] font-semibold text-pava-cream backdrop-blur-sm transition-colors hover:bg-pava-brown"
+                >
+                  Ver en Google Maps <ExternalLink size={12} />
+                </a>
+              </div>
+
+              {/* Real photos of the store — same ones on the Maps listing */}
+              {LOCAL_PHOTOS.map((photo) => (
+                <a
+                  key={photo.src}
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="img-hover-zoom relative aspect-square overflow-hidden rounded-control bg-pava-green-dark"
+                  aria-label={`${photo.alt} — ver más fotos en Google Maps`}
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 33vw, 19vw"
+                  />
+                </a>
+              ))}
             </div>
             <div className="absolute -bottom-5 -right-5 hidden h-28 w-28 border-2 border-pava-gold/30 lg:block" />
           </ScrollReveal>

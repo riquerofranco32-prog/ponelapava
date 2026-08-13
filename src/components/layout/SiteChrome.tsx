@@ -4,8 +4,9 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import CartDrawer from "@/components/cart/CartDrawer";
 
-// /admin has its own dark dashboard shell (AdminShell) — the storefront
-// nav/footer/cart/WhatsApp FAB don't belong there.
+// /admin has its own dark dashboard shell (AdminShell), and /login is a
+// bare full-screen form — the storefront nav/footer/cart/WhatsApp FAB
+// don't belong on either.
 //
 // Footer and WhatsAppFAB are async server components — a "use client" module
 // can't import and render an async component directly (Next treats anything
@@ -22,7 +23,7 @@ export default function SiteChrome({
   whatsAppFab: React.ReactNode;
 }) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/login")) {
     return <>{children}</>;
   }
 

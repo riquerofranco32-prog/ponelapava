@@ -74,3 +74,15 @@ export function buildMapsUrl(addressLine: string, addressCity: string): string {
     `${addressLine}, ${addressCity}`,
   )}`;
 }
+
+// Free embeddable map iframe — no Google Cloud API key needed (unlike the
+// Maps Embed API / JS API), which this single-store site has no use for
+// otherwise. Precise enough for a "here's roughly where we are" section.
+export function buildMapsEmbedUrl(
+  addressLine: string,
+  addressCity: string,
+): string {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(
+    `${addressLine}, ${addressCity}`,
+  )}&z=16&output=embed`;
+}

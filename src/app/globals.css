@@ -481,6 +481,68 @@ body {
   pointer-events: none;
 }
 
+/* ── Local map — desaturated + brand-tinted until hovered ─── */
+.local-map-iframe {
+  filter: grayscale(0.85) brightness(0.92) contrast(1.05);
+  transition: filter 0.6s ease;
+}
+.local-map-frame:hover .local-map-iframe {
+  filter: grayscale(0) brightness(1) contrast(1);
+}
+.local-map-tint {
+  background: var(--color-pava-green);
+  mix-blend-mode: color;
+  opacity: 0.45;
+  transition: opacity 0.6s ease;
+}
+.local-map-frame:hover .local-map-tint {
+  opacity: 0;
+}
+@keyframes pinFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+.local-map-pin {
+  animation: pinFloat 2.4s ease-in-out infinite;
+}
+
+/* ── Vertical marquee (Google reviews columns) ────── */
+@keyframes marqueeVertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+.marquee-vertical-track {
+  animation: marqueeVertical linear infinite;
+}
+.marquee-vertical-track:hover {
+  animation-play-state: paused;
+}
+.marquee-vertical-mask {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+}
+
 /* ── Cursor-tracked spotlight (category cards) ────── */
 .spotlight-overlay {
   background: radial-gradient(

@@ -61,7 +61,8 @@ class CDP {
       if (msg.id && this.pending.has(msg.id)) {
         const { resolve, reject } = this.pending.get(msg.id);
         this.pending.delete(msg.id);
-        msg.error ? reject(new Error(`${msg.error.message} (${msg.error.code})`)) : resolve(msg.result);
+        if (msg.error) reject(new Error(`${msg.error.message} (${msg.error.code})`));
+        else resolve(msg.result);
       } else if (msg.method) {
         for (const l of this.listeners) l(msg);
       }

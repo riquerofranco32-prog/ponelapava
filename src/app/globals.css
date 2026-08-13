@@ -490,6 +490,16 @@ body {
   color: var(--dash-text) !important;
 }
 
+/* Dark scrollbar for the admin shell — overrides the storefront's
+   cream/green scrollbar, which looked broken against .pava-admin's
+   dark surfaces. */
+.pava-admin ::-webkit-scrollbar-track {
+  background: var(--dash-surface);
+}
+.pava-admin ::-webkit-scrollbar-thumb {
+  background: var(--dash-border);
+}
+
 /* ── Reduced motion ───────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

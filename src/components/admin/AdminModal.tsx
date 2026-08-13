@@ -65,6 +65,7 @@ export function AdminModal({
   // viewport, not a transformed ancestor.
   return createPortal(
     <div
+      className="pava-admin"
       style={{
         position: "fixed",
         inset: 0,

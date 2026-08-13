@@ -39,7 +39,7 @@ export default function TrustBar() {
               <div className="text-[13px] font-semibold text-pava-cream">
                 {title}
               </div>
-              <div className="text-[11px] text-pava-cream/50">{subtitle}</div>
+              <div className="text-[11px] text-pava-cream/65">{subtitle}</div>
             </div>
           </div>
         ))}

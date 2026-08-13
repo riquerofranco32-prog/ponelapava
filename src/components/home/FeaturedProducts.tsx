@@ -25,8 +25,8 @@ export default async function FeaturedProducts() {
         >
           <div className="lg:col-span-7">
             <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-9 bg-pava-terracotta" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-terracotta">
+              <span className="h-px w-9 bg-pava-gold-deep" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold-deep">
                 Selección de la casa
               </span>
             </div>
@@ -37,7 +37,7 @@ export default async function FeaturedProducts() {
             </h2>
           </div>
           <div className="flex items-end justify-between gap-6 lg:col-span-5 lg:col-start-8 lg:flex-col lg:items-end lg:pb-1">
-            <p className="max-w-xs text-sm leading-relaxed text-pava-brown-mid/60">
+            <p className="max-w-xs text-sm leading-relaxed text-pava-brown-mid/75">
               Elegidos con criterio. Para usar todos los días.
             </p>
             <Link

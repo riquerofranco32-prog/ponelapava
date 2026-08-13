@@ -83,7 +83,7 @@ export default function AboutSection() {
             </div>
 
             {/* Body text */}
-            <div className="space-y-4 text-[15px] leading-relaxed text-pava-brown-mid/70">
+            <div className="space-y-4 text-[15px] leading-relaxed text-pava-brown-mid/75">
               <p>
                 En Poné La Pava creemos que el mate no es solo una bebida: es un
                 ritual, un pretexto para estar juntos, para bajar el ritmo y
@@ -110,7 +110,7 @@ export default function AboutSection() {
                     <div className="font-display text-2xl font-bold text-pava-brown">
                       {value}
                     </div>
-                    <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-brown-mid/55">
+                    <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pava-brown-mid/75">
                       {label}
                     </div>
                   </div>

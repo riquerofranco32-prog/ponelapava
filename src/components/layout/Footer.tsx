@@ -44,12 +44,12 @@ export default function Footer() {
                 <span className="font-display text-2xl font-bold text-pava-cream">
                   Poné La Pava
                 </span>
-                <span className="mt-0.5 block text-[10px] tracking-[0.2em] uppercase text-pava-cream/50">
+                <span className="mt-0.5 block text-[10px] tracking-[0.2em] uppercase text-pava-cream/65">
                   Yerbas & Accesorios
                 </span>
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-pava-cream/60 max-w-xs">
+            <p className="text-sm leading-relaxed text-pava-cream/65 max-w-xs">
               Especialistas en la cultura del mate. Yerbas seleccionadas, mates
               artesanales y todo lo que necesitás para el mate perfecto.
             </p>
@@ -86,7 +86,7 @@ export default function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-pava-cream/60 hover:text-pava-cream transition-colors duration-200"
+                    className="text-sm text-pava-cream/65 hover:text-pava-cream transition-colors duration-200"
                   >
                     {label}
                   </Link>
@@ -105,7 +105,7 @@ export default function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className="text-sm text-pava-cream/60 hover:text-pava-cream transition-colors duration-200"
+                    className="text-sm text-pava-cream/65 hover:text-pava-cream transition-colors duration-200"
                   >
                     {label}
                   </Link>
@@ -120,7 +120,7 @@ export default function Footer() {
               El local
             </h3>
             <div className="flex flex-col gap-4">
-              <div className="flex items-start gap-3 text-sm text-pava-cream/60">
+              <div className="flex items-start gap-3 text-sm text-pava-cream/65">
                 <MapPin
                   size={15}
                   className="mt-0.5 shrink-0 text-pava-cream/40"
@@ -131,7 +131,7 @@ export default function Footer() {
                   {STORE_ADDRESS_CITY}
                 </span>
               </div>
-              <div className="flex items-start gap-3 text-sm text-pava-cream/60">
+              <div className="flex items-start gap-3 text-sm text-pava-cream/65">
                 <Clock
                   size={15}
                   className="mt-0.5 shrink-0 text-pava-cream/40"
@@ -162,10 +162,10 @@ export default function Footer() {
       <div className="border-t border-pava-cream/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-pava-cream/40">
+            <p className="text-xs text-pava-cream/65">
               © {currentYear} Poné La Pava. Todos los derechos reservados.
             </p>
-            <p className="text-xs text-pava-cream/30">
+            <p className="text-xs text-pava-cream/65">
               Hecho con mate 🧉 en Argentina
             </p>
           </div>

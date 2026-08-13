@@ -51,7 +51,7 @@ export default function ProductCard({
                 {product.name}
               </h3>
             </Link>
-            <p className="text-xs text-pava-brown-mid/60 mt-1">
+            <p className="text-xs text-pava-brown-mid/70 mt-1">
               {truncate(product.description, 80)}
             </p>
           </div>
@@ -131,11 +131,7 @@ export default function ProductCard({
       <div className="p-5 sm:p-6">
         <div className="mb-2 flex items-start justify-between gap-3">
           <Badge variant="category">{getCategoryLabel(product.category)}</Badge>
-          <span
-            className={`font-display shrink-0 text-lg font-bold leading-none ${
-              isFeatured ? "text-pava-gold" : "text-pava-green"
-            }`}
-          >
+          <span className="font-display shrink-0 text-lg font-bold leading-none text-pava-green">
             {formatPrice(product.price)}
           </span>
         </div>
@@ -146,7 +142,7 @@ export default function ProductCard({
           </h3>
         </Link>
 
-        <p className="mb-5 min-h-9 text-[13px] leading-relaxed text-pava-brown-mid/65">
+        <p className="mb-5 min-h-9 text-[13px] leading-relaxed text-pava-brown-mid/70">
           {truncate(product.description, 72)}
         </p>
 

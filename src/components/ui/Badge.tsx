@@ -9,7 +9,7 @@ interface BadgeProps {
 const variantClasses: Record<string, string> = {
   available: "bg-pava-green/10 text-pava-green border border-pava-green/20",
   out_of_stock: "bg-pava-terracotta/10 text-pava-terracotta border border-pava-terracotta/20",
-  featured: "bg-pava-gold/15 text-pava-gold border border-pava-gold/30",
+  featured: "bg-pava-gold text-pava-brown border border-pava-gold",
   category: "bg-pava-cream-dark text-pava-brown-mid border border-pava-brown/10",
   custom: "",
 };

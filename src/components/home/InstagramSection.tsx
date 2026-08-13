@@ -42,8 +42,8 @@ export default function InstagramSection() {
         >
           <div>
             <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-9 bg-pava-terracotta" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-terracotta">
+              <span className="h-px w-9 bg-pava-gold-deep" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold-deep">
                 La ronda sigue
               </span>
             </div>

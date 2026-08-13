@@ -30,8 +30,8 @@ export default function Categories() {
         >
           <div>
             <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-9 bg-pava-gold" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold">
+              <span className="h-px w-9 bg-pava-gold-deep" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold-deep">
                 Explorá por categoría
               </span>
             </div>

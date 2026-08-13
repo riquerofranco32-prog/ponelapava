@@ -49,7 +49,7 @@ export default function HowToBuy() {
             <br />
             <em className="not-italic text-pava-gold">muy simple.</em>
           </h2>
-          <p className="mt-5 text-sm leading-relaxed text-pava-cream/55 max-w-md">
+          <p className="mt-5 text-sm leading-relaxed text-pava-cream/65 max-w-md">
             Todo por WhatsApp. Sin formularios, sin cuentas, sin complicaciones.
           </p>
         </ScrollReveal>
@@ -64,7 +64,7 @@ export default function HowToBuy() {
               <h3 className="font-display mb-2 text-xl font-bold text-pava-cream">
                 {step.title}
               </h3>
-              <p className="text-[14px] leading-relaxed text-pava-cream/55">
+              <p className="text-[14px] leading-relaxed text-pava-cream/65">
                 {step.description}
               </p>
             </ScrollReveal>

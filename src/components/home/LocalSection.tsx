@@ -9,11 +9,16 @@ import {
 } from "@/lib/settings";
 
 // Real photos of the store (same ones used in InstagramSection) — not
-// stock, matches what visitors actually find on the Google Maps listing.
+// stock. Deliberately NOT pulled from the Google Maps listing: its cover
+// photo (and at least one other) turned out to be a neighboring hotel's
+// reception, not this store — bad data on Google's end, not something to
+// propagate onto the site. Worth reporting/fixing on the real listing.
 const LOCAL_PHOTOS = [
   { src: "/ig_storefront.jpg", alt: "Frente del local Poné La Pava" },
   { src: "/ig_shelf.jpg", alt: "Estantería de accesorios en el local" },
   { src: "/local_store_1786546091007.png", alt: "Interior del local" },
+  { src: "/ig_termos.jpg", alt: "Termos Stanley en exhibición" },
+  { src: "/ig_sara.jpg", alt: "Yerbas Sara en el local" },
 ];
 
 export default async function LocalSection() {

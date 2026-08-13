@@ -60,7 +60,7 @@ export default function CartPage() {
           </p>
           <Link
             href="/catalogo"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-pava-green text-pava-cream text-sm font-semibold border-2 border-pava-green hover:bg-pava-green-light transition-colors"
+            className="inline-flex items-center gap-2 rounded-control px-8 py-4 bg-pava-green text-pava-cream text-sm font-semibold border-2 border-pava-green hover:bg-pava-green-light transition-colors"
           >
             Ir al catálogo
           </Link>
@@ -97,10 +97,10 @@ export default function CartPage() {
               {items.map(({ product, quantity }) => (
                 <li
                   key={product.id}
-                  className="flex gap-4 p-4 bg-white border border-pava-brown/8"
+                  className="flex gap-4 p-4 rounded-card bg-white border border-pava-brown/8"
                 >
                   {/* Image */}
-                  <div className="relative w-20 h-20 shrink-0 overflow-hidden">
+                  <div className="relative w-20 h-20 shrink-0 overflow-hidden rounded-control">
                     <Image
                       src={product.images[0]}
                       alt={product.name}
@@ -124,7 +124,7 @@ export default function CartPage() {
 
                     <div className="flex items-center justify-between">
                       {/* Quantity */}
-                      <div className="flex items-center border border-pava-brown/15">
+                      <div className="flex items-center overflow-hidden rounded-control border border-pava-brown/15">
                         <button
                           onClick={() =>
                             updateQuantity(product.id, quantity - 1)
@@ -177,7 +177,7 @@ export default function CartPage() {
 
           {/* Summary & checkout */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-pava-brown/8 p-6 sticky top-24">
+            <div className="rounded-card bg-white border border-pava-brown/8 p-6 sticky top-24">
               <h2 className="font-display text-xl font-bold text-pava-brown mb-6">
                 Resumen del pedido
               </h2>
@@ -222,7 +222,7 @@ export default function CartPage() {
                     placeholder="¿Cómo te llamás?"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors"
+                    className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors"
                   />
                 </div>
                 <div>
@@ -238,7 +238,7 @@ export default function CartPage() {
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors resize-none"
+                    className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors resize-none"
                   />
                 </div>
               </div>
@@ -247,7 +247,7 @@ export default function CartPage() {
               <button
                 onClick={handleWhatsApp}
                 disabled={!customerName.trim()}
-                className="flex items-center justify-center gap-2 w-full py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 w-full rounded-control py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageCircle size={18} />
                 Enviar pedido por WhatsApp

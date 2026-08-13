@@ -18,7 +18,7 @@ export default function Badge({ variant = "category", children, className }: Bad
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase",
+        "inline-flex items-center gap-1 rounded-chip px-2.5 py-0.5 text-xs font-medium tracking-wide uppercase",
         variantClasses[variant],
         className
       )}

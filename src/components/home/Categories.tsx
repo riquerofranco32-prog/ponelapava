@@ -86,7 +86,7 @@ export default function Categories() {
         <ScrollReveal direction="up" delay={200} className="mt-14 lg:mt-16">
           <Link
             href="/catalogo"
-            className="group flex items-center justify-between gap-4 border border-pava-brown/15 px-5 py-6 transition-colors duration-300 hover:border-pava-green/50 sm:px-6"
+            className="group flex items-center justify-between gap-4 rounded-control border border-pava-brown/15 px-5 py-6 transition-colors duration-300 hover:border-pava-green/50 sm:px-6"
           >
             <span className="font-display text-xl font-bold text-pava-brown sm:text-2xl">
               ¿Ya sabés qué buscás?{" "}

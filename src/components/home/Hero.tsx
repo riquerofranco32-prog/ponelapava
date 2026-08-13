@@ -133,7 +133,7 @@ export default function Hero() {
             <Link
               href="/catalogo"
               id="hero-cta-catalogo"
-              className="inline-flex items-center justify-center gap-3 bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
+              className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
             >
               Explorar el catálogo
               <span className="text-base" aria-hidden="true">
@@ -143,7 +143,7 @@ export default function Hero() {
             <Link
               href="/#el-local"
               id="hero-cta-local"
-              className="inline-flex items-center justify-center gap-2 border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
+              className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
             >
               Conocé el local
             </Link>

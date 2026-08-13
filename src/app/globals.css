@@ -37,6 +37,15 @@
   /* ── Shadows ──────────────────────────────────── */
   --shadow-card: 0 16px 40px -20px rgba(38, 64, 46, 0.5);
   --shadow-card-hover: 0 22px 48px -22px rgba(38, 64, 46, 0.65);
+
+  /* ── Radii ────────────────────────────────────────
+     Escala aprobada 2026-08-13 (ver CLAUDE.md): card para
+     objetos grandes, control para botones/inputs/miniaturas,
+     chip para badges/tags y mini-controles. Nada estructural
+     ni pegado a un borde del viewport lleva radio. */
+  --radius-card: 14px;
+  --radius-control: 8px;
+  --radius-chip: 4px;
 }
 
 /* ── Base Reset ───────────────────────────────────── */

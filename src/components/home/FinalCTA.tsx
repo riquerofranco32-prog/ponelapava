@@ -41,7 +41,7 @@ export default async function FinalCTA() {
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/catalogo"
-              className="inline-flex items-center justify-center gap-3 border-2 border-pava-gold bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:border-pava-gold-light hover:bg-pava-gold-light active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-3 rounded-control border-2 border-pava-gold bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:border-pava-gold-light hover:bg-pava-gold-light active:scale-[0.98]"
             >
               Ver el catálogo <span aria-hidden="true">→</span>
             </Link>
@@ -49,7 +49,7 @@ export default async function FinalCTA() {
               href={whatsappChatUrl(settings.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 border border-pava-cream/35 bg-pava-brown/20 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-sm transition-all duration-200 hover:border-whatsapp hover:bg-whatsapp"
+              className="inline-flex items-center justify-center gap-3 rounded-control border border-pava-cream/35 bg-pava-brown/20 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-sm transition-all duration-200 hover:border-whatsapp hover:bg-whatsapp"
             >
               Consultar por WhatsApp
             </a>

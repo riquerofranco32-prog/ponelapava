@@ -113,7 +113,7 @@ export default async function LocalSection() {
                 href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 border-2 border-pava-gold bg-pava-gold px-5 py-3 text-sm font-semibold tracking-wide text-pava-brown transition-colors hover:border-pava-gold-light hover:bg-pava-gold-light"
+                className="inline-flex items-center justify-center gap-2 rounded-control border-2 border-pava-gold bg-pava-gold px-5 py-3 text-sm font-semibold tracking-wide text-pava-brown transition-colors hover:border-pava-gold-light hover:bg-pava-gold-light"
               >
                 <ExternalLink size={15} /> Cómo llegar
               </a>
@@ -121,7 +121,7 @@ export default async function LocalSection() {
                 href={whatsappChatUrl(settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 border border-pava-cream/30 px-5 py-3 text-sm font-semibold tracking-wide text-pava-cream transition-colors hover:border-whatsapp hover:bg-whatsapp"
+                className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/30 px-5 py-3 text-sm font-semibold tracking-wide text-pava-cream transition-colors hover:border-whatsapp hover:bg-whatsapp"
               >
                 <MessageCircle size={15} /> WhatsApp
               </a>

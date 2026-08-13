@@ -83,7 +83,7 @@ export default function ProductDetail({
           {/* Images */}
           <div>
             {/* Main image */}
-            <div className="relative aspect-square overflow-hidden bg-white mb-3">
+            <div className="relative aspect-square overflow-hidden rounded-card bg-white mb-3">
               <Image
                 src={product.images[activeImage] ?? product.images[0]}
                 alt={product.name}
@@ -94,7 +94,7 @@ export default function ProductDetail({
               />
               {isOutOfStock && (
                 <div className="absolute inset-0 bg-pava-brown/50 flex items-center justify-center">
-                  <span className="bg-pava-cream text-pava-brown text-sm font-semibold tracking-wider uppercase px-6 py-3">
+                  <span className="rounded-control bg-pava-cream text-pava-brown text-sm font-semibold tracking-wider uppercase px-6 py-3">
                     Agotado
                   </span>
                 </div>
@@ -108,7 +108,7 @@ export default function ProductDetail({
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}
-                    className={`relative w-16 h-16 overflow-hidden border-2 transition-all ${
+                    className={`relative w-16 h-16 overflow-hidden rounded-control border-2 transition-all ${
                       activeImage === i
                         ? "border-pava-green"
                         : "border-transparent hover:border-pava-brown/30"
@@ -190,7 +190,7 @@ export default function ProductDetail({
                       {product.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="text-xs bg-pava-cream-dark text-pava-brown-mid px-2 py-0.5 border border-pava-brown/10"
+                          className="text-xs rounded-chip bg-pava-cream-dark text-pava-brown-mid px-2 py-0.5 border border-pava-brown/10"
                         >
                           {tag}
                         </span>
@@ -205,7 +205,7 @@ export default function ProductDetail({
             {!isOutOfStock ? (
               <div className="flex items-stretch gap-3 mb-4">
                 {/* Quantity */}
-                <div className="flex items-center border-2 border-pava-brown/15">
+                <div className="flex items-center overflow-hidden rounded-control border-2 border-pava-brown/15">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="flex items-center justify-center w-11 h-11 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
@@ -229,7 +229,7 @@ export default function ProductDetail({
                 <button
                   onClick={handleAddToCart}
                   disabled={added}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold tracking-wide border-2 transition-all duration-200 active:scale-[0.98] ${
+                  className={`flex-1 flex items-center justify-center gap-2 rounded-control px-6 py-3 text-sm font-semibold tracking-wide border-2 transition-all duration-200 active:scale-[0.98] ${
                     added
                       ? "bg-pava-green text-pava-cream border-pava-green"
                       : "bg-pava-green text-pava-cream border-pava-green hover:bg-pava-green-light hover:border-pava-green-light"
@@ -240,7 +240,7 @@ export default function ProductDetail({
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-center py-4 bg-pava-cream-dark border border-pava-brown/10 mb-4">
+              <div className="flex items-center justify-center rounded-control py-4 bg-pava-cream-dark border border-pava-brown/10 mb-4">
                 <span className="text-sm text-pava-brown/60 font-medium">
                   Producto sin stock — consultanos por disponibilidad
                 </span>
@@ -255,7 +255,7 @@ export default function ProductDetail({
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors duration-200"
+              className="flex items-center justify-center gap-2 w-full rounded-control py-3 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors duration-200"
             >
               <MessageCircle size={16} />
               Consultar por WhatsApp

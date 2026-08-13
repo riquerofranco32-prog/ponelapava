@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/settings";
 
-export default function FinalCTA() {
+export default async function FinalCTA() {
+  const settings = await getSiteSettings();
+
   return (
     <section className="grain-overlay relative overflow-hidden bg-pava-brown py-24 sm:py-28 lg:py-40">
       <div className="absolute inset-0">
@@ -43,7 +46,7 @@ export default function FinalCTA() {
               Ver el catálogo <span aria-hidden="true">→</span>
             </Link>
             <a
-              href={whatsappChatUrl()}
+              href={whatsappChatUrl(settings.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-3 border border-pava-cream/35 bg-pava-brown/20 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-sm transition-all duration-200 hover:border-whatsapp hover:bg-whatsapp"

@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import { Montserrat, Playfair_Display, Caveat } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import SiteChrome from "@/components/layout/SiteChrome";
-import { SITE_URL, STORE_ADDRESS_LINE, STORE_ADDRESS_CITY } from "@/lib/site";
+import Footer from "@/components/layout/Footer";
+import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
+import { SITE_URL } from "@/lib/site";
+import { getSiteSettings } from "@/lib/settings";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -24,6 +28,10 @@ const caveat = Caveat({
   display: "swap",
   weight: ["500", "600", "700"],
 });
+
+// Address (used in JSON-LD below) comes from Supabase and is editable from
+// /admin — revalidate periodically instead of baking it in at build time.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -70,26 +78,28 @@ export const metadata: Metadata = {
   },
 };
 
-const businessJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Store",
-  name: "Poné La Pava",
-  description:
-    "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos y bombillas.",
-  url: SITE_URL,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: STORE_ADDRESS_LINE,
-    addressLocality: STORE_ADDRESS_CITY,
-    addressCountry: "AR",
-  },
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
+  const businessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    name: "Poné La Pava",
+    description:
+      "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos y bombillas.",
+    url: SITE_URL,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: settings.addressLine,
+      addressLocality: settings.addressCity,
+      addressCountry: "AR",
+    },
+  };
+
   return (
     <html
       lang="es"
@@ -100,9 +110,13 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
-        <CartProvider>
-          <SiteChrome>{children}</SiteChrome>
-        </CartProvider>
+        <SiteSettingsProvider settings={settings}>
+          <CartProvider>
+            <SiteChrome footer={<Footer />} whatsAppFab={<WhatsAppFAB />}>
+              {children}
+            </SiteChrome>
+          </CartProvider>
+        </SiteSettingsProvider>
       </body>
     </html>
   );

@@ -3,12 +3,8 @@ import Link from "next/link";
 import { MessageCircle, MapPin, Clock } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/icons";
 import { NAV_LINKS } from "@/lib/nav";
-import {
-  INSTAGRAM_URL,
-  STORE_ADDRESS_LINE,
-  STORE_ADDRESS_CITY,
-  STORE_HOURS,
-} from "@/lib/site";
+import { INSTAGRAM_URL } from "@/lib/site";
+import { getSiteSettings } from "@/lib/settings";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 
 const categories = [
@@ -20,8 +16,9 @@ const categories = [
   { href: "/catalogo?cat=combos", label: "Combos" },
 ];
 
-export default function Footer() {
+export default async function Footer() {
   const currentYear = new Date().getFullYear();
+  const settings = await getSiteSettings();
 
   return (
     <footer id="contacto" className="bg-pava-brown text-pava-cream/80">
@@ -65,7 +62,7 @@ export default function Footer() {
                 <InstagramIcon size={16} />
               </a>
               <a
-                href={whatsappChatUrl()}
+                href={whatsappChatUrl(settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-9 h-9 border border-pava-cream/20 hover:border-whatsapp hover:text-whatsapp transition-all duration-200"
@@ -126,9 +123,9 @@ export default function Footer() {
                   className="mt-0.5 shrink-0 text-pava-cream/40"
                 />
                 <span>
-                  {STORE_ADDRESS_LINE}
+                  {settings.addressLine}
                   <br />
-                  {STORE_ADDRESS_CITY}
+                  {settings.addressCity}
                 </span>
               </div>
               <div className="flex items-start gap-3 text-sm text-pava-cream/60">
@@ -137,15 +134,14 @@ export default function Footer() {
                   className="mt-0.5 shrink-0 text-pava-cream/40"
                 />
                 <span>
-                  {STORE_HOURS.map(({ days, hours }) => (
-                    <span key={days} className="block">
-                      {days}: {hours}
-                    </span>
-                  ))}
+                  <span className="block">
+                    Lun–Vie: {settings.hoursWeekday}
+                  </span>
+                  <span className="block">Sáb: {settings.hoursSaturday}</span>
                 </span>
               </div>
               <a
-                href={whatsappChatUrl()}
+                href={whatsappChatUrl(settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-whatsapp hover:text-whatsapp-dark transition-colors duration-200 font-medium"

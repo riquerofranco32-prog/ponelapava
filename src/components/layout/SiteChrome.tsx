@@ -2,16 +2,24 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
-import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
 
 // /admin has its own dark dashboard shell (AdminShell) — the storefront
 // nav/footer/cart/WhatsApp FAB don't belong there.
+//
+// Footer and WhatsAppFAB are async server components — a "use client" module
+// can't import and render an async component directly (Next treats anything
+// imported into a client module as client-bundled, and async client
+// components aren't allowed), so RootLayout renders them and passes the
+// result down as plain React nodes instead.
 export default function SiteChrome({
   children,
+  footer,
+  whatsAppFab,
 }: {
   children: React.ReactNode;
+  footer: React.ReactNode;
+  whatsAppFab: React.ReactNode;
 }) {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) {
@@ -23,8 +31,8 @@ export default function SiteChrome({
       <Navbar />
       <CartDrawer />
       <main>{children}</main>
-      <Footer />
-      <WhatsAppFAB />
+      {footer}
+      {whatsAppFab}
     </>
   );
 }

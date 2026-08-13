@@ -11,11 +11,13 @@ import { InstagramIcon } from "@/components/ui/icons";
 import { NAV_LINKS } from "@/lib/nav";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/site";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const mainLinks = NAV_LINKS.filter((link) => link.href !== "/catalogo");
 
 export default function Navbar() {
   const pathname = usePathname();
+  const settings = useSiteSettings();
   // Only the homepage has a full-bleed hero the transparent navbar can sit
   // over. Every other page renders its own content at the top, so the
   // navbar must stay solid there or it collides with that content.
@@ -288,7 +290,7 @@ export default function Navbar() {
               Ver catálogo
             </Link>
             <a
-              href={whatsappChatUrl()}
+              href={whatsappChatUrl(settings.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex w-full items-center justify-center gap-2 bg-whatsapp py-4 text-sm font-semibold tracking-wide text-white transition-colors duration-200 hover:bg-whatsapp-dark"

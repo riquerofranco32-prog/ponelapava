@@ -1,10 +1,14 @@
 import { MessageCircle } from "lucide-react";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/settings";
 
-export default function WhatsAppFAB() {
+export default async function WhatsAppFAB() {
+  const settings = await getSiteSettings();
+
   return (
     <a
       href={whatsappChatUrl(
+        settings.whatsappNumber,
         "Hola! Quería consultar sobre productos de Poné La Pava 👋",
       )}
       target="_blank"

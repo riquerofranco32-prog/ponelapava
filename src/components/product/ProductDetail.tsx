@@ -16,6 +16,7 @@ import { useCart } from "@/context/CartContext";
 import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface ProductDetailProps {
   product: Product;
@@ -30,6 +31,7 @@ export default function ProductDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
   const { addItem, setDrawer } = useCart();
+  const settings = useSiteSettings();
 
   const isOutOfStock = product.status === "out_of_stock";
 
@@ -248,6 +250,7 @@ export default function ProductDetail({
             {/* WhatsApp */}
             <a
               href={whatsappChatUrl(
+                settings.whatsappNumber,
                 `Hola! Me interesa el producto: ${product.name} (${formatPrice(product.price)})`,
               )}
               target="_blank"

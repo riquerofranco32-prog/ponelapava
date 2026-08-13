@@ -1,15 +1,13 @@
 import Image from "next/image";
 import { MapPin, Clock, MessageCircle, ExternalLink } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-import { whatsappChatUrl, WHATSAPP_DISPLAY } from "@/lib/whatsapp";
-import {
-  STORE_ADDRESS_LINE,
-  STORE_ADDRESS_CITY,
-  STORE_HOURS,
-  STORE_MAPS_URL,
-} from "@/lib/site";
+import { whatsappChatUrl } from "@/lib/whatsapp";
+import { getSiteSettings, buildMapsUrl } from "@/lib/settings";
 
-export default function LocalSection() {
+export default async function LocalSection() {
+  const settings = await getSiteSettings();
+  const mapsUrl = buildMapsUrl(settings.addressLine, settings.addressCity);
+
   return (
     <section
       id="el-local"
@@ -67,10 +65,10 @@ export default function LocalSection() {
                     Dirección
                   </span>
                   <p className="mt-1 font-medium text-pava-cream">
-                    {STORE_ADDRESS_LINE}
+                    {settings.addressLine}
                   </p>
                   <p className="text-sm text-pava-cream/60">
-                    {STORE_ADDRESS_CITY}
+                    {settings.addressCity}
                   </p>
                 </div>
               </div>
@@ -82,14 +80,12 @@ export default function LocalSection() {
                   <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/50">
                     Horarios
                   </span>
-                  {STORE_HOURS.map(({ days, hours }) => (
-                    <p
-                      key={days}
-                      className="mt-1 text-sm text-pava-cream/70 first:font-medium first:text-pava-cream"
-                    >
-                      {days}: {hours} hs
-                    </p>
-                  ))}
+                  <p className="mt-1 text-sm font-medium text-pava-cream">
+                    Lun–Vie: {settings.hoursWeekday} hs
+                  </p>
+                  <p className="text-sm text-pava-cream/70">
+                    Sáb: {settings.hoursSaturday} hs
+                  </p>
                 </div>
               </div>
               <div className="flex gap-4 border-t border-pava-cream/15 py-5">
@@ -101,12 +97,12 @@ export default function LocalSection() {
                     WhatsApp
                   </span>
                   <a
-                    href={whatsappChatUrl()}
+                    href={whatsappChatUrl(settings.whatsappNumber)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-1 block font-medium text-pava-cream transition-colors hover:text-whatsapp"
                   >
-                    {WHATSAPP_DISPLAY}
+                    {settings.whatsappDisplay}
                   </a>
                 </div>
               </div>
@@ -114,7 +110,7 @@ export default function LocalSection() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
-                href={STORE_MAPS_URL}
+                href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 border-2 border-pava-gold bg-pava-gold px-5 py-3 text-sm font-semibold tracking-wide text-pava-brown transition-colors hover:border-pava-gold-light hover:bg-pava-gold-light"
@@ -122,7 +118,7 @@ export default function LocalSection() {
                 <ExternalLink size={15} /> Cómo llegar
               </a>
               <a
-                href={whatsappChatUrl()}
+                href={whatsappChatUrl(settings.whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 border border-pava-cream/30 px-5 py-3 text-sm font-semibold tracking-wide text-pava-cream transition-colors hover:border-whatsapp hover:bg-whatsapp"

@@ -20,6 +20,7 @@ import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
 import DashboardStats from "@/components/admin/DashboardStats";
 import OrdersTable from "@/components/admin/OrdersTable";
+import SettingsForm from "@/components/admin/SettingsForm";
 
 type AdminSection =
   "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
@@ -257,51 +258,7 @@ export default function AdminPage() {
       {activeSection === "pedidos" && <OrdersTable />}
 
       {/* ── CONFIGURACIÓN ── */}
-      {activeSection === "configuracion" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {[
-            { label: "Nombre del negocio", value: "Poné La Pava" },
-            { label: "Número de WhatsApp", value: "+54 9 2994 65-0177" },
-            {
-              label: "Dirección del local",
-              value: "Avenida San Martín 475, Catriel, Río Negro",
-            },
-            { label: "Horarios", value: "Lun–Vie: 9–19 · Sáb: 9–14" },
-          ].map(({ label, value }) => (
-            <Card key={label}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.07em",
-                  color: "var(--dash-muted)",
-                  marginBottom: 8,
-                }}
-              >
-                {label}
-              </label>
-              <input
-                type="text"
-                defaultValue={value}
-                readOnly
-                className="admin-input"
-              />
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--dash-muted)",
-                  marginTop: 8,
-                }}
-              >
-                Definido en src/lib/site.ts y src/lib/whatsapp.ts — edición
-                desde acá, próximamente.
-              </p>
-            </Card>
-          ))}
-        </div>
-      )}
+      {activeSection === "configuracion" && <SettingsForm />}
 
       {creating && (
         <ProductForm

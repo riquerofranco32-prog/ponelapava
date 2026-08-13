@@ -15,10 +15,12 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } =
     useCart();
+  const settings = useSiteSettings();
   const [customerName, setCustomerName] = useState("");
   const [comment, setComment] = useState("");
 
@@ -41,7 +43,7 @@ export default function CartPage() {
     } catch {
       // ignore — WhatsApp still opens below
     }
-    const url = buildWhatsAppUrl(orderData);
+    const url = buildWhatsAppUrl(settings.whatsappNumber, orderData);
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

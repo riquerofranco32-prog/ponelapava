@@ -1,0 +1,247 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+import { DashboardStats as Stats } from "@/lib/orders";
+import { formatPrice } from "@/lib/utils";
+
+function formatDayLabel(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
+}
+
+export default function DashboardStats() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/stats")
+      .then((res) => {
+        if (!res.ok) throw new Error("No se pudieron cargar las métricas");
+        return res.json();
+      })
+      .then(setStats)
+      .catch((err) => setError(err.message));
+  }, []);
+
+  if (error) {
+    return (
+      <div
+        style={{
+          background: "var(--dash-danger-bg)",
+          border: "1px solid var(--dash-danger-border)",
+          borderRadius: 8,
+          padding: "12px 16px",
+          fontSize: 14,
+          color: "var(--dash-danger)",
+          marginBottom: 24,
+        }}
+      >
+        {error}
+      </div>
+    );
+  }
+
+  const chartData =
+    stats?.salesByDay.map((d) => ({ ...d, label: formatDayLabel(d.date) })) ??
+    [];
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 16,
+          marginBottom: 20,
+        }}
+      >
+        <StatCard
+          label="Ingresos (14 días)"
+          value={stats ? formatPrice(stats.totalRevenue) : "…"}
+        />
+        <StatCard label="Pedidos (14 días)" value={stats?.orderCount ?? "…"} />
+        <StatCard
+          label="Ticket promedio"
+          value={stats ? formatPrice(stats.avgTicket) : "…"}
+        />
+      </div>
+
+      <div
+        style={{
+          background: "var(--dash-surface)",
+          border: "1px solid var(--dash-border)",
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 20,
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: 16,
+            fontWeight: 700,
+            marginBottom: 16,
+            color: "var(--dash-text)",
+          }}
+        >
+          Ventas últimos 14 días
+        </h2>
+        {stats && stats.orderCount === 0 ? (
+          <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>
+            Todavía no hay pedidos registrados en este período.
+          </p>
+        ) : (
+          <div style={{ width: "100%", height: 220 }}>
+            <ResponsiveContainer>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient
+                    id="salesGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#c7a67a" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#c7a67a" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#3a3324"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  stroke="#9c9280"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#9c9280"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                  tickFormatter={(v) =>
+                    v === 0 ? "0" : `${Math.round(v / 1000)}k`
+                  }
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "#1e1b15",
+                    border: "1px solid #3a3324",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                  labelStyle={{ color: "#f3ede0" }}
+                  formatter={(value) => [formatPrice(Number(value)), "Ventas"]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#c7a67a"
+                  strokeWidth={2}
+                  fill="url(#salesGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+
+      {stats && stats.topProducts.length > 0 && (
+        <div
+          style={{
+            background: "var(--dash-surface)",
+            border: "1px solid var(--dash-border)",
+            borderRadius: 12,
+            padding: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: 16,
+              fontWeight: 700,
+              marginBottom: 16,
+              color: "var(--dash-text)",
+            }}
+          >
+            Más vendidos (14 días)
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {stats.topProducts.map((p, i) => (
+              <div
+                key={p.name}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontSize: 13,
+                }}
+              >
+                <span style={{ color: "var(--dash-text)" }}>
+                  <span style={{ color: "var(--dash-muted)", marginRight: 8 }}>
+                    {i + 1}.
+                  </span>
+                  {p.name}
+                </span>
+                <span style={{ color: "var(--dash-muted)" }}>
+                  {p.quantity} vendidos
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div
+      style={{
+        background: "var(--dash-surface)",
+        border: "1px solid var(--dash-border)",
+        borderRadius: 12,
+        padding: 20,
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          fontSize: 11,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          color: "var(--dash-muted)",
+          marginBottom: 10,
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: 28,
+          fontWeight: 700,
+          color: "var(--dash-text)",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}

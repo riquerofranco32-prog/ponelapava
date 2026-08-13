@@ -18,6 +18,8 @@ import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import ProductForm from "@/components/admin/ProductForm";
 import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
+import DashboardStats from "@/components/admin/DashboardStats";
+import OrdersTable from "@/components/admin/OrdersTable";
 
 type AdminSection =
   "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
@@ -139,12 +141,14 @@ export default function AdminPage() {
       {/* ── DASHBOARD ── */}
       {activeSection === "dashboard" && (
         <div>
+          <DashboardStats />
+
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
               gap: 16,
-              marginBottom: 32,
+              marginBottom: 20,
             }}
           >
             <KpiCard
@@ -250,13 +254,7 @@ export default function AdminPage() {
       )}
 
       {/* ── PEDIDOS ── */}
-      {activeSection === "pedidos" && (
-        <EmptyState
-          icon={ShoppingCart}
-          title="Gestión de pedidos"
-          description="Los pedidos llegan por WhatsApp. Un panel de pedidos guardados está planeado para más adelante."
-        />
-      )}
+      {activeSection === "pedidos" && <OrdersTable />}
 
       {/* ── CONFIGURACIÓN ── */}
       {activeSection === "configuracion" && (

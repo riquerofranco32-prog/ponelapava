@@ -22,14 +22,26 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [comment, setComment] = useState("");
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
     if (items.length === 0) return;
-    const url = buildWhatsAppUrl({
+    const orderData = {
       customerName: customerName || "Sin nombre",
       items,
       total,
       comment,
-    });
+    };
+    // Best-effort: a DB hiccup shouldn't block the customer from ordering —
+    // the WhatsApp message is still the source of truth for the sale.
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
+      });
+    } catch {
+      // ignore — WhatsApp still opens below
+    }
+    const url = buildWhatsAppUrl(orderData);
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

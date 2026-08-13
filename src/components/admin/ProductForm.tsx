@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
+import { Camera, Loader2, X } from "lucide-react";
 import { Product, ProductCategory, ProductStatus } from "@/types";
 import { ProductInput } from "@/lib/products";
 import { getCategoryLabel } from "@/lib/utils";
@@ -58,7 +60,7 @@ export default function ProductForm({
   const [status, setStatus] = useState<ProductStatus>(
     product?.status ?? "available",
   );
-  const [images, setImages] = useState(product?.images.join(", ") ?? "");
+  const [images, setImages] = useState<string[]>(product?.images ?? []);
   const [tags, setTags] = useState(product?.tags?.join(", ") ?? "");
   const [weight, setWeight] = useState(product?.weight ?? "");
   const [brand, setBrand] = useState(product?.brand ?? "");
@@ -69,6 +71,10 @@ export default function ProductForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (images.length === 0) {
+      setError("Agregá al menos una foto del producto.");
+      return;
+    }
     setSaving(true);
     try {
       await onSave({
@@ -79,10 +85,7 @@ export default function ProductForm({
         price: Number(price),
         category,
         status,
-        images: images
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
+        images,
         tags: tags
           .split(",")
           .map((s) => s.trim())
@@ -118,6 +121,10 @@ export default function ProductForm({
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 16 }}
       >
+        <AdminField label="Fotos">
+          <ImagePicker images={images} onChange={setImages} />
+        </AdminField>
+
         <AdminField label="Nombre">
           <input
             required
@@ -217,16 +224,6 @@ export default function ProductForm({
           />
         </AdminField>
 
-        <AdminField label="Imágenes (rutas separadas por coma)">
-          <input
-            required
-            value={images}
-            onChange={(e) => setImages(e.target.value)}
-            placeholder="/product_foo.png"
-            className="admin-input"
-          />
-        </AdminField>
-
         <AdminField label="Tags (separados por coma, opcional)">
           <input
             value={tags}
@@ -257,5 +254,135 @@ export default function ProductForm({
         )}
       </form>
     </AdminModal>
+  );
+}
+
+function ImagePicker({
+  images,
+  onChange,
+}: {
+  images: string[];
+  onChange: (images: string[]) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/products/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error al subir imagen");
+      onChange([...images, data.url]);
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "Error al subir imagen",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeImage(index: number) {
+    onChange(images.filter((_, i) => i !== index));
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+        {images.map((src, i) => (
+          <div
+            key={src + i}
+            style={{
+              position: "relative",
+              width: 72,
+              height: 72,
+              borderRadius: 8,
+              overflow: "hidden",
+              background: "var(--dash-surface-2)",
+              border: "1px solid var(--dash-border)",
+              flexShrink: 0,
+            }}
+          >
+            <Image
+              src={src}
+              alt=""
+              fill
+              sizes="72px"
+              style={{ objectFit: "cover" }}
+            />
+            <button
+              type="button"
+              onClick={() => removeImage(i)}
+              aria-label="Quitar foto"
+              style={{
+                position: "absolute",
+                top: 3,
+                right: 3,
+                width: 18,
+                height: 18,
+                borderRadius: "50%",
+                background: "rgba(0,0,0,0.6)",
+                color: "#fff",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+            >
+              <X size={11} />
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: 8,
+            border: "1px dashed var(--dash-border)",
+            background: "var(--dash-surface-2)",
+            color: "var(--dash-muted)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: uploading ? "default" : "pointer",
+            flexShrink: 0,
+          }}
+        >
+          {uploading ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <Camera size={18} />
+          )}
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFile}
+          style={{ display: "none" }}
+        />
+      </div>
+      {uploadError && (
+        <p style={{ fontSize: 12, color: "var(--dash-danger)", marginTop: 8 }}>
+          {uploadError}
+        </p>
+      )}
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/settings";
 import { AdminField } from "@/components/admin/AdminField";
 import { AdminButton } from "@/components/admin/AdminButton";
+import { assertOk } from "@/lib/admin-fetch";
 
 export default function SettingsForm() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -15,7 +16,7 @@ export default function SettingsForm() {
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((res) => {
-        if (!res.ok) throw new Error("No se pudo cargar la configuración");
+        assertOk(res, "No se pudo cargar la configuración");
         return res.json();
       })
       .then(setSettings)
@@ -35,7 +36,7 @@ export default function SettingsForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      if (!res.ok) throw new Error("No se pudo guardar la configuración");
+      assertOk(res, "No se pudo guardar la configuración");
       setSettings(await res.json());
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);

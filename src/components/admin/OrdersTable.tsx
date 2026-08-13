@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
+import { assertOk } from "@/lib/admin-fetch";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending: "Pendiente",
@@ -32,7 +33,7 @@ export default function OrdersTable() {
     setError(null);
     try {
       const res = await fetch("/api/admin/orders");
-      if (!res.ok) throw new Error("No se pudieron cargar los pedidos");
+      assertOk(res, "No se pudieron cargar los pedidos");
       setOrders(await res.json());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
@@ -47,13 +48,18 @@ export default function OrdersTable() {
 
   async function handleStatusChange(id: string, status: Order["status"]) {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
-    const res = await fetch(`/api/admin/orders/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (!res.ok) {
-      loadOrders(); // revert on failure
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      assertOk(res, "No se pudo actualizar el estado del pedido");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo actualizar el estado",
+      );
+      loadOrders(); // revert the optimistic update
     }
   }
 

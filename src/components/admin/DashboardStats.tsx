@@ -14,6 +14,7 @@ import { DollarSign, ShoppingCart, Receipt } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
 import { AdminCard, AdminKpiCard } from "./AdminCard";
+import { assertOk } from "@/lib/admin-fetch";
 
 function formatDayLabel(iso: string): string {
   const d = new Date(iso + "T00:00:00");
@@ -27,7 +28,7 @@ export default function DashboardStats() {
   useEffect(() => {
     fetch("/api/admin/stats")
       .then((res) => {
-        if (!res.ok) throw new Error("No se pudieron cargar las métricas");
+        assertOk(res, "No se pudieron cargar las métricas");
         return res.json();
       })
       .then(setStats)

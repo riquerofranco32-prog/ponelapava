@@ -8,17 +8,19 @@ import {
   buildMapsEmbedUrl,
 } from "@/lib/settings";
 
-// Real photos of the store (same ones used in InstagramSection) — not
-// stock. Deliberately NOT pulled from the Google Maps listing: its cover
-// photo (and at least one other) turned out to be a neighboring hotel's
-// reception, not this store — bad data on Google's end, not something to
-// propagate onto the site. Worth reporting/fixing on the real listing.
+// Real photos of the store. Deliberately NOT pulled from the Google Maps
+// listing: its cover photo (and at least one other) turned out to be a
+// neighboring hotel's reception, not this store — bad data on Google's
+// end, not something to propagate onto the site. Worth reporting/fixing
+// on the real listing.
 const LOCAL_PHOTOS = [
   { src: "/ig_storefront.jpg", alt: "Frente del local Poné La Pava" },
-  { src: "/ig_shelf.jpg", alt: "Estantería de accesorios en el local" },
-  { src: "/local_store_1786546091007.png", alt: "Interior del local" },
-  { src: "/ig_termos.jpg", alt: "Termos Stanley en exhibición" },
-  { src: "/ig_sara.jpg", alt: "Yerbas Sara en el local" },
+  { src: "/local-shelf-1.jpg", alt: "Estantería de termos y yerbas" },
+  { src: "/local-shelf-2.jpg", alt: "Mates de cuero y accesorios" },
+  { src: "/local-shelf-3.jpg", alt: "Bolsos y mates artesanales" },
+  { src: "/local-shelf-4.jpg", alt: "Termos y vasos térmicos" },
+  { src: "/local-shelf-5.jpg", alt: "Bombillas y mates en exhibición" },
+  { src: "/local-shelf-6.jpg", alt: "Vista general del local" },
 ];
 
 export default async function LocalSection() {

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Product } from "@/types";
 import { ProductInput } from "@/lib/products";
+import { assertOk } from "@/lib/admin-fetch";
 import ProductForm from "@/components/admin/ProductForm";
 import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
@@ -54,7 +55,7 @@ export default function AdminPage() {
     setLoadError(null);
     try {
       const res = await fetch("/api/admin/products");
-      if (!res.ok) throw new Error("No se pudieron cargar los productos");
+      assertOk(res, "No se pudieron cargar los productos");
       setProducts(await res.json());
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : "Error desconocido");
@@ -73,7 +74,7 @@ export default function AdminPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    if (!res.ok) throw new Error("No se pudo crear el producto");
+    assertOk(res, "No se pudo crear el producto");
     setCreating(false);
     await loadProducts();
   }
@@ -84,13 +85,19 @@ export default function AdminPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    if (!res.ok) throw new Error("No se pudo actualizar el producto");
+    assertOk(res, "No se pudo actualizar el producto");
     setEditingProduct(null);
     await loadProducts();
   }
 
   // Mirrors ProductForm's stock/status link: 0 auto-marks out of stock,
   // restocking from 0 auto-clears it back to available.
+  //
+  // Nothing awaits this function's promise (the stepper's onClick fires
+  // it and moves on), so a thrown error here would otherwise become a
+  // silent unhandled rejection — the count looks unchanged and nobody
+  // knows the write failed. Catch it and surface it in the same banner
+  // used for the initial product-load failure.
   async function handleStockChange(product: Product, next: number) {
     const qty = Math.max(0, next);
     let status = product.status;
@@ -98,14 +105,20 @@ export default function AdminPage() {
     else if (qty > 0 && status === "out_of_stock") status = "available";
 
     const { id, createdAt: _createdAt, ...rest } = product;
-    await handleUpdate(id, { ...rest, stock: qty, status });
+    try {
+      await handleUpdate(id, { ...rest, stock: qty, status });
+    } catch (err) {
+      setLoadError(
+        err instanceof Error ? err.message : "No se pudo actualizar el stock",
+      );
+    }
   }
 
   async function handleDelete(product: Product) {
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: "DELETE",
     });
-    if (!res.ok) throw new Error("No se pudo eliminar el producto");
+    assertOk(res, "No se pudo eliminar el producto");
     setDeletingProduct(null);
     await loadProducts();
   }

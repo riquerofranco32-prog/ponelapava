@@ -441,9 +441,53 @@ body {
   clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%);
 }
 
-/* ── Admin form inputs ─────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   ADMIN DASHBOARD — dark shell, scoped to .pava-admin
+   so it never bleeds into the public cream/green site.
+   Same warm brand family as the storefront (brown/gold)
+   inverted to a dark "control room" palette.
+   ══════════════════════════════════════════════════ */
+.pava-admin {
+  --dash-bg: #16140f;
+  --dash-surface: #1e1b15;
+  --dash-surface-2: #27231a;
+  --dash-surface-3: #322c20;
+  --dash-border: #3a3324;
+  --dash-text: #f3ede0;
+  --dash-muted: #9c9280;
+  --dash-accent: #c7a67a;
+  --dash-accent-hover: #d8c093;
+  --dash-danger: #e59a7a;
+  --dash-danger-bg: rgba(229, 154, 122, 0.1);
+  --dash-danger-border: rgba(229, 154, 122, 0.25);
+  --dash-success: #8bab7a;
+  --dash-success-bg: rgba(139, 171, 122, 0.1);
+  --dash-success-border: rgba(139, 171, 122, 0.25);
+  background: var(--dash-bg);
+  color: var(--dash-text);
+  min-height: 100vh;
+}
+
 .admin-input {
-  @apply w-full border border-pava-brown/15 bg-pava-cream px-3 py-2.5 text-sm text-pava-brown transition-colors focus:border-pava-green focus:outline-none;
+  width: 100%;
+  background: var(--dash-surface-2);
+  border: 1px solid var(--dash-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--dash-text);
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.admin-input:focus {
+  border-color: var(--dash-accent);
+}
+
+.admin-nav-link:hover {
+  background: var(--dash-surface-2);
+  color: var(--dash-text) !important;
 }
 
 /* ── Reduced motion ───────────────────────────────── */

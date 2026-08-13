@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   LayoutDashboard,
   Package,
@@ -17,16 +16,18 @@ import { Product } from "@/types";
 import { ProductInput } from "@/lib/products";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import ProductForm from "@/components/admin/ProductForm";
+import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
+import { AdminButton } from "@/components/admin/AdminButton";
 
 type AdminSection =
   "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
 
-const navItems = [
-  { id: "dashboard" as const, label: "Dashboard", icon: LayoutDashboard },
-  { id: "productos" as const, label: "Productos", icon: Package },
-  { id: "categorias" as const, label: "Categorías", icon: Tag },
-  { id: "pedidos" as const, label: "Pedidos", icon: ShoppingCart },
-  { id: "configuracion" as const, label: "Configuración", icon: Settings },
+const NAV_ITEMS: AdminNavItem[] = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "productos", label: "Productos", icon: Package },
+  { id: "categorias", label: "Categorías", icon: Tag },
+  { id: "pedidos", label: "Pedidos", icon: ShoppingCart },
+  { id: "configuracion", label: "Configuración", icon: Settings },
 ];
 
 export default function AdminPage() {
@@ -101,229 +102,208 @@ export default function AdminPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-pava-cream-dark">
-      {/* Sidebar */}
-      <aside className="w-60 bg-pava-brown text-pava-cream flex flex-col shrink-0">
-        {/* Brand */}
-        <div className="px-5 py-6 border-b border-pava-cream/10">
-          <Link href="/" className="block">
-            <span className="font-display text-lg font-bold text-pava-cream">
-              Poné La Pava
-            </span>
-            <span className="block text-[10px] tracking-[0.2em] uppercase text-pava-cream/40 mt-0.5">
-              Panel Admin
-            </span>
-          </Link>
+    <AdminShell
+      navItems={NAV_ITEMS}
+      activeSection={activeSection}
+      onSectionChange={(id) => setActiveSection(id as AdminSection)}
+    >
+      <h1
+        style={{
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: 22,
+          fontWeight: 700,
+          marginBottom: 24,
+          color: "var(--dash-text)",
+          textTransform: "capitalize",
+        }}
+      >
+        {NAV_ITEMS.find((n) => n.id === activeSection)?.label}
+      </h1>
+
+      {loadError && (
+        <div
+          style={{
+            marginBottom: 20,
+            background: "var(--dash-danger-bg)",
+            border: "1px solid var(--dash-danger-border)",
+            borderRadius: 8,
+            padding: "12px 16px",
+            fontSize: 14,
+            color: "var(--dash-danger)",
+          }}
+        >
+          {loadError}
         </div>
+      )}
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveSection(id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-150 text-left ${
-                activeSection === id
-                  ? "bg-pava-cream/10 text-pava-cream border-l-2 border-pava-gold"
-                  : "text-pava-cream/60 hover:text-pava-cream hover:bg-pava-cream/5 border-l-2 border-transparent"
-              }`}
-            >
-              <Icon size={17} />
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Back to site */}
-        <div className="px-3 pb-5">
-          <Link
-            href="/"
-            className="flex items-center justify-center w-full py-2 text-xs text-pava-cream/50 hover:text-pava-cream transition-colors border border-pava-cream/10 hover:border-pava-cream/30"
+      {/* ── DASHBOARD ── */}
+      {activeSection === "dashboard" && (
+        <div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: 16,
+              marginBottom: 32,
+            }}
           >
-            ← Ver sitio
-          </Link>
+            <KpiCard
+              label="Total de productos"
+              value={loading ? "…" : products.length}
+            />
+            <KpiCard
+              label="Destacados"
+              value={loading ? "…" : products.filter((p) => p.featured).length}
+            />
+            <KpiCard
+              label="Agotados"
+              value={
+                loading
+                  ? "…"
+                  : products.filter((p) => p.status === "out_of_stock").length
+              }
+            />
+          </div>
+
+          <Card>
+            <h2
+              style={{
+                fontFamily: "var(--font-playfair), Georgia, serif",
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 16,
+                color: "var(--dash-text)",
+              }}
+            >
+              Últimos productos
+            </h2>
+            <ProductsTable
+              data={products.slice(0, 5)}
+              compact
+              onEdit={setEditingProduct}
+              onDelete={handleDelete}
+            />
+          </Card>
         </div>
-      </aside>
+      )}
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
-        {/* Topbar */}
-        <div className="bg-white border-b border-pava-brown/8 px-8 py-4 flex items-center justify-between">
-          <h1 className="font-display text-xl font-bold text-pava-brown capitalize">
-            {navItems.find((n) => n.id === activeSection)?.label}
-          </h1>
-        </div>
-
-        <div className="px-8 py-8">
-          {loadError && (
-            <div className="mb-6 bg-pava-terracotta/10 border border-pava-terracotta/30 px-4 py-3 text-sm text-pava-terracotta">
-              {loadError}
-            </div>
-          )}
-
-          {/* ── DASHBOARD ── */}
-          {activeSection === "dashboard" && (
-            <div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-                <div className="bg-white border border-pava-brown/8 p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
-                      Total de productos
-                    </span>
-                    <Package size={18} className="text-pava-brown/30" />
-                  </div>
-                  <span className="font-display text-3xl font-bold text-pava-brown">
-                    {loading ? "…" : products.length}
-                  </span>
-                </div>
-                <div className="bg-white border border-pava-brown/8 p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
-                      Destacados
-                    </span>
-                    <Package size={18} className="text-pava-brown/30" />
-                  </div>
-                  <span className="font-display text-3xl font-bold text-pava-brown">
-                    {loading ? "…" : products.filter((p) => p.featured).length}
-                  </span>
-                </div>
-                <div className="bg-white border border-pava-brown/8 p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs text-pava-brown/50 font-medium uppercase tracking-wide">
-                      Agotados
-                    </span>
-                    <Package size={18} className="text-pava-brown/30" />
-                  </div>
-                  <span className="font-display text-3xl font-bold text-pava-brown">
-                    {loading
-                      ? "…"
-                      : products.filter((p) => p.status === "out_of_stock")
-                          .length}
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-white border border-pava-brown/8 p-6">
-                <h2 className="font-display text-lg font-bold text-pava-brown mb-4">
-                  Últimos productos
-                </h2>
-                <ProductsTable
-                  data={products.slice(0, 5)}
-                  compact
-                  onEdit={setEditingProduct}
-                  onDelete={handleDelete}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ── PRODUCTOS ── */}
-          {activeSection === "productos" && (
-            <div>
-              {/* Actions bar */}
-              <div className="flex items-center justify-between gap-4 mb-6">
-                <div className="relative flex-1 max-w-md">
-                  <Search
-                    size={15}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-pava-brown/40"
-                  />
-                  <input
-                    type="search"
-                    placeholder="Buscar producto..."
-                    value={searchProduct}
-                    onChange={(e) => setSearchProduct(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-pava-brown/15 text-pava-brown text-sm focus:outline-none focus:border-pava-green transition-colors"
-                  />
-                </div>
-                <button
-                  onClick={() => setCreating(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
-                >
-                  <Plus size={15} />
-                  Nuevo producto
-                </button>
-              </div>
-
-              {loading ? (
-                <p className="text-sm text-pava-brown/50">
-                  Cargando productos...
-                </p>
-              ) : (
-                <ProductsTable
-                  data={filteredProducts}
-                  onEdit={setEditingProduct}
-                  onDelete={handleDelete}
-                />
-              )}
-            </div>
-          )}
-
-          {/* ── CATEGORIAS ── */}
-          {activeSection === "categorias" && (
-            <div className="bg-white border border-pava-brown/8 p-8 text-center">
-              <Tag size={32} className="mx-auto text-pava-brown/20 mb-4" />
-              <h2 className="font-display text-xl font-bold text-pava-brown mb-2">
-                Gestión de categorías
-              </h2>
-              <p className="text-pava-brown/50 text-sm max-w-md mx-auto">
-                Las categorías están definidas en el código del sitio. Gestión
-                editable próximamente.
-              </p>
-            </div>
-          )}
-
-          {/* ── PEDIDOS ── */}
-          {activeSection === "pedidos" && (
-            <div className="bg-white border border-pava-brown/8 p-8 text-center">
-              <ShoppingCart
-                size={32}
-                className="mx-auto text-pava-brown/20 mb-4"
+      {/* ── PRODUCTOS ── */}
+      {activeSection === "productos" && (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+              marginBottom: 20,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+              <Search
+                size={15}
+                style={{
+                  position: "absolute",
+                  left: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--dash-muted)",
+                }}
               />
-              <h2 className="font-display text-xl font-bold text-pava-brown mb-2">
-                Gestión de pedidos
-              </h2>
-              <p className="text-pava-brown/50 text-sm max-w-md mx-auto">
-                Los pedidos llegan por WhatsApp. Un panel de pedidos guardados
-                está planeado para más adelante.
-              </p>
+              <input
+                type="search"
+                placeholder="Buscar producto..."
+                value={searchProduct}
+                onChange={(e) => setSearchProduct(e.target.value)}
+                className="admin-input"
+                style={{ paddingLeft: 36 }}
+              />
             </div>
-          )}
+            <AdminButton onClick={() => setCreating(true)}>
+              <Plus size={15} />
+              Nuevo producto
+            </AdminButton>
+          </div>
 
-          {/* ── CONFIGURACIÓN ── */}
-          {activeSection === "configuracion" && (
-            <div className="space-y-5">
-              {[
-                { label: "Nombre del negocio", value: "Poné La Pava" },
-                { label: "Número de WhatsApp", value: "+54 9 2994 65-0177" },
-                {
-                  label: "Dirección del local",
-                  value: "Avenida San Martín 475, Catriel, Río Negro",
-                },
-                { label: "Horarios", value: "Lun–Vie: 9–19 · Sáb: 9–14" },
-              ].map(({ label, value }) => (
-                <div
-                  key={label}
-                  className="bg-white border border-pava-brown/8 p-5"
-                >
-                  <label className="block text-xs font-medium text-pava-brown/60 uppercase tracking-wide mb-2">
-                    {label}
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue={value}
-                    className="w-full px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm"
-                    readOnly
-                  />
-                  <p className="text-xs text-pava-brown/40 mt-1.5">
-                    Definido en src/lib/site.ts y src/lib/whatsapp.ts — edición
-                    desde acá, próximamente.
-                  </p>
-                </div>
-              ))}
-            </div>
+          {loading ? (
+            <p style={{ fontSize: 14, color: "var(--dash-muted)" }}>
+              Cargando productos...
+            </p>
+          ) : (
+            <ProductsTable
+              data={filteredProducts}
+              onEdit={setEditingProduct}
+              onDelete={handleDelete}
+            />
           )}
         </div>
-      </main>
+      )}
+
+      {/* ── CATEGORIAS ── */}
+      {activeSection === "categorias" && (
+        <EmptyState
+          icon={Tag}
+          title="Gestión de categorías"
+          description="Las categorías están definidas en el código del sitio. Gestión editable próximamente."
+        />
+      )}
+
+      {/* ── PEDIDOS ── */}
+      {activeSection === "pedidos" && (
+        <EmptyState
+          icon={ShoppingCart}
+          title="Gestión de pedidos"
+          description="Los pedidos llegan por WhatsApp. Un panel de pedidos guardados está planeado para más adelante."
+        />
+      )}
+
+      {/* ── CONFIGURACIÓN ── */}
+      {activeSection === "configuracion" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {[
+            { label: "Nombre del negocio", value: "Poné La Pava" },
+            { label: "Número de WhatsApp", value: "+54 9 2994 65-0177" },
+            {
+              label: "Dirección del local",
+              value: "Avenida San Martín 475, Catriel, Río Negro",
+            },
+            { label: "Horarios", value: "Lun–Vie: 9–19 · Sáb: 9–14" },
+          ].map(({ label, value }) => (
+            <Card key={label}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                  color: "var(--dash-muted)",
+                  marginBottom: 8,
+                }}
+              >
+                {label}
+              </label>
+              <input
+                type="text"
+                defaultValue={value}
+                readOnly
+                className="admin-input"
+              />
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "var(--dash-muted)",
+                  marginTop: 8,
+                }}
+              >
+                Definido en src/lib/site.ts y src/lib/whatsapp.ts — edición
+                desde acá, próximamente.
+              </p>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {creating && (
         <ProductForm
@@ -338,6 +318,99 @@ export default function AdminPage() {
           onCancel={() => setEditingProduct(null)}
         />
       )}
+    </AdminShell>
+  );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: "var(--dash-surface)",
+        border: "1px solid var(--dash-border)",
+        borderRadius: 12,
+        padding: 20,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function KpiCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <Card>
+      <span
+        style={{
+          display: "block",
+          fontSize: 11,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          color: "var(--dash-muted)",
+          marginBottom: 10,
+        }}
+      >
+        {label}
+      </span>
+      <span
+        style={{
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: 30,
+          fontWeight: 700,
+          color: "var(--dash-text)",
+        }}
+      >
+        {value}
+      </span>
+    </Card>
+  );
+}
+
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "var(--dash-surface)",
+        border: "1px solid var(--dash-border)",
+        borderRadius: 12,
+        padding: 40,
+        textAlign: "center",
+      }}
+    >
+      <Icon
+        size={32}
+        style={{ margin: "0 auto 16px", color: "var(--dash-muted)" }}
+      />
+      <h2
+        style={{
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: 18,
+          fontWeight: 700,
+          marginBottom: 8,
+          color: "var(--dash-text)",
+        }}
+      >
+        {title}
+      </h2>
+      <p
+        style={{
+          fontSize: 14,
+          color: "var(--dash-muted)",
+          maxWidth: 420,
+          margin: "0 auto",
+        }}
+      >
+        {description}
+      </p>
     </div>
   );
 }
@@ -353,87 +426,84 @@ function ProductsTable({
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
 }) {
+  const th: React.CSSProperties = {
+    textAlign: "left",
+    padding: "10px 14px",
+    fontSize: 11,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: "var(--dash-muted)",
+  };
+  const td: React.CSSProperties = {
+    padding: "12px 14px",
+    borderTop: "1px solid var(--dash-border)",
+  };
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
+      >
         <thead>
-          <tr className="border-b border-pava-brown/10">
-            <th className="text-left py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-              Producto
-            </th>
-            {!compact && (
-              <th className="text-left py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-                Categoría
-              </th>
-            )}
-            <th className="text-left py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-              Precio
-            </th>
-            <th className="text-left py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-              Estado
-            </th>
-            <th className="text-right py-3 px-4 text-xs font-semibold text-pava-brown/50 uppercase tracking-wide">
-              Acciones
-            </th>
+          <tr>
+            <th style={th}>Producto</th>
+            {!compact && <th style={th}>Categoría</th>}
+            <th style={th}>Precio</th>
+            <th style={th}>Estado</th>
+            <th style={{ ...th, textAlign: "right" }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {data.map((product) => (
-            <tr
-              key={product.id}
-              className="border-b border-pava-brown/5 hover:bg-pava-cream-dark/50 transition-colors"
-            >
-              <td className="py-3 px-4">
-                <span className="font-medium text-pava-brown line-clamp-1">
+            <tr key={product.id}>
+              <td style={td}>
+                <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
                   {product.name}
                 </span>
-                {!compact && (
-                  <span className="block text-xs text-pava-brown/40 mt-0.5">
+                {!compact && product.brand && (
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 12,
+                      color: "var(--dash-muted)",
+                      marginTop: 2,
+                    }}
+                  >
                     {product.brand}
                   </span>
                 )}
               </td>
               {!compact && (
-                <td className="py-3 px-4 text-pava-brown/60">
+                <td style={{ ...td, color: "var(--dash-muted)" }}>
                   {getCategoryLabel(product.category)}
                 </td>
               )}
-              <td className="py-3 px-4 font-medium text-pava-brown">
+              <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
                 {formatPrice(product.price)}
               </td>
-              <td className="py-3 px-4">
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${
-                    product.status === "available"
-                      ? "bg-pava-green/10 text-pava-green"
-                      : product.status === "featured"
-                        ? "bg-pava-gold/15 text-pava-gold"
-                        : "bg-pava-terracotta/10 text-pava-terracotta"
-                  }`}
-                >
-                  {product.status === "available"
-                    ? "Disponible"
-                    : product.status === "featured"
-                      ? "Destacado"
-                      : "Agotado"}
-                </span>
+              <td style={td}>
+                <StatusBadge status={product.status} />
               </td>
-              <td className="py-3 px-4">
-                <div className="flex items-center justify-end gap-2">
-                  <button
+              <td style={{ ...td, textAlign: "right" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 6,
+                  }}
+                >
+                  <IconButton
                     onClick={() => onEdit(product)}
-                    className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-green hover:bg-pava-green/10 transition-colors"
                     title="Editar"
-                  >
-                    <Edit2 size={13} />
-                  </button>
-                  <button
+                    icon={Edit2}
+                  />
+                  <IconButton
                     onClick={() => onDelete(product)}
-                    className="flex items-center justify-center w-7 h-7 text-pava-brown/40 hover:text-pava-terracotta hover:bg-pava-terracotta/10 transition-colors"
                     title="Eliminar"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                    icon={Trash2}
+                    danger
+                  />
                 </div>
               </td>
             </tr>
@@ -441,5 +511,74 @@ function ProductsTable({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function StatusBadge({ status }: { status: Product["status"] }) {
+  const map = {
+    available: {
+      label: "Disponible",
+      color: "var(--dash-success)",
+      bg: "var(--dash-success-bg)",
+    },
+    featured: {
+      label: "Destacado",
+      color: "var(--dash-accent)",
+      bg: "rgba(199,166,122,0.12)",
+    },
+    out_of_stock: {
+      label: "Agotado",
+      color: "var(--dash-danger)",
+      bg: "var(--dash-danger-bg)",
+    },
+  } as const;
+  const { label, color, bg } = map[status];
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        padding: "3px 10px",
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 600,
+        color,
+        background: bg,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function IconButton({
+  onClick,
+  title,
+  icon: Icon,
+  danger = false,
+}: {
+  onClick: () => void;
+  title: string;
+  icon: React.ComponentType<{ size?: number }>;
+  danger?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        width: 30,
+        height: 30,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+        background: "var(--dash-surface-2)",
+        border: "1px solid var(--dash-border)",
+        color: danger ? "var(--dash-danger)" : "var(--dash-muted)",
+        cursor: "pointer",
+      }}
+    >
+      <Icon size={13} />
+    </button>
   );
 }

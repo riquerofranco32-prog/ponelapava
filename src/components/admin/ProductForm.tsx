@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
 import { Product, ProductCategory, ProductStatus } from "@/types";
 import { ProductInput } from "@/lib/products";
 import { getCategoryLabel } from "@/lib/utils";
+import { AdminModal } from "@/components/admin/AdminModal";
+import { AdminField } from "@/components/admin/AdminField";
+import { AdminButton } from "@/components/admin/AdminButton";
 
 const CATEGORIES: ProductCategory[] = [
   "yerbas",
@@ -29,6 +31,8 @@ function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+const FORM_ID = "product-form";
 
 interface ProductFormProps {
   product?: Product;
@@ -95,180 +99,163 @@ export default function ProductForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-pava-brown/50 px-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto bg-white p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold text-pava-brown">
-            {product ? "Editar producto" : "Nuevo producto"}
-          </h2>
-          <button
-            onClick={onCancel}
-            className="text-pava-brown/40 hover:text-pava-brown"
-            aria-label="Cerrar"
-          >
-            <X size={18} />
-          </button>
+    <AdminModal
+      title={product ? "Editar producto" : "Nuevo producto"}
+      onClose={onCancel}
+      footer={
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <AdminButton variant="secondary" onClick={onCancel}>
+            Cancelar
+          </AdminButton>
+          <AdminButton type="submit" form={FORM_ID} disabled={saving}>
+            {saving ? "Guardando..." : "Guardar"}
+          </AdminButton>
+        </div>
+      }
+    >
+      <form
+        id={FORM_ID}
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 16 }}
+      >
+        <AdminField label="Nombre">
+          <input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="admin-input"
+          />
+        </AdminField>
+
+        <AdminField label="Slug (opcional — se genera del nombre)">
+          <input
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder={name ? slugify(name) : ""}
+            className="admin-input"
+          />
+        </AdminField>
+
+        <AdminField label="Descripción corta">
+          <input
+            required
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="admin-input"
+          />
+        </AdminField>
+
+        <AdminField label="Descripción larga (opcional)">
+          <textarea
+            value={longDescription}
+            onChange={(e) => setLongDescription(e.target.value)}
+            rows={3}
+            className="admin-input"
+            style={{ resize: "none" }}
+          />
+        </AdminField>
+
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
+        >
+          <AdminField label="Precio (ARS)">
+            <input
+              required
+              type="number"
+              min={0}
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="admin-input"
+            />
+          </AdminField>
+          <AdminField label="Peso (opcional)">
+            <input
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="500g"
+              className="admin-input"
+            />
+          </AdminField>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Nombre">
-            <input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
+        >
+          <AdminField label="Categoría">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ProductCategory)}
               className="admin-input"
-            />
-          </Field>
-
-          <Field label="Slug (opcional — se genera del nombre)">
-            <input
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder={name ? slugify(name) : ""}
-              className="admin-input"
-            />
-          </Field>
-
-          <Field label="Descripción corta">
-            <input
-              required
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="admin-input"
-            />
-          </Field>
-
-          <Field label="Descripción larga (opcional)">
-            <textarea
-              value={longDescription}
-              onChange={(e) => setLongDescription(e.target.value)}
-              rows={3}
-              className="admin-input resize-none"
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Precio (ARS)">
-              <input
-                required
-                type="number"
-                min={0}
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="admin-input"
-              />
-            </Field>
-            <Field label="Peso (opcional)">
-              <input
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="500g"
-                className="admin-input"
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Categoría">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as ProductCategory)}
-                className="admin-input"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {getCategoryLabel(c)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Estado">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as ProductStatus)}
-                className="admin-input"
-              >
-                {STATUSES.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Marca (opcional)">
-            <input
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="admin-input"
-            />
-          </Field>
-
-          <Field label="Imágenes (rutas separadas por coma)">
-            <input
-              required
-              value={images}
-              onChange={(e) => setImages(e.target.value)}
-              placeholder="/product_foo.png"
-              className="admin-input"
-            />
-          </Field>
-
-          <Field label="Tags (separados por coma, opcional)">
-            <input
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              className="admin-input"
-            />
-          </Field>
-
-          <label className="flex items-center gap-2 text-sm text-pava-brown">
-            <input
-              type="checkbox"
-              checked={featured}
-              onChange={(e) => setFeatured(e.target.checked)}
-            />
-            Mostrar en destacados de la home
-          </label>
-
-          {error && <p className="text-sm text-pava-terracotta">{error}</p>}
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 text-sm text-pava-brown/60 hover:text-pava-brown"
             >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-pava-green px-5 py-2 text-sm font-medium text-pava-cream hover:bg-pava-green-light disabled:opacity-50"
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {getCategoryLabel(c)}
+                </option>
+              ))}
+            </select>
+          </AdminField>
+          <AdminField label="Estado">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ProductStatus)}
+              className="admin-input"
             >
-              {saving ? "Guardando..." : "Guardar"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
+              {STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </AdminField>
+        </div>
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-pava-brown/60 uppercase tracking-wide">
-        {label}
-      </span>
-      {children}
-    </label>
+        <AdminField label="Marca (opcional)">
+          <input
+            value={brand}
+            onChange={(e) => setBrand(e.target.value)}
+            className="admin-input"
+          />
+        </AdminField>
+
+        <AdminField label="Imágenes (rutas separadas por coma)">
+          <input
+            required
+            value={images}
+            onChange={(e) => setImages(e.target.value)}
+            placeholder="/product_foo.png"
+            className="admin-input"
+          />
+        </AdminField>
+
+        <AdminField label="Tags (separados por coma, opcional)">
+          <input
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            className="admin-input"
+          />
+        </AdminField>
+
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 14,
+            color: "var(--dash-text)",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={featured}
+            onChange={(e) => setFeatured(e.target.checked)}
+          />
+          Mostrar en destacados de la home
+        </label>
+
+        {error && (
+          <p style={{ fontSize: 13, color: "var(--dash-danger)" }}>{error}</p>
+        )}
+      </form>
+    </AdminModal>
   );
 }

@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Playfair_Display, Caveat } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import CartDrawer from "@/components/cart/CartDrawer";
-import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { SITE_URL, STORE_ADDRESS_LINE, STORE_ADDRESS_CITY } from "@/lib/site";
 
 const montserrat = Montserrat({
@@ -104,11 +101,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
         <CartProvider>
-          <Navbar />
-          <CartDrawer />
-          <main>{children}</main>
-          <Footer />
-          <WhatsAppFAB />
+          <SiteChrome>{children}</SiteChrome>
         </CartProvider>
       </body>
     </html>

@@ -1,1 +1,11 @@
 @AGENTS.md
+
+## Reglas de diseño del proyecto
+
+- **Border-radius vs. borde del viewport:** cualquier objeto que toque un borde del viewport queda con esquinas rectas, aunque su categoría sea "contenido" — la geometría gana sobre la categoría. Una esquina redondeada contra el borde de pantalla deja un hueco por donde asoma el fondo/backdrop (el mismo efecto roto que un borde de un solo lado con esquina redondeada). Casos de referencia (cerrados el 2026-08-13): el panel del drawer del carrito (`src/components/cart/CartDrawer.tsx`) y el panel del menú mobile (`src/components/layout/Navbar.tsx`) quedan rectos; el redondeo del carrito vive en sus filas y controles internos.
+- **Escala de radios:** tokens en `@theme inline` de `src/app/globals.css` — `--radius-card` 14px (cards y objetos grandes), `--radius-control` 8px (botones, inputs, selects, chips ≥~28px de alto, miniaturas de imagen), `--radius-chip` 4px (badges/tags ~22px de alto y mini-controles ≤~32px). La banda de proporción de referencia es 14–20% de la altura del elemento; si un elemento cae muy afuera de la banda, se ajusta el valor puntual antes que romper la escala.
+- **Verificación óptica medida:** los cambios visuales se verifican con radio/estilos computados y capturas vía `scripts/optical-check.mjs` (URL base por parámetro; contra build local para cambios aún no deployados), no a ojo.
+
+## Reglas de proceso
+
+- **Verificar el deployment, no solo el push:** el reporte final de un cambio debe confirmar que el deployment de Vercel quedó efectivamente servido (estado Ready — o, sin acceso al dashboard, midiendo que producción sirve el cambio), no solo que el push llegó a GitHub. Antecedente (2026-08-13): el deploy de `9013bed` quedó Blocked en Vercel y los cambios recién llegaron a producción con los commits siguientes.

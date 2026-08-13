@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# salidas de la verificación óptica (scripts/optical-check.mjs)
+/.optical-check/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

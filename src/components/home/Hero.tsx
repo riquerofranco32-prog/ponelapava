@@ -114,7 +114,7 @@ export default function Hero() {
 
           {/* Headline — masked line reveal */}
           <h1
-            className="font-display max-w-4xl leading-[0.87] tracking-[-0.04em] text-pava-cream
+            className="font-display max-w-4xl leading-[1.05] tracking-[-0.04em] text-pava-cream
               text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]"
           >
             <span className="block overflow-hidden">

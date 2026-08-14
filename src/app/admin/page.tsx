@@ -13,16 +13,16 @@ import {
   AlertTriangle,
   PackageX,
 } from "lucide-react";
-import { Product } from "@/types";
+import { Category, Product } from "@/types";
 import { ProductInput } from "@/lib/products";
 import { assertOk } from "@/lib/admin-fetch";
 import ProductForm from "@/components/admin/ProductForm";
+import CategoriesPanel from "@/components/admin/CategoriesPanel";
 import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { TableSkeleton } from "@/components/admin/TableSkeleton";
-import { EmptyState } from "@/components/admin/EmptyState";
 import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import DashboardStats from "@/components/admin/DashboardStats";
@@ -44,6 +44,7 @@ export default function AdminPage() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
   const [searchProduct, setSearchProduct] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -64,8 +65,17 @@ export default function AdminPage() {
     }
   }
 
+  async function loadCategories() {
+    const res = await fetch("/api/admin/categories");
+    assertOk(res, "No se pudieron cargar las categorías");
+    setCategories(await res.json());
+  }
+
   useEffect(() => {
     loadProducts();
+    loadCategories().catch((err) =>
+      setLoadError(err instanceof Error ? err.message : "Error desconocido"),
+    );
   }, []);
 
   async function handleCreate(input: ProductInput) {
@@ -284,11 +294,7 @@ export default function AdminPage() {
 
       {/* ── CATEGORIAS ── */}
       {activeSection === "categorias" && (
-        <EmptyState
-          icon={Tag}
-          title="Gestión de categorías"
-          description="Las categorías están definidas en el código del sitio. Gestión editable próximamente."
-        />
+        <CategoriesPanel categories={categories} onChange={loadCategories} />
       )}
 
       {/* ── PEDIDOS ── */}
@@ -299,12 +305,14 @@ export default function AdminPage() {
 
       {creating && (
         <ProductForm
+          categories={categories}
           onSave={handleCreate}
           onCancel={() => setCreating(false)}
         />
       )}
       {editingProduct && (
         <ProductForm
+          categories={categories}
           product={editingProduct}
           onSave={(input) => handleUpdate(editingProduct.id, input)}
           onCancel={() => setEditingProduct(null)}

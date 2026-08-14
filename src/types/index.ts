@@ -1,6 +1,7 @@
 // ── Product ────────────────────────────────────────────
-export type ProductCategory =
-  "yerbas" | "mates" | "bombillas" | "termos" | "accesorios" | "combos";
+// Category slugs come from the `categories` table (managed in /admin) —
+// not a fixed union, so newly created categories don't need a code change.
+export type ProductCategory = string;
 
 export type ProductStatus = "available" | "out_of_stock" | "featured";
 
@@ -30,6 +31,7 @@ export interface Category {
   description: string;
   image: string;
   icon: string;
+  sortOrder?: number;
   productCount?: number;
 }
 

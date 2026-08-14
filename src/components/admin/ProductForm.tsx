@@ -3,21 +3,11 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { Camera, Loader2, X } from "lucide-react";
-import { Product, ProductCategory, ProductStatus } from "@/types";
+import { Category, Product, ProductCategory, ProductStatus } from "@/types";
 import { ProductInput } from "@/lib/products";
-import { getCategoryLabel } from "@/lib/utils";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminField } from "@/components/admin/AdminField";
 import { AdminButton } from "@/components/admin/AdminButton";
-
-const CATEGORIES: ProductCategory[] = [
-  "yerbas",
-  "mates",
-  "bombillas",
-  "termos",
-  "accesorios",
-  "combos",
-];
 
 const STATUSES: { value: ProductStatus; label: string }[] = [
   { value: "available", label: "Disponible" },
@@ -38,12 +28,14 @@ const FORM_ID = "product-form";
 
 interface ProductFormProps {
   product?: Product;
+  categories: Category[];
   onSave: (input: ProductInput) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function ProductForm({
   product,
+  categories,
   onSave,
   onCancel,
 }: ProductFormProps) {
@@ -55,7 +47,7 @@ export default function ProductForm({
   );
   const [price, setPrice] = useState(String(product?.price ?? ""));
   const [category, setCategory] = useState<ProductCategory>(
-    product?.category ?? "yerbas",
+    product?.category ?? categories[0]?.slug ?? "",
   );
   const [status, setStatus] = useState<ProductStatus>(
     product?.status ?? "available",
@@ -210,9 +202,9 @@ export default function ProductForm({
               onChange={(e) => setCategory(e.target.value as ProductCategory)}
               className="admin-input"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {getCategoryLabel(c)}
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
                 </option>
               ))}
             </select>

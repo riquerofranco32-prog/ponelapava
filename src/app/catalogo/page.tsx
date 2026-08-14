@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import CatalogClient from "@/components/catalog/CatalogClient";
 import PageHeader from "@/components/layout/PageHeader";
 import { getProducts } from "@/lib/products";
+import { getCategories } from "@/lib/categories";
 
 // Products come from Supabase and are editable from /admin — revalidate
 // periodically instead of baking them in at build time.
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CatalogPage() {
-  const products = await getProducts();
+  const [products, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
 
   return (
     <div className="bg-pava-cream min-h-screen">
@@ -39,7 +43,7 @@ export default async function CatalogPage() {
             </div>
           }
         >
-          <CatalogClient products={products} />
+          <CatalogClient products={products} categories={categories} />
         </Suspense>
       </div>
     </div>

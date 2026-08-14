@@ -7,7 +7,7 @@ import {
   ShoppingBag,
   Gift,
 } from "lucide-react";
-import { categories } from "@/data/categories";
+import { getCategories } from "@/lib/categories";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
 const ICONS = {
@@ -19,7 +19,8 @@ const ICONS = {
   combos: Gift,
 } as const;
 
-export default function Categories() {
+export default async function Categories() {
+  const categories = await getCategories();
   return (
     <section className="bg-pava-cream-dark py-24 sm:py-28 lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">

@@ -117,30 +117,45 @@ export default function Hero() {
             </span>
           </div>
 
-          {/* Headline — masked line reveal */}
+          {/* Headline — masked line reveal
+              El `overflow-hidden` de cada línea es lo que hace el efecto de
+              subida, pero su caja es exactamente el line-box, y con
+              leading-[1.05] sobre Playfair (caja de contenido 1.33em) el
+              half-leading queda negativo: debajo de la baseline sobran
+              0.108em y la cola de la "y" de "tuyo" baja 0.191em, así que se
+              cortaba 0.083em (11.1px en 1440, 4.8px en 390).
+              Subir el leading no es la salida: para tapar el descendente
+              haría falta ~1.22, y eso afloja el ritmo del titular entero.
+              La salida es despegar la caja que recorta del line-box:
+              padding-bottom en el hijo (que además agranda su propia altura,
+              y como translate-y-full resuelve contra el border-box, el
+              desplazamiento del reveal crece igual y la máscara lo sigue
+              tapando por completo al arrancar) y margin-bottom negativo del
+              mismo valor en el wrapper, que devuelve el ritmo vertical
+              exacto: nada de lo que viene abajo se mueve. */}
           <h1
             className="font-display max-w-4xl leading-[1.05] tracking-[-0.04em] text-pava-cream
               text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]"
           >
-            <span className="block overflow-hidden">
+            <span className="-mb-[0.14em] block overflow-hidden">
               <span
-                className={`block transition-all duration-700 ease-out delay-200
+                className={`block pb-[0.14em] transition-all duration-700 ease-out delay-200
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
                 El ritual
               </span>
             </span>
-            <span className="block overflow-hidden">
+            <span className="-mb-[0.14em] block overflow-hidden">
               <em
-                className={`not-italic block text-pava-gold transition-all duration-700 ease-out delay-300
+                className={`not-italic block pb-[0.14em] text-pava-gold transition-all duration-700 ease-out delay-300
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
                 del mate
               </em>
             </span>
-            <span className="block overflow-hidden">
+            <span className="-mb-[0.14em] block overflow-hidden">
               <span
-                className={`block transition-all duration-700 ease-out delay-400
+                className={`block pb-[0.14em] transition-all duration-700 ease-out delay-400
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
                 es tuyo.

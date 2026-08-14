@@ -20,6 +20,10 @@ export interface Product {
   weight?: string;
   brand?: string;
   featured?: boolean;
+  // Promo vigente — el admin la prende y apaga por producto. El precio de
+  // promo es EL precio (no hay regular tachado), así que alcanza con un flag
+  // y no hace falta un segundo campo de precio.
+  promo?: boolean;
   createdAt?: string;
 }
 

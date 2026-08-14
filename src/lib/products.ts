@@ -16,6 +16,7 @@ interface ProductRow {
   weight: string | null;
   brand: string | null;
   featured: boolean;
+  promo: boolean;
   created_at: string;
 }
 
@@ -35,6 +36,7 @@ function fromRow(row: ProductRow): Product {
     weight: row.weight ?? undefined,
     brand: row.brand ?? undefined,
     featured: row.featured,
+    promo: row.promo,
     createdAt: row.created_at,
   };
 }
@@ -117,6 +119,7 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       weight: input.weight ?? null,
       brand: input.brand ?? null,
       featured: input.featured ?? false,
+      promo: input.promo ?? false,
     })
     .select()
     .single();
@@ -144,6 +147,7 @@ export async function updateProduct(
       weight: input.weight ?? null,
       brand: input.brand ?? null,
       featured: input.featured ?? false,
+      promo: input.promo ?? false,
     })
     .eq("id", id)
     .select()

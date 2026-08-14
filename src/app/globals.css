@@ -419,6 +419,17 @@ body {
   outline-offset: 2px;
 }
 
+/* Para controles que viven dentro de un contenedor con overflow hidden (el
+   toggle de vista del catálogo): ahí el anillo de afuera se recorta, y con
+   offset negativo se dibuja hacia adentro del propio control y entra entero.
+   Va acá y no como utilidad de Tailwind por la misma razón que la regla de
+   arriba: las utilidades están en @layer utilities y lo sin capa les gana,
+   así que un `focus-visible:-outline-offset-2` en el className no tendría
+   ningún efecto. Sin capa y con más especificidad, esto sí gana. */
+.focus-ring-inset:focus-visible {
+  outline-offset: -2px;
+}
+
 /* ── Navigation Active ────────────────────────────── */
 .nav-link {
   position: relative;

@@ -124,13 +124,14 @@ export default function CatalogClient({
 
           {/* View toggle — el `overflow-hidden` del grupo recorta el anillo de
               foco de los botones, que por la regla global sale 2px hacia
-              afuera con 2px de offset (medido: se comía 3px). Con offset
-              negativo el anillo se dibuja hacia adentro del botón y entra
-              entero. */}
+              afuera con 2px de offset (medido: se comía 3px). `focus-ring-inset`
+              (globals.css) lo dibuja hacia adentro y entra entero. Va como
+              clase propia y no como utilidad de Tailwind porque la regla
+              global de foco está sin capa y le ganaría a la utilidad. */}
           <div className="flex overflow-hidden rounded-control border border-pava-brown/15 bg-white">
             <button
               onClick={() => setView("grid")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors focus-visible:-outline-offset-2 ${
+              className={`focus-ring-inset flex items-center justify-center w-10 h-10 transition-colors ${
                 view === "grid"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"
@@ -142,7 +143,7 @@ export default function CatalogClient({
             </button>
             <button
               onClick={() => setView("list")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors focus-visible:-outline-offset-2 ${
+              className={`focus-ring-inset flex items-center justify-center w-10 h-10 transition-colors ${
                 view === "list"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"

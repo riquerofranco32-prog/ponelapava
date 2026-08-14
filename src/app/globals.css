@@ -449,6 +449,27 @@ body {
   background: linear-gradient(to right, rgba(199, 166, 122, 0.35), transparent);
 }
 
+/* ── Área táctil mínima ───────────────────────────────
+   Los controles de ícono del carrito quedan muy por debajo de los 44px que
+   necesita un dedo (el tacho del drawer mide 14×14, los ± miden 24×24).
+   Esta clase agranda SOLO la zona sensible, con un pseudo-elemento
+   centrado y transparente: el ícono y la caja visible no cambian de tamaño
+   y, como el pseudo-elemento está fuera del flujo, tampoco se mueve el
+   layout. No sirve dentro de un ancestro con overflow hidden, porque ahí
+   el recorte también corta el hit-testing. */
+.tap-44 {
+  position: relative;
+}
+.tap-44::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
 /* ── Hide scrollbar on horizontal touch scrollers ───── */
 .no-scrollbar {
   scrollbar-width: none;

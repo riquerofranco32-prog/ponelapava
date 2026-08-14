@@ -123,13 +123,18 @@ export default function CartPage() {
                     </p>
 
                     <div className="flex items-center justify-between">
-                      {/* Quantity */}
+                      {/* Quantity — acá el grupo tiene `overflow-hidden` (para
+                          recortar el hover contra el borde redondeado), y eso
+                          también recorta el hit-testing, así que el truco del
+                          pseudo-elemento de `tap-44` no sirve. En mobile los
+                          botones crecen a 44px de verdad; de sm para arriba
+                          quedan como estaban. El ícono no cambia de tamaño. */}
                       <div className="flex items-center overflow-hidden rounded-control border border-pava-brown/15">
                         <button
                           onClick={() =>
                             updateQuantity(product.id, quantity - 1)
                           }
-                          className="flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
+                          className="flex items-center justify-center h-11 w-11 sm:h-8 sm:w-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
                           aria-label="Reducir cantidad"
                         >
                           <Minus size={12} />
@@ -141,7 +146,7 @@ export default function CartPage() {
                           onClick={() =>
                             updateQuantity(product.id, quantity + 1)
                           }
-                          className="flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
+                          className="flex items-center justify-center h-11 w-11 sm:h-8 sm:w-8 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
                           aria-label="Aumentar cantidad"
                         >
                           <Plus size={12} />
@@ -154,7 +159,7 @@ export default function CartPage() {
                         </span>
                         <button
                           onClick={() => removeItem(product.id)}
-                          className="text-pava-brown/30 hover:text-pava-terracotta transition-colors"
+                          className="tap-44 text-pava-brown/30 hover:text-pava-terracotta transition-colors"
                           aria-label={`Eliminar ${product.name}`}
                         >
                           <Trash2 size={15} />

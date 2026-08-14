@@ -380,9 +380,17 @@ body {
   opacity: 1;
 }
 
+/* `opacity: 0` esconde el botón pero NO lo saca del hit-testing: la franja
+   de ~62px sobre la foto seguía capturando el click. Verificado con
+   document.elementFromPoint en el centro de la zona: devolvía el botón
+   oculto, tanto en desktop como en mobile. Y en mobile no hay hover que lo
+   revele nunca ((hover: hover) = false), así que un toque en la parte baja
+   de la foto agregaba al carrito sin que nada lo anunciara, en vez de
+   abrir el producto. `pointer-events` acompaña a la visibilidad. */
 .product-card-btn {
   transform: translateY(6px);
   opacity: 0;
+  pointer-events: none;
   transition:
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.35s ease;
@@ -390,6 +398,7 @@ body {
 .product-card:hover .product-card-btn {
   transform: translateY(0);
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ── Focus styles ─────────────────────────────────── */

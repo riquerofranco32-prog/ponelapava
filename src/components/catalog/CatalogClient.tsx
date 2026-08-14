@@ -170,11 +170,15 @@ export default function CatalogClient({
             aria-pressed={activeCategory === slug}
           >
             {name}
+            {/* El conteo del chip inactivo estaba a /40, que sobre el blanco
+                del chip da 2.17:1 — bien por debajo de 4.5:1 para 12px. A /70
+                da 4.62:1. El del chip activo (crema /70 sobre verde) ya rinde
+                5.19:1 y queda como está. */}
             <span
               className={`text-xs ${
                 activeCategory === slug
                   ? "text-pava-cream/70"
-                  : "text-pava-brown/40"
+                  : "text-pava-brown/70"
               }`}
             >
               ({count})

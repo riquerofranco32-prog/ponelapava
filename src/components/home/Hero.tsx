@@ -41,27 +41,32 @@ export default function Hero() {
           transform: `scale(1.06) translate(${parallax.x * -10}px, ${parallax.y * -10}px)`,
         }}
       >
-        {allowVideo ? (
+        {/* La imagen queda montada SIEMPRE, como capa de fondo, y el video se
+            apila encima. Antes se alternaban (Image → video con `poster`), y
+            eso traía el PNG dos veces: optimizado por next/image en el primer
+            render, y después crudo desde /public porque los `poster` no pasan
+            por el optimizador. Sin `poster`, el video se pinta transparente
+            hasta su primer cuadro y lo que se ve mientras tanto es esta misma
+            imagen — un solo archivo, ya optimizado. */}
+        <Image
+          src="/hero_background_1786545961305.png"
+          alt="Mate servido sobre mesa de madera"
+          fill
+          priority
+          quality={92}
+          className="object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
+          sizes="100vw"
+        />
+        {allowVideo && (
           <video
             autoPlay
             muted
             loop
             playsInline
-            poster="/hero_background_1786545961305.png"
             className="absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
           >
             <source src="/hero-mate-pour.mp4" type="video/mp4" />
           </video>
-        ) : (
-          <Image
-            src="/hero_background_1786545961305.png"
-            alt="Mate servido sobre mesa de madera"
-            fill
-            priority
-            quality={92}
-            className="object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
-            sizes="100vw"
-          />
         )}
         {/* Multi-layer gradient for editorial feel */}
         <div className="absolute inset-0 bg-gradient-to-t from-pava-brown via-pava-brown/55 to-transparent" />

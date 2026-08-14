@@ -2,28 +2,36 @@
 
 import { useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { Category } from "@/types";
+import { Category, Product } from "@/types";
 import { CategoryInput } from "@/lib/categories";
 import { assertOk } from "@/lib/admin-fetch";
 import { AdminCard } from "@/components/admin/AdminCard";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { EmptyState } from "@/components/admin/EmptyState";
 import { ProductThumb } from "@/components/admin/products/ProductThumb";
 import { IconButton } from "@/components/admin/products/IconButton";
 import CategoryForm from "@/components/admin/CategoryForm";
+import { Tag } from "lucide-react";
 
 interface CategoriesPanelProps {
   categories: Category[];
+  products: Product[];
   onChange: () => void;
 }
 
 export default function CategoriesPanel({
   categories,
+  products,
   onChange,
 }: CategoriesPanelProps) {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
+
+  function productCount(slug: string): number {
+    return products.filter((p) => p.category === slug).length;
+  }
 
   async function handleCreate(input: CategoryInput) {
     const res = await fetch("/api/admin/categories", {
@@ -71,63 +79,79 @@ export default function CategoriesPanel({
         </AdminButton>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-          gap: 14,
-        }}
-      >
-        {categories.map((category) => (
-          <AdminCard key={category.id}>
-            <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-              <ProductThumb src={category.image} size={48} />
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div
+      {categories.length === 0 ? (
+        <EmptyState
+          icon={Tag}
+          title="Todavía no hay categorías"
+          description="Creá la primera para poder asignarla a tus productos."
+        />
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+            gap: 14,
+          }}
+        >
+          {categories.map((category) => {
+            const count = productCount(category.slug);
+            return (
+              <AdminCard key={category.id}>
+                <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                  <ProductThumb src={category.image} size={48} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: "var(--dash-text)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {category.icon} {category.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+                      /{category.slug} · {count}{" "}
+                      {count === 1 ? "producto" : "productos"}
+                    </div>
+                  </div>
+                </div>
+                <p
                   style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: "var(--dash-text)",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
+                    fontSize: 13,
+                    color: "var(--dash-muted)",
+                    marginBottom: 14,
+                    minHeight: 34,
                   }}
                 >
-                  {category.icon} {category.name}
+                  {category.description}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <IconButton
+                    title="Editar"
+                    icon={Pencil}
+                    onClick={() => setEditing(category)}
+                  />
+                  <IconButton
+                    title="Eliminar"
+                    icon={Trash2}
+                    danger
+                    onClick={() => setDeleting(category)}
+                  />
                 </div>
-                <div style={{ fontSize: 12, color: "var(--dash-muted)" }}>
-                  /{category.slug}
-                </div>
-              </div>
-            </div>
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--dash-muted)",
-                marginBottom: 14,
-                minHeight: 34,
-              }}
-            >
-              {category.description}
-            </p>
-            <div
-              style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
-            >
-              <IconButton
-                title="Editar"
-                icon={Pencil}
-                onClick={() => setEditing(category)}
-              />
-              <IconButton
-                title="Eliminar"
-                icon={Trash2}
-                danger
-                onClick={() => setDeleting(category)}
-              />
-            </div>
-          </AdminCard>
-        ))}
-      </div>
+              </AdminCard>
+            );
+          })}
+        </div>
+      )}
 
       {creating && (
         <CategoryForm
@@ -145,7 +169,15 @@ export default function CategoriesPanel({
       {deleting && (
         <ConfirmDialog
           title="Eliminar categoría"
-          message={`¿Eliminar "${deleting.name}"? Los productos que ya la usan no se van a borrar, pero quedarán sin categoría válida.`}
+          message={
+            productCount(deleting.slug) > 0
+              ? `"${deleting.name}" tiene ${productCount(deleting.slug)} producto${
+                  productCount(deleting.slug) === 1 ? "" : "s"
+                } asignado${
+                  productCount(deleting.slug) === 1 ? "" : "s"
+                }. Si la eliminás, esos productos quedan con una categoría que ya no existe. ¿Eliminar de todos modos?`
+              : `¿Eliminar "${deleting.name}"? Esta acción no se puede deshacer.`
+          }
           onConfirm={() => handleDelete(deleting)}
           onCancel={() => setDeleting(null)}
         />

@@ -294,7 +294,11 @@ export default function AdminPage() {
 
       {/* ── CATEGORIAS ── */}
       {activeSection === "categorias" && (
-        <CategoriesPanel categories={categories} onChange={loadCategories} />
+        <CategoriesPanel
+          categories={categories}
+          products={products}
+          onChange={loadCategories}
+        />
       )}
 
       {/* ── PEDIDOS ── */}

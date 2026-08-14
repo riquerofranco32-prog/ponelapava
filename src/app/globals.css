@@ -393,10 +393,21 @@ body {
 }
 
 /* ── Focus styles ─────────────────────────────────── */
+/* Esta regla va SIN capa a propósito: las utilidades de Tailwind v4 viven
+   en @layer utilities, y lo sin capa le gana a lo que está en capas. Eso
+   es lo que hace que los controles que traen `focus:outline-none` (el
+   buscador y el select del catálogo, los inputs del carrito) igual muestren
+   anillo de foco. Moverla a @layer base los dejaría sin anillo.
+
+   Lo que NO puede llevar es `border-radius`: por la misma razón le ganaba
+   al `rounded-*` propio de cada control y le aplastaba las esquinas al
+   enfocarlo (medido: las 22 paradas de Tab en la home, las 26 del catálogo
+   y las 18 en mobile; `#hero-cta-catalogo` pasaba de 8px a ~2px). El
+   outline sigue el radio real del elemento, así que sacándolo el anillo
+   abraza la forma del control. */
 :focus-visible {
   outline: 2px solid #26402e;
   outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* ── Navigation Active ────────────────────────────── */

@@ -122,11 +122,15 @@ export default function CatalogClient({
             <option value="name">Nombre A-Z</option>
           </select>
 
-          {/* View toggle */}
+          {/* View toggle — el `overflow-hidden` del grupo recorta el anillo de
+              foco de los botones, que por la regla global sale 2px hacia
+              afuera con 2px de offset (medido: se comía 3px). Con offset
+              negativo el anillo se dibuja hacia adentro del botón y entra
+              entero. */}
           <div className="flex overflow-hidden rounded-control border border-pava-brown/15 bg-white">
             <button
               onClick={() => setView("grid")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors ${
+              className={`flex items-center justify-center w-10 h-10 transition-colors focus-visible:-outline-offset-2 ${
                 view === "grid"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"
@@ -138,7 +142,7 @@ export default function CatalogClient({
             </button>
             <button
               onClick={() => setView("list")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors ${
+              className={`flex items-center justify-center w-10 h-10 transition-colors focus-visible:-outline-offset-2 ${
                 view === "list"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { Category, Product } from "@/types";
 import { CategoryInput } from "@/lib/categories";
 import { assertOk } from "@/lib/admin-fetch";
@@ -34,10 +34,12 @@ export default function CategoriesPanel({
   }
 
   async function handleCreate(input: CategoryInput) {
+    const nextSortOrder =
+      Math.max(0, ...categories.map((c) => c.sortOrder ?? 0)) + 1;
     const res = await fetch("/api/admin/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
+      body: JSON.stringify({ ...input, sortOrder: nextSortOrder }),
     });
     assertOk(res, "No se pudo crear la categoría");
     setCreating(false);
@@ -61,6 +63,26 @@ export default function CategoriesPanel({
     });
     assertOk(res, "No se pudo eliminar la categoría");
     setDeleting(null);
+    onChange();
+  }
+
+  async function saveSortOrder(category: Category, sortOrder: number) {
+    const { id, productCount: _productCount, ...rest } = category;
+    await fetch(`/api/admin/categories/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...rest, sortOrder }),
+    });
+  }
+
+  async function moveCategory(index: number, direction: -1 | 1) {
+    const target = categories[index + direction];
+    const current = categories[index];
+    if (!target) return;
+    await Promise.all([
+      saveSortOrder(current, target.sortOrder ?? 0),
+      saveSortOrder(target, current.sortOrder ?? 0),
+    ]);
     onChange();
   }
 
@@ -93,7 +115,7 @@ export default function CategoriesPanel({
             gap: 14,
           }}
         >
-          {categories.map((category) => {
+          {categories.map((category, index) => {
             const count = productCount(category.slug);
             return (
               <AdminCard key={category.id}>
@@ -132,20 +154,34 @@ export default function CategoriesPanel({
                   style={{
                     display: "flex",
                     gap: 8,
-                    justifyContent: "flex-end",
+                    justifyContent: "space-between",
                   }}
                 >
-                  <IconButton
-                    title="Editar"
-                    icon={Pencil}
-                    onClick={() => setEditing(category)}
-                  />
-                  <IconButton
-                    title="Eliminar"
-                    icon={Trash2}
-                    danger
-                    onClick={() => setDeleting(category)}
-                  />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <IconButton
+                      title="Subir"
+                      icon={ChevronUp}
+                      onClick={() => moveCategory(index, -1)}
+                    />
+                    <IconButton
+                      title="Bajar"
+                      icon={ChevronDown}
+                      onClick={() => moveCategory(index, 1)}
+                    />
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <IconButton
+                      title="Editar"
+                      icon={Pencil}
+                      onClick={() => setEditing(category)}
+                    />
+                    <IconButton
+                      title="Eliminar"
+                      icon={Trash2}
+                      danger
+                      onClick={() => setDeleting(category)}
+                    />
+                  </div>
                 </div>
               </AdminCard>
             );

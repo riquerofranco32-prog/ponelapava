@@ -43,6 +43,7 @@ const NAV_ITEMS: AdminNavItem[] = [
 export default function AdminPage() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
   const [searchProduct, setSearchProduct] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,8 +136,9 @@ export default function AdminPage() {
 
   const filteredProducts = products.filter(
     (p) =>
-      p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-      p.brand?.toLowerCase().includes(searchProduct.toLowerCase()),
+      (categoryFilter === "all" || p.category === categoryFilter) &&
+      (p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
+        p.brand?.toLowerCase().includes(searchProduct.toLowerCase())),
   );
 
   return (
@@ -273,6 +275,19 @@ export default function AdminPage() {
                 style={{ paddingLeft: 36 }}
               />
             </div>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="admin-input"
+              style={{ width: "auto", minWidth: 160 }}
+            >
+              <option value="all">Todas las categorías</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             <AdminButton onClick={() => setCreating(true)}>
               <Plus size={15} />
               Nuevo producto

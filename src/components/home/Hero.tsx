@@ -12,8 +12,11 @@ export default function Hero() {
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 60);
+    // Skip the ~1.3MB video on small screens — mobile visitors are more
+    // likely on limited data, and the poster image reads fine there.
     setAllowVideo(
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+        !window.matchMedia("(max-width: 640px)").matches,
     );
     return () => clearTimeout(timer);
   }, []);

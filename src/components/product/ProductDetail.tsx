@@ -54,25 +54,32 @@ export default function ProductDetail({
             className="flex items-center gap-2 text-sm text-pava-brown/50"
             aria-label="Breadcrumb"
           >
-            <Link href="/" className="hover:text-pava-green transition-colors">
+            <Link
+              href="/"
+              className="shrink-0 hover:text-pava-green transition-colors"
+            >
               Inicio
             </Link>
-            <span>/</span>
+            <span className="shrink-0">/</span>
             <Link
               href="/catalogo"
-              className="hover:text-pava-green transition-colors"
+              className="shrink-0 hover:text-pava-green transition-colors"
             >
               Catálogo
             </Link>
-            <span>/</span>
+            <span className="shrink-0">/</span>
             <Link
               href={`/catalogo?cat=${product.category}`}
-              className="hover:text-pava-green transition-colors"
+              className="shrink-0 hover:text-pava-green transition-colors"
             >
               {getCategoryLabel(product.category)}
             </Link>
-            <span>/</span>
-            <span className="text-pava-brown line-clamp-1">{product.name}</span>
+            <span className="shrink-0">/</span>
+            {/* min-w-0 lets this item shrink below its content width so
+                truncate actually clamps it instead of overflowing the row */}
+            <span className="min-w-0 flex-1 truncate text-pava-brown">
+              {product.name}
+            </span>
           </nav>
         </div>
       </div>
@@ -103,12 +110,12 @@ export default function ProductDetail({
 
             {/* Thumbnails */}
             {product.images.length > 1 && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveImage(i)}
-                    className={`relative w-16 h-16 overflow-hidden rounded-control border-2 transition-all ${
+                    className={`relative w-16 h-16 shrink-0 overflow-hidden rounded-control border-2 transition-all ${
                       activeImage === i
                         ? "border-pava-green"
                         : "border-transparent hover:border-pava-brown/30"

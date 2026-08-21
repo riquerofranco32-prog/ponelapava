@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 // FinalCTA itself stays a server component (fetches settings for the
@@ -8,6 +8,8 @@ import Image from "next/image";
 // useEffect — lives in this small client-only background piece instead.
 export default function FinalCTABackground() {
   const [allowVideo, setAllowVideo] = useState(false);
+  const [nearViewport, setNearViewport] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAllowVideo(
@@ -15,9 +17,27 @@ export default function FinalCTABackground() {
     );
   }, []);
 
+  // This section sits below the fold — defer the ~1.3MB video download
+  // until the user actually scrolls near it, instead of on page load.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "600px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="absolute inset-0">
-      {allowVideo ? (
+    <div ref={rootRef} className="absolute inset-0">
+      {allowVideo && nearViewport ? (
         <video
           autoPlay
           muted

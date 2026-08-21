@@ -24,7 +24,7 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [comment, setComment] = useState("");
 
-  const handleWhatsApp = async () => {
+  const handleWhatsApp = () => {
     if (items.length === 0) return;
     const orderData = {
       customerName: customerName || "Sin nombre",
@@ -32,19 +32,18 @@ export default function CartPage() {
       total,
       comment,
     };
-    // Best-effort: a DB hiccup shouldn't block the customer from ordering —
-    // the WhatsApp message is still the source of truth for the sale.
-    try {
-      await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-    } catch {
-      // ignore — WhatsApp still opens below
-    }
+    // Open WhatsApp synchronously, in the same click, or iOS Safari treats
+    // it as an unrequested popup and blocks it — awaiting the fetch first
+    // (as this used to) loses that user-gesture window on mobile.
     const url = buildWhatsAppUrl(settings.whatsappNumber, orderData);
     window.open(url, "_blank", "noopener,noreferrer");
+    // Best-effort order log, fire-and-forget — a DB hiccup shouldn't block
+    // the customer from ordering; WhatsApp is already open by this point.
+    fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData),
+    }).catch(() => {});
   };
 
   if (items.length === 0) {

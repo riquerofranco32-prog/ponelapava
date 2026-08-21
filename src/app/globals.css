@@ -380,9 +380,17 @@ body {
   opacity: 1;
 }
 
+/* `opacity: 0` esconde el botón pero NO lo saca del hit-testing: la franja
+   de ~62px sobre la foto seguía capturando el click. Verificado con
+   document.elementFromPoint en el centro de la zona: devolvía el botón
+   oculto, tanto en desktop como en mobile. Y en mobile no hay hover que lo
+   revele nunca ((hover: hover) = false), así que un toque en la parte baja
+   de la foto agregaba al carrito sin que nada lo anunciara, en vez de
+   abrir el producto. `pointer-events` acompaña a la visibilidad. */
 .product-card-btn {
   transform: translateY(6px);
   opacity: 0;
+  pointer-events: none;
   transition:
     transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.35s ease;
@@ -390,13 +398,36 @@ body {
 .product-card:hover .product-card-btn {
   transform: translateY(0);
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* ── Focus styles ─────────────────────────────────── */
+/* Esta regla va SIN capa a propósito: las utilidades de Tailwind v4 viven
+   en @layer utilities, y lo sin capa le gana a lo que está en capas. Eso
+   es lo que hace que los controles que traen `focus:outline-none` (el
+   buscador y el select del catálogo, los inputs del carrito) igual muestren
+   anillo de foco. Moverla a @layer base los dejaría sin anillo.
+
+   Lo que NO puede llevar es `border-radius`: por la misma razón le ganaba
+   al `rounded-*` propio de cada control y le aplastaba las esquinas al
+   enfocarlo (medido: las 22 paradas de Tab en la home, las 26 del catálogo
+   y las 18 en mobile; `#hero-cta-catalogo` pasaba de 8px a ~2px). El
+   outline sigue el radio real del elemento, así que sacándolo el anillo
+   abraza la forma del control. */
 :focus-visible {
   outline: 2px solid #26402e;
   outline-offset: 2px;
-  border-radius: 2px;
+}
+
+/* Para controles que viven dentro de un contenedor con overflow hidden (el
+   toggle de vista del catálogo): ahí el anillo de afuera se recorta, y con
+   offset negativo se dibuja hacia adentro del propio control y entra entero.
+   Va acá y no como utilidad de Tailwind por la misma razón que la regla de
+   arriba: las utilidades están en @layer utilities y lo sin capa les gana,
+   así que un `focus-visible:-outline-offset-2` en el className no tendría
+   ningún efecto. Sin capa y con más especificidad, esto sí gana. */
+.focus-ring-inset:focus-visible {
+  outline-offset: -2px;
 }
 
 /* ── Navigation Active ────────────────────────────── */
@@ -438,6 +469,27 @@ body {
 
 .reveal.visible .step-connector {
   transform: scaleX(1);
+}
+
+/* ── Área táctil mínima ───────────────────────────────
+   Los controles de ícono del carrito quedan muy por debajo de los 44px que
+   necesita un dedo (el tacho del drawer mide 14×14, los ± miden 24×24).
+   Esta clase agranda SOLO la zona sensible, con un pseudo-elemento
+   centrado y transparente: el ícono y la caja visible no cambian de tamaño
+   y, como el pseudo-elemento está fuera del flujo, tampoco se mueve el
+   layout. No sirve dentro de un ancestro con overflow hidden, porque ahí
+   el recorte también corta el hit-testing. */
+.tap-44 {
+  position: relative;
+}
+.tap-44::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
 }
 
 /* ── Hide scrollbar on horizontal touch scrollers ───── */

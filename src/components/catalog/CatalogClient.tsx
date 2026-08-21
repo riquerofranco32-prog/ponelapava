@@ -122,11 +122,16 @@ export default function CatalogClient({
             <option value="name">Nombre A-Z</option>
           </select>
 
-          {/* View toggle */}
+          {/* View toggle — el `overflow-hidden` del grupo recorta el anillo de
+              foco de los botones, que por la regla global sale 2px hacia
+              afuera con 2px de offset (medido: se comía 3px). `focus-ring-inset`
+              (globals.css) lo dibuja hacia adentro y entra entero. Va como
+              clase propia y no como utilidad de Tailwind porque la regla
+              global de foco está sin capa y le ganaría a la utilidad. */}
           <div className="flex overflow-hidden rounded-control border border-pava-brown/15 bg-white">
             <button
               onClick={() => setView("grid")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors ${
+              className={`focus-ring-inset flex items-center justify-center w-10 h-10 transition-colors ${
                 view === "grid"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"
@@ -138,7 +143,7 @@ export default function CatalogClient({
             </button>
             <button
               onClick={() => setView("list")}
-              className={`flex items-center justify-center w-10 h-10 transition-colors ${
+              className={`focus-ring-inset flex items-center justify-center w-10 h-10 transition-colors ${
                 view === "list"
                   ? "bg-pava-green text-pava-cream"
                   : "text-pava-brown hover:text-pava-green"
@@ -166,11 +171,15 @@ export default function CatalogClient({
             aria-pressed={activeCategory === slug}
           >
             {name}
+            {/* El conteo del chip inactivo estaba a /40, que sobre el blanco
+                del chip da 2.17:1 — bien por debajo de 4.5:1 para 12px. A /70
+                da 4.62:1. El del chip activo (crema /70 sobre verde) ya rinde
+                5.19:1 y queda como está. */}
             <span
               className={`text-xs ${
                 activeCategory === slug
                   ? "text-pava-cream/70"
-                  : "text-pava-brown/40"
+                  : "text-pava-brown/70"
               }`}
             >
               ({count})

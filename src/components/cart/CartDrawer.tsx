@@ -100,9 +100,12 @@ export default function CartDrawer() {
 
                     {/* Quantity controls */}
                     <div className="flex items-center gap-2 mt-2">
+                      {/* tap-44: los ± miden 24×24 y el tacho 14×14, muy por
+                          debajo del dedo. La clase agranda el área sensible a
+                          44px sin tocar el tamaño visible ni el layout. */}
                       <button
                         onClick={() => updateQuantity(product.id, quantity - 1)}
-                        className="flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
+                        className="tap-44 flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
                         aria-label="Reducir cantidad"
                       >
                         <Minus size={11} />
@@ -112,14 +115,14 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
+                        className="tap-44 flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
                         aria-label="Aumentar cantidad"
                       >
                         <Plus size={11} />
                       </button>
                       <button
                         onClick={() => removeItem(product.id)}
-                        className="ml-auto text-pava-brown/30 hover:text-pava-terracotta transition-colors"
+                        className="tap-44 ml-auto text-pava-brown/30 hover:text-pava-terracotta transition-colors"
                         aria-label={`Eliminar ${product.name}`}
                       >
                         <Trash2 size={14} />

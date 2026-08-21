@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAdminUserEmail } from "@/context/AdminUserContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import PendingOrdersBadge from "@/components/admin/PendingOrdersBadge";
 
 export interface AdminNavItem {
   id: string;
@@ -38,7 +39,22 @@ export default function AdminShell({
 }: AdminShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [clockTime, setClockTime] = useState<string | null>(null);
   const email = useAdminUserEmail();
+
+  useEffect(() => {
+    function tick() {
+      setClockTime(
+        new Date().toLocaleTimeString("es-AR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    }
+    tick();
+    const id = setInterval(tick, 10_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleLogout() {
     const supabase = createSupabaseBrowserClient();
@@ -180,7 +196,8 @@ export default function AdminShell({
               }}
             >
               <item.icon size={16} />
-              {item.label}
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {item.id === "pedidos" && <PendingOrdersBadge />}
             </button>
           );
         })}
@@ -254,7 +271,10 @@ export default function AdminShell({
                 cursor: "pointer",
               }}
             >
-              <item.icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
+              <span style={{ position: "relative", display: "flex" }}>
+                <item.icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
+                {item.id === "pedidos" && <PendingOrdersBadge collapsed />}
+              </span>
               <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500 }}>
                 {item.label}
               </span>
@@ -291,16 +311,32 @@ export default function AdminShell({
           }}
         >
           {!collapsed && (
-            <span
-              style={{
-                fontFamily: "var(--font-playfair), Georgia, serif",
-                fontWeight: 700,
-                fontSize: 15,
-                color: "var(--dash-text)",
-              }}
-            >
-              Poné La Pava
-            </span>
+            <div>
+              <span
+                style={{
+                  display: "block",
+                  fontFamily: "var(--font-playfair), Georgia, serif",
+                  fontWeight: 700,
+                  fontSize: 15,
+                  color: "var(--dash-text)",
+                }}
+              >
+                Poné La Pava
+              </span>
+              {clockTime && (
+                <span
+                  style={{
+                    display: "block",
+                    fontSize: 11,
+                    color: "var(--dash-muted)",
+                    fontVariantNumeric: "tabular-nums",
+                    marginTop: 1,
+                  }}
+                >
+                  {clockTime}
+                </span>
+              )}
+            </div>
           )}
           <button
             onClick={() => {
@@ -353,10 +389,18 @@ export default function AdminShell({
                   cursor: "pointer",
                   whiteSpace: "nowrap",
                   textAlign: "left",
+                  position: collapsed ? "relative" : undefined,
                 }}
               >
                 <item.icon size={16} />
-                {!collapsed && item.label}
+                {collapsed ? (
+                  item.id === "pedidos" && <PendingOrdersBadge collapsed />
+                ) : (
+                  <>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {item.id === "pedidos" && <PendingOrdersBadge />}
+                  </>
+                )}
               </button>
             );
           })}

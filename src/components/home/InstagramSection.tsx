@@ -67,14 +67,17 @@ export default function InstagramSection() {
         </ScrollReveal>
 
         <ScrollReveal direction="scale">
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-5 lg:gap-4">
-            {instagramPosts.map((post) => (
+          {/* Bento grid — first post gets the hero spot, rest fill around it */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:auto-rows-[180px] lg:gap-4 xl:auto-rows-[220px]">
+            {instagramPosts.map((post, i) => (
               <a
                 key={post.id}
                 href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative block aspect-square overflow-hidden bg-pava-brown"
+                className={`group relative block aspect-square overflow-hidden bg-pava-brown lg:aspect-auto ${
+                  i === 0 ? "lg:col-span-2 lg:row-span-2" : ""
+                }`}
                 aria-label={post.alt}
               >
                 <Image
@@ -82,7 +85,11 @@ export default function InstagramSection() {
                   alt={post.alt}
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
-                  sizes="(max-width: 1024px) 50vw, 20vw"
+                  sizes={
+                    i === 0
+                      ? "(max-width: 1024px) 100vw, 40vw"
+                      : "(max-width: 1024px) 50vw, 20vw"
+                  }
                 />
                 <div className="absolute inset-0 flex items-end justify-end bg-gradient-to-t from-pava-brown/80 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:p-4">
                   <span className="text-xs text-pava-gold">Ver post ↗</span>

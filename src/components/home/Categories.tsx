@@ -1,23 +1,7 @@
 import Link from "next/link";
-import {
-  Leaf,
-  Coffee,
-  Sparkles,
-  Thermometer,
-  ShoppingBag,
-  Gift,
-} from "lucide-react";
+import Image from "next/image";
 import { getCategories } from "@/lib/categories";
 import ScrollReveal from "@/components/ui/ScrollReveal";
-
-const ICONS = {
-  yerbas: Leaf,
-  mates: Coffee,
-  bombillas: Sparkles,
-  termos: Thermometer,
-  accesorios: ShoppingBag,
-  combos: Gift,
-} as const;
 
 export default async function Categories() {
   const categories = await getCategories();
@@ -55,32 +39,38 @@ export default async function Categories() {
           </Link>
         </ScrollReveal>
 
-        {/* Icon circle row */}
-        <div className="grid grid-cols-3 gap-x-4 gap-y-10 sm:grid-cols-6 sm:gap-x-6">
-          {categories.map((cat, i) => {
-            const Icon = ICONS[cat.slug as keyof typeof ICONS] ?? Leaf;
-            return (
-              <ScrollReveal
-                key={cat.id}
-                direction="up"
-                delay={i * 60}
-                className="flex flex-col items-center"
+        {/* Photo cards — real category imagery instead of generic icons */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
+          {categories.map((cat, i) => (
+            <ScrollReveal key={cat.id} direction="up" delay={i * 60}>
+              <Link
+                href={`/catalogo?cat=${cat.slug}`}
+                aria-label={`Ver categoría ${cat.name}`}
+                className="img-hover-zoom group relative block aspect-[3/4] overflow-hidden rounded-card bg-pava-brown"
               >
-                <Link
-                  href={`/catalogo?cat=${cat.slug}`}
-                  className="group flex flex-col items-center gap-3.5 text-center"
-                  aria-label={`Ver categoría ${cat.name}`}
-                >
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-pava-cream text-pava-brown shadow-[var(--shadow-card)] transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-pava-brown group-hover:text-pava-cream sm:h-20 sm:w-20">
-                    <Icon size={26} strokeWidth={1.5} aria-hidden="true" />
-                  </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pava-brown sm:text-xs">
+                {cat.image && (
+                  <Image
+                    src={cat.image}
+                    alt=""
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-pava-brown/85 via-pava-brown/10 to-transparent transition-colors duration-300 group-hover:from-pava-brown/90" />
+                <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3.5 sm:p-4">
+                  {cat.icon && (
+                    <span className="text-lg leading-none" aria-hidden="true">
+                      {cat.icon}
+                    </span>
+                  )}
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-pava-cream sm:text-xs">
                     {cat.name}
                   </span>
-                </Link>
-              </ScrollReveal>
-            );
-          })}
+                </div>
+              </Link>
+            </ScrollReveal>
+          ))}
         </div>
 
         {/* CTA banner */}

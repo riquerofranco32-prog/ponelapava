@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/products";
-import ProductCard from "@/components/catalog/ProductCard";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import FeaturedCarousel from "@/components/home/FeaturedCarousel";
 
 export default async function FeaturedProducts() {
-  // Show up to 6 featured products
+  // Show up to 8 featured products
   const featuredProducts = await getFeaturedProducts();
-  const displayed = featuredProducts.slice(0, 6);
-  const [first, ...rest] = displayed;
-  const second = rest[0];
-  const third = rest[1];
-  const remaining = rest.slice(2);
+  const displayed = featuredProducts.slice(0, 8);
 
   return (
     <section
@@ -52,50 +48,11 @@ export default async function FeaturedProducts() {
           </div>
         </ScrollReveal>
 
-        {/* Editorial grid — row 1: 1 large + 2 medium */}
+        {/* Horizontal scroll-snap carousel — browse without leaving the section */}
         {displayed.length > 0 && (
-          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-6">
-            {/* Large card */}
-            {first && (
-              <ScrollReveal
-                direction="up"
-                delay={0}
-                className="sm:col-span-2 lg:col-span-5"
-              >
-                <ProductCard product={first} featured />
-              </ScrollReveal>
-            )}
-            {/* Two medium cards */}
-            {second && (
-              <ScrollReveal
-                direction="up"
-                delay={80}
-                className="lg:col-span-3 lg:col-start-6"
-              >
-                <ProductCard product={second} />
-              </ScrollReveal>
-            )}
-            {third && (
-              <ScrollReveal
-                direction="up"
-                delay={160}
-                className="lg:col-span-4 lg:col-start-9"
-              >
-                <ProductCard product={third} />
-              </ScrollReveal>
-            )}
-          </div>
-        )}
-
-        {/* Row 2 — remaining cards equal */}
-        {remaining.length > 0 && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-            {remaining.map((product, i) => (
-              <ScrollReveal key={product.id} direction="up" delay={i * 80}>
-                <ProductCard product={product} />
-              </ScrollReveal>
-            ))}
-          </div>
+          <ScrollReveal direction="up">
+            <FeaturedCarousel products={displayed} />
+          </ScrollReveal>
         )}
 
         {/* Bottom CTA */}

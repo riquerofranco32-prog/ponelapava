@@ -419,14 +419,25 @@ body {
   width: 100%;
 }
 
-/* ── Step connector line ──────────────────────────── */
+/* ── Step connector line — fills in as its step reveals ── */
 .step-connector {
   position: absolute;
   top: 2.25rem;
   left: calc(100% - 0.5rem);
   width: calc(100% - 1rem);
   height: 1px;
-  background: linear-gradient(to right, rgba(199, 166, 122, 0.35), transparent);
+  background: linear-gradient(
+    to right,
+    var(--color-pava-gold, #c7a67a),
+    transparent
+  );
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+}
+
+.reveal.visible .step-connector {
+  transform: scaleX(1);
 }
 
 /* ── Hide scrollbar on horizontal touch scrollers ───── */

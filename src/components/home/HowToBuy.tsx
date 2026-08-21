@@ -63,6 +63,12 @@ export default function HowToBuy() {
               delay={index * 90}
               className="relative"
             >
+              <span
+                aria-hidden="true"
+                className="font-display pointer-events-none absolute -top-3 right-0 text-6xl font-bold leading-none text-pava-gold/10 sm:text-7xl"
+              >
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <span className="relative z-10 mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-pava-gold/40 bg-pava-brown text-pava-gold">
                 <step.icon size={24} strokeWidth={1.5} aria-hidden="true" />
               </span>

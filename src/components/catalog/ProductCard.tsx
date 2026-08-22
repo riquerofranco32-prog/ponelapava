@@ -5,7 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import { Product } from "@/types";
-import { formatPrice, getCategoryLabel, truncate } from "@/lib/utils";
+import {
+  formatPrice,
+  getCategoryLabel,
+  trackSpotlight,
+  truncate,
+} from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "./AddToCartButton";
 import QuickViewModal from "./QuickViewModal";
@@ -82,7 +87,10 @@ export default function ProductCard({
   const imageAspect = featured ? "aspect-[4/3]" : "aspect-[5/4]";
 
   return (
-    <article className="product-card group relative overflow-hidden rounded-card border border-pava-brown/8 bg-white transition-all duration-350 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]">
+    <article
+      onMouseMove={trackSpotlight}
+      className="product-card group relative overflow-hidden rounded-card border border-pava-brown/8 bg-white transition-all duration-350 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]"
+    >
       <span className="product-card-glow" aria-hidden="true" />
       {/* Image area */}
       <div

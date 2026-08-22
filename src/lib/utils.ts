@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -54,9 +55,28 @@ export function getCategoryLabel(category: string): string {
 }
 
 /**
+ * Tracks the cursor position over an element as CSS custom properties
+ * (--mx/--my), for cards using the .spotlight-overlay radial-gradient.
+ */
+export function trackSpotlight(e: MouseEvent<HTMLElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty(
+    "--mx",
+    `${((e.clientX - rect.left) / rect.width) * 100}%`,
+  );
+  e.currentTarget.style.setProperty(
+    "--my",
+    `${((e.clientY - rect.top) / rect.height) * 100}%`,
+  );
+}
+
+/**
  * Returns a status display info.
  */
-export function getStatusInfo(status: string): { label: string; color: string } {
+export function getStatusInfo(status: string): {
+  label: string;
+  color: string;
+} {
   const map: Record<string, { label: string; color: string }> = {
     available: { label: "Disponible", color: "text-pava-green" },
     out_of_stock: { label: "Agotado", color: "text-pava-terracotta" },

@@ -21,8 +21,7 @@ export default async function FinalCTA() {
           </div>
           <h2 className="font-display text-5xl font-bold leading-[0.89] tracking-tight text-pava-cream sm:text-6xl lg:text-7xl xl:text-8xl">
             ¿Ya sabés qué vas
-            <br />a poner en el{" "}
-            <em className="not-italic text-pava-gold">mate?</em>
+            <br />a poner en el <em className="text-shine not-italic">mate?</em>
           </h2>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-pava-cream/75 sm:text-lg">
             Encontrá piezas elegidas para que cada mate tenga su propia

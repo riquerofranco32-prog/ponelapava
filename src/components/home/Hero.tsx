@@ -150,7 +150,7 @@ export default function Hero() {
             </span>
             <span className="-mb-[0.14em] block overflow-hidden">
               <em
-                className={`not-italic block pb-[0.14em] text-pava-gold transition-all duration-700 ease-out delay-300
+                className={`text-shine not-italic block pb-[0.14em] transition-all duration-700 ease-out delay-300
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
                 del mate

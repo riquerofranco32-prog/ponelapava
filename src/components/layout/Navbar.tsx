@@ -50,11 +50,17 @@ export default function Navbar() {
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           isScrolled
-            ? "border-b border-pava-brown/8 bg-pava-cream/97 backdrop-blur-lg"
+            ? "border-b border-pava-brown/8 bg-pava-cream/97 backdrop-blur-lg lg:border-0 lg:bg-transparent lg:px-4 lg:pt-3 lg:backdrop-blur-none"
             : "bg-transparent",
         )}
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        <div
+          className={cn(
+            "mx-auto max-w-7xl px-5 transition-all duration-500 sm:px-8 lg:px-10",
+            isScrolled &&
+              "lg:max-w-6xl lg:rounded-full lg:border lg:border-pava-brown/10 lg:bg-pava-cream/97 lg:px-6 lg:shadow-[0_12px_32px_-14px_rgba(38,64,46,0.35)] lg:backdrop-blur-lg",
+          )}
+        >
           <div
             className={cn(
               "flex items-center justify-between transition-all duration-400",

@@ -1,10 +1,21 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getCategories } from "@/lib/categories";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import CategoryCard from "./CategoryCard";
 
 export default async function Categories() {
   const categories = await getCategories();
+
+  // Bento layout: the first card takes a 2x2 spot, the rest fill a 4-col
+  // strip beside/below it. If the trailing row doesn't fill up (e.g. 6 or 7
+  // categories), stretch its last items so there's no dangling gap.
+  // Only handles remainders that split evenly (1 or 2 leftover); a remainder
+  // of 3 falls back to a 1-column gap, since 4 doesn't divide by 3.
+  const smallCount = categories.length - 1;
+  const remainder = smallCount % 4;
+  const trailingSpanClass =
+    remainder === 1 ? "lg:col-span-4" : remainder === 2 ? "lg:col-span-2" : "";
+
   return (
     <section className="bg-pava-cream-dark py-24 sm:py-28 lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -39,38 +50,29 @@ export default async function Categories() {
           </Link>
         </ScrollReveal>
 
-        {/* Photo cards — real category imagery instead of generic icons */}
+        {/* Photo cards — real category imagery instead of generic icons.
+            First card gets the bento hero spot on desktop. */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
-          {categories.map((cat, i) => (
-            <ScrollReveal key={cat.id} direction="up" delay={i * 60}>
-              <Link
-                href={`/catalogo?cat=${cat.slug}`}
-                aria-label={`Ver categoría ${cat.name}`}
-                className="img-hover-zoom group relative block aspect-[3/4] overflow-hidden rounded-card bg-pava-brown"
+          {categories.map((cat, i) => {
+            const isTrailing =
+              remainder > 0 && i >= categories.length - remainder;
+            return (
+              <ScrollReveal
+                key={cat.id}
+                direction="up"
+                delay={i * 60}
+                className={
+                  i === 0
+                    ? "col-span-2 sm:col-span-1 lg:col-span-2 lg:row-span-2"
+                    : isTrailing
+                      ? trailingSpanClass
+                      : ""
+                }
               >
-                {cat.image && (
-                  <Image
-                    src={cat.image}
-                    alt=""
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-pava-brown/85 via-pava-brown/10 to-transparent transition-colors duration-300 group-hover:from-pava-brown/90" />
-                <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3.5 sm:p-4">
-                  {cat.icon && (
-                    <span className="text-lg leading-none" aria-hidden="true">
-                      {cat.icon}
-                    </span>
-                  )}
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-pava-cream sm:text-xs">
-                    {cat.name}
-                  </span>
-                </div>
-              </Link>
-            </ScrollReveal>
-          ))}
+                <CategoryCard cat={cat} featured={i === 0} />
+              </ScrollReveal>
+            );
+          })}
         </div>
 
         {/* CTA banner */}

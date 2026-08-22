@@ -27,6 +27,28 @@ export function formatPrice(price: number): string {
   }).format(price);
 }
 
+// Matches a leading number + g/kg unit in the free-text `weight` field, e.g.
+// "500g", "1kg", "1.5 Kg". Anything else (missing weight, "combo", "250ml")
+// is intentionally unparseable — unitPrice() returns null for those.
+const WEIGHT_PATTERN = /^(\d+(?:\.\d+)?)\s*(kg|g)$/i;
+
+/**
+ * Price per 100g, formatted like formatPrice (e.g. "$1.200 / 100 g").
+ * Returns null when `weight` is missing or doesn't match a parseable
+ * "<number><g|kg>" pattern — callers should simply not render anything.
+ */
+export function unitPrice(price: number, weight?: string): string | null {
+  if (!weight) return null;
+  const match = weight.trim().match(WEIGHT_PATTERN);
+  if (!match) return null;
+  const grams =
+    match[2].toLowerCase() === "kg"
+      ? Number(match[1]) * 1000
+      : Number(match[1]);
+  if (!(grams > 0)) return null;
+  return `${formatPrice(price / (grams / 100))} / 100 g`;
+}
+
 /**
  * Truncates a string to a max length.
  */

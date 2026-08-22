@@ -11,7 +11,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { Product } from "@/types";
-import { formatPrice, getCategoryLabel } from "@/lib/utils";
+import { formatPrice, getCategoryLabel, unitPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
@@ -34,6 +34,7 @@ export default function ProductDetail({
   const settings = useSiteSettings();
 
   const isOutOfStock = product.status === "out_of_stock";
+  const perUnit = unitPrice(product.price, product.weight);
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
@@ -154,10 +155,15 @@ export default function ProductDetail({
             </h1>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="font-display text-4xl font-bold text-pava-green">
-                {formatPrice(product.price)}
-              </span>
+            <div className="mb-6">
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-4xl font-bold text-pava-green">
+                  {formatPrice(product.price)}
+                </span>
+              </div>
+              {perUnit && (
+                <p className="text-sm text-pava-brown-mid/60 mt-1">{perUnit}</p>
+              )}
             </div>
 
             {/* Description */}

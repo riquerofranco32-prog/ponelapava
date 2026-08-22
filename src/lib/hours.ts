@@ -53,3 +53,28 @@ export function isStoreOpenNow(
   );
   return minutesNow >= start && minutesNow < end;
 }
+
+// Opening time for the next day the store is open, for closed-hours copy
+// ("te respondemos mañana desde las 9:00"). Skips straight to Monday when
+// tomorrow would be Sunday (closed) instead of saying "mañana" for a day
+// the store never opens.
+export function getNextOpeningLabel(
+  hoursWeekday: string,
+  hoursSaturday: string,
+  now = new Date(),
+): string {
+  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const weekdayTomorrow = new Intl.DateTimeFormat("en-US", {
+    timeZone: STORE_TIMEZONE,
+    weekday: "short",
+  }).format(tomorrow);
+
+  if (weekdayTomorrow === "Sun") {
+    const [start] = splitRange(hoursWeekday);
+    return `el lunes desde las ${start}`;
+  }
+  const [start] = splitRange(
+    weekdayTomorrow === "Sat" ? hoursSaturday : hoursWeekday,
+  );
+  return `mañana desde las ${start}`;
+}

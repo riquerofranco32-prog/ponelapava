@@ -11,6 +11,7 @@ import {
   LOW_STOCK_THRESHOLD,
   trackSpotlight,
   truncate,
+  unitPrice,
 } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "./AddToCartButton";
@@ -32,6 +33,7 @@ export default function ProductCard({
   const isFeatured = product.status === "featured";
   const isLowStock =
     !isOutOfStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
+  const perUnit = unitPrice(product.price, product.weight);
 
   if (view === "list") {
     return (
@@ -75,8 +77,15 @@ export default function ProductCard({
             </p>
           </div>
           <div className="flex items-center justify-between mt-3">
-            <span className="font-display text-lg font-bold text-pava-green">
-              {formatPrice(product.price)}
+            <span>
+              <span className="font-display text-lg font-bold text-pava-green block">
+                {formatPrice(product.price)}
+              </span>
+              {perUnit && (
+                <span className="text-[11px] text-pava-brown-mid/60">
+                  {perUnit}
+                </span>
+              )}
             </span>
             <div className="w-32">
               <AddToCartButton
@@ -168,8 +177,15 @@ export default function ProductCard({
       <div className="p-5 sm:p-6">
         <div className="mb-2 flex items-start justify-between gap-3">
           <Badge variant="category">{getCategoryLabel(product.category)}</Badge>
-          <span className="font-display shrink-0 text-lg font-bold leading-none text-pava-green">
-            {formatPrice(product.price)}
+          <span className="shrink-0 text-right">
+            <span className="font-display block text-lg font-bold leading-none text-pava-green">
+              {formatPrice(product.price)}
+            </span>
+            {perUnit && (
+              <span className="mt-1 block text-[11px] text-pava-brown-mid/60">
+                {perUnit}
+              </span>
+            )}
           </span>
         </div>
 

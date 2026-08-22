@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Search, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
 import { Category, Product, ProductCategory } from "@/types";
 import ProductCard from "@/components/catalog/ProductCard";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 type SortOption = "default" | "price-asc" | "price-desc" | "name";
+
+const SORT_OPTIONS: SortOption[] = [
+  "default",
+  "price-asc",
+  "price-desc",
+  "name",
+];
+const SEARCH_DEBOUNCE_MS = 300;
 
 interface CatalogClientProps {
   products: Product[];
@@ -18,17 +26,68 @@ export default function CatalogClient({
   categories,
 }: CatalogClientProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const categoryParam = searchParams.get("cat");
   const initialCategory =
     categoryParam && categories.some((c) => c.slug === categoryParam)
       ? (categoryParam as ProductCategory)
       : "all";
-  const [search, setSearch] = useState("");
+  const sortParam = searchParams.get("sort");
+  const initialSort = SORT_OPTIONS.includes(sortParam as SortOption)
+    ? (sortParam as SortOption)
+    : "default";
+  const initialSearch = searchParams.get("q") ?? "";
+
+  const [search, setSearch] = useState(initialSearch);
   const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">(
     initialCategory,
   );
-  const [sort, setSort] = useState<SortOption>("default");
+  const [sort, setSort] = useState<SortOption>(initialSort);
   const [view, setView] = useState<"grid" | "list">("grid");
+
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const updateUrl = useCallback(
+    (next: {
+      search: string;
+      sort: SortOption;
+      category: ProductCategory | "all";
+    }) => {
+      const params = new URLSearchParams();
+      if (next.category !== "all") params.set("cat", next.category);
+      if (next.search.trim()) params.set("q", next.search);
+      if (next.sort !== "default") params.set("sort", next.sort);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [pathname, router],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, []);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      updateUrl({ search: value, sort, category: activeCategory });
+    }, SEARCH_DEBOUNCE_MS);
+  };
+
+  const handleSortChange = (value: SortOption) => {
+    setSort(value);
+    updateUrl({ search, sort: value, category: activeCategory });
+  };
+
+  const handleCategoryChange = (value: ProductCategory | "all") => {
+    setActiveCategory(value);
+    updateUrl({ search, sort, category: value });
+  };
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -71,7 +130,7 @@ export default function CatalogClient({
     }
 
     return result;
-  }, [activeCategory, search, sort]);
+  }, [activeCategory, search, sort, products]);
 
   const categoryTabs = [
     { slug: "all" as const, name: "Todos", count: products.length },
@@ -98,7 +157,7 @@ export default function CatalogClient({
             aria-label="Buscar productos"
             placeholder="Buscar yerbas, mates, termos..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
           />
         </div>
@@ -113,7 +172,7 @@ export default function CatalogClient({
             id="catalog-sort"
             aria-label="Ordenar productos"
             value={sort}
-            onChange={(e) => setSort(e.target.value as SortOption)}
+            onChange={(e) => handleSortChange(e.target.value as SortOption)}
             className="rounded-control bg-white border border-pava-brown/15 text-pava-brown text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors cursor-pointer"
           >
             <option value="default">Destacados</option>
@@ -162,7 +221,9 @@ export default function CatalogClient({
         {categoryTabs.map(({ slug, name, count }) => (
           <button
             key={slug}
-            onClick={() => setActiveCategory(slug as ProductCategory | "all")}
+            onClick={() =>
+              handleCategoryChange(slug as ProductCategory | "all")
+            }
             className={`inline-flex items-center gap-1.5 rounded-control px-4 py-2 text-sm font-medium border-2 transition-all duration-200 ${
               activeCategory === slug
                 ? "bg-pava-green text-pava-cream border-pava-green"
@@ -208,8 +269,11 @@ export default function CatalogClient({
           </p>
           <button
             onClick={() => {
+              if (searchDebounceRef.current)
+                clearTimeout(searchDebounceRef.current);
               setSearch("");
               setActiveCategory("all");
+              updateUrl({ search: "", sort, category: "all" });
             }}
             className="mt-6 rounded-control px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
           >

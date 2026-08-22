@@ -24,7 +24,11 @@ type CartAction =
   | { type: "CLEAR_CART" }
   | { type: "TOGGLE_DRAWER" }
   | { type: "SET_DRAWER"; open: boolean }
-  | { type: "HYDRATE"; items: CartItem[] };
+  | { type: "HYDRATE"; items: CartItem[] }
+  | {
+      type: "SYNC";
+      products: Pick<Product, "id" | "price" | "stock" | "status">[];
+    };
 
 const CART_STORAGE_KEY = "ponelapava_cart";
 
@@ -90,6 +94,30 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "HYDRATE":
       return { ...state, items: action.items };
 
+    // Reconcile stale localStorage snapshots against fresh DB data: drop
+    // items whose product no longer exists, patch price/stock/status on
+    // the rest so a days-old cart can't check out at old prices.
+    case "SYNC": {
+      const fresh = new Map(action.products.map((p) => [p.id, p]));
+      return {
+        ...state,
+        items: state.items
+          .filter((item) => fresh.has(item.product.id))
+          .map((item) => {
+            const p = fresh.get(item.product.id)!;
+            return {
+              ...item,
+              product: {
+                ...item.product,
+                price: p.price,
+                stock: p.stock,
+                status: p.status,
+              },
+            };
+          }),
+      };
+    }
+
     default:
       return state;
   }
@@ -108,6 +136,9 @@ interface CartContextValue {
   clearCart: () => void;
   toggleDrawer: () => void;
   setDrawer: (open: boolean) => void;
+  syncCart: (
+    products: Pick<Product, "id" | "price" | "stock" | "status">[],
+  ) => void;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -186,6 +217,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "SET_DRAWER", open });
   }, []);
 
+  const syncCart = useCallback(
+    (products: Pick<Product, "id" | "price" | "stock" | "status">[]) => {
+      dispatch({ type: "SYNC", products });
+    },
+    [],
+  );
+
   const value: CartContextValue = {
     items: state.items,
     isOpen: state.isOpen,
@@ -198,6 +236,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     clearCart,
     toggleDrawer,
     setDrawer,
+    syncCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

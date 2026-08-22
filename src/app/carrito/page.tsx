@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,19 +10,116 @@ import {
   ShoppingBag,
   MessageCircle,
   ChevronLeft,
+  AlertTriangle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
+import { isStoreOpenNow, getNextOpeningLabel } from "@/lib/hours";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import type { ProductStatus } from "@/types";
 
 export default function CartPage() {
-  const { items, updateQuantity, removeItem, clearCart, total, itemCount } =
-    useCart();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    total,
+    itemCount,
+    syncCart,
+  } = useCart();
   const settings = useSiteSettings();
   const [customerName, setCustomerName] = useState("");
   const [comment, setComment] = useState("");
+  const [isSyncing, setIsSyncing] = useState(true);
+  const [syncNotices, setSyncNotices] = useState<string[]>([]);
+  // Starts null (matches server HTML, avoids a hydration mismatch, same
+  // pattern as OpenStatusBadge) — resolves on mount since it depends on the
+  // visitor's clock.
+  const [isOpen, setIsOpen] = useState<boolean | null>(null);
+  useEffect(() => {
+    setIsOpen(isStoreOpenNow(settings.hoursWeekday, settings.hoursSaturday));
+  }, [settings.hoursWeekday, settings.hoursSaturday]);
+
+  // Re-check price/stock/status against the DB on load — the cart snapshot
+  // in localStorage can be days old. Runs once against the items present
+  // at mount; skip entirely if the cart was already empty.
+  const didSyncRef = useRef(false);
+  useEffect(() => {
+    if (didSyncRef.current || items.length === 0) {
+      setIsSyncing(false);
+      return;
+    }
+    didSyncRef.current = true;
+    const before = items;
+    fetch("/api/products/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: before.map(({ product }) => product.id) }),
+    })
+      .then((res) => res.json())
+      .then(
+        (data: {
+          products?: {
+            id: string;
+            price: number;
+            stock: number;
+            status: ProductStatus;
+          }[];
+        }) => {
+          const fresh = data.products ?? [];
+          const freshMap = new Map(fresh.map((p) => [p.id, p]));
+          const notices: string[] = [];
+          const removed = before.filter(
+            ({ product }) => !freshMap.has(product.id),
+          );
+          if (removed.length === 1) {
+            notices.push(
+              `${removed[0].product.name} ya no está disponible y la quitamos del carrito.`,
+            );
+          } else if (removed.length > 1) {
+            notices.push(
+              `${removed.length} productos ya no están disponibles y los quitamos del carrito.`,
+            );
+          }
+
+          const priceChanged = before.filter(({ product }) => {
+            const p = freshMap.get(product.id);
+            return p && p.price !== product.price;
+          });
+          if (priceChanged.length === 1) {
+            notices.push(`${priceChanged[0].product.name} cambió de precio.`);
+          } else if (priceChanged.length > 1) {
+            notices.push(
+              `${priceChanged.length} productos cambiaron de precio.`,
+            );
+          }
+
+          const newlyOutOfStock = before.filter(({ product }) => {
+            const p = freshMap.get(product.id);
+            return (
+              p &&
+              p.status === "out_of_stock" &&
+              product.status !== "out_of_stock"
+            );
+          });
+          newlyOutOfStock.forEach(({ product }) =>
+            notices.push(`${product.name} se agotó.`),
+          );
+
+          setSyncNotices(notices);
+          syncCart(fresh);
+        },
+      )
+      .catch(() => {
+        // Validate endpoint failed — skip the stale-data notice, but don't
+        // block checkout on it forever.
+      })
+      .finally(() => setIsSyncing(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleWhatsApp = () => {
     if (items.length === 0) return;
@@ -54,6 +151,16 @@ export default function CartPage() {
           <h1 className="font-display text-3xl font-bold text-pava-brown mb-3">
             Tu carrito está vacío
           </h1>
+          {syncNotices.length > 0 && (
+            <div className="flex gap-2 text-left rounded-control bg-amber-50 border border-amber-300 text-amber-800 text-xs p-3 mb-6">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                {syncNotices.map((notice) => (
+                  <p key={notice}>{notice}</p>
+                ))}
+              </div>
+            </div>
+          )}
           <p className="text-pava-brown-mid/70 mb-8">
             Explorá nuestro catálogo y encontrá lo que estás buscando.
           </p>
@@ -181,6 +288,16 @@ export default function CartPage() {
 
           {/* Summary & checkout */}
           <div className="lg:col-span-1">
+            {syncNotices.length > 0 && (
+              <div className="flex gap-2 rounded-control bg-amber-50 border border-amber-300 text-amber-800 text-xs p-3 mb-4">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  {syncNotices.map((notice) => (
+                    <p key={notice}>{notice}</p>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="rounded-card bg-white border border-pava-brown/8 p-6 sticky top-24">
               <h2 className="font-display text-xl font-bold text-pava-brown mb-6">
                 Resumen del pedido
@@ -250,21 +367,24 @@ export default function CartPage() {
               {/* WhatsApp CTA */}
               <button
                 onClick={handleWhatsApp}
-                disabled={!customerName.trim()}
+                disabled={!customerName.trim() || isSyncing}
                 className="flex items-center justify-center gap-2 w-full rounded-control py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageCircle size={18} />
-                Enviar pedido por WhatsApp
+                {isSyncing
+                  ? "Verificando disponibilidad..."
+                  : "Enviar pedido por WhatsApp"}
               </button>
-              {!customerName.trim() && (
+              {!isSyncing && !customerName.trim() && (
                 <p className="text-xs text-pava-brown/50 text-center mt-2">
                   Completá tu nombre para continuar
                 </p>
               )}
 
               <p className="text-xs text-pava-brown/40 text-center mt-4 leading-relaxed">
-                Se abrirá WhatsApp con tu pedido pre-armado. Coordinamos la
-                entrega o retiro en el local.
+                {isOpen === false
+                  ? `Estamos cerrados — te respondemos ${getNextOpeningLabel(settings.hoursWeekday, settings.hoursSaturday)}.`
+                  : "Se abrirá WhatsApp con tu pedido pre-armado. Coordinamos la entrega o retiro en el local."}
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MessageCircle, MapPin, Clock } from "lucide-react";
+import { MessageCircle, MapPin, Clock, LogIn } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/icons";
 import { NAV_LINKS } from "@/lib/nav";
 import { INSTAGRAM_URL } from "@/lib/site";
@@ -164,6 +164,13 @@ export default async function Footer() {
             <p className="text-xs text-pava-cream/65">
               Hecho con mate 🧉 en Argentina
             </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-xs text-pava-cream/40 transition-colors duration-200 hover:text-pava-cream/70"
+            >
+              <LogIn size={12} />
+              Acceso
+            </Link>
           </div>
         </div>
       </div>

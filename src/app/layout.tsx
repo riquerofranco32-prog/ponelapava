@@ -8,6 +8,7 @@ import Footer from "@/components/layout/Footer";
 import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
 import { SITE_URL } from "@/lib/site";
 import { getSiteSettings } from "@/lib/settings";
+import { parseOpeningHoursRange } from "@/lib/hours";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -85,6 +86,13 @@ export default async function RootLayout({
 }>) {
   const settings = await getSiteSettings();
 
+  const [weekdayOpens, weekdayCloses] = parseOpeningHoursRange(
+    settings.hoursWeekday,
+  );
+  const [saturdayOpens, saturdayCloses] = parseOpeningHoursRange(
+    settings.hoursSaturday,
+  );
+
   const businessJsonLd = {
     "@context": "https://schema.org",
     "@type": "Store",
@@ -92,12 +100,31 @@ export default async function RootLayout({
     description:
       "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos y bombillas.",
     url: SITE_URL,
+    image: `${SITE_URL}/hero_background_1786545961305.png`,
+    telephone: settings.whatsappDisplay,
+    priceRange: "$$",
     address: {
       "@type": "PostalAddress",
       streetAddress: settings.addressLine,
       addressLocality: settings.addressCity,
       addressCountry: "AR",
     },
+    // Closed Sundays, matching the isStoreOpenNow() rule the "open now"
+    // badge uses — keep both in sync if that ever changes.
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: weekdayOpens,
+        closes: weekdayCloses,
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Saturday"],
+        opens: saturdayOpens,
+        closes: saturdayCloses,
+      },
+    ],
   };
 
   return (

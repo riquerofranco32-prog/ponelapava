@@ -1,10 +1,11 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { LOW_STOCK_THRESHOLD } from "@/lib/utils";
 
 export function stockColor(value: number): string {
   if (value <= 0) return "var(--dash-danger)";
-  if (value <= 5) return "var(--dash-accent)";
+  if (value <= LOW_STOCK_THRESHOLD) return "var(--dash-accent)";
   return "var(--dash-text)";
 }
 

@@ -3,6 +3,12 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 /**
+ * Stock at or below this (but above 0) is shown as "low stock" — same
+ * threshold the admin's stock stepper already colors as a warning.
+ */
+export const LOW_STOCK_THRESHOLD = 5;
+
+/**
  * Merges Tailwind CSS classes safely.
  */
 export function cn(...inputs: ClassValue[]) {

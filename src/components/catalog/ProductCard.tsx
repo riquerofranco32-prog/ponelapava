@@ -8,6 +8,7 @@ import { Product } from "@/types";
 import {
   formatPrice,
   getCategoryLabel,
+  LOW_STOCK_THRESHOLD,
   trackSpotlight,
   truncate,
 } from "@/lib/utils";
@@ -29,6 +30,8 @@ export default function ProductCard({
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const isOutOfStock = product.status === "out_of_stock";
   const isFeatured = product.status === "featured";
+  const isLowStock =
+    !isOutOfStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
 
   if (view === "list") {
     return (
@@ -56,6 +59,11 @@ export default function ProductCard({
                 {getCategoryLabel(product.category)}
               </Badge>
               {isFeatured && <Badge variant="featured">Destacado</Badge>}
+              {isLowStock && (
+                <Badge variant="low_stock">
+                  Últimas {product.stock} unidades
+                </Badge>
+              )}
             </div>
             <Link href={`/producto/${product.id}`}>
               <h3 className="font-medium text-pava-brown hover:text-pava-green transition-colors leading-tight">
@@ -116,9 +124,14 @@ export default function ProductCard({
         </Link>
 
         {/* Badges */}
-        {isFeatured && !isOutOfStock && (
-          <div className="absolute left-3 top-3">
-            <Badge variant="featured">Destacado</Badge>
+        {!isOutOfStock && (isFeatured || isLowStock) && (
+          <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+            {isFeatured && <Badge variant="featured">Destacado</Badge>}
+            {isLowStock && (
+              <Badge variant="low_stock">
+                Últimas {product.stock} unidades
+              </Badge>
+            )}
           </div>
         )}
 

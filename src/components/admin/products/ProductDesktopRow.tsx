@@ -27,7 +27,7 @@ export function ProductDesktopRow({
   compact?: boolean;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
-  onStockChange: (product: Product, next: number) => void;
+  onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
   return (
     <tr

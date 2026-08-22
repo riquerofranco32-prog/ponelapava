@@ -131,11 +131,9 @@ export default function AdminPage() {
   // Mirrors ProductForm's stock/status link: 0 auto-marks out of stock,
   // restocking from 0 auto-clears it back to available.
   //
-  // Nothing awaits this function's promise (the stepper's onClick fires
-  // it and moves on), so a thrown error here would otherwise become a
-  // silent unhandled rejection — the count looks unchanged and nobody
-  // knows the write failed. Catch it and surface it in the same banner
-  // used for the initial product-load failure.
+  // Rethrows on failure — StockStepper awaits this to know when to roll
+  // its optimistic count back, so swallowing the error here would leave
+  // the count wrong on screen with no toast to explain why.
   async function handleStockChange(product: Product, next: number) {
     const qty = Math.max(0, next);
     let status = product.status;
@@ -146,9 +144,11 @@ export default function AdminPage() {
     try {
       await handleUpdate(id, { ...rest, stock: qty, status });
     } catch (err) {
-      setLoadError(
+      showToast(
         err instanceof Error ? err.message : "No se pudo actualizar el stock",
+        "error",
       );
+      throw err;
     }
   }
 
@@ -382,7 +382,7 @@ function ProductsTable({
   compact?: boolean;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
-  onStockChange: (product: Product, next: number) => void;
+  onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
   const th: React.CSSProperties = {
     textAlign: "left",

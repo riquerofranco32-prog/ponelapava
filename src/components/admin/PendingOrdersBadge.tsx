@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Order } from "@/types";
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -17,12 +16,10 @@ export default function PendingOrdersBadge({
 
     async function poll() {
       try {
-        const res = await fetch("/api/admin/orders");
+        const res = await fetch("/api/admin/orders/pending-count");
         if (!res.ok) return;
-        const orders: Order[] = await res.json();
-        if (!cancelled) {
-          setCount(orders.filter((o) => o.status === "pending").length);
-        }
+        const { count } = await res.json();
+        if (!cancelled) setCount(count);
       } catch {
         // silent — a failed poll just keeps the last known count
       }

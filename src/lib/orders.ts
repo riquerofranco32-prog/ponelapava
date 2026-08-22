@@ -71,6 +71,18 @@ export async function updateOrderStatus(
   if (error) throw error;
 }
 
+// `head: true` skips fetching row data entirely — Postgres returns just the
+// count, so this badge polling every 30s doesn't drag the whole order
+// history along just to check a number.
+export async function getPendingOrdersCount(): Promise<number> {
+  const { count, error } = await supabaseAdmin()
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export interface DashboardStats {
   totalRevenue: number;
   orderCount: number;

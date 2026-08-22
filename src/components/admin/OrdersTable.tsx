@@ -3,26 +3,15 @@
 import { useEffect, useState } from "react";
 import { Clock, CheckCircle2, PackageCheck, ShoppingBag } from "lucide-react";
 import { Order } from "@/types";
-import { formatPrice } from "@/lib/utils";
+import { STATUS_LABELS } from "@/lib/orderStatus";
 import { AdminKpiCard } from "./AdminCard";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
 import { useAdminToast } from "./AdminToast";
-
-const STATUS_LABELS: Record<Order["status"], string> = {
-  pending: "Pendiente",
-  confirmed: "Confirmado",
-  delivered: "Entregado",
-  cancelled: "Cancelado",
-};
-
-const STATUS_COLORS: Record<Order["status"], { color: string; bg: string }> = {
-  pending: { color: "var(--dash-accent)", bg: "rgba(199,166,122,0.12)" },
-  confirmed: { color: "var(--dash-success)", bg: "var(--dash-success-bg)" },
-  delivered: { color: "var(--dash-muted)", bg: "var(--dash-surface-2)" },
-  cancelled: { color: "var(--dash-danger)", bg: "var(--dash-danger-bg)" },
-};
+import { OrderDesktopRow } from "./orders/OrderDesktopRow";
+import { OrderMobileCard } from "./orders/OrderMobileCard";
+import { OrderDetailModal } from "./orders/OrderDetailModal";
 
 type StatusFilter = "all" | Order["status"];
 
@@ -31,6 +20,7 @@ export default function OrdersTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const showToast = useAdminToast();
 
   async function loadOrders() {
@@ -118,11 +108,6 @@ export default function OrdersTable() {
     letterSpacing: "0.05em",
     color: "var(--dash-muted)",
   };
-  const td: React.CSSProperties = {
-    padding: "12px 14px",
-    borderTop: "1px solid var(--dash-border)",
-    verticalAlign: "top",
-  };
 
   return (
     <div>
@@ -185,110 +170,64 @@ export default function OrdersTable() {
           description="Probá con otro filtro."
         />
       ) : (
-        <div style={{ overflowX: "auto", maxHeight: "70vh" }}>
-          <table
-            className="admin-table"
-            style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
+        <>
+          <div
+            className="admin-desktop-only"
+            style={{ overflowX: "auto", maxHeight: "70vh" }}
           >
-            <thead>
-              <tr>
-                <th style={th}>Cliente</th>
-                <th style={th}>Productos</th>
-                <th style={th}>Total</th>
-                <th style={th}>Fecha</th>
-                <th style={th}>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order, index) => (
-                <tr
-                  key={order.id}
-                  className="admin-row-in admin-row-hover"
-                  style={{ "--i": index } as React.CSSProperties}
-                >
-                  <td style={td}>
-                    <span
-                      style={{ fontWeight: 500, color: "var(--dash-text)" }}
-                    >
-                      {order.customerName}
-                    </span>
-                    {order.comment && (
-                      <span
-                        style={{
-                          display: "block",
-                          fontSize: 12,
-                          color: "var(--dash-muted)",
-                          marginTop: 2,
-                          maxWidth: 220,
-                        }}
-                      >
-                        {order.comment}
-                      </span>
-                    )}
-                  </td>
-                  <td
-                    style={{ ...td, color: "var(--dash-muted)", maxWidth: 280 }}
-                  >
-                    {order.items
-                      .map((i) => `${i.productName} x${i.quantity}`)
-                      .join(", ")}
-                  </td>
-                  <td
-                    style={{
-                      ...td,
-                      fontWeight: 500,
-                      color: "var(--dash-text)",
-                    }}
-                  >
-                    {formatPrice(order.total)}
-                  </td>
-                  <td
-                    style={{
-                      ...td,
-                      color: "var(--dash-muted)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {new Date(order.createdAt).toLocaleDateString("es-AR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td style={td}>
-                    <select
-                      value={order.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          order.id!,
-                          e.target.value as Order["status"],
-                        )
-                      }
-                      style={{
-                        ...STATUS_COLORS[order.status],
-                        border: "none",
-                        borderRadius: 999,
-                        padding: "3px 10px",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {(Object.keys(STATUS_LABELS) as Order["status"][]).map(
-                        (s) => (
-                          <option key={s} value={s}>
-                            {STATUS_LABELS[s]}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </td>
+            <table
+              className="admin-table"
+              style={{
+                width: "100%",
+                fontSize: 14,
+                borderCollapse: "collapse",
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={th}>Cliente</th>
+                  <th style={th}>Productos</th>
+                  <th style={th}>Total</th>
+                  <th style={th}>Fecha</th>
+                  <th style={th}>Estado</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredOrders.map((order, index) => (
+                  <OrderDesktopRow
+                    key={order.id}
+                    order={order}
+                    index={index}
+                    onStatusChange={handleStatusChange}
+                    onView={setViewingOrder}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div
+            className="admin-mobile-only"
+            style={{ display: "flex", flexDirection: "column", gap: 10 }}
+          >
+            {filteredOrders.map((order, index) => (
+              <OrderMobileCard
+                key={order.id}
+                order={order}
+                index={index}
+                onStatusChange={handleStatusChange}
+                onView={setViewingOrder}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {viewingOrder && (
+        <OrderDetailModal
+          order={viewingOrder}
+          onClose={() => setViewingOrder(null)}
+        />
       )}
     </div>
   );

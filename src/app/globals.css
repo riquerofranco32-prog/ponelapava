@@ -849,11 +849,11 @@ body {
   color: var(--dash-danger);
 }
 
-/* ── Nav items (sidebar + mobile dropdown) ────────────
-   aria-current="page" carries the active look — one rule instead of
-   inline background/color per button, and it doubles as the a11y
-   marker screen readers need. */
-.admin-nav-item {
+/* ── Nav items (sidebar + mobile dropdown) + generic link-style
+   buttons (e.g. a table cell that opens a detail view) share the same
+   plain/hover look — only the active-page treatment is nav-specific. */
+.admin-nav-item,
+.admin-link-btn {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -869,7 +869,8 @@ body {
     background-color 0.18s ease,
     color 0.18s ease;
 }
-.admin-nav-item:hover {
+.admin-nav-item:hover,
+.admin-link-btn:hover {
   background: var(--dash-surface-2);
   color: var(--dash-text);
 }

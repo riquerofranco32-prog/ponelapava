@@ -1,5 +1,5 @@
 import { supabase, supabaseAdmin } from "@/lib/supabase";
-import { Order, OrderItem, CartItem } from "@/types";
+import { Order, OrderItem, CartItem, ProductStatus } from "@/types";
 
 interface OrderRow {
   id: string;
@@ -60,14 +60,106 @@ export async function getOrders(): Promise<Order[]> {
   return (data as OrderRow[]).map(fromRow);
 }
 
+// Mirrors admin/page.tsx's handleStockChange rule: 0 stock auto-marks a
+// product out_of_stock, restocking from 0 auto-clears it back to available.
+// sign is -1 when an order is confirmed (stock leaves), +1 when a confirmed
+// order is cancelled (stock comes back).
+async function adjustStock(items: OrderItem[], sign: -1 | 1): Promise<void> {
+  const admin = supabaseAdmin();
+  for (const item of items) {
+    const { data, error: fetchError } = await admin
+      .from("products")
+      .select("stock, status")
+      .eq("id", item.productId)
+      .single();
+    if (fetchError) throw fetchError;
+
+    const stock = Math.max(0, data.stock + sign * item.quantity);
+    let status = data.status as ProductStatus;
+    if (stock <= 0 && status !== "out_of_stock") status = "out_of_stock";
+    else if (stock > 0 && status === "out_of_stock") status = "available";
+
+    const { error: updateError } = await admin
+      .from("products")
+      .update({ stock, status })
+      .eq("id", item.productId);
+    if (updateError) throw updateError;
+  }
+}
+
+// Postgres "undefined_column" — thrown if supabase-migration-order-stock-applied.sql
+// hasn't been run yet. Order status changes must keep working even then;
+// they just skip stock adjustment until the migration lands.
+const UNDEFINED_COLUMN = "42703";
+
 export async function updateOrderStatus(
   id: string,
   status: Order["status"],
 ): Promise<void> {
-  const { error } = await supabaseAdmin()
+  const admin = supabaseAdmin();
+
+  // stock_applied is an idempotency guard so a double-click on "Confirmado",
+  // or a delivered->confirmed->delivered round-trip, can't decrement (or
+  // restore) stock twice.
+  let current: {
+    status: Order["status"];
+    items: OrderItem[];
+    stock_applied?: boolean;
+  };
+  let hasStockColumn = true;
+  const first = await admin
     .from("orders")
-    .update({ status })
-    .eq("id", id);
+    .select("status, stock_applied, items")
+    .eq("id", id)
+    .single();
+  if (first.error?.code === UNDEFINED_COLUMN) {
+    hasStockColumn = false;
+    const fallback = await admin
+      .from("orders")
+      .select("status, items")
+      .eq("id", id)
+      .single();
+    if (fallback.error) throw fallback.error;
+    current = fallback.data;
+  } else if (first.error) {
+    throw first.error;
+  } else {
+    current = first.data;
+  }
+
+  const currentStatus = current.status as Order["status"];
+  const stockApplied = hasStockColumn
+    ? (current.stock_applied as boolean)
+    : false;
+  const items = current.items as OrderItem[];
+
+  const update: { status: Order["status"]; stock_applied?: boolean } = {
+    status,
+  };
+
+  if (hasStockColumn) {
+    if (
+      status === "confirmed" &&
+      currentStatus !== "confirmed" &&
+      !stockApplied
+    ) {
+      await adjustStock(items, -1);
+      update.stock_applied = true;
+    } else if (
+      currentStatus === "confirmed" &&
+      status === "cancelled" &&
+      stockApplied
+    ) {
+      await adjustStock(items, 1);
+      update.stock_applied = false;
+    }
+  } else {
+    console.warn(
+      "orders.stock_applied column missing — run supabase-migration-order-stock-applied.sql. Skipping stock adjustment.",
+    );
+  }
+
+  const { error } = await admin.from("orders").update(update).eq("id", id);
   if (error) throw error;
 }
 
@@ -87,18 +179,29 @@ export interface DashboardStats {
   totalRevenue: number;
   orderCount: number;
   avgTicket: number;
+  revenueChange: number | null;
+  orderCountChange: number | null;
+  avgTicketChange: number | null;
   salesByDay: { date: string; total: number }[];
   topProducts: { name: string; quantity: number }[];
 }
 
-// Last 14 days of orders drive both the revenue KPIs and the sales chart —
+// Last 14 days of orders drive the revenue KPIs and the sales chart —
 // enough to be useful for a small shop without pulling the whole history
-// on every dashboard load.
+// on every dashboard load. The prior 14 days are fetched in the same query
+// (28-day window) just to compute the change vs. the previous period.
 const STATS_WINDOW_DAYS = 14;
+
+// (recent - previous) / previous * 100, or null when previous is 0 (avoids
+// Infinity/NaN when there's nothing to compare against).
+function percentChange(recent: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return ((recent - previous) / previous) * 100;
+}
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const since = new Date();
-  since.setDate(since.getDate() - STATS_WINDOW_DAYS);
+  since.setDate(since.getDate() - STATS_WINDOW_DAYS * 2);
 
   const { data, error } = await supabaseAdmin()
     .from("orders")
@@ -107,11 +210,29 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .neq("status", "cancelled");
   if (error) throw error;
 
-  const orders = data as Pick<OrderRow, "total" | "items" | "created_at">[];
+  const allOrders = data as Pick<OrderRow, "total" | "items" | "created_at">[];
+
+  const boundary = new Date();
+  boundary.setDate(boundary.getDate() - STATS_WINDOW_DAYS);
+  const boundaryIso = boundary.toISOString();
+
+  const orders = allOrders.filter((o) => o.created_at >= boundaryIso);
+  const previousOrders = allOrders.filter((o) => o.created_at < boundaryIso);
 
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
   const orderCount = orders.length;
   const avgTicket = orderCount > 0 ? Math.round(totalRevenue / orderCount) : 0;
+
+  const previousRevenue = previousOrders.reduce((sum, o) => sum + o.total, 0);
+  const previousOrderCount = previousOrders.length;
+  const previousAvgTicket =
+    previousOrderCount > 0
+      ? Math.round(previousRevenue / previousOrderCount)
+      : 0;
+
+  const revenueChange = percentChange(totalRevenue, previousRevenue);
+  const orderCountChange = percentChange(orderCount, previousOrderCount);
+  const avgTicketChange = percentChange(avgTicket, previousAvgTicket);
 
   const byDay = new Map<string, number>();
   for (let i = STATS_WINDOW_DAYS - 1; i >= 0; i--) {
@@ -144,5 +265,14 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
 
-  return { totalRevenue, orderCount, avgTicket, salesByDay, topProducts };
+  return {
+    totalRevenue,
+    orderCount,
+    avgTicket,
+    revenueChange,
+    orderCountChange,
+    avgTicketChange,
+    salesByDay,
+    topProducts,
+  };
 }

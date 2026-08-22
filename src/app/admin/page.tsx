@@ -207,7 +207,10 @@ export default function AdminPage() {
       {/* ── DASHBOARD ── */}
       {activeSection === "dashboard" && (
         <div>
-          <DashboardStats />
+          <DashboardStats
+            products={products}
+            onStockChange={handleStockChange}
+          />
 
           {loading ? (
             <KpiSkeleton count={4} />
@@ -239,27 +242,6 @@ export default function AdminPage() {
               />
             </div>
           )}
-
-          <AdminCard>
-            <h2
-              style={{
-                fontFamily: "var(--font-playfair), Georgia, serif",
-                fontSize: 16,
-                fontWeight: 700,
-                marginBottom: 16,
-                color: "var(--dash-text)",
-              }}
-            >
-              Últimos productos
-            </h2>
-            <ProductsTable
-              data={products.slice(0, 5)}
-              compact
-              onEdit={setEditingProduct}
-              onDelete={setDeletingProduct}
-              onStockChange={handleStockChange}
-            />
-          </AdminCard>
         </div>
       )}
 

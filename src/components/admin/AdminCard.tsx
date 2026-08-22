@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn, trackSpotlight } from "@/lib/utils";
+import { AdminMetric } from "@/types";
 
 export function AdminCard({
   children,
@@ -48,10 +49,14 @@ export function AdminKpiCard({
   label,
   value,
   icon: Icon,
+  change,
+  trend,
 }: {
   label: string;
   value: number | string;
   icon?: React.ComponentType<{ size?: number }>;
+  change?: AdminMetric["change"];
+  trend?: AdminMetric["trend"];
 }) {
   const isNumeric = typeof value === "number";
   const countedValue = useCountUp(isNumeric ? value : 0);
@@ -102,17 +107,31 @@ export function AdminKpiCard({
           </span>
         )}
       </div>
-      <span
-        style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 28,
-          fontWeight: 700,
-          color: "var(--dash-text)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
-        {isNumeric ? countedValue : value}
-      </span>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: 28,
+            fontWeight: 700,
+            color: "var(--dash-text)",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {isNumeric ? countedValue : value}
+        </span>
+        {change && trend && trend !== "neutral" && (
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color:
+                trend === "up" ? "var(--dash-success)" : "var(--dash-danger)",
+            }}
+          >
+            {trend === "up" ? "▲" : "▼"} {change}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

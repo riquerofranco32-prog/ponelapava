@@ -10,11 +10,14 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { DollarSign, ShoppingCart, Receipt } from "lucide-react";
+import { DollarSign, ShoppingCart, Receipt, PackageCheck } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, LOW_STOCK_THRESHOLD } from "@/lib/utils";
+import { Product } from "@/types";
 import { AdminCard, AdminKpiCard } from "./AdminCard";
 import { KpiSkeleton } from "./TableSkeleton";
+import { EmptyState } from "./EmptyState";
+import { StockStepper } from "./products/StockStepper";
 import { assertOk } from "@/lib/admin-fetch";
 
 function formatDayLabel(iso: string): string {
@@ -22,7 +25,23 @@ function formatDayLabel(iso: string): string {
   return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
 }
 
-export default function DashboardStats() {
+// Renders as AdminKpiCard's change/trend props, or nothing when there's no
+// prior-period data to compare against (percentChange returned null).
+function kpiDelta(pct: number | null) {
+  if (pct === null) return {};
+  return {
+    change: `${Math.abs(Math.round(pct))}%`,
+    trend: (pct >= 0 ? "up" : "down") as "up" | "down",
+  };
+}
+
+export default function DashboardStats({
+  products,
+  onStockChange,
+}: {
+  products: Product[];
+  onStockChange: (product: Product, next: number) => Promise<void>;
+}) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,16 +87,19 @@ export default function DashboardStats() {
             icon={DollarSign}
             label="Ingresos (14 días)"
             value={formatPrice(stats.totalRevenue)}
+            {...kpiDelta(stats.revenueChange)}
           />
           <AdminKpiCard
             icon={ShoppingCart}
             label="Pedidos (14 días)"
             value={stats.orderCount}
+            {...kpiDelta(stats.orderCountChange)}
           />
           <AdminKpiCard
             icon={Receipt}
             label="Ticket promedio"
             value={formatPrice(stats.avgTicket)}
+            {...kpiDelta(stats.avgTicketChange)}
           />
         </div>
       )}
@@ -159,6 +181,12 @@ export default function DashboardStats() {
         )}
       </AdminCard>
 
+      <RestockPanel
+        products={products}
+        fastMovers={stats?.topProducts ?? []}
+        onStockChange={onStockChange}
+      />
+
       {stats && stats.topProducts.length > 0 && (
         <AdminCard>
           <h2
@@ -198,5 +226,98 @@ export default function DashboardStats() {
         </AdminCard>
       )}
     </div>
+  );
+}
+
+function RestockPanel({
+  products,
+  fastMovers,
+  onStockChange,
+}: {
+  products: Product[];
+  fastMovers: { name: string; quantity: number }[];
+  onStockChange: (product: Product, next: number) => Promise<void>;
+}) {
+  const fastMoverNames = new Set(fastMovers.map((p) => p.name));
+  const needsRestock = products
+    .filter((p) => p.stock <= LOW_STOCK_THRESHOLD)
+    .sort((a, b) => a.stock - b.stock);
+
+  return (
+    <AdminCard style={{ marginBottom: 20 }}>
+      <h2
+        style={{
+          fontFamily: "var(--font-playfair), Georgia, serif",
+          fontSize: 16,
+          fontWeight: 700,
+          marginBottom: 16,
+          color: "var(--dash-text)",
+        }}
+      >
+        Necesita reposición
+      </h2>
+      {needsRestock.length === 0 ? (
+        <EmptyState
+          icon={PackageCheck}
+          title="Todo en orden"
+          description="Ningún producto está agotado o con stock bajo."
+        />
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {needsRestock.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                fontSize: 13,
+                paddingBottom: 10,
+                borderBottom: "1px solid var(--dash-border)",
+              }}
+            >
+              <span
+                style={{
+                  color: "var(--dash-text)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {p.name}
+                {fastMoverNames.has(p.name) && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.03em",
+                      color: "var(--dash-danger)",
+                      background: "var(--dash-danger-bg)",
+                      border: "1px solid var(--dash-danger-border)",
+                      borderRadius: 999,
+                      padding: "2px 8px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    se vende rápido
+                  </span>
+                )}
+              </span>
+              <div style={{ flexShrink: 0 }}>
+                <StockStepper
+                  value={p.stock}
+                  onChange={(next) => onStockChange(p, next)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </AdminCard>
   );
 }

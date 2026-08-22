@@ -80,8 +80,18 @@ export default function AdminShell({
     setMobileOpen(false);
   }
 
+  const sidebarWidth = collapsed ? "64px" : "232px";
+
   return (
-    <div className="pava-admin" style={{ display: "flex" }}>
+    <div
+      className="pava-admin"
+      style={
+        {
+          display: "flex",
+          "--admin-sidebar-w": sidebarWidth,
+        } as React.CSSProperties
+      }
+    >
       {/* ── MOBILE TOP BAR ── */}
       <header
         className="lg:hidden flex items-center justify-between"
@@ -178,22 +188,9 @@ export default function AdminShell({
             <button
               key={item.id}
               onClick={() => selectSection(item.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "12px 14px",
-                borderRadius: 8,
-                fontSize: 14,
-                fontWeight: isActive ? 700 : 500,
-                textAlign: "left",
-                color: isActive ? "#1e1b15" : "var(--dash-text)",
-                background: isActive
-                  ? "var(--dash-accent)"
-                  : "var(--dash-surface-2)",
-                border: "none",
-                cursor: "pointer",
-              }}
+              aria-current={isActive ? "page" : undefined}
+              className="admin-nav-item"
+              style={{ padding: "12px 14px" }}
             >
               <item.icon size={16} />
               <span style={{ flex: 1 }}>{item.label}</span>
@@ -258,6 +255,7 @@ export default function AdminShell({
             <button
               key={item.id}
               onClick={() => selectSection(item.id)}
+              aria-current={isActive ? "page" : undefined}
               style={{
                 flex: 1,
                 display: "flex",
@@ -269,6 +267,7 @@ export default function AdminShell({
                 border: "none",
                 color: isActive ? "var(--dash-accent)" : "var(--dash-muted)",
                 cursor: "pointer",
+                transition: "color 0.18s ease",
               }}
             >
               <span style={{ position: "relative", display: "flex" }}>
@@ -373,22 +372,11 @@ export default function AdminShell({
                 key={item.id}
                 onClick={() => onSectionChange(item.id)}
                 title={collapsed ? item.label : undefined}
-                className={isActive ? undefined : "admin-nav-link"}
+                aria-current={isActive ? "page" : undefined}
+                className="admin-nav-item"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
                   padding: collapsed ? "10px 0" : "10px 12px",
                   justifyContent: collapsed ? "center" : "flex-start",
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: isActive ? 600 : 400,
-                  color: isActive ? "#1e1b15" : "var(--dash-muted)",
-                  background: isActive ? "var(--dash-accent)" : "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  textAlign: "left",
                   position: collapsed ? "relative" : undefined,
                 }}
               >
@@ -481,27 +469,10 @@ export default function AdminShell({
         }}
         className="lg:pt-8 lg:pb-8 lg:px-8"
       >
-        <div
-          className="lg:ml-0"
-          style={{
-            marginLeft: 0,
-          }}
-        >
+        <div key={activeSection} className="admin-section-in">
           {children}
         </div>
       </main>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @media (min-width: 1024px) {
-          .pava-admin main {
-            margin-left: ${collapsed ? 64 : 232}px;
-            transition: margin-left 0.2s ease;
-          }
-        }
-      `,
-        }}
-      />
     </div>
   );
 }

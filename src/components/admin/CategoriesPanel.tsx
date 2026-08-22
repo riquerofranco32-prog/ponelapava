@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { ProductThumb } from "@/components/admin/products/ProductThumb";
 import { IconButton } from "@/components/admin/products/IconButton";
 import CategoryForm from "@/components/admin/CategoryForm";
+import { useAdminToast } from "@/components/admin/AdminToast";
 import { Tag } from "lucide-react";
 
 interface CategoriesPanelProps {
@@ -28,6 +29,7 @@ export default function CategoriesPanel({
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
+  const showToast = useAdminToast();
 
   function productCount(slug: string): number {
     return products.filter((p) => p.category === slug).length;
@@ -44,6 +46,7 @@ export default function CategoriesPanel({
     assertOk(res, "No se pudo crear la categoría");
     setCreating(false);
     onChange();
+    showToast("Categoría creada");
   }
 
   async function handleUpdate(id: string, input: CategoryInput) {
@@ -55,6 +58,7 @@ export default function CategoriesPanel({
     assertOk(res, "No se pudo actualizar la categoría");
     setEditing(null);
     onChange();
+    showToast("Categoría actualizada");
   }
 
   async function handleDelete(category: Category) {
@@ -64,6 +68,7 @@ export default function CategoriesPanel({
     assertOk(res, "No se pudo eliminar la categoría");
     setDeleting(null);
     onChange();
+    showToast("Categoría eliminada");
   }
 
   async function saveSortOrder(category: Category, sortOrder: number) {
@@ -118,7 +123,11 @@ export default function CategoriesPanel({
           {categories.map((category, index) => {
             const count = productCount(category.slug);
             return (
-              <AdminCard key={category.id}>
+              <AdminCard
+                key={category.id}
+                className="admin-row-in"
+                style={{ "--i": index } as React.CSSProperties}
+              >
                 <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
                   <ProductThumb src={category.image} size={48} />
                   <div style={{ minWidth: 0, flex: 1 }}>

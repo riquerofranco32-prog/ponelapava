@@ -65,7 +65,7 @@ export function AdminModal({
   // viewport, not a transformed ancestor.
   return createPortal(
     <div
-      className="pava-admin"
+      className="pava-admin admin-modal-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -86,6 +86,7 @@ export function AdminModal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        className="admin-modal-dialog"
         style={{
           width: "100%",
           maxWidth,
@@ -116,18 +117,8 @@ export function AdminModal({
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: "var(--dash-surface-2)",
-              border: "none",
-              color: "var(--dash-muted)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className="admin-icon-btn"
+            style={{ width: 32, height: 32, borderRadius: "50%" }}
           >
             <X size={16} />
           </button>

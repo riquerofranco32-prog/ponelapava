@@ -8,6 +8,7 @@ import { AdminKpiCard } from "./AdminCard";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
+import { useAdminToast } from "./AdminToast";
 
 const STATUS_LABELS: Record<Order["status"], string> = {
   pending: "Pendiente",
@@ -30,6 +31,7 @@ export default function OrdersTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const showToast = useAdminToast();
 
   async function loadOrders() {
     setLoading(true);
@@ -58,9 +60,11 @@ export default function OrdersTable() {
         body: JSON.stringify({ status }),
       });
       assertOk(res, "No se pudo actualizar el estado del pedido");
+      showToast(`Pedido marcado como ${STATUS_LABELS[status].toLowerCase()}`);
     } catch (err) {
-      setError(
+      showToast(
         err instanceof Error ? err.message : "No se pudo actualizar el estado",
+        "error",
       );
       loadOrders(); // revert the optimistic update
     }
@@ -122,14 +126,7 @@ export default function OrdersTable() {
 
   return (
     <div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
+      <div className="admin-kpi-grid">
         <AdminKpiCard icon={ShoppingBag} label="Total" value={orders.length} />
         <AdminKpiCard icon={Clock} label="Pendientes" value={pendingCount} />
         <AdminKpiCard
@@ -188,8 +185,9 @@ export default function OrdersTable() {
           description="Probá con otro filtro."
         />
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto", maxHeight: "70vh" }}>
           <table
+            className="admin-table"
             style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
           >
             <thead>
@@ -202,8 +200,12 @@ export default function OrdersTable() {
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id}>
+              {filteredOrders.map((order, index) => (
+                <tr
+                  key={order.id}
+                  className="admin-row-in admin-row-hover"
+                  style={{ "--i": index } as React.CSSProperties}
+                >
                   <td style={td}>
                     <span
                       style={{ fontWeight: 500, color: "var(--dash-text)" }}

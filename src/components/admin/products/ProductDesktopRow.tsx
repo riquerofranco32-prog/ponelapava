@@ -16,19 +16,24 @@ const td: React.CSSProperties = {
 
 export function ProductDesktopRow({
   product,
+  index = 0,
   compact = false,
   onEdit,
   onDelete,
   onStockChange,
 }: {
   product: Product;
+  index?: number;
   compact?: boolean;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => void;
 }) {
   return (
-    <tr>
+    <tr
+      className="admin-row-in admin-row-hover"
+      style={{ "--i": index } as React.CSSProperties}
+    >
       <td style={td}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <ProductThumb src={product.images[0]} />

@@ -14,6 +14,7 @@ import { DollarSign, ShoppingCart, Receipt } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
 import { AdminCard, AdminKpiCard } from "./AdminCard";
+import { KpiSkeleton } from "./TableSkeleton";
 import { assertOk } from "@/lib/admin-fetch";
 
 function formatDayLabel(iso: string): string {
@@ -59,30 +60,27 @@ export default function DashboardStats() {
 
   return (
     <div style={{ marginBottom: 32 }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 16,
-          marginBottom: 20,
-        }}
-      >
-        <AdminKpiCard
-          icon={DollarSign}
-          label="Ingresos (14 días)"
-          value={stats ? formatPrice(stats.totalRevenue) : "…"}
-        />
-        <AdminKpiCard
-          icon={ShoppingCart}
-          label="Pedidos (14 días)"
-          value={stats?.orderCount ?? "…"}
-        />
-        <AdminKpiCard
-          icon={Receipt}
-          label="Ticket promedio"
-          value={stats ? formatPrice(stats.avgTicket) : "…"}
-        />
-      </div>
+      {!stats ? (
+        <KpiSkeleton count={3} />
+      ) : (
+        <div className="admin-kpi-grid">
+          <AdminKpiCard
+            icon={DollarSign}
+            label="Ingresos (14 días)"
+            value={formatPrice(stats.totalRevenue)}
+          />
+          <AdminKpiCard
+            icon={ShoppingCart}
+            label="Pedidos (14 días)"
+            value={stats.orderCount}
+          />
+          <AdminKpiCard
+            icon={Receipt}
+            label="Ticket promedio"
+            value={formatPrice(stats.avgTicket)}
+          />
+        </div>
+      )}
 
       <AdminCard style={{ marginBottom: 20 }}>
         <h2

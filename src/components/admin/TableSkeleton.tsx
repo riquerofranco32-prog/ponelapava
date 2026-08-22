@@ -18,3 +18,17 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
     </div>
   );
 }
+
+export function KpiSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="admin-kpi-grid">
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="admin-card admin-skeleton-row"
+          style={{ height: 84 }}
+        />
+      ))}
+    </div>
+  );
+}

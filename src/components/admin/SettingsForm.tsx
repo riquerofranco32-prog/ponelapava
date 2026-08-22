@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SiteSettings } from "@/lib/settings";
 import { AdminField } from "@/components/admin/AdminField";
 import { AdminButton } from "@/components/admin/AdminButton";
+import { useAdminToast } from "@/components/admin/AdminToast";
 import { assertOk } from "@/lib/admin-fetch";
 
 export default function SettingsForm() {
@@ -11,7 +12,7 @@ export default function SettingsForm() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const showToast = useAdminToast();
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -29,7 +30,6 @@ export default function SettingsForm() {
     if (!settings) return;
     setSaving(true);
     setError(null);
-    setSaved(false);
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
@@ -38,8 +38,7 @@ export default function SettingsForm() {
       });
       assertOk(res, "No se pudo guardar la configuración");
       setSettings(await res.json());
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      showToast("Configuración guardada");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar");
     } finally {
@@ -56,9 +55,26 @@ export default function SettingsForm() {
 
   if (loading) {
     return (
-      <p style={{ fontSize: 14, color: "var(--dash-muted)" }}>
-        Cargando configuración...
-      </p>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+          maxWidth: 520,
+        }}
+      >
+        {[56, 56, 56, 56, 56, 100].map((height, i) => (
+          <div
+            key={i}
+            className="admin-skeleton-row"
+            style={{
+              height,
+              borderRadius: 8,
+              background: "var(--dash-surface-2)",
+            }}
+          />
+        ))}
+      </div>
     );
   }
 
@@ -170,11 +186,6 @@ export default function SettingsForm() {
         <AdminButton type="submit" disabled={saving}>
           {saving ? "Guardando..." : "Guardar cambios"}
         </AdminButton>
-        {saved && (
-          <span style={{ fontSize: 13, color: "var(--dash-success)" }}>
-            Guardado ✓
-          </span>
-        )}
       </div>
       <p style={{ fontSize: 12, color: "var(--dash-muted)" }}>
         Los cambios se reflejan en el sitio público en hasta 60 segundos.

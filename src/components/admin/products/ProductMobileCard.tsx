@@ -10,25 +10,31 @@ import { IconButton } from "./IconButton";
 
 export function ProductMobileCard({
   product,
+  index = 0,
   onEdit,
   onDelete,
   onStockChange,
 }: {
   product: Product;
+  index?: number;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => void;
 }) {
   return (
     <div
-      style={{
-        display: "flex",
-        gap: 12,
-        padding: 14,
-        background: "var(--dash-surface)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 10,
-      }}
+      className="admin-row-in"
+      style={
+        {
+          display: "flex",
+          gap: 12,
+          padding: 14,
+          background: "var(--dash-surface)",
+          border: "1px solid var(--dash-border)",
+          borderRadius: 10,
+          "--i": index,
+        } as React.CSSProperties
+      }
     >
       <ProductThumb src={product.images[0]} size={52} />
       <div style={{ flex: 1, minWidth: 0 }}>

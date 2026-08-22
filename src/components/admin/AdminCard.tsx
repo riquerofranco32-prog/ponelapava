@@ -1,25 +1,47 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { cn, trackSpotlight } from "@/lib/utils";
+
 export function AdminCard({
   children,
   style,
+  className,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
+  className?: string;
 }) {
   return (
-    <div
-      style={{
-        background: "var(--dash-surface)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 12,
-        padding: 20,
-        ...style,
-      }}
-    >
+    <div className={cn("admin-card", className)} style={style}>
       {children}
     </div>
   );
+}
+
+function useCountUp(value: number, duration = 600): number {
+  const [display, setDisplay] = useState(value);
+  const fromRef = useRef(value);
+
+  useEffect(() => {
+    const from = fromRef.current;
+    const to = value;
+    if (from === to) return;
+
+    let raf = 0;
+    let start: number | null = null;
+    function step(timestamp: number) {
+      if (start === null) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      setDisplay(Math.round(from + (to - from) * progress));
+      if (progress < 1) raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+    fromRef.current = to;
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+
+  return display;
 }
 
 export function AdminKpiCard({
@@ -31,8 +53,18 @@ export function AdminKpiCard({
   value: number | string;
   icon?: React.ComponentType<{ size?: number }>;
 }) {
+  const isNumeric = typeof value === "number";
+  const countedValue = useCountUp(isNumeric ? value : 0);
+
   return (
-    <AdminCard>
+    <div
+      className="admin-card admin-card--interactive group"
+      onMouseMove={trackSpotlight}
+    >
+      <span
+        aria-hidden="true"
+        className="spotlight-overlay pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
       <div
         style={{
           display: "flex",
@@ -76,10 +108,11 @@ export function AdminKpiCard({
           fontSize: 28,
           fontWeight: 700,
           color: "var(--dash-text)",
+          fontVariantNumeric: "tabular-nums",
         }}
       >
-        {value}
+        {isNumeric ? countedValue : value}
       </span>
-    </AdminCard>
+    </div>
   );
 }

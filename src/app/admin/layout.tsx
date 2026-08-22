@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { AdminUserProvider } from "@/context/AdminUserContext";
+import { AdminToastProvider } from "@/components/admin/AdminToast";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -22,6 +23,8 @@ export default async function AdminLayout({
   if (!user) redirect("/login");
 
   return (
-    <AdminUserProvider email={user.email ?? ""}>{children}</AdminUserProvider>
+    <AdminUserProvider email={user.email ?? ""}>
+      <AdminToastProvider>{children}</AdminToastProvider>
+    </AdminUserProvider>
   );
 }

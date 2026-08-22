@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -22,12 +22,13 @@ import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
-import { TableSkeleton } from "@/components/admin/TableSkeleton";
+import { TableSkeleton, KpiSkeleton } from "@/components/admin/TableSkeleton";
 import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import DashboardStats from "@/components/admin/DashboardStats";
 import OrdersTable from "@/components/admin/OrdersTable";
 import SettingsForm from "@/components/admin/SettingsForm";
+import { useAdminToast } from "@/components/admin/AdminToast";
 
 type AdminSection =
   "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
@@ -51,9 +52,14 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const showToast = useAdminToast();
 
-  async function loadProducts() {
-    setLoading(true);
+  // `silent` skips the loading flag on refetches after a mutation — the
+  // table already has data on screen, so flashing it back to a skeleton
+  // on every save/delete reads as a glitch rather than a load.
+  async function loadProducts(silent = false) {
+    if (!silent) setLoading(true);
     setLoadError(null);
     try {
       const res = await fetch("/api/admin/products");
@@ -62,7 +68,7 @@ export default function AdminPage() {
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
@@ -79,6 +85,21 @@ export default function AdminPage() {
     );
   }, []);
 
+  // "/" jumps straight to the product search, mirroring the shortcut
+  // shoppers already know from GitHub/Linear-style tools.
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key !== "/") return;
+      const target = e.target as HTMLElement;
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (activeSection !== "productos") return;
+      e.preventDefault();
+      searchInputRef.current?.focus();
+    }
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [activeSection]);
+
   async function handleCreate(input: ProductInput) {
     const res = await fetch("/api/admin/products", {
       method: "POST",
@@ -87,7 +108,8 @@ export default function AdminPage() {
     });
     assertOk(res, "No se pudo crear el producto");
     setCreating(false);
-    await loadProducts();
+    await loadProducts(true);
+    showToast("Producto creado");
   }
 
   async function handleUpdate(id: string, input: ProductInput) {
@@ -98,7 +120,12 @@ export default function AdminPage() {
     });
     assertOk(res, "No se pudo actualizar el producto");
     setEditingProduct(null);
-    await loadProducts();
+    await loadProducts(true);
+  }
+
+  async function handleFormUpdate(id: string, input: ProductInput) {
+    await handleUpdate(id, input);
+    showToast("Producto actualizado");
   }
 
   // Mirrors ProductForm's stock/status link: 0 auto-marks out of stock,
@@ -131,7 +158,8 @@ export default function AdminPage() {
     });
     assertOk(res, "No se pudo eliminar el producto");
     setDeletingProduct(null);
-    await loadProducts();
+    await loadProducts(true);
+    showToast("Producto eliminado");
   }
 
   const filteredProducts = products.filter(
@@ -181,43 +209,36 @@ export default function AdminPage() {
         <div>
           <DashboardStats />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-              gap: 16,
-              marginBottom: 20,
-            }}
-          >
-            <AdminKpiCard
-              icon={Package}
-              label="Total de productos"
-              value={loading ? "…" : products.length}
-            />
-            <AdminKpiCard
-              icon={Star}
-              label="Destacados"
-              value={loading ? "…" : products.filter((p) => p.featured).length}
-            />
-            <AdminKpiCard
-              icon={PackageX}
-              label="Agotados"
-              value={
-                loading
-                  ? "…"
-                  : products.filter((p) => p.status === "out_of_stock").length
-              }
-            />
-            <AdminKpiCard
-              icon={AlertTriangle}
-              label="Stock bajo (≤5)"
-              value={
-                loading
-                  ? "…"
-                  : products.filter((p) => p.stock > 0 && p.stock <= 5).length
-              }
-            />
-          </div>
+          {loading ? (
+            <KpiSkeleton count={4} />
+          ) : (
+            <div className="admin-kpi-grid">
+              <AdminKpiCard
+                icon={Package}
+                label="Total de productos"
+                value={products.length}
+              />
+              <AdminKpiCard
+                icon={Star}
+                label="Destacados"
+                value={products.filter((p) => p.featured).length}
+              />
+              <AdminKpiCard
+                icon={PackageX}
+                label="Agotados"
+                value={
+                  products.filter((p) => p.status === "out_of_stock").length
+                }
+              />
+              <AdminKpiCard
+                icon={AlertTriangle}
+                label="Stock bajo (≤5)"
+                value={
+                  products.filter((p) => p.stock > 0 && p.stock <= 5).length
+                }
+              />
+            </div>
+          )}
 
           <AdminCard>
             <h2
@@ -267,8 +288,9 @@ export default function AdminPage() {
                 }}
               />
               <input
+                ref={searchInputRef}
                 type="search"
-                placeholder="Buscar producto..."
+                placeholder="Buscar producto... (/)"
                 value={searchProduct}
                 onChange={(e) => setSearchProduct(e.target.value)}
                 className="admin-input"
@@ -333,7 +355,7 @@ export default function AdminPage() {
         <ProductForm
           categories={categories}
           product={editingProduct}
-          onSave={(input) => handleUpdate(editingProduct.id, input)}
+          onSave={(input) => handleFormUpdate(editingProduct.id, input)}
           onCancel={() => setEditingProduct(null)}
         />
       )}
@@ -375,8 +397,12 @@ function ProductsTable({
   return (
     <>
       {/* Desktop — full table with an inline stock stepper per row */}
-      <div className="admin-desktop-only" style={{ overflowX: "auto" }}>
+      <div
+        className="admin-desktop-only"
+        style={{ overflowX: "auto", maxHeight: compact ? undefined : "70vh" }}
+      >
         <table
+          className="admin-table"
           style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
         >
           <thead>
@@ -390,9 +416,10 @@ function ProductsTable({
             </tr>
           </thead>
           <tbody>
-            {data.map((product) => (
+            {data.map((product, index) => (
               <ProductDesktopRow
                 key={product.id}
+                index={index}
                 product={product}
                 compact={compact}
                 onEdit={onEdit}
@@ -409,9 +436,10 @@ function ProductsTable({
         className="admin-mobile-only"
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-        {data.map((product) => (
+        {data.map((product, index) => (
           <ProductMobileCard
             key={product.id}
+            index={index}
             product={product}
             onEdit={onEdit}
             onDelete={onDelete}

@@ -98,8 +98,19 @@ export async function getRelatedProducts(
 
 export type ProductInput = Omit<Product, "id" | "createdAt">;
 
+// Stock is the source of truth for availability: whatever status a caller
+// passes, 0 stock always reads as out_of_stock and restocking always clears
+// that flag. Enforced here (not just in the admin form) so no write path —
+// current or future — can leave stock and status out of sync in the DB.
+function syncStatus(stock: number, status: ProductStatus): ProductStatus {
+  if (stock <= 0) return "out_of_stock";
+  if (status === "out_of_stock") return "available";
+  return status;
+}
+
 export async function createProduct(input: ProductInput): Promise<Product> {
   const id = crypto.randomUUID();
+  const stock = input.stock ?? 0;
   const { data, error } = await supabaseAdmin()
     .from("products")
     .insert({
@@ -110,8 +121,8 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       long_description: input.longDescription ?? null,
       price: input.price,
       category: input.category,
-      status: input.status,
-      stock: input.stock ?? 0,
+      status: syncStatus(stock, input.status),
+      stock,
       images: input.images,
       tags: input.tags ?? [],
       weight: input.weight ?? null,
@@ -128,6 +139,7 @@ export async function updateProduct(
   id: string,
   input: ProductInput,
 ): Promise<Product> {
+  const stock = input.stock ?? 0;
   const { data, error } = await supabaseAdmin()
     .from("products")
     .update({
@@ -137,8 +149,8 @@ export async function updateProduct(
       long_description: input.longDescription ?? null,
       price: input.price,
       category: input.category,
-      status: input.status,
-      stock: input.stock ?? 0,
+      status: syncStatus(stock, input.status),
+      stock,
       images: input.images,
       tags: input.tags ?? [],
       weight: input.weight ?? null,

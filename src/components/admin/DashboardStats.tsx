@@ -274,7 +274,7 @@ function RestockPanel({
                 gap: 10,
                 fontSize: 13,
                 paddingBottom: 10,
-                borderBottom: "1px solid var(--dash-border)",
+                borderBottom: "1px solid rgba(243,237,224,0.08)",
               }}
             >
               <span

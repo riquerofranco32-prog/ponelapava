@@ -8,6 +8,7 @@ import { ProductInput } from "@/lib/products";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminField } from "@/components/admin/AdminField";
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminToggle } from "@/components/admin/AdminToggle";
 
 const STATUSES: { value: ProductStatus; label: string }[] = [
   { value: "available", label: "Disponible" },
@@ -255,22 +256,11 @@ export default function ProductForm({
           />
         </AdminField>
 
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 14,
-            color: "var(--dash-text)",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={featured}
-            onChange={(e) => setFeatured(e.target.checked)}
-          />
-          Mostrar en destacados de la home
-        </label>
+        <AdminToggle
+          checked={featured}
+          onChange={setFeatured}
+          label="Mostrar en destacados de la home"
+        />
 
         {error && (
           <p style={{ fontSize: 13, color: "var(--dash-danger)" }}>{error}</p>

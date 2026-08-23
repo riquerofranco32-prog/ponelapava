@@ -99,6 +99,9 @@ export function AdminModal({
           flexDirection: "column",
         }}
       >
+        <div className="admin-modal-handle">
+          <span />
+        </div>
         <div
           style={{
             display: "flex",

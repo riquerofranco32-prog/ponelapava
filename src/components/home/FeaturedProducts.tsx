@@ -4,9 +4,12 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import FeaturedCarousel from "@/components/home/FeaturedCarousel";
 
 export default async function FeaturedProducts() {
-  // Show up to 8 featured products
+  // Show up to 8 featured products, in-stock ones first so a sold-out
+  // item doesn't bump an available one out of this prime homepage slot.
   const featuredProducts = await getFeaturedProducts();
-  const displayed = featuredProducts.slice(0, 8);
+  const displayed = [...featuredProducts]
+    .sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0))
+    .slice(0, 8);
 
   return (
     <section

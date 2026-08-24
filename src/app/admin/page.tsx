@@ -12,6 +12,7 @@ import {
   Star,
   AlertTriangle,
   PackageX,
+  PackageSearch,
 } from "lucide-react";
 import { Category, Product } from "@/types";
 import { ProductInput } from "@/lib/products";
@@ -22,6 +23,7 @@ import AdminShell, { AdminNavItem } from "@/components/admin/AdminShell";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { EmptyState } from "@/components/admin/EmptyState";
 import { TableSkeleton, KpiSkeleton } from "@/components/admin/TableSkeleton";
 import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
@@ -300,6 +302,20 @@ export default function AdminPage() {
 
           {loading ? (
             <TableSkeleton rows={6} />
+          ) : filteredProducts.length === 0 ? (
+            <EmptyState
+              icon={PackageSearch}
+              title={
+                products.length === 0
+                  ? "Todavía no hay productos"
+                  : "Ningún producto coincide"
+              }
+              description={
+                products.length === 0
+                  ? "Creá el primero con el botón de arriba."
+                  : "Probá con otra búsqueda o categoría."
+              }
+            />
           ) : (
             <ProductsTable
               data={filteredProducts}

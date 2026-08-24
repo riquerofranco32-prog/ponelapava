@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 import { Product } from "@/types";
 import {
   formatPrice,
@@ -13,6 +13,7 @@ import {
   truncate,
   unitPrice,
 } from "@/lib/utils";
+import { useFavorites } from "@/context/FavoritesContext";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "./AddToCartButton";
 import QuickViewModal from "./QuickViewModal";
@@ -29,6 +30,8 @@ export default function ProductCard({
   featured = false,
 }: ProductCardProps) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(product.id);
   const isOutOfStock = product.status === "out_of_stock";
   const isFeatured = product.status === "featured";
   const isLowStock =
@@ -56,16 +59,35 @@ export default function ProductCard({
         </div>
         <div className="flex-1 min-w-0 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="category">
-                {getCategoryLabel(product.category)}
-              </Badge>
-              {isFeatured && <Badge variant="featured">Destacado</Badge>}
-              {isLowStock && (
-                <Badge variant="low_stock">
-                  Últimas {product.stock} unidades
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <Badge variant="category">
+                  {getCategoryLabel(product.category)}
                 </Badge>
-              )}
+                {isFeatured && <Badge variant="featured">Destacado</Badge>}
+                {isLowStock && (
+                  <Badge variant="low_stock">
+                    Últimas {product.stock} unidades
+                  </Badge>
+                )}
+              </div>
+              <button
+                onClick={() => toggleFavorite(product.id)}
+                aria-label={
+                  favorite
+                    ? `Quitar ${product.name} de favoritos`
+                    : `Agregar ${product.name} a favoritos`
+                }
+                aria-pressed={favorite}
+                className="shrink-0 text-pava-brown/40 hover:text-pava-terracotta transition-colors"
+              >
+                <Heart
+                  size={18}
+                  className={
+                    favorite ? "fill-pava-terracotta text-pava-terracotta" : ""
+                  }
+                />
+              </button>
             </div>
             <Link href={`/producto/${product.id}`}>
               <h3 className="font-medium text-pava-brown hover:text-pava-green transition-colors leading-tight">
@@ -144,14 +166,35 @@ export default function ProductCard({
           </div>
         )}
 
-        {/* Quick view trigger */}
-        <button
-          onClick={() => setQuickViewOpen(true)}
-          aria-label={`Vista rápida de ${product.name}`}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100"
-        >
-          <Eye size={14} />
-        </button>
+        {/* Favorite + quick view triggers */}
+        <div className="absolute right-3 top-3 flex flex-col gap-2">
+          <button
+            onClick={() => toggleFavorite(product.id)}
+            aria-label={
+              favorite
+                ? `Quitar ${product.name} de favoritos`
+                : `Agregar ${product.name} a favoritos`
+            }
+            aria-pressed={favorite}
+            className={`flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold ${
+              favorite
+                ? "text-pava-terracotta opacity-100"
+                : "text-pava-brown opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            <Heart
+              size={14}
+              className={favorite ? "fill-pava-terracotta" : ""}
+            />
+          </button>
+          <button
+            onClick={() => setQuickViewOpen(true)}
+            aria-label={`Vista rápida de ${product.name}`}
+            className="flex h-8 w-8 items-center justify-center bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100"
+          >
+            <Eye size={14} />
+          </button>
+        </div>
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-pava-brown/55">
             <span className="rounded-control bg-pava-cream px-4 py-2 text-xs font-semibold uppercase tracking-wider text-pava-brown">

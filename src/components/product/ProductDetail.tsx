@@ -9,10 +9,12 @@ import {
   ShoppingBag,
   MessageCircle,
   ChevronLeft,
+  Heart,
 } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel, unitPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
 import { whatsappChatUrl } from "@/lib/whatsapp";
@@ -31,6 +33,8 @@ export default function ProductDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
   const { addItem, setDrawer } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(product.id);
   const settings = useSiteSettings();
 
   const isOutOfStock = product.status === "out_of_stock";
@@ -139,14 +143,35 @@ export default function ProductDetail({
           {/* Info */}
           <div className="flex flex-col">
             {/* Category + status */}
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="category">
-                {getCategoryLabel(product.category)}
-              </Badge>
-              {product.status === "featured" && (
-                <Badge variant="featured">Destacado</Badge>
-              )}
-              {isOutOfStock && <Badge variant="out_of_stock">Sin stock</Badge>}
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="category">
+                  {getCategoryLabel(product.category)}
+                </Badge>
+                {product.status === "featured" && (
+                  <Badge variant="featured">Destacado</Badge>
+                )}
+                {isOutOfStock && (
+                  <Badge variant="out_of_stock">Sin stock</Badge>
+                )}
+              </div>
+              <button
+                onClick={() => toggleFavorite(product.id)}
+                aria-label={
+                  favorite
+                    ? `Quitar ${product.name} de favoritos`
+                    : `Agregar ${product.name} a favoritos`
+                }
+                aria-pressed={favorite}
+                className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-pava-brown/15 text-pava-brown/60 hover:border-pava-terracotta hover:text-pava-terracotta transition-colors"
+              >
+                <Heart
+                  size={17}
+                  className={
+                    favorite ? "fill-pava-terracotta text-pava-terracotta" : ""
+                  }
+                />
+              </button>
             </div>
 
             {/* Name */}

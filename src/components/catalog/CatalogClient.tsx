@@ -1,9 +1,16 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Search, LayoutGrid, List, SlidersHorizontal } from "lucide-react";
+import {
+  Search,
+  LayoutGrid,
+  List,
+  SlidersHorizontal,
+  Heart,
+} from "lucide-react";
 import { Category, Product, ProductCategory } from "@/types";
 import ProductCard from "@/components/catalog/ProductCard";
+import { useFavorites } from "@/context/FavoritesContext";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 type SortOption = "default" | "price-asc" | "price-desc" | "name";
@@ -48,6 +55,8 @@ export default function CatalogClient({
   );
   const [sort, setSort] = useState<SortOption>(initialSort);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const { favoriteIds } = useFavorites();
   const [minPrice, setMinPrice] = useState(initialMinPrice);
   const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
 
@@ -167,6 +176,11 @@ export default function CatalogClient({
     if (!isNaN(min)) result = result.filter((p) => p.price >= min);
     if (!isNaN(max)) result = result.filter((p) => p.price <= max);
 
+    // Filter by favorites
+    if (favoritesOnly) {
+      result = result.filter((p) => favoriteIds.has(p.id));
+    }
+
     // Sort
     switch (sort) {
       case "price-asc":
@@ -188,7 +202,16 @@ export default function CatalogClient({
     }
 
     return result;
-  }, [activeCategory, search, sort, products, minPrice, maxPrice]);
+  }, [
+    activeCategory,
+    search,
+    sort,
+    products,
+    minPrice,
+    maxPrice,
+    favoritesOnly,
+    favoriteIds,
+  ]);
 
   const categoryTabs = [
     { slug: "all" as const, name: "Todos", count: products.length },
@@ -253,6 +276,20 @@ export default function CatalogClient({
             </button>
           )}
         </div>
+
+        {/* Favorites toggle */}
+        <button
+          onClick={() => setFavoritesOnly((prev) => !prev)}
+          aria-pressed={favoritesOnly}
+          className={`inline-flex items-center gap-1.5 rounded-control px-4 py-3 text-sm font-medium border transition-colors ${
+            favoritesOnly
+              ? "bg-pava-terracotta text-white border-pava-terracotta"
+              : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-terracotta hover:text-pava-terracotta"
+          }`}
+        >
+          <Heart size={15} className={favoritesOnly ? "fill-white" : ""} />
+          Favoritos
+        </button>
 
         {/* Sort */}
         <div className="flex items-center gap-2">
@@ -352,12 +389,14 @@ export default function CatalogClient({
       {/* Products grid/list */}
       {filtered.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-4xl mb-4">🌿</p>
+          <p className="text-4xl mb-4">{favoritesOnly ? "🤍" : "🌿"}</p>
           <p className="font-display text-xl text-pava-brown font-semibold mb-2">
-            Sin resultados
+            {favoritesOnly ? "Sin favoritos todavía" : "Sin resultados"}
           </p>
           <p className="text-pava-brown-mid/75 text-sm">
-            Probá con otro término o revisá todas las categorías
+            {favoritesOnly
+              ? "Tocá el corazón de un producto para guardarlo acá"
+              : "Probá con otro término o revisá todas las categorías"}
           </p>
           <button
             onClick={() => {
@@ -369,6 +408,7 @@ export default function CatalogClient({
               setActiveCategory("all");
               setMinPrice("");
               setMaxPrice("");
+              setFavoritesOnly(false);
               updateUrl({
                 search: "",
                 sort,

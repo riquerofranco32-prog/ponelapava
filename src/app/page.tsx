@@ -8,6 +8,7 @@ import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
 import GoogleReviews from "@/components/home/GoogleReviews";
 import HowToBuy from "@/components/home/HowToBuy";
+import FAQSection from "@/components/home/FAQSection";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
 
@@ -34,6 +35,7 @@ export default function HomePage() {
       <MateMatcher />
       <LocalSection />
       <GoogleReviews />
+      <FAQSection />
       <FinalCTA />
       <InstagramSection />
     </>

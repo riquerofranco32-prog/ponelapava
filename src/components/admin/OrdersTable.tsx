@@ -236,20 +236,46 @@ export default function OrdersTable() {
     color: "var(--dash-muted)",
   };
 
+  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
+
+  const counts: Record<StatusFilter, number> = {
+    all: orders.length,
+    pending: pendingCount,
+    confirmed: confirmedCount,
+    delivered: deliveredCount,
+    cancelled: cancelledCount,
+  };
+
   return (
     <div>
       <div className="admin-kpi-grid">
-        <AdminKpiCard icon={ShoppingBag} label="Total" value={orders.length} />
-        <AdminKpiCard icon={Clock} label="Pendientes" value={pendingCount} />
+        <AdminKpiCard
+          icon={ShoppingBag}
+          label="Total"
+          value={orders.length}
+          active={statusFilter === "all"}
+          onClick={() => setStatusFilter("all")}
+        />
+        <AdminKpiCard
+          icon={Clock}
+          label="Pendientes"
+          value={pendingCount}
+          active={statusFilter === "pending"}
+          onClick={() => setStatusFilter("pending")}
+        />
         <AdminKpiCard
           icon={CheckCircle2}
           label="Confirmados"
           value={confirmedCount}
+          active={statusFilter === "confirmed"}
+          onClick={() => setStatusFilter("confirmed")}
         />
         <AdminKpiCard
           icon={PackageCheck}
           label="Entregados"
           value={deliveredCount}
+          active={statusFilter === "delivered"}
+          onClick={() => setStatusFilter("delivered")}
         />
       </div>
 
@@ -279,8 +305,18 @@ export default function OrdersTable() {
               className={`admin-toolbar-pill${
                 statusFilter === f.value ? " admin-toolbar-pill--active" : ""
               }`}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
             >
-              {f.label}
+              <span>{f.label}</span>
+              <span
+                style={{
+                  fontSize: 11,
+                  opacity: 0.7,
+                  fontWeight: statusFilter === f.value ? 700 : 500,
+                }}
+              >
+                ({counts[f.value]})
+              </span>
             </button>
           ))}
         </div>

@@ -57,3 +57,38 @@ export function whatsappChatUrl(
   const encoded = message ? `?text=${encodeURIComponent(message)}` : "";
   return `${WHATSAPP_BASE_URL}/${whatsappNumber}${encoded}`;
 }
+
+/**
+ * Builds a WhatsApp deep link to message a customer from the Admin panel.
+ */
+export function buildAdminCustomerWhatsAppUrl(
+  phone: string,
+  customerName: string,
+  total: number,
+  status: "pending" | "confirmed" | "delivered" | "cancelled" | "ready" | "general" = "general",
+): string {
+  let cleanPhone = phone.replace(/\D/g, "");
+  if (cleanPhone.startsWith("0")) cleanPhone = cleanPhone.slice(1);
+  if (cleanPhone.length === 10) cleanPhone = `549${cleanPhone}`;
+  else if (
+    cleanPhone.startsWith("54") &&
+    !cleanPhone.startsWith("549") &&
+    cleanPhone.length === 12
+  ) {
+    cleanPhone = `549${cleanPhone.slice(2)}`;
+  }
+
+  let text = "";
+  if (status === "confirmed") {
+    text = `¡Hola ${customerName}! 👋 Confirmamos tu pedido en *Poné La Pava* por ${formatPrice(total)}. ¡Ya lo estamos preparando con mucho cuidado! 🧉✨`;
+  } else if (status === "delivered") {
+    text = `¡Hola ${customerName}! 🧉 Tu pedido de *Poné La Pava* ya fue entregado / despachado. ¡Esperamos que disfrutes cada mate! Si tenés fotos, ¡etiquétanos en Instagram! 📸`;
+  } else if (status === "ready") {
+    text = `¡Hola ${customerName}! 🧉 Tu pedido de *Poné La Pava* ya está listo para retirar en nuestro local. ¡Te esperamos! ✨`;
+  } else {
+    text = `¡Hola ${customerName}! 👋 Te escribimos desde *Poné La Pava* por tu pedido reciente. ¿Tenés unos minutos para coordinar? 🧉`;
+  }
+
+  return `${WHATSAPP_BASE_URL}/${cleanPhone}?text=${encodeURIComponent(text)}`;
+}
+

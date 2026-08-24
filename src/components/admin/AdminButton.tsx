@@ -12,6 +12,8 @@ export function AdminButton({
   onClick,
   type = "button",
   form,
+  title,
+  style,
 }: {
   variant?: Variant;
   disabled?: boolean;
@@ -20,11 +22,15 @@ export function AdminButton({
   onClick?: () => void;
   type?: "button" | "submit";
   form?: string;
+  title?: string;
+  style?: React.CSSProperties;
 }) {
   return (
     <button
       type={type}
       form={form}
+      title={title}
+      style={style}
       onClick={onClick}
       disabled={disabled}
       className={cn(

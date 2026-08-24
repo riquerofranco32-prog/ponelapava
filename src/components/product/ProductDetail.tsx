@@ -10,6 +10,12 @@ import {
   MessageCircle,
   ChevronLeft,
   Heart,
+  Share2,
+  Check,
+  Truck,
+  Store,
+  CreditCard,
+  ShieldCheck,
 } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel, unitPrice } from "@/lib/utils";
@@ -32,10 +38,35 @@ export default function ProductDetail({
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const { addItem, setDrawer } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.id);
   const settings = useSiteSettings();
+
+  const handleShare = async () => {
+    if (typeof window === "undefined") return;
+    const shareData = {
+      title: `${product.name} | Poné La Pava`,
+      text: product.description,
+      url: window.location.href,
+    };
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // Fallback to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch {
+      // Ignore
+    }
+  };
 
   const isOutOfStock = product.status === "out_of_stock";
   const perUnit = unitPrice(product.price, product.weight);
@@ -142,9 +173,9 @@ export default function ProductDetail({
 
           {/* Info */}
           <div className="flex flex-col">
-            {/* Category + status */}
+            {/* Category + status + actions */}
             <div className="flex items-center justify-between gap-2 mb-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="category">
                   {getCategoryLabel(product.category)}
                 </Badge>
@@ -155,23 +186,37 @@ export default function ProductDetail({
                   <Badge variant="out_of_stock">Sin stock</Badge>
                 )}
               </div>
-              <button
-                onClick={() => toggleFavorite(product.id)}
-                aria-label={
-                  favorite
-                    ? `Quitar ${product.name} de favoritos`
-                    : `Agregar ${product.name} a favoritos`
-                }
-                aria-pressed={favorite}
-                className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-pava-brown/15 text-pava-brown/60 hover:border-pava-terracotta hover:text-pava-terracotta transition-colors"
-              >
-                <Heart
-                  size={17}
-                  className={
-                    favorite ? "fill-pava-terracotta text-pava-terracotta" : ""
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  aria-label="Compartir producto"
+                  className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-pava-brown/15 text-pava-brown/60 hover:border-pava-green hover:text-pava-green transition-colors"
+                  title="Compartir o copiar enlace"
+                >
+                  {copiedLink ? (
+                    <Check size={16} className="text-pava-green" />
+                  ) : (
+                    <Share2 size={16} />
+                  )}
+                </button>
+                <button
+                  onClick={() => toggleFavorite(product.id)}
+                  aria-label={
+                    favorite
+                      ? `Quitar ${product.name} de favoritos`
+                      : `Agregar ${product.name} a favoritos`
                   }
-                />
-              </button>
+                  aria-pressed={favorite}
+                  className="shrink-0 flex h-9 w-9 items-center justify-center rounded-full border border-pava-brown/15 text-pava-brown/60 hover:border-pava-terracotta hover:text-pava-terracotta transition-colors"
+                >
+                  <Heart
+                    size={17}
+                    className={
+                      favorite ? "fill-pava-terracotta text-pava-terracotta" : ""
+                    }
+                  />
+                </button>
+              </div>
             </div>
 
             {/* Name */}
@@ -179,17 +224,31 @@ export default function ProductDetail({
               {product.name}
             </h1>
 
-            {/* Price */}
+            {/* Price & Installments */}
             <div className="mb-6">
               <div className="flex items-baseline gap-3">
                 <span className="font-display text-4xl font-bold text-pava-green">
                   {formatPrice(product.price)}
                 </span>
               </div>
-              {perUnit && (
-                <p className="text-sm text-pava-brown-mid/60 mt-1">{perUnit}</p>
-              )}
+              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-pava-green/10 px-2.5 py-0.5 font-semibold text-pava-green">
+                  <CreditCard size={13} />
+                  3 cuotas de {formatPrice(Math.round(product.price / 3))}
+                </span>
+                {perUnit && (
+                  <span className="text-pava-brown-mid/60">{perUnit}</span>
+                )}
+              </div>
             </div>
+
+            {/* Low stock alert */}
+            {!isOutOfStock && product.stock > 0 && product.stock <= 3 && (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-control bg-amber-500/10 border border-amber-500/20 px-3.5 py-2 text-xs font-semibold text-amber-900">
+                <span className="animate-pulse">🔥</span>
+                <span>¡Últimas {product.stock} unidades disponibles en tienda!</span>
+              </div>
+            )}
 
             {/* Description */}
             <div className="prose prose-sm max-w-none mb-8 text-pava-brown-mid/80 leading-relaxed">
@@ -301,6 +360,46 @@ export default function ProductDetail({
               <MessageCircle size={16} />
               Consultar por WhatsApp
             </a>
+
+            {/* Value proposition badges */}
+            <div className="mt-8 grid grid-cols-1 gap-3 rounded-card border border-pava-brown/10 bg-white/70 p-4 sm:grid-cols-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
+                  <Truck size={17} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-bold text-pava-brown block">Envíos a todo el país</span>
+                  <span className="text-pava-brown-mid/70">Gratis superando $65.000</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
+                  <Store size={17} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-bold text-pava-brown block">Retiro gratis en el local</span>
+                  <span className="text-pava-brown-mid/70">Villa Mercedes, San Luis</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
+                  <CreditCard size={17} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-bold text-pava-brown block">Medios de pago</span>
+                  <span className="text-pava-brown-mid/70">Tarjeta, transferencia y efectivo</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
+                  <ShieldCheck size={17} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-bold text-pava-brown block">Garantía de calidad</span>
+                  <span className="text-pava-brown-mid/70">Productos 100% originales</span>
+                </div>
+              </div>
+            </div>
 
             {/* Back */}
             <Link

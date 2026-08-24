@@ -59,6 +59,37 @@ export default function CartDrawer() {
           </button>
         </div>
 
+        {/* Free shipping banner & progress bar */}
+        {items.length > 0 && (() => {
+          const FREE_SHIPPING_THRESHOLD = 65000;
+          const qualifies = total >= FREE_SHIPPING_THRESHOLD;
+          const amountLeft = FREE_SHIPPING_THRESHOLD - total;
+          const progressPct = Math.min(100, Math.max(0, (total / FREE_SHIPPING_THRESHOLD) * 100));
+
+          return (
+            <div className="bg-pava-cream-dark/50 border-b border-pava-brown/10 px-5 py-3">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                {qualifies ? (
+                  <span className="font-semibold text-pava-green flex items-center gap-1.5">
+                    <span>🎉</span> ¡Tenés envío gratis incluido!
+                  </span>
+                ) : (
+                  <span className="text-pava-brown">
+                    Sumá <strong className="font-bold text-pava-green">{formatPrice(amountLeft)}</strong> más para <strong className="font-semibold">Envío Gratis</strong>
+                  </span>
+                )}
+                <span className="text-[11px] font-bold text-pava-brown-mid/75">{Math.round(progressPct)}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-pava-brown/15 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-pava-green rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           {items.length === 0 ? (

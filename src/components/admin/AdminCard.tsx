@@ -51,19 +51,33 @@ export function AdminKpiCard({
   icon: Icon,
   change,
   trend,
+  onClick,
+  active,
+  style,
 }: {
   label: string;
   value: number | string;
   icon?: React.ComponentType<{ size?: number }>;
   change?: AdminMetric["change"];
   trend?: AdminMetric["trend"];
+  onClick?: () => void;
+  active?: boolean;
+  style?: React.CSSProperties;
 }) {
   const isNumeric = typeof value === "number";
   const countedValue = useCountUp(isNumeric ? value : 0);
 
   return (
     <div
-      className="admin-card admin-card--interactive group"
+      onClick={onClick}
+      className={cn(
+        "admin-card admin-card--interactive group",
+        active && "border-pava-gold ring-1 ring-pava-gold",
+      )}
+      style={{
+        cursor: onClick ? "pointer" : undefined,
+        ...style,
+      }}
       onMouseMove={trackSpotlight}
     >
       <span

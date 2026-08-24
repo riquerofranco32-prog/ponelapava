@@ -207,7 +207,7 @@ export default function Hero() {
               <Link
                 href="/catalogo"
                 id="hero-cta-catalogo"
-                className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10"
+                className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-lg shadow-pava-gold/10"
               >
                 Explorar el catálogo
                 <span className="text-base" aria-hidden="true">
@@ -226,9 +226,30 @@ export default function Hero() {
             </MagneticButton>
           </div>
 
+          {/* Floating Trust Badges */}
+          <div
+            className={`mt-7 flex flex-wrap items-center gap-2.5 sm:gap-3
+              transition-all duration-700 ease-out delay-450
+              ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+              <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>
+              <span className="font-semibold text-pava-cream">4.9</span>
+              <span className="text-pava-cream/70 text-[11px]">en Google</span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+              <span className="text-pava-gold text-xs">🚚</span>
+              <span className="font-medium text-pava-cream/90">Envíos a todo el país</span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+              <span className="text-pava-gold text-xs">🧉</span>
+              <span className="font-medium text-pava-cream/90">+1.000 clientes felices</span>
+            </div>
+          </div>
+
           {/* Bottom meta bar */}
           <div
-            className={`mt-12 flex items-center gap-5 border-t border-pava-cream/15 pt-5 sm:mt-16
+            className={`mt-10 flex items-center gap-5 border-t border-pava-cream/15 pt-5 sm:mt-12
               transition-all duration-700 ease-out delay-500
               ${loaded ? "opacity-100" : "opacity-0"}`}
           >

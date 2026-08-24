@@ -224,9 +224,13 @@ export default function ProductCard({
             <span className="font-display block text-lg font-bold leading-none text-pava-green">
               {formatPrice(product.price)}
             </span>
-            {perUnit && (
+            {perUnit ? (
               <span className="mt-1 block text-[11px] text-pava-brown-mid/60">
                 {perUnit}
+              </span>
+            ) : (
+              <span className="mt-1 block text-[10px] font-medium text-pava-olive-light">
+                3 cuotas de {formatPrice(Math.round(product.price / 3))}
               </span>
             )}
           </span>

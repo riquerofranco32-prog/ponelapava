@@ -215,7 +215,24 @@ function RestockPanel({
 
   return (
     <AdminCard style={{ marginBottom: 20 }}>
-      <h2 className="admin-section-title">Necesita reposición</h2>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <h2 className="admin-section-title" style={{ margin: 0 }}>Necesita reposición</h2>
+        {needsRestock.length > 0 && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--dash-danger)",
+              background: "var(--dash-danger-bg)",
+              border: "1px solid var(--dash-danger-border)",
+              borderRadius: "var(--radius-chip, 4px)",
+              padding: "2px 8px",
+            }}
+          >
+            {needsRestock.length} {needsRestock.length === 1 ? "producto crítico" : "productos críticos"}
+          </span>
+        )}
+      </div>
       {needsRestock.length === 0 ? (
         <EmptyState
           icon={PackageCheck}

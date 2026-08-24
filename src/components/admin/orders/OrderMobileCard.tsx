@@ -1,8 +1,9 @@
 "use client";
 
-import { Eye } from "lucide-react";
+import { Eye, MessageCircle } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice, truncate } from "@/lib/utils";
+import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 
 export function OrderMobileCard({
@@ -52,24 +53,49 @@ export function OrderMobileCard({
           aria-label={`Seleccionar pedido de ${order.customerName}`}
           style={{ flexShrink: 0, marginTop: 3 }}
         />
-        <button
-          onClick={() => onView(order)}
-          className="admin-link-btn"
-          style={{ padding: 0, background: "none", minWidth: 0, flex: 1 }}
-        >
-          <Eye size={13} style={{ opacity: 0.6, flexShrink: 0 }} />
-          <span
-            style={{
-              fontWeight: 500,
-              color: "var(--dash-text)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 0 }}>
+          <button
+            onClick={() => onView(order)}
+            className="admin-link-btn"
+            style={{ padding: 0, background: "none", minWidth: 0, flex: 1 }}
           >
-            {order.customerName}
-          </span>
-        </button>
+            <Eye size={13} style={{ opacity: 0.6, flexShrink: 0 }} />
+            <span
+              style={{
+                fontWeight: 500,
+                color: "var(--dash-text)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {order.customerName}
+            </span>
+          </button>
+          {order.customerPhone && (
+            <a
+              href={buildAdminCustomerWhatsAppUrl(
+                order.customerPhone,
+                order.customerName,
+                order.total,
+                order.status === "confirmed" ? "confirmed" : order.status === "delivered" ? "delivered" : "general"
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Chatear con ${order.customerName}`}
+              style={{
+                color: "var(--color-whatsapp, #25d366)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                padding: 2,
+              }}
+            >
+              <MessageCircle size={15} />
+            </a>
+          )}
+        </div>
         <span
           style={{
             fontSize: 12,

@@ -32,6 +32,7 @@ export default function CartPage() {
   } = useCart();
   const settings = useSiteSettings();
   const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [comment, setComment] = useState("");
   const [isSyncing, setIsSyncing] = useState(true);
   const [syncNotices, setSyncNotices] = useState<string[]>([]);
@@ -125,6 +126,7 @@ export default function CartPage() {
     if (items.length === 0) return;
     const orderData = {
       customerName: customerName || "Sin nombre",
+      customerPhone: customerPhone.trim() || undefined,
       items,
       total,
       comment,
@@ -299,6 +301,37 @@ export default function CartPage() {
               </div>
             )}
             <div className="rounded-card bg-white border border-pava-brown/8 p-6 sticky top-24">
+              {/* Free shipping progress */}
+              {(() => {
+                const FREE_SHIPPING_THRESHOLD = 65000;
+                const qualifies = total >= FREE_SHIPPING_THRESHOLD;
+                const amountLeft = FREE_SHIPPING_THRESHOLD - total;
+                const progressPct = Math.min(100, Math.max(0, (total / FREE_SHIPPING_THRESHOLD) * 100));
+
+                return (
+                  <div className="mb-6 rounded-control bg-pava-cream-dark/50 border border-pava-brown/10 p-3.5">
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      {qualifies ? (
+                        <span className="font-semibold text-pava-green flex items-center gap-1.5">
+                          <span>🎉</span> ¡Envío gratis incluido!
+                        </span>
+                      ) : (
+                        <span className="text-pava-brown">
+                          Faltan <strong className="font-bold text-pava-green">{formatPrice(amountLeft)}</strong> para <strong className="font-semibold">Envío Gratis</strong>
+                        </span>
+                      )}
+                      <span className="text-[11px] font-bold text-pava-brown-mid/75">{Math.round(progressPct)}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-pava-brown/15 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-pava-green rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${progressPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+
               <h2 className="font-display text-xl font-bold text-pava-brown mb-6">
                 Resumen del pedido
               </h2>
@@ -343,6 +376,22 @@ export default function CartPage() {
                     placeholder="¿Cómo te llamás?"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="customer-phone"
+                    className="block text-xs font-medium text-pava-brown/70 mb-1"
+                  >
+                    Teléfono / WhatsApp (opcional)
+                  </label>
+                  <input
+                    id="customer-phone"
+                    type="tel"
+                    placeholder="Ej: 11 2345-6789"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
                     className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors"
                   />
                 </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { Eye } from "lucide-react";
+import { Eye, MessageCircle } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 
 const td: React.CSSProperties = {
@@ -40,20 +41,49 @@ export function OrderDesktopRow({
         />
       </td>
       <td style={td}>
-        <button
-          onClick={() => onView(order)}
-          className="admin-link-btn"
-          style={{
-            padding: 0,
-            background: "none",
-            fontWeight: 500,
-            color: "var(--dash-text)",
-            gap: 6,
-          }}
-        >
-          <Eye size={13} style={{ opacity: 0.6 }} />
-          {order.customerName}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button
+            onClick={() => onView(order)}
+            className="admin-link-btn"
+            style={{
+              padding: 0,
+              background: "none",
+              fontWeight: 500,
+              color: "var(--dash-text)",
+              gap: 6,
+            }}
+          >
+            <Eye size={13} style={{ opacity: 0.6 }} />
+            {order.customerName}
+          </button>
+          {order.customerPhone && (
+            <a
+              href={buildAdminCustomerWhatsAppUrl(
+                order.customerPhone,
+                order.customerName,
+                order.total,
+                order.status === "confirmed" ? "confirmed" : order.status === "delivered" ? "delivered" : "general"
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Chatear con ${order.customerName} por WhatsApp`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--color-whatsapp, #25d366)",
+                padding: 2,
+                borderRadius: 4,
+                opacity: 0.8,
+                transition: "opacity 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
+            >
+              <MessageCircle size={14} />
+            </a>
+          )}
+        </div>
         {order.comment && (
           <span
             style={{

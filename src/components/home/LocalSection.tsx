@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { MapPin, Clock, MessageCircle, ExternalLink } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import StoreLivePill from "@/components/ui/StoreLivePill";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import {
   getSiteSettings,
@@ -145,6 +146,10 @@ export default async function LocalSection() {
                   <p className="text-sm text-pava-cream/70">
                     Sáb: {settings.hoursSaturday} hs
                   </p>
+                  <StoreLivePill
+                    hoursWeekday={settings.hoursWeekday}
+                    hoursSaturday={settings.hoursSaturday}
+                  />
                 </div>
               </div>
               <div className="flex gap-4 border-t border-pava-cream/15 py-5">

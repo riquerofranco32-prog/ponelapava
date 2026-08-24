@@ -16,17 +16,29 @@ export function OrderDesktopRow({
   index,
   onStatusChange,
   onView,
+  selected,
+  onToggleSelect,
 }: {
   order: Order;
   index: number;
   onStatusChange: (id: string, status: Order["status"]) => void;
   onView: (order: Order) => void;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
 }) {
   return (
     <tr
       className="admin-row-in admin-row-hover"
       style={{ "--i": index } as React.CSSProperties}
     >
+      <td style={{ ...td, width: 32 }}>
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={() => onToggleSelect(order.id!)}
+          aria-label={`Seleccionar pedido de ${order.customerName}`}
+        />
+      </td>
       <td style={td}>
         <button
           onClick={() => onView(order)}

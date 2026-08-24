@@ -7,6 +7,9 @@ import {
   PackageCheck,
   ShoppingBag,
   Search,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
 } from "lucide-react";
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
@@ -21,6 +24,8 @@ import { OrderMobileCard } from "./orders/OrderMobileCard";
 import { OrderDetailModal } from "./orders/OrderDetailModal";
 
 type StatusFilter = "all" | Order["status"];
+type SortColumn = "date" | "total";
+type SortDir = "asc" | "desc";
 
 // ponytail: naive CSV field escaping (wrap+double quotes) — covers Excel/Sheets fine
 function csvField(value: string): string {
@@ -53,7 +58,22 @@ export default function OrdersTable() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortColumn, setSortColumn] = useState<SortColumn>("date");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const showToast = useAdminToast();
+
+  function handleSort(column: SortColumn) {
+    if (sortColumn === column) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(column);
+      setSortDir("desc");
+    }
+  }
 
   async function loadOrders() {
     setLoading(true);
@@ -92,25 +112,58 @@ export default function OrdersTable() {
     }
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleBulkStatusChange(status: Order["status"]) {
+    const ids = Array.from(selectedIds);
+    setBulkUpdating(true);
+    setOrders((prev) =>
+      prev.map((o) => (ids.includes(o.id!) ? { ...o, status } : o)),
+    );
+    try {
+      const results = await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/orders/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          }),
+        ),
+      );
+      const failed = results.filter((r) => !r.ok).length;
+      if (failed > 0) {
+        throw new Error(
+          `${failed} de ${ids.length} pedidos no se pudieron actualizar`,
+        );
+      }
+      showToast(
+        `${ids.length} pedido${ids.length !== 1 ? "s" : ""} marcado${ids.length !== 1 ? "s" : ""} como ${STATUS_LABELS[status].toLowerCase()}`,
+      );
+      setSelectedIds(new Set());
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "No se pudo actualizar en lote",
+        "error",
+      );
+      loadOrders(); // revert the optimistic update
+    } finally {
+      setBulkUpdating(false);
+    }
+  }
+
   if (loading) {
     return <TableSkeleton rows={5} />;
   }
 
   if (error) {
-    return (
-      <div
-        style={{
-          background: "var(--dash-danger-bg)",
-          border: "1px solid var(--dash-danger-border)",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 14,
-          color: "var(--dash-danger)",
-        }}
-      >
-        {error}
-      </div>
-    );
+    return <div className="admin-error-banner">{error}</div>;
   }
 
   if (orders.length === 0) {
@@ -131,13 +184,47 @@ export default function OrdersTable() {
       ? orders
       : orders.filter((o) => o.status === statusFilter);
   const searchTerm = search.trim().toLowerCase();
-  const filteredOrders = !searchTerm
+  const searchFiltered = !searchTerm
     ? statusFiltered
     : statusFiltered.filter(
         (o) =>
           o.customerName.toLowerCase().includes(searchTerm) ||
           o.items.some((i) => i.productName.toLowerCase().includes(searchTerm)),
       );
+  const fromMs = dateFrom ? new Date(dateFrom).getTime() : null;
+  // end of day so "hasta" incluye todo el día seleccionado
+  const toMs = dateTo
+    ? new Date(dateTo).getTime() + 24 * 60 * 60 * 1000 - 1
+    : null;
+  const dateFiltered = searchFiltered.filter((o) => {
+    const t = new Date(o.createdAt).getTime();
+    if (fromMs !== null && t < fromMs) return false;
+    if (toMs !== null && t > toMs) return false;
+    return true;
+  });
+  const filteredOrders = [...dateFiltered].sort((a, b) => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortColumn === "total") return (a.total - b.total) * dir;
+    return (
+      (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir
+    );
+  });
+  const allVisibleSelected =
+    filteredOrders.length > 0 &&
+    filteredOrders.every((o) => selectedIds.has(o.id!));
+
+  function toggleSelectAllVisible() {
+    setSelectedIds((prev) => {
+      if (allVisibleSelected) {
+        const next = new Set(prev);
+        filteredOrders.forEach((o) => next.delete(o.id!));
+        return next;
+      }
+      const next = new Set(prev);
+      filteredOrders.forEach((o) => next.add(o.id!));
+      return next;
+    });
+  }
 
   const th: React.CSSProperties = {
     textAlign: "left",
@@ -189,23 +276,9 @@ export default function OrdersTable() {
             <button
               key={f.value}
               onClick={() => setStatusFilter(f.value)}
-              style={{
-                borderRadius: 999,
-                padding: "6px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                border:
-                  statusFilter === f.value
-                    ? "1px solid var(--dash-accent)"
-                    : "1px solid var(--dash-border)",
-                background:
-                  statusFilter === f.value
-                    ? "var(--dash-accent)"
-                    : "var(--dash-surface-2)",
-                color:
-                  statusFilter === f.value ? "#1e1b15" : "var(--dash-muted)",
-              }}
+              className={`admin-toolbar-pill${
+                statusFilter === f.value ? " admin-toolbar-pill--active" : ""
+              }`}
             >
               {f.label}
             </button>
@@ -229,18 +302,47 @@ export default function OrdersTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar cliente o producto..."
-              style={{
-                borderRadius: 999,
-                padding: "6px 14px 6px 30px",
-                fontSize: 12,
-                fontWeight: 600,
-                border: "1px solid var(--dash-border)",
-                background: "var(--dash-surface-2)",
-                color: "var(--dash-muted)",
-                outline: "none",
-                minWidth: 200,
-              }}
+              className="admin-toolbar-input"
+              style={{ padding: "6px 14px 6px 30px", minWidth: 200 }}
             />
+          </div>
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              aria-label="Desde"
+              className="admin-toolbar-input"
+              style={{ padding: "6px 10px" }}
+            />
+            <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              aria-label="Hasta"
+              className="admin-toolbar-input"
+              style={{ padding: "6px 10px" }}
+            />
+            {(dateFrom || dateTo) && (
+              <button
+                onClick={() => {
+                  setDateFrom("");
+                  setDateTo("");
+                }}
+                aria-label="Limpiar rango de fechas"
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--dash-muted)",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  padding: "0 4px",
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
           <AdminButton
             variant="secondary"
@@ -250,6 +352,65 @@ export default function OrdersTable() {
           </AdminButton>
         </div>
       </div>
+
+      {selectedIds.size > 0 && (
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+            alignItems: "center",
+            padding: "10px 14px",
+            marginBottom: 12,
+            borderRadius: 10,
+            border: "1px solid var(--dash-accent)",
+            background: "var(--dash-surface-2)",
+          }}
+        >
+          <span
+            style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)" }}
+          >
+            {selectedIds.size} pedido{selectedIds.size !== 1 ? "s" : ""}{" "}
+            seleccionado
+            {selectedIds.size !== 1 ? "s" : ""}
+          </span>
+          <span style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+            Marcar como:
+          </span>
+          {(
+            [
+              "pending",
+              "confirmed",
+              "delivered",
+              "cancelled",
+            ] as Order["status"][]
+          ).map((status) => (
+            <AdminButton
+              key={status}
+              variant="secondary"
+              disabled={bulkUpdating}
+              onClick={() => handleBulkStatusChange(status)}
+            >
+              {STATUS_LABELS[status]}
+            </AdminButton>
+          ))}
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            disabled={bulkUpdating}
+            style={{
+              marginLeft: "auto",
+              background: "none",
+              border: "none",
+              fontSize: 12,
+              color: "var(--dash-muted)",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            Cancelar selección
+          </button>
+        </div>
+      )}
 
       {filteredOrders.length === 0 ? (
         <EmptyState
@@ -273,10 +434,68 @@ export default function OrdersTable() {
             >
               <thead>
                 <tr>
+                  <th style={{ ...th, width: 32 }}>
+                    <input
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleSelectAllVisible}
+                      aria-label="Seleccionar todos los pedidos visibles"
+                    />
+                  </th>
                   <th style={th}>Cliente</th>
                   <th style={th}>Productos</th>
-                  <th style={th}>Total</th>
-                  <th style={th}>Fecha</th>
+                  <th style={th}>
+                    <button
+                      onClick={() => handleSort("total")}
+                      style={{
+                        ...th,
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Total
+                      {sortColumn === "total" ? (
+                        sortDir === "asc" ? (
+                          <ArrowUp size={12} />
+                        ) : (
+                          <ArrowDown size={12} />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} style={{ opacity: 0.4 }} />
+                      )}
+                    </button>
+                  </th>
+                  <th style={th}>
+                    <button
+                      onClick={() => handleSort("date")}
+                      style={{
+                        ...th,
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Fecha
+                      {sortColumn === "date" ? (
+                        sortDir === "asc" ? (
+                          <ArrowUp size={12} />
+                        ) : (
+                          <ArrowDown size={12} />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} style={{ opacity: 0.4 }} />
+                      )}
+                    </button>
+                  </th>
                   <th style={th}>Estado</th>
                 </tr>
               </thead>
@@ -286,6 +505,8 @@ export default function OrdersTable() {
                     key={order.id}
                     order={order}
                     index={index}
+                    selected={selectedIds.has(order.id!)}
+                    onToggleSelect={toggleSelect}
                     onStatusChange={handleStatusChange}
                     onView={setViewingOrder}
                   />
@@ -303,6 +524,8 @@ export default function OrdersTable() {
                 key={order.id}
                 order={order}
                 index={index}
+                selected={selectedIds.has(order.id!)}
+                onToggleSelect={toggleSelect}
                 onStatusChange={handleStatusChange}
                 onView={setViewingOrder}
               />

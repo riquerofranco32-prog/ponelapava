@@ -39,6 +39,8 @@ export default function CatalogClient({
     ? (sortParam as SortOption)
     : "default";
   const initialSearch = searchParams.get("q") ?? "";
+  const initialMinPrice = searchParams.get("min") ?? "";
+  const initialMaxPrice = searchParams.get("max") ?? "";
 
   const [search, setSearch] = useState(initialSearch);
   const [activeCategory, setActiveCategory] = useState<ProductCategory | "all">(
@@ -46,19 +48,26 @@ export default function CatalogClient({
   );
   const [sort, setSort] = useState<SortOption>(initialSort);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
 
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const priceDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateUrl = useCallback(
     (next: {
       search: string;
       sort: SortOption;
       category: ProductCategory | "all";
+      minPrice: string;
+      maxPrice: string;
     }) => {
       const params = new URLSearchParams();
       if (next.category !== "all") params.set("cat", next.category);
       if (next.search.trim()) params.set("q", next.search);
       if (next.sort !== "default") params.set("sort", next.sort);
+      if (next.minPrice.trim()) params.set("min", next.minPrice);
+      if (next.maxPrice.trim()) params.set("max", next.maxPrice);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
@@ -68,6 +77,7 @@ export default function CatalogClient({
   useEffect(() => {
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
     };
   }, []);
 
@@ -75,18 +85,60 @@ export default function CatalogClient({
     setSearch(value);
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     searchDebounceRef.current = setTimeout(() => {
-      updateUrl({ search: value, sort, category: activeCategory });
+      updateUrl({
+        search: value,
+        sort,
+        category: activeCategory,
+        minPrice,
+        maxPrice,
+      });
     }, SEARCH_DEBOUNCE_MS);
   };
 
   const handleSortChange = (value: SortOption) => {
     setSort(value);
-    updateUrl({ search, sort: value, category: activeCategory });
+    updateUrl({
+      search,
+      sort: value,
+      category: activeCategory,
+      minPrice,
+      maxPrice,
+    });
   };
 
   const handleCategoryChange = (value: ProductCategory | "all") => {
     setActiveCategory(value);
-    updateUrl({ search, sort, category: value });
+    updateUrl({ search, sort, category: value, minPrice, maxPrice });
+  };
+
+  const handlePriceChange = (bound: "min" | "max", value: string) => {
+    const nextMin = bound === "min" ? value : minPrice;
+    const nextMax = bound === "max" ? value : maxPrice;
+    if (bound === "min") setMinPrice(value);
+    else setMaxPrice(value);
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    priceDebounceRef.current = setTimeout(() => {
+      updateUrl({
+        search,
+        sort,
+        category: activeCategory,
+        minPrice: nextMin,
+        maxPrice: nextMax,
+      });
+    }, SEARCH_DEBOUNCE_MS);
+  };
+
+  const clearPriceFilter = () => {
+    if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+    setMinPrice("");
+    setMaxPrice("");
+    updateUrl({
+      search,
+      sort,
+      category: activeCategory,
+      minPrice: "",
+      maxPrice: "",
+    });
   };
 
   const filtered = useMemo(() => {
@@ -109,6 +161,12 @@ export default function CatalogClient({
       );
     }
 
+    // Filter by price range
+    const min = parseFloat(minPrice);
+    const max = parseFloat(maxPrice);
+    if (!isNaN(min)) result = result.filter((p) => p.price >= min);
+    if (!isNaN(max)) result = result.filter((p) => p.price <= max);
+
     // Sort
     switch (sort) {
       case "price-asc":
@@ -130,7 +188,7 @@ export default function CatalogClient({
     }
 
     return result;
-  }, [activeCategory, search, sort, products]);
+  }, [activeCategory, search, sort, products, minPrice, maxPrice]);
 
   const categoryTabs = [
     { slug: "all" as const, name: "Todos", count: products.length },
@@ -160,6 +218,40 @@ export default function CatalogClient({
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
           />
+        </div>
+
+        {/* Price range */}
+        <div className="flex items-center gap-1.5">
+          <input
+            type="number"
+            inputMode="numeric"
+            aria-label="Precio mínimo"
+            placeholder="Desde $"
+            min={0}
+            value={minPrice}
+            onChange={(e) => handlePriceChange("min", e.target.value)}
+            className="w-24 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors"
+          />
+          <span className="text-pava-brown/40 text-sm">–</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            aria-label="Precio máximo"
+            placeholder="Hasta $"
+            min={0}
+            value={maxPrice}
+            onChange={(e) => handlePriceChange("max", e.target.value)}
+            className="w-24 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm px-3 py-3 focus:outline-none focus:border-pava-green transition-colors"
+          />
+          {(minPrice || maxPrice) && (
+            <button
+              onClick={clearPriceFilter}
+              aria-label="Limpiar filtro de precio"
+              className="text-pava-brown/50 hover:text-pava-green text-sm px-1"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Sort */}
@@ -271,9 +363,19 @@ export default function CatalogClient({
             onClick={() => {
               if (searchDebounceRef.current)
                 clearTimeout(searchDebounceRef.current);
+              if (priceDebounceRef.current)
+                clearTimeout(priceDebounceRef.current);
               setSearch("");
               setActiveCategory("all");
-              updateUrl({ search: "", sort, category: "all" });
+              setMinPrice("");
+              setMaxPrice("");
+              updateUrl({
+                search: "",
+                sort,
+                category: "all",
+                minPrice: "",
+                maxPrice: "",
+              });
             }}
             className="mt-6 rounded-control px-6 py-3 bg-pava-green text-pava-cream text-sm font-medium border-2 border-pava-green hover:bg-pava-green-light transition-colors"
           >

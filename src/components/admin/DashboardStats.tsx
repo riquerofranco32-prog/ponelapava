@@ -57,17 +57,7 @@ export default function DashboardStats({
 
   if (error) {
     return (
-      <div
-        style={{
-          background: "var(--dash-danger-bg)",
-          border: "1px solid var(--dash-danger-border)",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 14,
-          color: "var(--dash-danger)",
-          marginBottom: 24,
-        }}
-      >
+      <div className="admin-error-banner" style={{ marginBottom: 24 }}>
         {error}
       </div>
     );
@@ -105,17 +95,7 @@ export default function DashboardStats({
       )}
 
       <AdminCard style={{ marginBottom: 20 }}>
-        <h2
-          style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            fontSize: 16,
-            fontWeight: 700,
-            marginBottom: 16,
-            color: "var(--dash-text)",
-          }}
-        >
-          Ventas últimos 14 días
-        </h2>
+        <h2 className="admin-section-title">Ventas últimos 14 días</h2>
         {stats && stats.orderCount === 0 ? (
           <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>
             Todavía no hay pedidos registrados en este período.
@@ -189,17 +169,7 @@ export default function DashboardStats({
 
       {stats && stats.topProducts.length > 0 && (
         <AdminCard>
-          <h2
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: 16,
-              fontWeight: 700,
-              marginBottom: 16,
-              color: "var(--dash-text)",
-            }}
-          >
-            Más vendidos (14 días)
-          </h2>
+          <h2 className="admin-section-title">Más vendidos (14 días)</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {stats.topProducts.map((p, i) => (
               <div
@@ -245,17 +215,7 @@ function RestockPanel({
 
   return (
     <AdminCard style={{ marginBottom: 20 }}>
-      <h2
-        style={{
-          fontFamily: "var(--font-playfair), Georgia, serif",
-          fontSize: 16,
-          fontWeight: 700,
-          marginBottom: 16,
-          color: "var(--dash-text)",
-        }}
-      >
-        Necesita reposición
-      </h2>
+      <h2 className="admin-section-title">Necesita reposición</h2>
       {needsRestock.length === 0 ? (
         <EmptyState
           icon={PackageCheck}

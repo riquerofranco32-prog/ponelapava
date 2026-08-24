@@ -29,6 +29,7 @@ export default function CategoriesPanel({
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
+  const [movingId, setMovingId] = useState<string | null>(null);
   const showToast = useAdminToast();
 
   function productCount(slug: string): number {
@@ -84,11 +85,16 @@ export default function CategoriesPanel({
     const target = categories[index + direction];
     const current = categories[index];
     if (!target) return;
-    await Promise.all([
-      saveSortOrder(current, target.sortOrder ?? 0),
-      saveSortOrder(target, current.sortOrder ?? 0),
-    ]);
-    onChange();
+    setMovingId(current.id);
+    try {
+      await Promise.all([
+        saveSortOrder(current, target.sortOrder ?? 0),
+        saveSortOrder(target, current.sortOrder ?? 0),
+      ]);
+      onChange();
+    } finally {
+      setMovingId(null);
+    }
   }
 
   return (
@@ -170,11 +176,13 @@ export default function CategoriesPanel({
                     <IconButton
                       title="Subir"
                       icon={ChevronUp}
+                      disabled={movingId !== null}
                       onClick={() => moveCategory(index, -1)}
                     />
                     <IconButton
                       title="Bajar"
                       icon={ChevronDown}
+                      disabled={movingId !== null}
                       onClick={() => moveCategory(index, 1)}
                     />
                   </div>

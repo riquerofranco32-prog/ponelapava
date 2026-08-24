@@ -23,6 +23,7 @@ export function OrderStatusSelect({
         fontSize: 12,
         fontWeight: 600,
         cursor: "pointer",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       {(Object.keys(STATUS_LABELS) as Order["status"][]).map((s) => (

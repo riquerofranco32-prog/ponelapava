@@ -32,6 +32,7 @@ export function StatusBadge({ status }: { status: Product["status"] }) {
         fontWeight: 600,
         color,
         background: bg,
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       {label}

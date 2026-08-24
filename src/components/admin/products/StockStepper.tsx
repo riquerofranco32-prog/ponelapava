@@ -24,6 +24,7 @@ export function StockStepper({
   onChange: (next: number) => Promise<void>;
 }) {
   const [localValue, setLocalValue] = useState(value);
+  const [confirmedTick, setConfirmedTick] = useState(0);
   const pendingRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onChangeRef = useRef(onChange);
@@ -54,6 +55,7 @@ export function StockStepper({
     timerRef.current = setTimeout(async () => {
       try {
         await onChangeRef.current(next);
+        setConfirmedTick((tick) => tick + 1);
       } catch {
         // The caller already surfaced the error (toast) — just roll the
         // optimistic count back to the last confirmed value.
@@ -73,6 +75,8 @@ export function StockStepper({
         <Minus size={12} />
       </StepButton>
       <span
+        key={confirmedTick}
+        className="admin-stock-pulse"
         style={{
           minWidth: 22,
           textAlign: "center",

@@ -7,8 +7,15 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 
 export default function CartDrawer() {
-  const { items, isOpen, setDrawer, updateQuantity, removeItem, itemCount, total } =
-    useCart();
+  const {
+    items,
+    isOpen,
+    setDrawer,
+    updateQuantity,
+    removeItem,
+    itemCount,
+    total,
+  } = useCart();
 
   return (
     <>
@@ -115,7 +122,8 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() => updateQuantity(product.id, quantity + 1)}
-                        className="tap-44 flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors"
+                        disabled={quantity >= product.stock}
+                        className="tap-44 flex items-center justify-center w-6 h-6 rounded-chip border border-pava-brown/20 hover:border-pava-green hover:text-pava-green transition-colors disabled:opacity-40 disabled:hover:border-pava-brown/20 disabled:hover:text-inherit"
                         aria-label="Aumentar cantidad"
                       >
                         <Plus size={11} />

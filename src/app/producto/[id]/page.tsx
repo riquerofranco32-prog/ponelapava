@@ -40,7 +40,7 @@ export default async function ProductPage({ params }: PageProps) {
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: product.images.map((src) => `${SITE_URL}${src}`),
+    image: product.images,
     brand: product.brand
       ? { "@type": "Brand", name: product.brand }
       : undefined,

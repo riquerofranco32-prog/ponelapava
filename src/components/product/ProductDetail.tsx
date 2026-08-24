@@ -230,8 +230,11 @@ export default function ProductDetail({
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="flex items-center justify-center w-11 h-11 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors"
+                    onClick={() =>
+                      setQuantity((q) => Math.min(product.stock, q + 1))
+                    }
+                    disabled={quantity >= product.stock}
+                    className="flex items-center justify-center w-11 h-11 text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
                     aria-label="Aumentar cantidad"
                   >
                     <Plus size={16} />

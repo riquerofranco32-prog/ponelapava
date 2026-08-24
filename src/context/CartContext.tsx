@@ -44,14 +44,23 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ...state,
           items: state.items.map((item) =>
             item.product.id === action.product.id
-              ? { ...item, quantity: item.quantity + qty }
+              ? {
+                  ...item,
+                  quantity: Math.min(item.quantity + qty, action.product.stock),
+                }
               : item,
           ),
         };
       }
       return {
         ...state,
-        items: [...state.items, { product: action.product, quantity: qty }],
+        items: [
+          ...state.items,
+          {
+            product: action.product,
+            quantity: Math.min(qty, action.product.stock),
+          },
+        ],
       };
     }
 
@@ -76,7 +85,10 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ...state,
         items: state.items.map((item) =>
           item.product.id === action.productId
-            ? { ...item, quantity: action.quantity }
+            ? {
+                ...item,
+                quantity: Math.min(action.quantity, item.product.stock),
+              }
             : item,
         ),
       };
@@ -95,18 +107,20 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return { ...state, items: action.items };
 
     // Reconcile stale localStorage snapshots against fresh DB data: drop
-    // items whose product no longer exists, patch price/stock/status on
-    // the rest so a days-old cart can't check out at old prices.
+    // items whose product no longer exists or ran out of stock, patch
+    // price/stock/status on the rest so a days-old cart can't check out
+    // at old prices or quantities the shelf no longer has.
     case "SYNC": {
       const fresh = new Map(action.products.map((p) => [p.id, p]));
       return {
         ...state,
         items: state.items
-          .filter((item) => fresh.has(item.product.id))
+          .filter((item) => (fresh.get(item.product.id)?.stock ?? 0) > 0)
           .map((item) => {
             const p = fresh.get(item.product.id)!;
             return {
               ...item,
+              quantity: Math.min(item.quantity, p.stock),
               product: {
                 ...item.product,
                 price: p.price,

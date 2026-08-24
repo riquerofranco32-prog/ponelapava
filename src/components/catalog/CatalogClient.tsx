@@ -239,8 +239,18 @@ export default function CatalogClient({
             placeholder="Buscar yerbas, mates, termos..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
+            className="w-full pl-10 pr-9 py-3 rounded-control bg-white border border-pava-brown/15 text-pava-brown placeholder-pava-brown/40 text-sm focus:outline-none focus:border-pava-green transition-colors"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => handleSearchChange("")}
+              aria-label="Borrar búsqueda"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-pava-brown/40 hover:text-pava-brown p-1"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Price range */}
@@ -377,6 +387,70 @@ export default function CatalogClient({
           </button>
         ))}
       </div>
+
+      {/* Active filters chips bar */}
+      {(activeCategory !== "all" || search.trim() || minPrice || maxPrice || favoritesOnly) && (
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="text-xs font-semibold text-pava-brown-mid/70 mr-1">Filtros activos:</span>
+          {activeCategory !== "all" && (
+            <button
+              onClick={() => handleCategoryChange("all")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pava-green/10 border border-pava-green/20 px-3 py-1 text-xs font-medium text-pava-green hover:bg-pava-green/20 transition-colors"
+            >
+              <span>{categories.find((c) => c.slug === activeCategory)?.name ?? activeCategory}</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {search.trim() && (
+            <button
+              onClick={() => handleSearchChange("")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pava-brown/10 border border-pava-brown/15 px-3 py-1 text-xs font-medium text-pava-brown hover:bg-pava-brown/20 transition-colors"
+            >
+              <span>Búsqueda: &ldquo;{search}&rdquo;</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {(minPrice || maxPrice) && (
+            <button
+              onClick={clearPriceFilter}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pava-brown/10 border border-pava-brown/15 px-3 py-1 text-xs font-medium text-pava-brown hover:bg-pava-brown/20 transition-colors"
+            >
+              <span>Precio: {minPrice ? `$${minPrice}` : "$0"} – {maxPrice ? `$${maxPrice}` : "Max"}</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {favoritesOnly && (
+            <button
+              onClick={() => setFavoritesOnly(false)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pava-terracotta/10 border border-pava-terracotta/20 px-3 py-1 text-xs font-medium text-pava-terracotta hover:bg-pava-terracotta/20 transition-colors"
+            >
+              <span>Favoritos</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+              if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
+              setSearch("");
+              setActiveCategory("all");
+              setMinPrice("");
+              setMaxPrice("");
+              setFavoritesOnly(false);
+              updateUrl({
+                search: "",
+                sort,
+                category: "all",
+                minPrice: "",
+                maxPrice: "",
+              });
+            }}
+            className="text-xs text-pava-terracotta underline hover:text-pava-terracotta/80 ml-2 cursor-pointer"
+          >
+            Limpiar todos
+          </button>
+        </div>
+      )}
 
       {/* Results count */}
       <p className="text-sm text-pava-brown-mid/75 mb-6">

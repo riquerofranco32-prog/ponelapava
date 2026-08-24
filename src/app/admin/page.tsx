@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   PackageX,
   PackageSearch,
+  History,
 } from "lucide-react";
 import { Category, Product } from "@/types";
 import { ProductInput } from "@/lib/products";
@@ -30,16 +31,23 @@ import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard
 import DashboardStats from "@/components/admin/DashboardStats";
 import OrdersTable from "@/components/admin/OrdersTable";
 import SettingsForm from "@/components/admin/SettingsForm";
+import AuditLogTable from "@/components/admin/AuditLogTable";
 import { useAdminToast } from "@/components/admin/AdminToast";
 
 type AdminSection =
-  "dashboard" | "productos" | "categorias" | "pedidos" | "configuracion";
+  | "dashboard"
+  | "productos"
+  | "categorias"
+  | "pedidos"
+  | "configuracion"
+  | "actividad";
 
 const NAV_ITEMS: AdminNavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "productos", label: "Productos", icon: Package },
   { id: "categorias", label: "Categorías", icon: Tag },
   { id: "pedidos", label: "Pedidos", icon: ShoppingCart },
+  { id: "actividad", label: "Actividad", icon: History },
   { id: "configuracion", label: "Configuración", icon: Settings },
 ];
 
@@ -338,6 +346,9 @@ export default function AdminPage() {
 
       {/* ── PEDIDOS ── */}
       {activeSection === "pedidos" && <OrdersTable />}
+
+      {/* ── ACTIVIDAD ── */}
+      {activeSection === "actividad" && <AuditLogTable />}
 
       {/* ── CONFIGURACIÓN ── */}
       {activeSection === "configuracion" && <SettingsForm />}

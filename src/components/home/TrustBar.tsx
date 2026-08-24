@@ -62,9 +62,11 @@ export default function TrustBar() {
         {items.map((item) => (
           <TrustItem key={item.title} {...item} />
         ))}
-        {items.map((item) => (
-          <TrustItem key={`dup-${item.title}`} {...item} />
-        ))}
+        <div aria-hidden="true" className="contents">
+          {items.map((item) => (
+            <TrustItem key={`dup-${item.title}`} {...item} />
+          ))}
+        </div>
       </div>
     </section>
   );

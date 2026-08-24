@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: "Catálogo",
   description:
     "Explorá nuestro catálogo completo: yerbas, mates artesanales, termos, bombillas, accesorios y combos. Filtrá por categoría y encontrá lo que buscás.",
+  alternates: { canonical: "/catalogo" },
 };
 
 export default async function CatalogPage() {

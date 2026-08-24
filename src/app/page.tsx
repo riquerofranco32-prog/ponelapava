@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   title: "Poné La Pava — Yerbas, Mates y Accesorios Premium",
   description:
     "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos, bombillas y todo lo que necesitás para el mate perfecto. Local físico y envíos.",
+  alternates: { canonical: "/" },
 };
 
 export default function HomePage() {
@@ -26,13 +27,13 @@ export default function HomePage() {
     <>
       <Hero />
       <TrustBar />
+      <HowToBuy />
       <FeaturedProducts />
       <AboutSection />
       <Categories />
       <MateMatcher />
       <LocalSection />
       <GoogleReviews />
-      <HowToBuy />
       <FinalCTA />
       <InstagramSection />
     </>

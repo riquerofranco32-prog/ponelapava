@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -14,19 +14,26 @@ export default function MagneticButton({
   strength = 0.25,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState("translate(0px, 0px)");
+  const reducedMotion = useRef(false);
 
+  useEffect(() => {
+    reducedMotion.current = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+  }, []);
+
+  // Writes transform directly to the DOM instead of useState — mousemove
+  // fires far too often to route through a React re-render.
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
+    if (reducedMotion.current || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
     const x = (e.clientX - rect.left - rect.width / 2) * strength;
     const y = (e.clientY - rect.top - rect.height / 2) * strength;
-    setTransform(`translate(${x}px, ${y}px)`);
+    ref.current.style.transform = `translate(${x}px, ${y}px)`;
   }
 
   function handleMouseLeave() {
-    setTransform("translate(0px, 0px)");
+    if (ref.current) ref.current.style.transform = "translate(0px, 0px)";
   }
 
   return (
@@ -36,7 +43,7 @@ export default function MagneticButton({
       onMouseLeave={handleMouseLeave}
       className={className}
       style={{
-        transform,
+        transform: "translate(0px, 0px)",
         transition: "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)",
         display: "inline-block",
       }}

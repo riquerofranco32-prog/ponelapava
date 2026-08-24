@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MagneticButton from "@/components/ui/MagneticButton";
 
 export default function Hero() {
   const [loaded, setLoaded] = useState(false);
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [allowVideo, setAllowVideo] = useState(false);
+  const bgRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 60);
@@ -21,28 +22,41 @@ export default function Hero() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Writes both layers' transforms directly to the DOM instead of through
+  // useState — mousemove fires far too often to route through a re-render
+  // of the whole Hero tree.
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setParallax({
-      x: ((e.clientX - rect.left) / rect.width - 0.5) * 2,
-      y: ((e.clientY - rect.top) / rect.height - 0.5) * 2,
-    });
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    if (bgRef.current) {
+      bgRef.current.style.transform = `scale(1.06) translate(${x * -10}px, ${y * -10}px)`;
+    }
+    if (contentRef.current) {
+      contentRef.current.style.transform = `translate(${x * 6}px, ${y * 6}px)`;
+    }
+  };
+
+  const resetParallax = () => {
+    if (bgRef.current)
+      bgRef.current.style.transform = "scale(1.06) translate(0px, 0px)";
+    if (contentRef.current)
+      contentRef.current.style.transform = "translate(0px, 0px)";
   };
 
   return (
     <section
       id="inicio"
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => setParallax({ x: 0, y: 0 })}
+      onMouseLeave={resetParallax}
       className="grain-overlay relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label="Bienvenida a Poné La Pava"
     >
       {/* Background image — mouse-driven parallax depth layer */}
       <div
+        ref={bgRef}
         className="absolute inset-0 z-0 transition-transform duration-300 ease-out"
-        style={{
-          transform: `scale(1.06) translate(${parallax.x * -10}px, ${parallax.y * -10}px)`,
-        }}
+        style={{ transform: "scale(1.06) translate(0px, 0px)" }}
       >
         {/* La imagen queda montada SIEMPRE, como capa de fondo, y el video se
             apila encima. Antes se alternaban (Image → video con `poster`), y
@@ -100,10 +114,9 @@ export default function Hero() {
       {/* Main content — fills screen, content at bottom; shallower parallax depth than bg */}
       {/* pt matches Navbar's initial height (h-20 lg:h-24) so content never renders under the fixed header on short viewports */}
       <div
+        ref={contentRef}
         className="relative z-10 flex flex-1 flex-col justify-end pt-20 transition-transform duration-300 ease-out lg:pt-24"
-        style={{
-          transform: `translate(${parallax.x * 6}px, ${parallax.y * 6}px)`,
-        }}
+        style={{ transform: "translate(0px, 0px)" }}
       >
         <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
           {/* Tag line — shimmer badge */}

@@ -102,6 +102,7 @@ export default function MateMatcher() {
                   key={q.question}
                   className="w-full shrink-0 px-1 text-center"
                   aria-hidden={step !== i}
+                  inert={step !== i}
                 >
                   <span className="mb-3 block text-[11px] font-semibold uppercase tracking-[0.2em] text-pava-gold-deep/70">
                     Paso {i + 1} de {QUESTIONS.length}

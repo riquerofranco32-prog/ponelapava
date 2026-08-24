@@ -43,6 +43,7 @@ export const metadata: Metadata = {
   },
   description:
     "Especialistas en la cultura del mate. Yerbas seleccionadas, mates artesanales, termos, bombillas y todo lo que necesitás para el mate perfecto.",
+  alternates: { canonical: "/" },
   keywords: [
     "yerba mate",
     "mates artesanales",

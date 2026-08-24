@@ -144,20 +144,24 @@ function Column({
   items: (WrittenReview | RatingOnlyReview)[];
   duration: number;
 }) {
-  const doubled = [...items, ...items];
+  const renderItems = (list: typeof items) =>
+    list.map((r, i) =>
+      isWritten(r) ? (
+        <ReviewCard key={i} {...r} />
+      ) : (
+        <ReviewChip key={i} {...r} />
+      ),
+    );
   return (
     <div className="marquee-vertical-mask h-full overflow-hidden">
       <div
         className="marquee-vertical-track"
         style={{ animationDuration: `${duration}s` }}
       >
-        {doubled.map((r, i) =>
-          isWritten(r) ? (
-            <ReviewCard key={i} {...r} />
-          ) : (
-            <ReviewChip key={i} {...r} />
-          ),
-        )}
+        {renderItems(items)}
+        <div aria-hidden="true" className="contents">
+          {renderItems(items)}
+        </div>
       </div>
     </div>
   );

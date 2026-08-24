@@ -21,6 +21,16 @@ export function AdminModal({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
+  // Background stays scrollable otherwise — same lock AdminShell uses for
+  // its mobile nav, needed here too since every admin modal is a portal
+  // outside the shell's own scroll container.
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   // Focus trap + Escape + restore focus on close
   useEffect(() => {
     const previouslyFocused = document.activeElement;

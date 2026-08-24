@@ -30,11 +30,17 @@ export function OrderDetailModal({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(buildSummary(order));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(buildSummary(order));
+      setCopyError(false);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopyError(true);
+    }
   }
 
   return (
@@ -43,7 +49,19 @@ export function OrderDetailModal({
       onClose={onClose}
       maxWidth={480}
       footer={
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          {copyError && (
+            <span style={{ fontSize: 12, color: "var(--dash-danger)" }}>
+              No se pudo copiar
+            </span>
+          )}
           <AdminButton variant="secondary" onClick={handleCopy}>
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? "Copiado" : "Copiar resumen"}

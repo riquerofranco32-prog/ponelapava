@@ -16,8 +16,7 @@ export default function Hero() {
     // Skip the ~1.3MB video on small screens — mobile visitors are more
     // likely on limited data, and the poster image reads fine there.
     setAllowVideo(
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
-        !window.matchMedia("(max-width: 640px)").matches,
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
     );
     return () => clearTimeout(timer);
   }, []);
@@ -58,20 +57,14 @@ export default function Hero() {
         className="absolute inset-0 z-0 transition-transform duration-300 ease-out"
         style={{ transform: "scale(1.06) translate(0px, 0px)" }}
       >
-        {/* La imagen queda montada SIEMPRE, como capa de fondo, y el video se
-            apila encima. Antes se alternaban (Image → video con `poster`), y
-            eso traía el PNG dos veces: optimizado por next/image en el primer
-            render, y después crudo desde /public porque los `poster` no pasan
-            por el optimizador. Sin `poster`, el video se pinta transparente
-            hasta su primer cuadro y lo que se ve mientras tanto es esta misma
-            imagen — un solo archivo, ya optimizado. */}
+        {/* La imagen queda montada SIEMPRE como fallback debajo del video */}
         <Image
           src="/hero_background_1786545961305.png"
           alt="Mate servido sobre mesa de madera"
           fill
           priority
           quality={92}
-          className="object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
+          className="object-cover object-center"
           sizes="100vw"
         />
         {allowVideo && (
@@ -80,9 +73,9 @@ export default function Hero() {
             muted
             loop
             playsInline
-            className="absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-[58%_center] lg:object-center"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           >
-            <source src="/hero-mate-pour.mp4" type="video/mp4" />
+            <source src="/videohero.mp4" type="video/mp4" />
           </video>
         )}
         {/* Multi-layer gradient for editorial feel */}

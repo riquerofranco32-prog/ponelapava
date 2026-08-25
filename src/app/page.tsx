@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero";
 import TrustBar from "@/components/home/TrustBar";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import CustomKitBuilder from "@/components/home/CustomKitBuilder";
+import ComboPacksSection from "@/components/home/ComboPacksSection";
 import Categories from "@/components/home/Categories";
 import BrandsSection from "@/components/home/BrandsSection";
 import MateroExperienceHub from "@/components/home/MateroExperienceHub";
@@ -32,6 +33,7 @@ export default function HomePage() {
       <TrustBar />
       <HowToBuy />
       <FeaturedProducts />
+      <ComboPacksSection />
       <CustomKitBuilder />
       <AboutSection />
       <Categories />

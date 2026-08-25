@@ -8,8 +8,9 @@ import RitualMastery from "@/components/home/RitualMastery";
 import WaterTempSimulator from "@/components/home/WaterTempSimulator";
 import CuringGuide from "@/components/home/CuringGuide";
 import MateMatcher from "@/components/home/MateMatcher";
+import YerbaProfileSelector from "@/components/home/YerbaProfileSelector";
 
-type HubTab = "anatomy" | "ritual" | "temp" | "curing" | "quiz";
+type HubTab = "anatomy" | "yerbas" | "quiz" | "temp" | "curing" | "ritual";
 
 interface TabItem {
   id: HubTab;
@@ -24,6 +25,12 @@ const TABS: TabItem[] = [
     name: "Anatomía del Mate",
     badge: "Detalle & Piezas",
     icon: "🧉",
+  },
+  {
+    id: "yerbas",
+    name: "Perfiles de Yerba",
+    badge: "Cata & Paladar",
+    icon: "🍃",
   },
   {
     id: "quiz",
@@ -78,8 +85,8 @@ export default function MateroExperienceHub() {
 
         {/* Tab Navigation Strip */}
         <ScrollReveal direction="up" delay={60} className="mb-10">
-          <div className="flex items-center justify-center">
-            <div className="inline-flex max-w-full overflow-x-auto p-1.5 rounded-card bg-pava-cream border border-pava-brown/12 shadow-sm gap-1.5 scrollbar-none">
+          <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none">
+            <div className="inline-flex max-w-full p-1.5 rounded-card bg-pava-cream border border-pava-brown/12 shadow-sm gap-1.5 shrink-0">
               {TABS.map((tab) => {
                 const isActive = tab.id === activeTab;
                 return (
@@ -87,7 +94,7 @@ export default function MateroExperienceHub() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 rounded-control px-4 py-2.5 text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer ${
+                    className={`flex items-center gap-2 rounded-control px-3.5 py-2.5 sm:px-4 text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer ${
                       isActive
                         ? "bg-pava-green text-pava-cream shadow-md shadow-pava-green/25 scale-[1.02]"
                         : "text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark/50"
@@ -116,6 +123,11 @@ export default function MateroExperienceHub() {
           {activeTab === "anatomy" && (
             <div className="animate-in fade-in zoom-in-95 duration-200">
               <MateAnatomy embedded />
+            </div>
+          )}
+          {activeTab === "yerbas" && (
+            <div className="animate-in fade-in zoom-in-95 duration-200">
+              <YerbaProfileSelector embedded />
             </div>
           )}
           {activeTab === "quiz" && (

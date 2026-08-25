@@ -35,6 +35,23 @@ export interface Category {
   productCount?: number;
 }
 
+// ── Coupon ──────────────────────────────────────────────
+// Applied manually by staff when writing up the WhatsApp order — the
+// checkout is a WhatsApp message, not an online cart, so there's no
+// automatic discount step to wire this into.
+export interface Coupon {
+  id: string;
+  code: string;
+  discountType: "percent" | "fixed";
+  discountValue: number;
+  validFrom?: string;
+  validUntil?: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export type CouponInput = Omit<Coupon, "id" | "createdAt">;
+
 // ── Cart ────────────────────────────────────────────────
 export interface CartItem {
   product: Product;

@@ -19,7 +19,9 @@ export function AdminModal({
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   // Background stays scrollable otherwise — same lock AdminShell uses for
   // its mobile nav, needed here too since every admin modal is a portal

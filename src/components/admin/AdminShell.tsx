@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, ExternalLink, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LogOut, Search } from "lucide-react";
 import { useAdminUserEmail } from "@/context/AdminUserContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import PendingOrdersBadge from "@/components/admin/PendingOrdersBadge";
+import AdminCommandPalette from "@/components/admin/AdminCommandPalette";
+import AdminShortcutsModal from "@/components/admin/AdminShortcutsModal";
 import { type AdminNavItem, ADMIN_NAV_ITEMS } from "@/lib/admin-nav";
 
 export type { AdminNavItem };
@@ -27,11 +29,30 @@ export default function AdminShell({
 }: AdminShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [clockTime, setClockTime] = useState<string | null>(null);
   const email = useAdminUserEmail();
   const pathname = usePathname();
   const activeItem =
     navItems.find((item) => pathname?.startsWith(item.href)) ?? navItems[0];
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      const isInput = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+      } else if (e.key === "?" && !isInput && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     function tick() {
@@ -132,7 +153,23 @@ export default function AdminShell({
         >
           Poné La Pava — Admin
         </span>
-        <span style={{ width: 44 }} aria-hidden="true" />
+        <button
+          onClick={() => setPaletteOpen(true)}
+          aria-label="Buscar"
+          style={{
+            width: 44,
+            height: 44,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--dash-text)",
+          }}
+        >
+          <Search size={18} />
+        </button>
       </header>
 
       {/* ── MOBILE OVERLAY + DROPDOWN ── */}
@@ -225,7 +262,7 @@ export default function AdminShell({
 
       {/* ── MOBILE BOTTOM NAV ── */}
       <nav
-        className="flex lg:hidden"
+        className="flex lg:hidden items-center justify-around"
         style={{
           position: "fixed",
           bottom: 0,
@@ -234,41 +271,93 @@ export default function AdminShell({
           zIndex: 60,
           background: "var(--dash-surface)",
           borderTop: "1px solid var(--dash-border)",
+          paddingBottom: "max(8px, env(safe-area-inset-bottom))",
+          backdropFilter: "blur(12px)",
         }}
       >
-        {navItems.slice(0, MOBILE_TAB_COUNT).map((item) => {
-          const isActive = item.href === activeItem.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 3,
-                padding: "10px 4px",
-                background: "none",
-                border: "none",
-                color: isActive ? "var(--dash-accent)" : "var(--dash-muted)",
-                cursor: "pointer",
-                transition: "color 0.18s ease",
-              }}
-            >
-              <span style={{ position: "relative", display: "flex" }}>
-                <item.icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
-                {item.href === "/admin/pedidos" && (
-                  <PendingOrdersBadge collapsed />
-                )}
-              </span>
-              <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500 }}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+        {[
+          navItems.find((i) => i.href === "/admin/dashboard"),
+          navItems.find((i) => i.href === "/admin/productos"),
+          navItems.find((i) => i.href === "/admin/pedidos"),
+          navItems.find((i) => i.href === "/admin/clientes"),
+        ]
+          .filter((i): i is NonNullable<typeof i> => Boolean(i))
+          .map((item) => {
+            const isActive = item.href === activeItem.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 3,
+                  padding: "8px 2px",
+                  background: "none",
+                  border: "none",
+                  color: isActive ? "var(--dash-accent)" : "var(--dash-muted)",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  minHeight: 48,
+                  transition: "color 0.18s ease",
+                }}
+              >
+                <span style={{ position: "relative", display: "flex" }}>
+                  <item.icon size={20} strokeWidth={isActive ? 2.2 : 1.8} />
+                  {item.href === "/admin/pedidos" && (
+                    <PendingOrdersBadge collapsed />
+                  )}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: isActive ? 700 : 500,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+
+        {/* 5th button: Menú / Más */}
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          aria-label="Más secciones del panel"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            padding: "8px 2px",
+            background: "none",
+            border: "none",
+            color: mobileOpen ? "var(--dash-accent)" : "var(--dash-muted)",
+            cursor: "pointer",
+            minHeight: 48,
+            transition: "color 0.18s ease",
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M3 6h14M3 10h14M3 14h14"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          <span style={{ fontSize: 10, fontWeight: mobileOpen ? 700 : 500 }}>
+            Más
+          </span>
+        </button>
       </nav>
 
       {/* ── DESKTOP SIDEBAR ── */}
@@ -354,6 +443,47 @@ export default function AdminShell({
             gap: 4,
           }}
         >
+          {/* Quick Search Button */}
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            title={collapsed ? "Buscar (Ctrl+K)" : undefined}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: collapsed ? "8px 0" : "8px 10px",
+              justifyContent: collapsed ? "center" : "space-between",
+              borderRadius: "var(--radius-control)",
+              background: "var(--dash-surface-elevated)",
+              border: "1px solid var(--dash-border)",
+              color: "var(--dash-text-muted)",
+              fontSize: 12,
+              cursor: "pointer",
+              marginBottom: 8,
+              transition: "border-color 0.15s ease",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Search size={14} />
+              {!collapsed && <span>Buscar...</span>}
+            </div>
+            {!collapsed && (
+              <kbd
+                style={{
+                  fontSize: 10,
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  background: "var(--dash-surface)",
+                  border: "1px solid var(--dash-border)",
+                  fontFamily: "monospace",
+                }}
+              >
+                ⌘K
+              </kbd>
+            )}
+          </button>
+
           {navItems.map((item) => {
             const isActive = item.href === activeItem.href;
             return (
@@ -476,6 +606,18 @@ export default function AdminShell({
           {children}
         </div>
       </main>
+
+      {/* Global Command Palette */}
+      <AdminCommandPalette
+        isOpen={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+      />
+
+      {/* Global Shortcuts Modal */}
+      <AdminShortcutsModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </div>
   );
 }

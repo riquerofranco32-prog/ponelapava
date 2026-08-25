@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Copy, ExternalLink } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
@@ -19,6 +19,7 @@ export function ProductDesktopRow({
   index = 0,
   compact = false,
   onEdit,
+  onDuplicate,
   onDelete,
   onStockChange,
 }: {
@@ -26,6 +27,7 @@ export function ProductDesktopRow({
   index?: number;
   compact?: boolean;
   onEdit: (product: Product) => void;
+  onDuplicate?: (product: Product) => void;
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
@@ -77,6 +79,23 @@ export function ProductDesktopRow({
       </td>
       <td style={{ ...td, textAlign: "right" }}>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+          <a
+            href={`/producto/${product.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ver en la tienda"
+            className="admin-icon-btn"
+            style={{ textDecoration: "none" }}
+          >
+            <ExternalLink size={14} />
+          </a>
+          {onDuplicate && (
+            <IconButton
+              onClick={() => onDuplicate(product)}
+              title="Duplicar / Clonar producto"
+              icon={Copy}
+            />
+          )}
           <IconButton
             onClick={() => onEdit(product)}
             title="Editar"

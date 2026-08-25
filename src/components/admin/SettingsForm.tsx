@@ -198,6 +198,62 @@ export default function SettingsForm() {
         <p style={{ fontSize: 12, color: "var(--dash-muted)" }}>
           Los cambios se reflejan en el sitio público en hasta 60 segundos.
         </p>
+
+        {/* Database Backup Tool */}
+        <div
+          style={{
+            marginTop: 24,
+            paddingTop: 20,
+            borderTop: "1px solid var(--dash-border)",
+          }}
+        >
+          <div style={{ marginBottom: 12 }}>
+            <h3
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: "var(--dash-text)",
+                marginBottom: 4,
+              }}
+            >
+              Copia de Seguridad (Backup)
+            </h3>
+            <p style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+              Descargá una copia de respaldo completa de la configuración de la tienda.
+            </p>
+          </div>
+          <AdminButton
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              const dataStr =
+                "data:text/json;charset=utf-8," +
+                encodeURIComponent(
+                  JSON.stringify(
+                    {
+                      settings,
+                      exportedAt: new Date().toISOString(),
+                      store: "Poné La Pava - Catriel",
+                    },
+                    null,
+                    2,
+                  ),
+                );
+              const downloadAnchor = document.createElement("a");
+              downloadAnchor.setAttribute("href", dataStr);
+              downloadAnchor.setAttribute(
+                "download",
+                `backup-ponelapava-${new Date().toISOString().slice(0, 10)}.json`,
+              );
+              document.body.appendChild(downloadAnchor);
+              downloadAnchor.click();
+              downloadAnchor.remove();
+              showToast("Backup descargado con éxito");
+            }}
+          >
+            Exportar Backup JSON
+          </AdminButton>
+        </div>
       </form>
 
       <AdminCard

@@ -36,7 +36,7 @@ export interface CreateOrderInput {
   comment?: string;
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<void> {
+export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const orderItems: OrderItem[] = input.items.map(({ product, quantity }) => ({
     productId: product.id,
     productName: product.name,
@@ -46,28 +46,41 @@ export async function createOrder(input: CreateOrderInput): Promise<void> {
   }));
 
   const payload: Record<string, unknown> = {
-    customer_name: input.customerName,
+    customer_name: input.customerName.trim(),
     items: orderItems,
     subtotal: input.total,
     total: input.total,
-    comment: input.comment || null,
+    comment: input.comment?.trim() || null,
+    status: "pending",
   };
 
-  if (input.customerPhone) {
-    payload.customer_phone = input.customerPhone;
+  if (input.customerPhone?.trim()) {
+    payload.customer_phone = input.customerPhone.trim();
   }
 
-  const { error } = await supabase.from("orders").insert(payload);
+  const admin = supabaseAdmin();
+  const { data, error } = await admin
+    .from("orders")
+    .insert(payload)
+    .select("*")
+    .single();
+
   if (error) {
     // If customer_phone column doesn't exist yet, retry without it
-    if (error.code === UNDEFINED_COLUMN && input.customerPhone) {
+    if (error.code === UNDEFINED_COLUMN && payload.customer_phone) {
       delete payload.customer_phone;
-      const retry = await supabase.from("orders").insert(payload);
+      const retry = await admin
+        .from("orders")
+        .insert(payload)
+        .select("*")
+        .single();
       if (retry.error) throw retry.error;
-      return;
+      return fromRow(retry.data as OrderRow);
     }
     throw error;
   }
+
+  return fromRow(data as OrderRow);
 }
 
 export async function getOrders(): Promise<Order[]> {

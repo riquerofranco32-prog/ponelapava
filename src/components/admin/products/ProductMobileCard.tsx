@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Copy, ExternalLink } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
@@ -12,12 +12,14 @@ export function ProductMobileCard({
   product,
   index = 0,
   onEdit,
+  onDuplicate,
   onDelete,
   onStockChange,
 }: {
   product: Product;
   index?: number;
   onEdit: (product: Product) => void;
+  onDuplicate?: (product: Product) => void;
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
@@ -64,7 +66,24 @@ export function ProductMobileCard({
               {getCategoryLabel(product.category)}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+            <a
+              href={`/producto/${product.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Ver en la tienda"
+              className="admin-icon-btn"
+              style={{ textDecoration: "none", width: 28, height: 28 }}
+            >
+              <ExternalLink size={13} />
+            </a>
+            {onDuplicate && (
+              <IconButton
+                onClick={() => onDuplicate(product)}
+                title="Duplicar"
+                icon={Copy}
+              />
+            )}
             <IconButton
               onClick={() => onEdit(product)}
               title="Editar"

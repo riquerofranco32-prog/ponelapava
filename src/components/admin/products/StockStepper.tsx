@@ -28,7 +28,9 @@ export function StockStepper({
   const pendingRef = useRef<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
 
   // Re-sync from the parent's confirmed value only while nothing is in
   // flight, or once it catches up to what was last committed — otherwise

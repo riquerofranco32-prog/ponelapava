@@ -11,6 +11,7 @@ import { TableSkeleton } from "@/components/admin/TableSkeleton";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
+import { InventoryValuationWidget } from "@/components/admin/products/InventoryValuationWidget";
 import { useAdminProducts } from "@/lib/useAdminProducts";
 
 export default function AdminProductosPage() {
@@ -26,10 +27,34 @@ export default function AdminProductosPage() {
   } = useAdminProducts();
   const [searchProduct, setSearchProduct] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out" | "available">("all");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [cloningProduct, setCloningProduct] = useState<Product | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  function handleDuplicate(product: Product) {
+    const cloned: Product = {
+      ...product,
+      id: "",
+      name: `${product.name} (Copia)`,
+      slug: `${product.slug}-copia`,
+    };
+    setCloningProduct(cloned);
+  }
+
+  // Support ?action=new and ?search=... from command palette or direct links
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "new") {
+      setCreating(true);
+    }
+    const q = params.get("search");
+    if (q) {
+      setSearchProduct(q);
+    }
+  }, []);
 
   // "/" jumps straight to the product search, mirroring the shortcut
   // shoppers already know from GitHub/Linear-style tools.
@@ -45,16 +70,212 @@ export default function AdminProductosPage() {
     return () => window.removeEventListener("keydown", handleKeydown);
   }, []);
 
-  const filteredProducts = products.filter(
-    (p) =>
-      (categoryFilter === "all" || p.category === categoryFilter) &&
-      (p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
-        p.brand?.toLowerCase().includes(searchProduct.toLowerCase())),
-  );
+  const lowStockCount = products.filter(
+    (p) => p.stock > 0 && p.stock <= 3,
+  ).length;
+  const outOfStockCount = products.filter((p) => p.stock === 0).length;
+  const inStockCount = products.filter((p) => p.stock > 0).length;
+
+  const filteredProducts = products.filter((p) => {
+    const matchCategory =
+      categoryFilter === "all" || p.category === categoryFilter;
+    const matchSearch =
+      p.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
+      p.brand?.toLowerCase().includes(searchProduct.toLowerCase());
+    let matchStock = true;
+    if (stockFilter === "low") {
+      matchStock = p.stock > 0 && p.stock <= 3;
+    } else if (stockFilter === "out") {
+      matchStock = p.stock === 0;
+    } else if (stockFilter === "available") {
+      matchStock = p.stock > 0;
+    }
+    return matchCategory && matchSearch && matchStock;
+  });
 
   return (
     <div>
       {loadError && <AdminErrorBanner message={loadError} />}
+
+      {/* Valuation & Stock Health Stats */}
+      {!loading && products.length > 0 && (
+        <InventoryValuationWidget products={products} />
+      )}
+
+      {/* Quick Stock Status Filter Chips */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 16,
+          overflowX: "auto",
+          paddingBottom: 4,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setStockFilter("all")}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "var(--radius-chip)",
+            border:
+              stockFilter === "all"
+                ? "1px solid var(--dash-accent)"
+                : "1px solid var(--dash-border)",
+            background:
+              stockFilter === "all"
+                ? "var(--dash-accent-subtle)"
+                : "var(--dash-surface)",
+            color:
+              stockFilter === "all"
+                ? "var(--dash-accent)"
+                : "var(--dash-text-muted)",
+            fontSize: 12,
+            fontWeight: stockFilter === "all" ? 600 : 500,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>Todos</span>
+          <span
+            style={{
+              fontSize: 11,
+              opacity: 0.75,
+              background: "var(--dash-surface-elevated)",
+              padding: "1px 5px",
+              borderRadius: 3,
+            }}
+          >
+            {products.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStockFilter("low")}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "var(--radius-chip)",
+            border:
+              stockFilter === "low"
+                ? "1px solid #f59e0b"
+                : "1px solid var(--dash-border)",
+            background:
+              stockFilter === "low"
+                ? "rgba(245, 158, 11, 0.15)"
+                : "var(--dash-surface)",
+            color: stockFilter === "low" ? "#d97706" : "var(--dash-text-muted)",
+            fontSize: 12,
+            fontWeight: stockFilter === "low" ? 600 : 500,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>⚠️ Stock Crítico (≤ 3)</span>
+          {lowStockCount > 0 && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                background: "#f59e0b",
+                color: "#fff",
+                padding: "1px 6px",
+                borderRadius: 999,
+              }}
+            >
+              {lowStockCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStockFilter("out")}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "var(--radius-chip)",
+            border:
+              stockFilter === "out"
+                ? "1px solid var(--dash-danger)"
+                : "1px solid var(--dash-border)",
+            background:
+              stockFilter === "out"
+                ? "rgba(220, 38, 38, 0.15)"
+                : "var(--dash-surface)",
+            color:
+              stockFilter === "out"
+                ? "var(--dash-danger)"
+                : "var(--dash-text-muted)",
+            fontSize: 12,
+            fontWeight: stockFilter === "out" ? 600 : 500,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>⛔ Sin Stock</span>
+          {outOfStockCount > 0 && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                background: "var(--dash-danger)",
+                color: "#fff",
+                padding: "1px 6px",
+                borderRadius: 999,
+              }}
+            >
+              {outOfStockCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStockFilter("available")}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "var(--radius-chip)",
+            border:
+              stockFilter === "available"
+                ? "1px solid #10b981"
+                : "1px solid var(--dash-border)",
+            background:
+              stockFilter === "available"
+                ? "rgba(16, 185, 129, 0.15)"
+                : "var(--dash-surface)",
+            color:
+              stockFilter === "available"
+                ? "#059669"
+                : "var(--dash-text-muted)",
+            fontSize: 12,
+            fontWeight: stockFilter === "available" ? 600 : 500,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span>✅ En Stock</span>
+          <span
+            style={{
+              fontSize: 11,
+              opacity: 0.75,
+              background: "var(--dash-surface-elevated)",
+              padding: "1px 5px",
+              borderRadius: 3,
+            }}
+          >
+            {inStockCount}
+          </span>
+        </button>
+      </div>
 
       <div
         style={{
@@ -126,6 +347,7 @@ export default function AdminProductosPage() {
         <ProductsTable
           data={filteredProducts}
           onEdit={setEditingProduct}
+          onDuplicate={handleDuplicate}
           onDelete={setDeletingProduct}
           onStockChange={handleStockChange}
         />
@@ -139,6 +361,17 @@ export default function AdminProductosPage() {
             setCreating(false);
           }}
           onCancel={() => setCreating(false)}
+        />
+      )}
+      {cloningProduct && (
+        <ProductForm
+          categories={categories}
+          product={cloningProduct}
+          onSave={async (input) => {
+            await handleCreate(input);
+            setCloningProduct(null);
+          }}
+          onCancel={() => setCloningProduct(null)}
         />
       )}
       {editingProduct && (
@@ -170,11 +403,13 @@ export default function AdminProductosPage() {
 function ProductsTable({
   data,
   onEdit,
+  onDuplicate,
   onDelete,
   onStockChange,
 }: {
   data: Product[];
   onEdit: (product: Product) => void;
+  onDuplicate?: (product: Product) => void;
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
@@ -216,6 +451,7 @@ function ProductsTable({
                 index={index}
                 product={product}
                 onEdit={onEdit}
+                onDuplicate={onDuplicate}
                 onDelete={onDelete}
                 onStockChange={onStockChange}
               />
@@ -235,6 +471,7 @@ function ProductsTable({
             index={index}
             product={product}
             onEdit={onEdit}
+            onDuplicate={onDuplicate}
             onDelete={onDelete}
             onStockChange={onStockChange}
           />

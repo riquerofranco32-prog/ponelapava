@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Clock,
   CheckCircle2,
@@ -10,6 +10,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  RefreshCw,
 } from "lucide-react";
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
@@ -42,7 +43,7 @@ function exportOrdersToCsv(orders: Order[]) {
     csvField(o.status),
   ]);
   const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -54,6 +55,7 @@ function exportOrdersToCsv(orders: Order[]) {
 export default function OrdersTable() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
@@ -75,23 +77,27 @@ export default function OrdersTable() {
     }
   }
 
-  async function loadOrders() {
-    setLoading(true);
+  const loadOrders = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     setError(null);
     try {
       const res = await fetch("/api/admin/orders");
       assertOk(res, "No se pudieron cargar los pedidos");
       setOrders(await res.json());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error desconocido");
+      if (!silent) setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
+      setRefreshing(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+    const interval = setInterval(() => loadOrders(true), 20_000);
+    return () => clearInterval(interval);
+  }, [loadOrders]);
 
   async function handleStatusChange(id: string, status: Order["status"]) {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
@@ -380,6 +386,21 @@ export default function OrdersTable() {
               </button>
             )}
           </div>
+          <AdminButton
+            variant="secondary"
+            onClick={() => loadOrders(false)}
+            disabled={refreshing || loading}
+          >
+            <RefreshCw
+              size={13}
+              style={{
+                marginRight: 6,
+                display: "inline",
+                animation: refreshing ? "spin 1s linear infinite" : "none",
+              }}
+            />
+            {refreshing ? "Actualizando..." : "Refrescar"}
+          </AdminButton>
           <AdminButton
             variant="secondary"
             onClick={() => exportOrdersToCsv(filteredOrders)}

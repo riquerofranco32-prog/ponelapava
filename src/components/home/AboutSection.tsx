@@ -16,8 +16,8 @@ export default function AboutSection() {
           >
             <div className="relative aspect-[3/4] overflow-hidden bg-pava-brown lg:aspect-auto lg:h-full lg:min-h-[580px]">
               <Image
-                src="/about_section_1786546070863.png"
-                alt="Compartiendo mate — Poné La Pava"
+                src="/local/local-1.jpg"
+                alt="Local Poné La Pava en Catriel, Río Negro"
                 fill
                 className="object-cover transition-transform duration-700 hover:scale-[1.02]"
                 sizes="(max-width: 1024px) 100vw, 50vw"

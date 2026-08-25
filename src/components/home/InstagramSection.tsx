@@ -3,32 +3,32 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { InstagramIcon } from "@/components/ui/icons";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/site";
 
-// Fotos reales del feed @ponelapava_yerbas (no stock).
+// Fotos reales del feed @ponelapava_yerbas
 const instagramPosts = [
   {
     id: "1",
-    image: "/ig_storefront.jpg",
-    alt: "Local de Poné La Pava en Catriel",
+    image: "/brand-gallery/post-1.jpg",
+    alt: "Mates artesanales y bombillas en Poné La Pava",
   },
   {
     id: "2",
-    image: "/ig_shelf.jpg",
-    alt: "Estantería de accesorios en el local",
+    image: "/brand-gallery/post-3.jpg",
+    alt: "Termos y accesorios materos en exhibición",
   },
   {
     id: "3",
-    image: "/ig_termos.jpg",
-    alt: "Termos Stanley en exhibición",
+    image: "/brand-gallery/post-5.jpg",
+    alt: "Yerbas seleccionadas y estacionadas",
   },
   {
     id: "4",
-    image: "/ig_sara.jpg",
-    alt: "Yerbas Sara en el local",
+    image: "/brand-gallery/post-7.jpg",
+    alt: "Mates camioneros e imperiales de cuero vaqueta",
   },
   {
     id: "5",
-    image: "/ig_bombillas.jpg",
-    alt: "Mates con virola en exhibición",
+    image: "/brand-gallery/post-9.jpg",
+    alt: "Sets materos y combos completos",
   },
 ];
 

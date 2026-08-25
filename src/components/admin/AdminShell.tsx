@@ -583,26 +583,144 @@ export default function AdminShell({
         style={{
           flex: 1,
           minHeight: "100vh",
-          paddingTop: "calc(56px + 20px)",
+          paddingTop: "calc(56px + 16px)",
           paddingBottom: "calc(64px + 20px)",
           paddingLeft: 16,
           paddingRight: 16,
         }}
-        className="lg:pt-8 lg:pb-8 lg:px-8"
+        className="lg:pt-6 lg:pb-10 lg:px-10"
       >
+        {/* Desktop Sticky Glass Top Bar */}
+        <div
+          className="hidden lg:flex items-center justify-between"
+          style={{
+            position: "sticky",
+            top: 12,
+            zIndex: 40,
+            marginBottom: 24,
+            padding: "10px 18px",
+            borderRadius: 12,
+            background: "rgba(24, 43, 29, 0.85)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid var(--dash-border)",
+            boxShadow: "0 4px 20px -2px rgba(0, 0, 0, 0.3)",
+          }}
+        >
+          {/* Left: Breadcrumbs & Status */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--dash-muted)" }}>
+              <span>Admin</span>
+              <span>/</span>
+              <span style={{ color: "var(--dash-text)", fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+                <activeItem.icon size={15} style={{ color: "var(--dash-accent)" }} />
+                {activeItem.label}
+              </span>
+            </div>
+
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: "rgba(16, 185, 129, 0.12)",
+                border: "1px solid rgba(16, 185, 129, 0.3)",
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#10b981",
+              }}
+            >
+              <span className="admin-live-dot admin-live-dot--success" style={{ width: 6, height: 6 }} />
+              Local & Web En Línea
+            </span>
+          </div>
+
+          {/* Right: Quick actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="admin-btn admin-btn--secondary"
+              style={{
+                fontSize: 12,
+                padding: "5px 10px",
+                height: 32,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Search size={13} />
+              <span>Buscar...</span>
+              <kbd
+                style={{
+                  fontSize: 10,
+                  padding: "0 4px",
+                  borderRadius: 4,
+                  background: "var(--dash-surface-3)",
+                  border: "1px solid var(--dash-border)",
+                  fontFamily: "monospace",
+                }}
+              >
+                ⌘K
+              </kbd>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShortcutsOpen(true)}
+              className="admin-btn admin-btn--secondary"
+              style={{
+                fontSize: 12,
+                padding: "0",
+                width: 32,
+                height: 32,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title="Atajos de teclado (?)"
+            >
+              <span style={{ fontWeight: 700, fontSize: 13 }}>?</span>
+            </button>
+
+            <Link
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="admin-btn admin-btn--primary"
+              style={{
+                fontSize: 12,
+                padding: "5px 12px",
+                height: 32,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <ExternalLink size={13} />
+              <span>Ver Tienda</span>
+            </Link>
+          </div>
+        </div>
+
         <div key={pathname} className="admin-section-in">
-          <h1
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: 22,
-              fontWeight: 700,
-              marginBottom: 24,
-              color: "var(--dash-text)",
-              textTransform: "capitalize",
-            }}
-          >
-            {activeItem.label}
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+            <h1
+              style={{
+                fontFamily: "var(--font-playfair), Georgia, serif",
+                fontSize: 24,
+                fontWeight: 700,
+                color: "var(--dash-text)",
+                margin: 0,
+                textTransform: "capitalize",
+              }}
+            >
+              {activeItem.label}
+            </h1>
+          </div>
           {children}
         </div>
       </main>

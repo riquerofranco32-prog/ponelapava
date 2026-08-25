@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { BorderBeam } from "@/components/ui/BorderBeam";
 
 const ANSWER_MAP = {
   recien_arranco: { slug: "mates", tag: "iniciacion", title: "Mates fáciles de curar y kits de inicio" },
@@ -215,8 +216,15 @@ export default function MateMatcher() {
                     <h3 className="font-display mb-3 text-2xl font-bold text-pava-brown sm:text-3xl">
                       ¡Tu combinación ideal!
                     </h3>
-                    <div className="mb-8 max-w-md rounded-control border border-pava-brown/15 bg-pava-cream-dark/40 p-4">
-                      <p className="font-medium text-pava-brown">
+                    <div className="relative overflow-hidden mb-8 max-w-md rounded-control border border-pava-green/30 bg-pava-cream-dark/50 p-5 shadow-sm">
+                      <BorderBeam
+                        size={160}
+                        duration={8}
+                        borderWidth={1.5}
+                        colorFrom="#26402e"
+                        colorTo="#c7a67a"
+                      />
+                      <p className="font-bold text-pava-brown text-base">
                         {result.title}
                       </p>
                     </div>

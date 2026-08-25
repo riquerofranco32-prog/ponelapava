@@ -684,6 +684,15 @@ body {
   border: 1px solid rgba(199, 166, 122, 0.2);
 }
 
+@keyframes borderBeam {
+  100% {
+    offset-distance: 100%;
+  }
+}
+.animate-border-beam {
+  animation: borderBeam var(--duration, 12s) infinite linear;
+}
+
 /* ══════════════════════════════════════════════════
    ADMIN DASHBOARD — dark shell, scoped to .pava-admin
    so it never bleeds into the public cream/green site.

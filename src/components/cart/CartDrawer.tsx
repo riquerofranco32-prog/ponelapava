@@ -176,23 +176,36 @@ export default function CartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-pava-brown/10 px-5 py-5 space-y-4">
-            {/* Total */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-pava-brown-mid/70">Total</span>
-              <span className="font-display text-xl font-bold text-pava-brown">
-                {formatPrice(total)}
-              </span>
+          <div className="border-t border-pava-brown/10 px-5 py-5 space-y-3.5 bg-white/50">
+            {/* Total breakdown */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs text-pava-brown-mid/70">
+                <span>Subtotal</span>
+                <span className="font-semibold text-pava-brown">{formatPrice(total)}</span>
+              </div>
+              <div className="flex items-baseline justify-between pt-1 border-t border-pava-brown/10">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-pava-gold-deep block">Con Transferencia (10% OFF)</span>
+                  <span className="font-display text-2xl font-bold text-pava-green block">
+                    {formatPrice(Math.round(total * 0.9))}
+                  </span>
+                </div>
+                <span className="text-xs text-pava-brown-mid/60 line-through">
+                  {formatPrice(total)}
+                </span>
+              </div>
             </div>
 
             {/* Actions */}
-            <Link
-              href="/carrito"
-              onClick={() => setDrawer(false)}
-              className="flex items-center justify-center w-full rounded-control py-3 bg-pava-green text-pava-cream text-sm font-semibold tracking-wide border-2 border-pava-green hover:bg-pava-green-light transition-colors"
-            >
-              Ver carrito completo
-            </Link>
+            <div className="space-y-2">
+              <Link
+                href="/carrito"
+                onClick={() => setDrawer(false)}
+                className="flex items-center justify-center w-full rounded-control py-3 bg-pava-green text-pava-cream text-xs font-bold uppercase tracking-wider border-2 border-pava-green hover:bg-pava-green-light transition-all shadow-md shadow-pava-green/20 cursor-pointer"
+              >
+                Iniciar Compra
+              </Link>
+            </div>
           </div>
         )}
       </div>

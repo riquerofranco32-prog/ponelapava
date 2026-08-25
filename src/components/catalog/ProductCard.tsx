@@ -190,7 +190,7 @@ export default function ProductCard({
           <button
             onClick={() => setQuickViewOpen(true)}
             aria-label={`Vista rápida de ${product.name}`}
-            className="flex h-8 w-8 items-center justify-center bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100 cursor-pointer"
           >
             <Eye size={14} />
           </button>

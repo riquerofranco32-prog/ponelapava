@@ -154,6 +154,27 @@ export default async function Footer() {
         </div>
       </div>
 
+      {/* Payment & Shipping trust bar */}
+      <div className="border-t border-pava-cream/10 bg-pava-brown-dark/40 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-pava-cream/70 text-center md:text-left">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <span className="font-semibold text-pava-cream mr-1">Medios de pago:</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Mercado Pago</span>
+              <span className="rounded-chip bg-pava-gold/20 border border-pava-gold/40 text-pava-gold px-2.5 py-1 text-[11px] font-bold">Transferencia 10% OFF</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Tarjeta en 3 cuotas</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Efectivo en local</span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2">
+              <span className="font-semibold text-pava-cream mr-1">Envíos seguros:</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Correo Argentino</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Andreani</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Retiro en Catriel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Bottom bar */}
       <div className="border-t border-pava-cream/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
@@ -162,7 +183,7 @@ export default async function Footer() {
               © {currentYear} Poné La Pava. Todos los derechos reservados.
             </p>
             <p className="text-xs text-pava-cream/65">
-              Hecho con mate 🧉 en Argentina
+              Hecho con mate 🧉 en Río Negro, Argentina
             </p>
             <Link
               href="/login"

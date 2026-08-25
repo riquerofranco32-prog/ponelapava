@@ -13,7 +13,6 @@ import HowToBuy from "@/components/home/HowToBuy";
 import FAQSection from "@/components/home/FAQSection";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
-import { LiveActivityTicker } from "@/components/ui/LiveActivityTicker";
 
 // Products come from Supabase and are editable from /admin — revalidate
 // periodically instead of baking them in at build time.
@@ -43,7 +42,6 @@ export default function HomePage() {
       <FAQSection />
       <FinalCTA />
       <InstagramSection />
-      <LiveActivityTicker />
     </>
   );
 }

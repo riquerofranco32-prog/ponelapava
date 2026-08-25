@@ -16,6 +16,7 @@ import {
   ExternalLink,
   ArrowRight,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import { Product } from "@/types";
 
@@ -131,6 +132,17 @@ export default function AdminCommandPalette({
       icon: TicketPercent,
       action: () => {
         router.push("/admin/cupones");
+        onClose();
+      },
+    },
+    {
+      id: "nav-marketing",
+      title: "Landing & Fotos",
+      subtitle: "Personalizar portada hero, promos y galería Instagram",
+      category: "Navegación",
+      icon: Sparkles,
+      action: () => {
+        router.push("/admin/marketing");
         onClose();
       },
     },

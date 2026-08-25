@@ -248,6 +248,8 @@ export interface DashboardStats {
   salesByDay: { date: string; total: number }[];
   topProducts: { name: string; quantity: number }[];
   peakHours: { hour: number; orders: number }[];
+  paymentMethods?: { transfer: number; cash: number; card: number };
+  deliveryMethods?: { pickup: number; delivery: number };
 }
 
 // Last 14 days of orders drive the dashboard's revenue KPIs and sales chart
@@ -272,12 +274,12 @@ export async function getDashboardStats(
 
   const { data, error } = await supabaseAdmin()
     .from("orders")
-    .select("total, items, created_at")
+    .select("total, items, created_at, comment")
     .gte("created_at", since.toISOString())
     .neq("status", "cancelled");
   if (error) throw error;
 
-  const allOrders = data as Pick<OrderRow, "total" | "items" | "created_at">[];
+  const allOrders = data as Pick<OrderRow, "total" | "items" | "created_at" | "comment">[];
 
   const boundary = new Date();
   boundary.setDate(boundary.getDate() - windowDays);
@@ -341,10 +343,29 @@ export async function getDashboardStats(
     hour12: false,
   });
   const ordersByHour = new Map<number, number>();
+  const paymentMethods = { transfer: 0, cash: 0, card: 0 };
+  const deliveryMethods = { pickup: 0, delivery: 0 };
+
   for (const order of orders) {
     const hour = Number(hourOfDay.format(new Date(order.created_at))) % 24;
     ordersByHour.set(hour, (ordersByHour.get(hour) ?? 0) + 1);
+
+    const c = order.comment || "";
+    if (c.includes("[Pago: Transferencia")) {
+      paymentMethods.transfer += 1;
+    } else if (c.includes("[Pago: Efectivo")) {
+      paymentMethods.cash += 1;
+    } else {
+      paymentMethods.card += 1;
+    }
+
+    if (c.includes("[Retiro en Local")) {
+      deliveryMethods.pickup += 1;
+    } else {
+      deliveryMethods.delivery += 1;
+    }
   }
+
   const peakHours = Array.from({ length: 24 }, (_, hour) => ({
     hour,
     orders: ordersByHour.get(hour) ?? 0,
@@ -360,5 +381,7 @@ export async function getDashboardStats(
     peakHours,
     salesByDay,
     topProducts,
+    paymentMethods,
+    deliveryMethods,
   };
 }

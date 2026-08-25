@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { DollarSign, ShoppingCart, Receipt, PackageCheck, RefreshCw } from "lucide-react";
+import {
+  DollarSign,
+  ShoppingCart,
+  Receipt,
+  PackageCheck,
+  RefreshCw,
+  CreditCard,
+  Truck,
+  Store,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice, LOW_STOCK_THRESHOLD } from "@/lib/utils";
 import { Product } from "@/types";
@@ -62,6 +73,13 @@ export default function DashboardStats({
       </div>
     );
   }
+
+  const totalOrders = stats?.orderCount || 0;
+  const transfCount = stats?.paymentMethods?.transfer || 0;
+  const cashCount = stats?.paymentMethods?.cash || 0;
+  const cardCount = stats?.paymentMethods?.card || 0;
+  const pickupCount = stats?.deliveryMethods?.pickup || 0;
+  const deliveryCount = stats?.deliveryMethods?.delivery || 0;
 
   return (
     <div style={{ marginBottom: 32 }}>
@@ -232,6 +250,59 @@ export default function DashboardStats({
 
       {/* Real-time Recent Orders Section */}
       <RecentOrdersWidget onOrderUpdated={() => fetchStats(true)} />
+
+      {/* Payment & Delivery Breakdown Insights */}
+      {stats && totalOrders > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
+          <AdminCard>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <CreditCard size={17} style={{ color: "var(--dash-accent)" }} />
+              <h2 className="admin-section-title" style={{ margin: 0 }}>Medios de Pago</h2>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--dash-text)" }}>💳 Transferencia (10% OFF)</span>
+                <span style={{ fontWeight: 700, color: "#10b981" }}>
+                  {transfCount} ({Math.round((transfCount / totalOrders) * 100)}%)
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--dash-text)" }}>💵 Efectivo en Local</span>
+                <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+                  {cashCount} ({Math.round((cashCount / totalOrders) * 100)}%)
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--dash-text)" }}>💳 Tarjetas / Otros</span>
+                <span style={{ fontWeight: 600, color: "var(--dash-muted)" }}>
+                  {cardCount} ({Math.round((cardCount / totalOrders) * 100)}%)
+                </span>
+              </div>
+            </div>
+          </AdminCard>
+
+          <AdminCard>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <Truck size={17} style={{ color: "var(--dash-accent)" }} />
+              <h2 className="admin-section-title" style={{ margin: 0 }}>Modo de Entrega</h2>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--dash-text)" }}>🏪 Retiro en Local Catriel</span>
+                <span style={{ fontWeight: 700, color: "var(--dash-accent)" }}>
+                  {pickupCount} ({Math.round((pickupCount / totalOrders) * 100)}%)
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ color: "var(--dash-text)" }}>🛵 Envío a Domicilio</span>
+                <span style={{ fontWeight: 600, color: "#3b82f6" }}>
+                  {deliveryCount} ({Math.round((deliveryCount / totalOrders) * 100)}%)
+                </span>
+              </div>
+            </div>
+          </AdminCard>
+        </div>
+      )}
 
       <AdminCard style={{ marginBottom: 20 }}>
         <h2 className="admin-section-title">Ventas últimos 14 días</h2>

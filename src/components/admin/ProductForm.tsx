@@ -507,41 +507,62 @@ export default function ProductForm({
               className="admin-input"
             />
             {numericPrice > 0 && (
-              <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
-                <button
-                  type="button"
-                  onClick={() => adjustPricePct(1.1)}
+              <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button
+                    type="button"
+                    onClick={() => adjustPricePct(1.1)}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: "var(--dash-surface-2)",
+                      border: "1px solid var(--dash-border)",
+                      color: "var(--dash-muted)",
+                      cursor: "pointer",
+                    }}
+                    title="Aumentar 10%"
+                  >
+                    +10%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => adjustPricePct(1.2)}
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: "var(--dash-surface-2)",
+                      border: "1px solid var(--dash-border)",
+                      color: "var(--dash-muted)",
+                      cursor: "pointer",
+                    }}
+                    title="Aumentar 20%"
+                  >
+                    +20%
+                  </button>
+                </div>
+                <div
                   style={{
-                    fontSize: 10,
-                    fontWeight: 600,
-                    padding: "2px 6px",
+                    fontSize: 11,
+                    color: "var(--dash-muted)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    padding: "4px 6px",
                     borderRadius: 4,
                     background: "var(--dash-surface-2)",
-                    border: "1px solid var(--dash-border)",
-                    color: "var(--dash-muted)",
-                    cursor: "pointer",
                   }}
-                  title="Aumentar 10%"
                 >
-                  +10%
-                </button>
-                <button
-                  type="button"
-                  onClick={() => adjustPricePct(1.2)}
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 600,
-                    padding: "2px 6px",
-                    borderRadius: 4,
-                    background: "var(--dash-surface-2)",
-                    border: "1px solid var(--dash-border)",
-                    color: "var(--dash-muted)",
-                    cursor: "pointer",
-                  }}
-                  title="Aumentar 20%"
-                >
-                  +20%
-                </button>
+                  <span style={{ color: "#10b981", fontWeight: 600 }}>
+                    ⚡ 10% OFF Transf: ${Math.round(numericPrice * 0.9).toLocaleString("es-AR")}
+                  </span>
+                  <span>
+                    💳 3 cuotas de ${Math.round(numericPrice / 3).toLocaleString("es-AR")}
+                  </span>
+                </div>
               </div>
             )}
           </div>

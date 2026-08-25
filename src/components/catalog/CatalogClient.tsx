@@ -150,12 +150,33 @@ export default function CatalogClient({
     });
   };
 
+  const [selectedBrand, setSelectedBrand] = useState<string>("all");
+  const [inStockOnly, setInStockOnly] = useState(false);
+
+  const availableBrands = useMemo(() => {
+    const brandsSet = new Set<string>();
+    products.forEach((p) => {
+      if (p.brand && p.brand.trim()) brandsSet.add(p.brand.trim());
+    });
+    return Array.from(brandsSet).sort();
+  }, [products]);
+
   const filtered = useMemo(() => {
     let result = [...products];
 
     // Filter by category
     if (activeCategory !== "all") {
       result = result.filter((p) => p.category === activeCategory);
+    }
+
+    // Filter by brand
+    if (selectedBrand !== "all") {
+      result = result.filter((p) => p.brand?.toLowerCase() === selectedBrand.toLowerCase());
+    }
+
+    // Filter by in stock
+    if (inStockOnly) {
+      result = result.filter((p) => p.stock > 0 || p.status === "available" || p.status === "featured");
     }
 
     // Filter by search
@@ -204,6 +225,8 @@ export default function CatalogClient({
     return result;
   }, [
     activeCategory,
+    selectedBrand,
+    inStockOnly,
     search,
     sort,
     products,
@@ -356,7 +379,7 @@ export default function CatalogClient({
       </div>
 
       {/* Category tabs */}
-      <div className="flex gap-2 flex-wrap mb-8">
+      <div className="flex gap-2 flex-wrap mb-4">
         {categoryTabs.map(({ slug, name, count }) => (
           <button
             key={slug}
@@ -365,16 +388,12 @@ export default function CatalogClient({
             }
             className={`inline-flex items-center gap-1.5 rounded-control px-4 py-2 text-sm font-medium border-2 transition-all duration-200 ${
               activeCategory === slug
-                ? "bg-pava-green text-pava-cream border-pava-green"
+                ? "bg-pava-green text-pava-cream border-pava-green shadow-xs"
                 : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green hover:text-pava-green"
             }`}
             aria-pressed={activeCategory === slug}
           >
             {name}
-            {/* El conteo del chip inactivo estaba a /40, que sobre el blanco
-                del chip da 2.17:1 — bien por debajo de 4.5:1 para 12px. A /70
-                da 4.62:1. El del chip activo (crema /70 sobre verde) ya rinde
-                5.19:1 y queda como está. */}
             <span
               className={`text-xs ${
                 activeCategory === slug
@@ -388,8 +407,56 @@ export default function CatalogClient({
         ))}
       </div>
 
+      {/* Brand quick filter chips + In-Stock filter */}
+      {availableBrands.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-8 py-2.5 px-3.5 bg-pava-cream-dark/30 rounded-control border border-pava-brown/10">
+          <span className="text-xs font-bold uppercase tracking-wider text-pava-gold-deep mr-1">
+            Marca:
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedBrand("all")}
+            className={`rounded-chip px-2.5 py-1 text-xs font-semibold transition-all ${
+              selectedBrand === "all"
+                ? "bg-pava-green text-pava-cream shadow-xs"
+                : "bg-white/80 text-pava-brown border border-pava-brown/10 hover:border-pava-green"
+            }`}
+          >
+            Todas
+          </button>
+          {availableBrands.map((b) => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => setSelectedBrand(selectedBrand === b ? "all" : b)}
+              className={`rounded-chip px-2.5 py-1 text-xs font-semibold transition-all ${
+                selectedBrand === b
+                  ? "bg-pava-green text-pava-cream shadow-xs"
+                  : "bg-white/80 text-pava-brown border border-pava-brown/10 hover:border-pava-green"
+              }`}
+            >
+              {b}
+            </button>
+          ))}
+
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setInStockOnly((prev) => !prev)}
+              className={`rounded-chip px-2.5 py-1 text-xs font-semibold border transition-all ${
+                inStockOnly
+                  ? "bg-emerald-600 text-white border-emerald-600"
+                  : "bg-white/80 text-pava-brown border-pava-brown/15 hover:border-emerald-600"
+              }`}
+            >
+              ✓ En stock
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Active filters chips bar */}
-      {(activeCategory !== "all" || search.trim() || minPrice || maxPrice || favoritesOnly) && (
+      {(activeCategory !== "all" || selectedBrand !== "all" || inStockOnly || search.trim() || minPrice || maxPrice || favoritesOnly) && (
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className="text-xs font-semibold text-pava-brown-mid/70 mr-1">Filtros activos:</span>
           {activeCategory !== "all" && (
@@ -397,7 +464,25 @@ export default function CatalogClient({
               onClick={() => handleCategoryChange("all")}
               className="inline-flex items-center gap-1.5 rounded-full bg-pava-green/10 border border-pava-green/20 px-3 py-1 text-xs font-medium text-pava-green hover:bg-pava-green/20 transition-colors"
             >
-              <span>{categories.find((c) => c.slug === activeCategory)?.name ?? activeCategory}</span>
+              <span>Categoría: {categories.find((c) => c.slug === activeCategory)?.name ?? activeCategory}</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {selectedBrand !== "all" && (
+            <button
+              onClick={() => setSelectedBrand("all")}
+              className="inline-flex items-center gap-1.5 rounded-full bg-pava-gold/15 border border-pava-gold/30 px-3 py-1 text-xs font-semibold text-pava-brown hover:bg-pava-gold/25 transition-colors"
+            >
+              <span>Marca: {selectedBrand}</span>
+              <span className="text-[10px]">✕</span>
+            </button>
+          )}
+          {inStockOnly && (
+            <button
+              onClick={() => setInStockOnly(false)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition-colors"
+            >
+              <span>En stock</span>
               <span className="text-[10px]">✕</span>
             </button>
           )}
@@ -434,6 +519,8 @@ export default function CatalogClient({
               if (priceDebounceRef.current) clearTimeout(priceDebounceRef.current);
               setSearch("");
               setActiveCategory("all");
+              setSelectedBrand("all");
+              setInStockOnly(false);
               setMinPrice("");
               setMaxPrice("");
               setFavoritesOnly(false);

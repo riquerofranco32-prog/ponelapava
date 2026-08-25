@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import MagneticButton from "@/components/ui/MagneticButton";
+import { LandingHero } from "@/types/landing";
+import { DEFAULT_LANDING_CONTENT } from "@/lib/landing";
 
-export default function Hero() {
+export default function Hero({ content }: { content?: LandingHero }) {
+  const hero = content || DEFAULT_LANDING_CONTENT.hero;
   const [loaded, setLoaded] = useState(false);
   const [allowVideo, setAllowVideo] = useState(false);
   const bgRef = useRef<HTMLDivElement>(null);
@@ -13,8 +16,7 @@ export default function Hero() {
 
   useEffect(() => {
     const timer = setTimeout(() => setLoaded(true), 60);
-    // Skip the ~1.3MB video on small screens — mobile visitors are more
-    // likely on limited data, and the poster image reads fine there.
+    // Skip video on reduced-motion preference
     setAllowVideo(
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches
     );
@@ -59,15 +61,15 @@ export default function Hero() {
       >
         {/* La imagen queda montada SIEMPRE como fallback debajo del video */}
         <Image
-          src="/hero_background_1786545961305.png"
-          alt="Mate servido sobre mesa de madera"
+          src={hero.backgroundImage || "/hero_background_1786545961305.png"}
+          alt="Foto de portada Poné La Pava"
           fill
           priority
           quality={92}
           className="object-cover object-center"
           sizes="100vw"
         />
-        {allowVideo && (
+        {allowVideo && hero.videoUrl && (
           <video
             autoPlay
             muted
@@ -75,7 +77,7 @@ export default function Hero() {
             playsInline
             className="absolute inset-0 h-full w-full object-cover object-center"
           >
-            <source src="/videohero.mp4" type="video/mp4" />
+            <source src={hero.videoUrl} type="video/mp4" />
           </video>
         )}
         {/* Multi-layer gradient for editorial feel */}
@@ -121,27 +123,11 @@ export default function Hero() {
             <span className="h-px w-10 bg-pava-gold" />
             <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-pava-gold/40 bg-pava-cream/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold backdrop-blur-[2px] sm:text-[11px]">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-pava-gold animate-pulse-dot" />
-              Poné La Pava · Tienda Matera
+              {hero.badge || "Poné La Pava · Tienda Matera"}
               <span className="shine-sweep" aria-hidden="true" />
             </span>
           </div>
 
-          {/* Headline — masked line reveal
-              El `overflow-hidden` de cada línea es lo que hace el efecto de
-              subida, pero su caja es exactamente el line-box, y con
-              leading-[1.05] sobre Playfair (caja de contenido 1.33em) el
-              half-leading queda negativo: debajo de la baseline sobran
-              0.108em y la cola de la "y" de "tuyo" baja 0.191em, así que se
-              cortaba 0.083em (11.1px en 1440, 4.8px en 390).
-              Subir el leading no es la salida: para tapar el descendente
-              haría falta ~1.22, y eso afloja el ritmo del titular entero.
-              La salida es despegar la caja que recorta del line-box:
-              padding-bottom en el hijo (que además agranda su propia altura,
-              y como translate-y-full resuelve contra el border-box, el
-              desplazamiento del reveal crece igual y la máscara lo sigue
-              tapando por completo al arrancar) y margin-bottom negativo del
-              mismo valor en el wrapper, que devuelve el ritmo vertical
-              exacto: nada de lo que viene abajo se mueve. */}
           <h1
             className="font-display max-w-4xl leading-[1.05] tracking-[-0.04em] text-pava-cream
               text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]"
@@ -151,7 +137,7 @@ export default function Hero() {
                 className={`block pb-[0.14em] transition-all duration-700 ease-out delay-200
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
-                El ritual
+                {hero.titleLine1 || "El ritual"}
               </span>
             </span>
             <span className="-mb-[0.14em] block overflow-hidden">
@@ -159,7 +145,7 @@ export default function Hero() {
                 className={`text-shine not-italic block pb-[0.14em] transition-all duration-700 ease-out delay-300
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
-                del mate
+                {hero.titleLine2 || "del mate"}
               </em>
             </span>
             <span className="-mb-[0.14em] block overflow-hidden">
@@ -167,7 +153,7 @@ export default function Hero() {
                 className={`block pb-[0.14em] transition-all duration-700 ease-out delay-400
                   ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
               >
-                es tuyo.
+                {hero.titleLine3 || "es tuyo."}
               </span>
             </span>
           </h1>
@@ -179,8 +165,7 @@ export default function Hero() {
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           >
             <p className="max-w-sm text-base leading-relaxed text-pava-cream/78 sm:text-lg lg:max-w-md">
-              Yerbas seleccionadas, mates artesanales y accesorios para
-              acompañar cada ronda.
+              {hero.subtitle || "Yerbas seleccionadas, mates artesanales y accesorios para acompañar cada ronda."}
             </p>
             <div className="hidden items-center gap-4 sm:flex">
               <span className="h-10 w-px bg-pava-cream/20" />
@@ -198,11 +183,11 @@ export default function Hero() {
           >
             <MagneticButton>
               <Link
-                href="/catalogo"
+                href={hero.ctaPrimaryLink || "/catalogo"}
                 id="hero-cta-catalogo"
                 className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-lg shadow-pava-gold/10"
               >
-                Explorar el catálogo
+                {hero.ctaPrimaryText || "Explorar el catálogo"}
                 <span className="text-base" aria-hidden="true">
                   →
                 </span>
@@ -210,11 +195,11 @@ export default function Hero() {
             </MagneticButton>
             <MagneticButton>
               <Link
-                href="/#el-local"
+                href={hero.ctaSecondaryLink || "/#el-local"}
                 id="hero-cta-local"
                 className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
               >
-                Conocé el local
+                {hero.ctaSecondaryText || "Conocé el local"}
               </Link>
             </MagneticButton>
           </div>

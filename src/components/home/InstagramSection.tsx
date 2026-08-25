@@ -2,37 +2,13 @@ import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { InstagramIcon } from "@/components/ui/icons";
 import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/site";
+import { getLandingContent } from "@/lib/landing";
+import { LandingGalleryPost } from "@/types/landing";
 
-// Fotos reales del feed @ponelapava_yerbas
-const instagramPosts = [
-  {
-    id: "1",
-    image: "/brand-gallery/post-1.jpg",
-    alt: "Mates artesanales y bombillas en Poné La Pava",
-  },
-  {
-    id: "2",
-    image: "/brand-gallery/post-3.jpg",
-    alt: "Termos y accesorios materos en exhibición",
-  },
-  {
-    id: "3",
-    image: "/brand-gallery/post-5.jpg",
-    alt: "Yerbas seleccionadas y estacionadas",
-  },
-  {
-    id: "4",
-    image: "/brand-gallery/post-7.jpg",
-    alt: "Mates camioneros e imperiales de cuero vaqueta",
-  },
-  {
-    id: "5",
-    image: "/brand-gallery/post-9.jpg",
-    alt: "Sets materos y combos completos",
-  },
-];
+export default async function InstagramSection({ posts }: { posts?: LandingGalleryPost[] }) {
+  const content = await getLandingContent();
+  const galleryPosts = posts || content.galleryPosts;
 
-export default function InstagramSection() {
   return (
     <section className="overflow-hidden bg-pava-cream-dark py-20 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -69,7 +45,7 @@ export default function InstagramSection() {
         <ScrollReveal direction="scale">
           {/* Bento grid — first post gets the hero spot, rest fill around it */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:auto-rows-[180px] lg:gap-4 xl:auto-rows-[220px]">
-            {instagramPosts.map((post, i) => (
+            {galleryPosts.map((post, i) => (
               <a
                 key={post.id}
                 href={INSTAGRAM_URL}

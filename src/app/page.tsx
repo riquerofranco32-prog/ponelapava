@@ -14,8 +14,9 @@ import HowToBuy from "@/components/home/HowToBuy";
 import FAQSection from "@/components/home/FAQSection";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
+import { getLandingContent } from "@/lib/landing";
 
-// Products come from Supabase and are editable from /admin — revalidate
+// Products and landing content come from Supabase and are editable from /admin — revalidate
 // periodically instead of baking them in at build time.
 export const revalidate = 60;
 
@@ -26,10 +27,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const landing = await getLandingContent();
+
   return (
     <>
-      <Hero />
+      <Hero content={landing.hero} />
       <TrustBar />
       <HowToBuy />
       <FeaturedProducts />
@@ -43,7 +46,7 @@ export default function HomePage() {
       <GoogleReviews />
       <FAQSection />
       <FinalCTA />
-      <InstagramSection />
+      <InstagramSection posts={landing.galleryPosts} />
     </>
   );
 }

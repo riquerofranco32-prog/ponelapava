@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Hero from "@/components/home/Hero";
 import TrustBar from "@/components/home/TrustBar";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
+import CustomKitBuilder from "@/components/home/CustomKitBuilder";
 import Categories from "@/components/home/Categories";
 import BrandsSection from "@/components/home/BrandsSection";
 import MateAnatomy from "@/components/home/MateAnatomy";
 import MateMatcher from "@/components/home/MateMatcher";
+import CuringGuide from "@/components/home/CuringGuide";
 import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
 import GoogleReviews from "@/components/home/GoogleReviews";
@@ -33,11 +35,13 @@ export default function HomePage() {
       <TrustBar />
       <HowToBuy />
       <FeaturedProducts />
+      <CustomKitBuilder />
       <AboutSection />
       <MateAnatomy />
       <Categories />
       <BrandsSection />
       <MateMatcher />
+      <CuringGuide />
       <LocalSection />
       <GoogleReviews />
       <FAQSection />

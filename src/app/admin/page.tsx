@@ -6,6 +6,7 @@ import {
   Package,
   Tag,
   ShoppingCart,
+  Users,
   Settings,
   Plus,
   Search,
@@ -30,6 +31,7 @@ import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import DashboardStats from "@/components/admin/DashboardStats";
 import OrdersTable from "@/components/admin/OrdersTable";
+import CustomersPanel from "@/components/admin/CustomersPanel";
 import SettingsForm from "@/components/admin/SettingsForm";
 import AuditLogTable from "@/components/admin/AuditLogTable";
 import { useAdminToast } from "@/components/admin/AdminToast";
@@ -39,6 +41,7 @@ type AdminSection =
   | "productos"
   | "categorias"
   | "pedidos"
+  | "clientes"
   | "configuracion"
   | "actividad";
 
@@ -47,6 +50,7 @@ const NAV_ITEMS: AdminNavItem[] = [
   { id: "productos", label: "Productos", icon: Package },
   { id: "categorias", label: "Categorías", icon: Tag },
   { id: "pedidos", label: "Pedidos", icon: ShoppingCart },
+  { id: "clientes", label: "Clientes", icon: Users },
   { id: "actividad", label: "Actividad", icon: History },
   { id: "configuracion", label: "Configuración", icon: Settings },
 ];
@@ -346,6 +350,9 @@ export default function AdminPage() {
 
       {/* ── PEDIDOS ── */}
       {activeSection === "pedidos" && <OrdersTable />}
+
+      {/* ── CLIENTES ── */}
+      {activeSection === "clientes" && <CustomersPanel />}
 
       {/* ── ACTIVIDAD ── */}
       {activeSection === "actividad" && <AuditLogTable />}

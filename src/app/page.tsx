@@ -6,7 +6,9 @@ import CustomKitBuilder from "@/components/home/CustomKitBuilder";
 import Categories from "@/components/home/Categories";
 import BrandsSection from "@/components/home/BrandsSection";
 import MateAnatomy from "@/components/home/MateAnatomy";
+import RitualMastery from "@/components/home/RitualMastery";
 import MateMatcher from "@/components/home/MateMatcher";
+import WaterTempSimulator from "@/components/home/WaterTempSimulator";
 import CuringGuide from "@/components/home/CuringGuide";
 import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
@@ -38,9 +40,11 @@ export default function HomePage() {
       <CustomKitBuilder />
       <AboutSection />
       <MateAnatomy />
+      <RitualMastery />
       <Categories />
       <BrandsSection />
       <MateMatcher />
+      <WaterTempSimulator />
       <CuringGuide />
       <LocalSection />
       <GoogleReviews />

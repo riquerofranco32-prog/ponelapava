@@ -220,13 +220,25 @@ export default function MateMatcher() {
                         {result.title}
                       </p>
                     </div>
-                    <Link
-                      href={query}
-                      className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-green px-8 py-4 text-sm font-bold tracking-wide text-pava-cream shadow-lg shadow-pava-green/20 transition-all duration-200 hover:bg-pava-green-light active:scale-[0.98]"
-                    >
-                      Explorar productos sugeridos
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </Link>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <Link
+                        href={query}
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-control bg-pava-green px-8 py-4 text-sm font-bold tracking-wide text-pava-cream shadow-lg shadow-pava-green/20 transition-all duration-200 hover:bg-pava-green-light active:scale-[0.98]"
+                      >
+                        Explorar productos sugeridos
+                        <ArrowRight size={16} aria-hidden="true" />
+                      </Link>
+                      <a
+                        href={`https://wa.me/5492994119330?text=${encodeURIComponent(
+                          `¡Hola Poné La Pava! Hice el test en la web y me recomendó: ${result.title}. ¿Qué opciones tienen disponibles?`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-pava-brown/20 bg-white px-6 py-4 text-sm font-semibold tracking-wide text-pava-brown transition-all duration-200 hover:border-whatsapp hover:text-whatsapp active:scale-[0.98]"
+                      >
+                        Consultar por WhatsApp
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>
@@ -251,7 +263,7 @@ export default function MateMatcher() {
                   onClick={restart}
                   className="inline-flex items-center gap-1.5 text-pava-brown-mid/75 transition-colors hover:text-pava-brown"
                 >
-                  <RotateCcw size={13} /> Reiniciar
+                  <RotateCcw size={13} /> Reiniciar test
                 </button>
               )}
             </div>

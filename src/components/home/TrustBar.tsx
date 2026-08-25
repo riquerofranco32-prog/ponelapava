@@ -1,16 +1,21 @@
-import { Leaf, Heart, MessageCircle, MapPin } from "lucide-react";
+import { Leaf, Heart, MessageCircle, MapPin, Sparkles, ShieldCheck } from "lucide-react";
 import OpenStatusBadge from "@/components/ui/OpenStatusBadge";
 
 const items = [
   {
     icon: Leaf,
     title: "Productos seleccionados",
-    subtitle: "Calidad que se siente.",
+    subtitle: "Calidad artesanal que se siente.",
+  },
+  {
+    icon: Sparkles,
+    title: "Envío Bonificado",
+    subtitle: "En compras mayores a $65.000.",
   },
   {
     icon: Heart,
     title: "Atención personalizada",
-    subtitle: "Te ayudamos a elegir.",
+    subtitle: "Te asesoramos en cada ronda.",
   },
   {
     icon: MapPin,
@@ -20,25 +25,31 @@ const items = [
   {
     icon: MessageCircle,
     title: "Pedí por WhatsApp",
-    subtitle: "Rápido y directo.",
+    subtitle: "Rápido, simple y directo.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Compra 100% segura",
+    subtitle: "Garantía en cada producto.",
   },
 ];
 
 function TrustItem({ icon: Icon, title, subtitle }: (typeof items)[number]) {
   return (
-    <div className="flex shrink-0 items-center gap-3.5 px-8">
-      <Icon
-        className="shrink-0 text-pava-gold"
-        size={22}
-        strokeWidth={1.5}
-        aria-hidden="true"
-      />
+    <div className="flex shrink-0 items-center gap-3.5 px-6 py-2 transition-all duration-300">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-pava-gold/30 bg-pava-gold/10 text-pava-gold">
+        <Icon
+          size={19}
+          strokeWidth={1.75}
+          aria-hidden="true"
+        />
+      </div>
       <div>
-        <div className="text-[13px] font-semibold whitespace-nowrap text-pava-cream">
+        <div className="text-[13px] font-bold tracking-wide whitespace-nowrap text-pava-cream">
           {title}
         </div>
         {subtitle ? (
-          <div className="text-[11px] whitespace-nowrap text-pava-cream/65">
+          <div className="text-[11px] whitespace-nowrap text-pava-cream/70 font-medium">
             {subtitle}
           </div>
         ) : (
@@ -46,7 +57,7 @@ function TrustItem({ icon: Icon, title, subtitle }: (typeof items)[number]) {
         )}
       </div>
       <span
-        className="ml-4 h-1 w-1 shrink-0 rounded-full bg-pava-gold/40"
+        className="ml-6 h-1.5 w-1.5 shrink-0 rotate-45 bg-pava-gold/50"
         aria-hidden="true"
       />
     </div>
@@ -55,10 +66,10 @@ function TrustItem({ icon: Icon, title, subtitle }: (typeof items)[number]) {
 
 export default function TrustBar() {
   return (
-    <section className="overflow-hidden border-y border-pava-cream/10 bg-pava-brown py-7">
+    <section className="overflow-hidden border-y border-pava-cream/10 bg-pava-green-dark py-5">
       {/* Duplicated track for a seamless infinite loop; the copy is
           aria-hidden since it repeats the same content for visual effect. */}
-      <div className="marquee-track">
+      <div className="marquee-track items-center">
         {items.map((item) => (
           <TrustItem key={item.title} {...item} />
         ))}

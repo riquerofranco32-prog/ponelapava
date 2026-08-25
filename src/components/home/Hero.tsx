@@ -228,22 +228,22 @@ export default function Hero() {
 
           {/* Floating Trust Badges */}
           <div
-            className={`mt-7 flex flex-wrap items-center gap-2.5 sm:gap-3
+            className={`mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3.5
               transition-all duration-700 ease-out delay-450
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
               <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>
-              <span className="font-semibold text-pava-cream">4.9</span>
+              <span className="font-bold text-pava-cream">5.0</span>
               <span className="text-pava-cream/70 text-[11px]">en Google</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
               <span className="text-pava-gold text-xs">🚚</span>
-              <span className="font-medium text-pava-cream/90">Envíos a todo el país</span>
+              <span className="font-medium text-pava-cream/95">Envíos a todo el país</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-brown/40 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
               <span className="text-pava-gold text-xs">🧉</span>
-              <span className="font-medium text-pava-cream/90">+1.000 clientes felices</span>
+              <span className="font-medium text-pava-cream/95">+1.000 clientes felices</span>
             </div>
           </div>
 

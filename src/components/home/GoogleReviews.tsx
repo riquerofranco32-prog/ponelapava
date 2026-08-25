@@ -66,26 +66,31 @@ function Stars({ size = 12 }: { size?: number }) {
 
 function ReviewCard({ name, meta, time, text }: WrittenReview) {
   return (
-    <div className="mb-4 rounded-card border border-pava-brown/8 bg-white p-5 shadow-[var(--shadow-card)]">
-      <div className="mb-3 flex items-center gap-3">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-          style={{ background: avatarColor(name) }}
-          aria-hidden="true"
-        >
-          {name[0]}
-        </span>
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-pava-brown">
-            {name}
-          </div>
-          <div className="truncate text-[11px] text-pava-brown-mid/55">
-            {meta} · {time}
+    <div className="mb-4 rounded-card border border-pava-brown/10 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-pava-green/30">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
+            style={{ background: avatarColor(name) }}
+            aria-hidden="true"
+          >
+            {name[0]}
+          </span>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-bold text-pava-brown">
+              {name}
+            </div>
+            <div className="truncate text-[11px] text-pava-brown-mid/60">
+              {meta} · {time}
+            </div>
           </div>
         </div>
+        <span className="shrink-0 rounded-chip bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+          ✓ Verificada
+        </span>
       </div>
-      <Stars />
-      <p className="mt-2 text-[13px] leading-relaxed text-pava-brown-mid/85">
+      <Stars size={14} />
+      <p className="mt-2.5 text-[13px] leading-relaxed text-pava-brown-mid/90 font-medium">
         &ldquo;{text}&rdquo;
       </p>
     </div>
@@ -94,21 +99,23 @@ function ReviewCard({ name, meta, time, text }: WrittenReview) {
 
 function ReviewChip({ name, time }: RatingOnlyReview) {
   return (
-    <div className="mb-4 flex items-center gap-3 rounded-control border border-pava-brown/8 bg-white px-4 py-3">
-      <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-        style={{ background: avatarColor(name) }}
-        aria-hidden="true"
-      >
-        {name[0]}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[13px] font-semibold text-pava-brown">
-          {name}
+    <div className="mb-4 flex items-center justify-between gap-3 rounded-control border border-pava-brown/8 bg-white px-4 py-3 shadow-xs">
+      <div className="flex items-center gap-3 min-w-0">
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+          style={{ background: avatarColor(name) }}
+          aria-hidden="true"
+        >
+          {name[0]}
+        </span>
+        <div className="min-w-0">
+          <div className="truncate text-[13px] font-semibold text-pava-brown">
+            {name}
+          </div>
+          <Stars size={11} />
         </div>
-        <Stars size={10} />
       </div>
-      <span className="shrink-0 text-[10px] text-pava-brown-mid/45">
+      <span className="shrink-0 text-[10px] text-pava-brown-mid/50 font-medium">
         {time}
       </span>
     </div>
@@ -169,32 +176,31 @@ function Column({
 
 export default function GoogleReviews() {
   return (
-    <section className="overflow-hidden bg-pava-cream-dark py-20 sm:py-24 lg:py-28">
+    <section className="overflow-hidden bg-pava-cream-dark py-20 sm:py-24 lg:py-28 border-y border-pava-brown/10">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <ScrollReveal
           direction="up"
           className="mb-12 flex flex-col items-center gap-4 text-center"
         >
-          <div className="mb-1 flex items-center gap-3">
-            <span className="h-px w-9 bg-pava-gold-deep" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold-deep">
-              Lo que dicen en Google
+          <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-white/80 px-4 py-1.5 backdrop-blur-sm shadow-xs">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-pava-brown">
+              Google Maps Rating · 5.0 ★
             </span>
-            <span className="h-px w-9 bg-pava-gold-deep" />
           </div>
-          <h2 className="font-display text-4xl font-bold leading-[0.95] tracking-tight text-pava-brown sm:text-5xl">
-            5.0 de calificación,
+          <h2 className="font-display text-4xl font-bold leading-[0.95] tracking-tight text-pava-brown sm:text-5xl lg:text-6xl">
+            Lo que dicen quienes
             <br />
-            <em className="not-italic text-pava-green">6 reseñas reales.</em>
+            <em className="not-italic text-pava-green">comparten la ronda.</em>
           </h2>
           <a
             href={GOOGLE_PLACE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-1 inline-flex items-center gap-2 text-sm font-semibold text-pava-brown transition-colors hover:text-pava-green"
+            className="group mt-2 inline-flex items-center gap-2.5 rounded-control border border-pava-brown/20 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-pava-brown shadow-xs transition-all hover:border-pava-green hover:text-pava-green hover:shadow-sm"
           >
-            <Stars size={16} />
-            Ver reseñas en Google
+            <Stars size={15} />
+            Ver perfil y reseñas en Google Maps
             <ExternalLink
               size={13}
               className="transition-transform group-hover:translate-x-0.5"

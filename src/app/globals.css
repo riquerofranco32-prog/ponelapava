@@ -695,21 +695,21 @@ body {
    them up too without inheriting .pava-admin's background/min-height. */
 .pava-admin,
 .admin-toast-root {
-  --dash-bg: #16140f;
-  --dash-surface: #1e1b15;
-  --dash-surface-2: #27231a;
-  --dash-surface-3: #322c20;
-  --dash-border: #3a3324;
-  --dash-text: #f3ede0;
-  --dash-muted: #9c9280;
+  --dash-bg: #111d14;
+  --dash-surface: #182b1d;
+  --dash-surface-2: #213927;
+  --dash-surface-3: #2b4933;
+  --dash-border: #385b40;
+  --dash-text: #f4efe4;
+  --dash-muted: #9eb5a2;
   --dash-accent: #c7a67a;
   --dash-accent-hover: #d8c093;
   --dash-danger: #e59a7a;
-  --dash-danger-bg: rgba(229, 154, 122, 0.1);
-  --dash-danger-border: rgba(229, 154, 122, 0.25);
+  --dash-danger-bg: rgba(229, 154, 122, 0.12);
+  --dash-danger-border: rgba(229, 154, 122, 0.3);
   --dash-success: #8bab7a;
-  --dash-success-bg: rgba(139, 171, 122, 0.1);
-  --dash-success-border: rgba(139, 171, 122, 0.25);
+  --dash-success-bg: rgba(139, 171, 122, 0.15);
+  --dash-success-border: rgba(139, 171, 122, 0.3);
 }
 .pava-admin {
   background: var(--dash-bg);

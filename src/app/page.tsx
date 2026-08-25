@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero";
 import TrustBar from "@/components/home/TrustBar";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import Categories from "@/components/home/Categories";
+import BrandsSection from "@/components/home/BrandsSection";
 import MateMatcher from "@/components/home/MateMatcher";
 import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
@@ -32,6 +33,7 @@ export default function HomePage() {
       <FeaturedProducts />
       <AboutSection />
       <Categories />
+      <BrandsSection />
       <MateMatcher />
       <LocalSection />
       <GoogleReviews />

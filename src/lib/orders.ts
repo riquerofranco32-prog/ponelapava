@@ -1,5 +1,6 @@
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { Order, OrderItem, CartItem, ProductStatus } from "@/types";
+import { STORE_TIMEZONE } from "@/lib/hours";
 
 interface OrderRow {
   id: string;
@@ -202,12 +203,14 @@ export interface DashboardStats {
   avgTicketChange: number | null;
   salesByDay: { date: string; total: number }[];
   topProducts: { name: string; quantity: number }[];
+  peakHours: { hour: number; orders: number }[];
 }
 
-// Last 14 days of orders drive the revenue KPIs and the sales chart —
-// enough to be useful for a small shop without pulling the whole history
-// on every dashboard load. The prior 14 days are fetched in the same query
-// (28-day window) just to compute the change vs. the previous period.
+// Last 14 days of orders drive the dashboard's revenue KPIs and sales chart
+// by default — enough to be useful for a small shop without pulling the
+// whole history on every load. /admin/reportes calls the same function with
+// a wider window (getDashboardStats(30|90)). Either way the prior period of
+// equal length is fetched in the same query just to compute the % change.
 const STATS_WINDOW_DAYS = 14;
 
 // (recent - previous) / previous * 100, or null when previous is 0 (avoids
@@ -217,9 +220,11 @@ function percentChange(recent: number, previous: number): number | null {
   return ((recent - previous) / previous) * 100;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(
+  windowDays: number = STATS_WINDOW_DAYS,
+): Promise<DashboardStats> {
   const since = new Date();
-  since.setDate(since.getDate() - STATS_WINDOW_DAYS * 2);
+  since.setDate(since.getDate() - windowDays * 2);
 
   const { data, error } = await supabaseAdmin()
     .from("orders")
@@ -231,7 +236,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const allOrders = data as Pick<OrderRow, "total" | "items" | "created_at">[];
 
   const boundary = new Date();
-  boundary.setDate(boundary.getDate() - STATS_WINDOW_DAYS);
+  boundary.setDate(boundary.getDate() - windowDays);
   const boundaryIso = boundary.toISOString();
 
   const orders = allOrders.filter((o) => o.created_at >= boundaryIso);
@@ -253,7 +258,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const avgTicketChange = percentChange(avgTicket, previousAvgTicket);
 
   const byDay = new Map<string, number>();
-  for (let i = STATS_WINDOW_DAYS - 1; i >= 0; i--) {
+  for (let i = windowDays - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     byDay.set(d.toISOString().slice(0, 10), 0);
@@ -283,6 +288,24 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
 
+  // Hour-of-day in store-local time (America/Argentina/Buenos_Aires), not
+  // server time — Vercel functions run in UTC, which would shift every
+  // bucket by 3h and make "hora pico" wrong.
+  const hourOfDay = new Intl.DateTimeFormat("en-US", {
+    timeZone: STORE_TIMEZONE,
+    hour: "numeric",
+    hour12: false,
+  });
+  const ordersByHour = new Map<number, number>();
+  for (const order of orders) {
+    const hour = Number(hourOfDay.format(new Date(order.created_at))) % 24;
+    ordersByHour.set(hour, (ordersByHour.get(hour) ?? 0) + 1);
+  }
+  const peakHours = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    orders: ordersByHour.get(hour) ?? 0,
+  }));
+
   return {
     totalRevenue,
     orderCount,
@@ -290,6 +313,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     revenueChange,
     orderCountChange,
     avgTicketChange,
+    peakHours,
     salesByDay,
     topProducts,
   };

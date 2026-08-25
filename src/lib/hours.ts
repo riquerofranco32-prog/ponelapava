@@ -1,4 +1,4 @@
-const STORE_TIMEZONE = "America/Argentina/Buenos_Aires";
+export const STORE_TIMEZONE = "America/Argentina/Buenos_Aires";
 
 function toMinutes(time: string): number {
   const [h, m] = time.split(":").map(Number);

@@ -69,20 +69,17 @@ export async function updateSiteSettings(
   return fromRow(data as SettingsRow);
 }
 
+export const GOOGLE_MAPS_PLACE_URL =
+  "https://www.google.com/maps/place/Pon%C3%A9+la+pava/@-37.8827105,-67.7994328,18z/data=!3m1!4b1!4m6!3m5!1s0x960acb005520266d:0x9a1a68896ad3d5a9!8m2!3d-37.8827105!4d-67.7981453!16s%2Fg%2F11mlfl_28d";
+
 export function buildMapsUrl(addressLine: string, addressCity: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${addressLine}, ${addressCity}`,
-  )}`;
+  return GOOGLE_MAPS_PLACE_URL;
 }
 
-// Free embeddable map iframe — no Google Cloud API key needed (unlike the
-// Maps Embed API / JS API), which this single-store site has no use for
-// otherwise. Precise enough for a "here's roughly where we are" section.
+// Free embeddable map iframe with exact coordinates for Poné La Pava in Catriel
 export function buildMapsEmbedUrl(
   addressLine: string,
   addressCity: string,
 ): string {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(
-    `${addressLine}, ${addressCity}`,
-  )}&z=16&output=embed`;
+  return `https://maps.google.com/maps?q=-37.8827105,-67.7981453+(Pon%C3%A9+La+Pava)&z=17&output=embed`;
 }

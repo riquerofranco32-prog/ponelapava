@@ -102,8 +102,11 @@ export function RecentOrdersWidget({
     }
   }
 
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "confirmed" | "delivered">("all");
   const pendingOrders = orders.filter((o) => o.status === "pending");
-  const recentOrders = orders.slice(0, 6);
+  const filteredOrders =
+    statusFilter === "all" ? orders : orders.filter((o) => o.status === statusFilter);
+  const recentOrders = filteredOrders.slice(0, 6);
 
   return (
     <div style={{ marginBottom: 24 }}>
@@ -162,7 +165,7 @@ export function RecentOrdersWidget({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: 16,
+            marginBottom: 14,
             flexWrap: "wrap",
             gap: 8,
           }}
@@ -231,6 +234,31 @@ export function RecentOrdersWidget({
               Ver todos <ArrowRight size={13} />
             </Link>
           </div>
+        </div>
+
+        {/* Status Filter Pills */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+          {(
+            [
+              { key: "all", label: "Todos" },
+              { key: "pending", label: "Pendientes", count: pendingOrders.length },
+              { key: "confirmed", label: "Confirmados" },
+              { key: "delivered", label: "Entregados" },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setStatusFilter(tab.key)}
+              className={`admin-toolbar-pill${statusFilter === tab.key ? " admin-toolbar-pill--active" : ""}`}
+              style={{ fontSize: 11, padding: "3px 8px" }}
+            >
+              <span>{tab.label}</span>
+              {"count" in tab && tab.count && tab.count > 0 ? (
+                <span style={{ marginLeft: 4, fontWeight: 700, opacity: 0.85 }}>({tab.count})</span>
+              ) : null}
+            </button>
+          ))}
         </div>
 
         {loading ? (
@@ -346,10 +374,74 @@ export function RecentOrdersWidget({
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap",
-                          marginTop: 1,
+                          marginTop: 2,
                         }}
                       >
                         {order.items.map((i) => `${i.productName} x${i.quantity}`).join(", ")}
+                      </div>
+
+                      {/* Delivery & Payment Badges */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                        {order.comment?.includes("[Envío a Domicilio") && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              padding: "1px 5px",
+                              borderRadius: 4,
+                              backgroundColor: "rgba(59, 130, 246, 0.12)",
+                              color: "#2563eb",
+                              border: "1px solid rgba(59, 130, 246, 0.25)",
+                            }}
+                          >
+                            🛵 Domicilio
+                          </span>
+                        )}
+                        {order.comment?.includes("[Retiro en Local") && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              padding: "1px 5px",
+                              borderRadius: 4,
+                              backgroundColor: "rgba(16, 185, 129, 0.12)",
+                              color: "#059669",
+                              border: "1px solid rgba(16, 185, 129, 0.25)",
+                            }}
+                          >
+                            🏪 Retiro Local
+                          </span>
+                        )}
+                        {order.comment?.includes("[Pago: Transferencia") && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              padding: "1px 5px",
+                              borderRadius: 4,
+                              backgroundColor: "rgba(16, 185, 129, 0.12)",
+                              color: "#059669",
+                              border: "1px solid rgba(16, 185, 129, 0.25)",
+                            }}
+                          >
+                            💳 Transf 10% OFF
+                          </span>
+                        )}
+                        {order.comment?.includes("[Cupón:") && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 600,
+                              padding: "1px 5px",
+                              borderRadius: 4,
+                              backgroundColor: "rgba(245, 158, 11, 0.12)",
+                              color: "#d97706",
+                              border: "1px solid rgba(245, 158, 11, 0.25)",
+                            }}
+                          >
+                            🏷️ Cupón
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

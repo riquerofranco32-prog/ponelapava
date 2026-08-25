@@ -11,6 +11,8 @@ import {
   Calendar,
   Percent,
   Search,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Coupon, CouponInput } from "@/types";
 import { formatPrice } from "@/lib/utils";
@@ -33,6 +35,8 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
   const [editing, setEditing] = useState<Coupon | null>(null);
   const [deleting, setDeleting] = useState<Coupon | null>(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "expired" | "paused">("all");
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const showToast = useAdminToast();
 
   const now = new Date();
@@ -43,12 +47,31 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
   }
 
   const activeCount = coupons.filter((c) => c.active && !isExpired(c)).length;
+  const expiredCount = coupons.filter(isExpired).length;
+  const pausedCount = coupons.filter((c) => !c.active && !isExpired(c)).length;
   const percentCount = coupons.filter((c) => c.discountType === "percent").length;
   const fixedCount = coupons.filter((c) => c.discountType === "fixed").length;
 
-  const filteredCoupons = coupons.filter((c) =>
-    c.code.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const filteredCoupons = coupons.filter((c) => {
+    if (search.trim() && !c.code.toLowerCase().includes(search.trim().toLowerCase())) {
+      return false;
+    }
+    if (statusFilter === "active") return c.active && !isExpired(c);
+    if (statusFilter === "expired") return isExpired(c);
+    if (statusFilter === "paused") return !c.active && !isExpired(c);
+    return true;
+  });
+
+  async function handleCopy(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      showToast(`Código ${code} copiado al portapapeles`);
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch {
+      showToast("Error al copiar código", "error");
+    }
+  }
 
   async function handleCreate(input: CouponInput) {
     const res = await fetch("/api/admin/coupons", {
@@ -187,6 +210,31 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
           </div>
         </div>
 
+        {/* Filter Pills */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+          {(
+            [
+              { key: "all", label: "Todos", count: coupons.length },
+              { key: "active", label: "Activos", count: activeCount },
+              { key: "paused", label: "Pausados", count: pausedCount },
+              { key: "expired", label: "Expirados", count: expiredCount },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setStatusFilter(tab.key)}
+              className={`admin-toolbar-pill${statusFilter === tab.key ? " admin-toolbar-pill--active" : ""}`}
+              style={{ fontSize: 11, padding: "3px 9px" }}
+            >
+              <span>{tab.label}</span>
+              <span style={{ marginLeft: 4, opacity: 0.75, fontWeight: statusFilter === tab.key ? 700 : 500 }}>
+                ({tab.count})
+              </span>
+            </button>
+          ))}
+        </div>
+
         {filteredCoupons.length === 0 ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "20px 0" }}>
             <EmptyState
@@ -227,18 +275,19 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
               <tbody>
                 {filteredCoupons.map((coupon) => {
                   const expired = isExpired(coupon);
+                  const isCopied = copiedCode === coupon.code;
                   return (
                     <tr key={coupon.id}>
                       <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                           <span
                             style={{
                               fontFamily: "monospace",
                               fontWeight: 700,
-                              fontSize: 14,
+                              fontSize: 13,
                               background: "var(--dash-surface-elevated)",
                               color: "var(--dash-text)",
-                              padding: "4px 8px",
+                              padding: "3px 8px",
                               borderRadius: "var(--radius-chip)",
                               border: "1px solid var(--dash-border)",
                               letterSpacing: "0.06em",
@@ -246,6 +295,23 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
                           >
                             {coupon.code}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(coupon.code)}
+                            title="Copiar código del cupón"
+                            style={{
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              padding: 4,
+                              color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              borderRadius: 4,
+                            }}
+                          >
+                            {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                          </button>
                         </div>
                       </td>
                       <td>

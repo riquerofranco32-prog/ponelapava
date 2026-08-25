@@ -73,12 +73,21 @@ export interface OrderItem {
   subtotal: number;
 }
 
+export type DeliveryMethod = "pickup" | "delivery";
+export type PaymentMethod = "transfer" | "card" | "cash";
+
 export interface Order {
   id?: string;
   customerName: string;
   customerPhone?: string;
   items: OrderItem[];
   subtotal: number;
+  discount?: number;
+  couponCode?: string;
+  shippingCost?: number;
+  deliveryMethod?: DeliveryMethod;
+  deliveryAddress?: string;
+  paymentMethod?: PaymentMethod;
   total: number;
   comment?: string;
   status: "pending" | "confirmed" | "delivered" | "cancelled";
@@ -88,7 +97,15 @@ export interface Order {
 // ── WhatsApp ────────────────────────────────────────────
 export interface WhatsAppOrderData {
   customerName: string;
+  customerPhone?: string;
   items: CartItem[];
+  subtotal?: number;
+  discount?: number;
+  couponCode?: string;
+  shippingCost?: number;
+  deliveryMethod?: DeliveryMethod;
+  deliveryAddress?: string;
+  paymentMethod?: PaymentMethod;
   total: number;
   comment?: string;
 }

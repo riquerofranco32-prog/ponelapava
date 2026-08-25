@@ -12,23 +12,26 @@ const MATES = [
   {
     id: "mate-camionero",
     name: "Mate Camionero Vaqueta",
-    price: 7200,
+    price: 18500,
     image: "/products/mate-camionero-vaqueta.jpg",
-    tag: "Cuero grueso",
-  },
-  {
-    id: "mate-calabaza",
-    name: "Mate Calabaza Cuero Natural",
-    price: 5500,
-    image: "/product_mate_calabaza_1786546121145.png",
-    tag: "Clásico de autor",
+    tag: "Cuero legítimo",
+    desc: "Calabaza gruesa y virola de acero",
   },
   {
     id: "mate-imperial",
-    name: "Mate Imperial Palo Santo",
-    price: 6800,
-    image: "/product_mate_calabaza_1786546121145.png",
+    name: "Mate Imperial Premium",
+    price: 24500,
+    image: "/brand-gallery/post-7.jpg",
     tag: "Virola cincelada",
+    desc: "Alpaca labrada y cuero seleccionado",
+  },
+  {
+    id: "mate-torpedo",
+    name: "Mate Torpedo Artesanal",
+    price: 16900,
+    image: "/brand-gallery/post-1.jpg",
+    tag: "Formato uruguayo",
+    desc: "Cuerpo estilizado y base reforzada",
   },
 ];
 
@@ -36,20 +39,26 @@ const BOMBILLAS = [
   {
     id: "bombilla-pico-loro",
     name: "Bombilla Pico de Loro Alpaca",
-    price: 2600,
+    price: 6900,
+    image: "/brand-gallery/post-10.jpg",
     tag: "Filtro ranurado",
+    desc: "Máximo flujo sin taparse",
   },
   {
-    id: "bombilla-alpaca",
-    name: "Bombilla Alpaca Lisa 18cm",
-    price: 1800,
-    tag: "Punta oval",
+    id: "bombilla-cincelada",
+    name: "Bombilla Alpaca Cincelada",
+    price: 7800,
+    image: "/brand-gallery/post-12.jpg",
+    tag: "Labrada a mano",
+    desc: "Detalles artesanales exclusivos",
   },
   {
-    id: "bombilla-resorte",
-    name: "Bombilla Acero Resorte",
-    price: 1400,
-    tag: "Fácil limpieza",
+    id: "bombilla-acero",
+    name: "Bombilla Acero Inoxidable",
+    price: 4500,
+    image: "/brand-gallery/post-16.jpg",
+    tag: "Alta durabilidad",
+    desc: "Fácil limpieza y resorte desmontable",
   },
 ];
 
@@ -60,13 +69,15 @@ const YERBAS = [
     price: 6800,
     image: "/products/yerba-canarias-1kg.jpg",
     tag: "Tipo Uruguaya",
+    desc: "Sabor intenso y molienda fina PU1",
   },
   {
     id: "yerba-playadito",
     name: "Yerba Playadito 1kg",
     price: 4900,
     image: "/products/yerba-playadito-1kg.jpg",
-    tag: "Suave correntina",
+    tag: "Suave tradicional",
+    desc: "Con palo, bajo contenido de polvo",
   },
   {
     id: "yerba-sara",
@@ -74,6 +85,7 @@ const YERBAS = [
     price: 6400,
     image: "/products/yerba-sara-1kg.jpg",
     tag: "Equilibrada",
+    desc: "Estacionamiento natural prolongado",
   },
 ];
 
@@ -81,6 +93,7 @@ export default function CustomKitBuilder() {
   const [selectedMate, setSelectedMate] = useState(MATES[0]);
   const [selectedBombilla, setSelectedBombilla] = useState(BOMBILLAS[0]);
   const [selectedYerba, setSelectedYerba] = useState(YERBAS[0]);
+  const [addedSuccess, setAddedSuccess] = useState(false);
 
   const { addItem, setDrawer } = useCart();
 
@@ -88,25 +101,28 @@ export default function CustomKitBuilder() {
   const discount = Math.round(subtotal * 0.1);
   const total = subtotal - discount;
 
-  const whatsappMessage = `¡Hola Poné La Pava! Quiero pedir el Set Matero Personalizado con 10% OFF:\n- ${selectedMate.name}\n- ${selectedBombilla.name}\n- ${selectedYerba.name}\nTotal con descuento: ${formatPrice(total)}`;
+  const whatsappMessage = `¡Hola Poné La Pava! Quiero pedir el Set Matero Personalizado con 10% OFF:\n- Mate: ${selectedMate.name}\n- Bombilla: ${selectedBombilla.name}\n- Yerba: ${selectedYerba.name}\nTotal con descuento: ${formatPrice(total)}`;
 
   function handleAddToCart() {
-    // Add custom combo product
     addItem({
       id: `combo-${selectedMate.id}-${selectedBombilla.id}-${selectedYerba.id}`,
-      name: `Set Matero Personalizado (${selectedMate.name.split(" ")[1]} + ${selectedBombilla.name.split(" ")[1]} + ${selectedYerba.name.split(" ")[1]})`,
+      name: `Set Personalizado (${selectedMate.name.replace("Mate ", "")} + ${selectedBombilla.name.replace("Bombilla ", "")} + ${selectedYerba.name.replace("Yerba ", "")})`,
       slug: "set-matero-personalizado",
-      description: "Set personalizado con mate, bombilla y yerba elegidos con 10% OFF.",
+      description: `Set personalizado con ${selectedMate.name}, ${selectedBombilla.name} y ${selectedYerba.name} con 10% de descuento incluido.`,
       price: total,
       category: "combos",
       status: "available",
-      images: [selectedMate.image || "/product_combo_kit_1786546132809.png"],
-      tags: ["combo", "personalizado", "descuento"],
+      images: [selectedMate.image || "/products/mate-camionero-vaqueta.jpg"],
+      tags: ["combo", "personalizado", "set-matero"],
       stock: 10,
       featured: true,
       createdAt: new Date().toISOString(),
     });
-    setDrawer(true);
+    setAddedSuccess(true);
+    setTimeout(() => {
+      setAddedSuccess(false);
+      setDrawer(true);
+    }, 900);
   }
 
   return (
@@ -147,18 +163,31 @@ export default function CustomKitBuilder() {
                       key={m.id}
                       type="button"
                       onClick={() => setSelectedMate(m)}
-                      className={`flex flex-col justify-between p-4 rounded-control border-2 text-left transition-all duration-200 cursor-pointer ${
+                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
-                          ? "border-pava-gold bg-pava-cream/10 shadow-md shadow-pava-gold/10"
-                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40"
+                          ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
+                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider">{m.tag}</span>
-                        {isSelected && <Check size={14} className="text-pava-gold" />}
+                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                        <Image
+                          src={m.image}
+                          alt={m.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
                       </div>
-                      <span className="font-semibold text-xs text-pava-cream mb-1">{m.name}</span>
-                      <span className="text-xs font-bold text-pava-gold">{formatPrice(m.price)}</span>
+                      <div>
+                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{m.tag}</span>
+                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{m.name}</span>
+                        <span className="text-xs font-bold text-pava-gold">{formatPrice(m.price)}</span>
+                      </div>
                     </button>
                   );
                 })}
@@ -179,18 +208,31 @@ export default function CustomKitBuilder() {
                       key={b.id}
                       type="button"
                       onClick={() => setSelectedBombilla(b)}
-                      className={`flex flex-col justify-between p-4 rounded-control border-2 text-left transition-all duration-200 cursor-pointer ${
+                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
-                          ? "border-pava-gold bg-pava-cream/10 shadow-md shadow-pava-gold/10"
-                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40"
+                          ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
+                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider">{b.tag}</span>
-                        {isSelected && <Check size={14} className="text-pava-gold" />}
+                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                        <Image
+                          src={b.image}
+                          alt={b.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
                       </div>
-                      <span className="font-semibold text-xs text-pava-cream mb-1">{b.name}</span>
-                      <span className="text-xs font-bold text-pava-gold">{formatPrice(b.price)}</span>
+                      <div>
+                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{b.tag}</span>
+                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{b.name}</span>
+                        <span className="text-xs font-bold text-pava-gold">{formatPrice(b.price)}</span>
+                      </div>
                     </button>
                   );
                 })}
@@ -211,18 +253,31 @@ export default function CustomKitBuilder() {
                       key={y.id}
                       type="button"
                       onClick={() => setSelectedYerba(y)}
-                      className={`flex flex-col justify-between p-4 rounded-control border-2 text-left transition-all duration-200 cursor-pointer ${
+                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
-                          ? "border-pava-gold bg-pava-cream/10 shadow-md shadow-pava-gold/10"
-                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40"
+                          ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
+                          : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider">{y.tag}</span>
-                        {isSelected && <Check size={14} className="text-pava-gold" />}
+                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                        <Image
+                          src={y.image}
+                          alt={y.name}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                        {isSelected && (
+                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
                       </div>
-                      <span className="font-semibold text-xs text-pava-cream mb-1">{y.name}</span>
-                      <span className="text-xs font-bold text-pava-gold">{formatPrice(y.price)}</span>
+                      <div>
+                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{y.tag}</span>
+                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{y.name}</span>
+                        <span className="text-xs font-bold text-pava-gold">{formatPrice(y.price)}</span>
+                      </div>
                     </button>
                   );
                 })}
@@ -232,7 +287,7 @@ export default function CustomKitBuilder() {
 
           {/* Summary Column */}
           <ScrollReveal direction="right" delay={100} className="lg:col-span-5 sticky top-28">
-            <div className="relative rounded-card border border-pava-gold/30 bg-pava-green/80 p-7 sm:p-8 backdrop-blur-md shadow-2xl overflow-hidden">
+            <div className="relative rounded-card border border-pava-gold/30 bg-pava-green/80 p-6 sm:p-7 backdrop-blur-md shadow-2xl overflow-hidden">
               <BorderBeam
                 size={240}
                 duration={12}
@@ -241,7 +296,7 @@ export default function CustomKitBuilder() {
                 colorTo="transparent"
               />
 
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-pava-cream/15">
+              <div className="flex items-center justify-between mb-5 pb-3 border-b border-pava-cream/15">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-pava-gold block">
                     Resumen de tu Set
@@ -255,24 +310,33 @@ export default function CustomKitBuilder() {
                 </span>
               </div>
 
-              {/* Items breakdown */}
-              <div className="space-y-3 mb-6 text-xs text-pava-cream/80">
-                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/5">
-                  <span className="truncate pr-2">🧉 {selectedMate.name}</span>
-                  <span className="font-semibold text-pava-cream">{formatPrice(selectedMate.price)}</span>
+              {/* Items breakdown with thumbnails */}
+              <div className="space-y-2.5 mb-5 text-xs text-pava-cream/85">
+                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/8">
+                  <span className="flex items-center gap-2 truncate pr-2">
+                    <span>🧉</span>
+                    <span className="truncate">{selectedMate.name}</span>
+                  </span>
+                  <span className="font-semibold text-pava-cream shrink-0">{formatPrice(selectedMate.price)}</span>
                 </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/5">
-                  <span className="truncate pr-2">✨ {selectedBombilla.name}</span>
-                  <span className="font-semibold text-pava-cream">{formatPrice(selectedBombilla.price)}</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/8">
+                  <span className="flex items-center gap-2 truncate pr-2">
+                    <span>✨</span>
+                    <span className="truncate">{selectedBombilla.name}</span>
+                  </span>
+                  <span className="font-semibold text-pava-cream shrink-0">{formatPrice(selectedBombilla.price)}</span>
                 </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/5">
-                  <span className="truncate pr-2">🌿 {selectedYerba.name}</span>
-                  <span className="font-semibold text-pava-cream">{formatPrice(selectedYerba.price)}</span>
+                <div className="flex items-center justify-between py-1.5 border-b border-pava-cream/8">
+                  <span className="flex items-center gap-2 truncate pr-2">
+                    <span>🌿</span>
+                    <span className="truncate">{selectedYerba.name}</span>
+                  </span>
+                  <span className="font-semibold text-pava-cream shrink-0">{formatPrice(selectedYerba.price)}</span>
                 </div>
               </div>
 
               {/* Price Calculation */}
-              <div className="space-y-1.5 mb-6 pt-2 border-t border-pava-cream/15">
+              <div className="space-y-1.5 mb-6 pt-1 border-t border-pava-cream/15">
                 <div className="flex items-center justify-between text-xs text-pava-cream/60">
                   <span>Precio regular:</span>
                   <span className="line-through">{formatPrice(subtotal)}</span>
@@ -294,10 +358,24 @@ export default function CustomKitBuilder() {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="w-full flex items-center justify-center gap-2 rounded-control bg-pava-gold py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-pava-brown shadow-lg shadow-pava-gold/20 transition-all hover:bg-pava-gold-light active:scale-[0.98] cursor-pointer"
+                  disabled={addedSuccess}
+                  className={`w-full flex items-center justify-center gap-2 rounded-control py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer shadow-lg ${
+                    addedSuccess
+                      ? "bg-emerald-500 text-white shadow-emerald-500/30 scale-98"
+                      : "bg-pava-gold text-pava-brown shadow-pava-gold/20 hover:bg-pava-gold-light active:scale-[0.98]"
+                  }`}
                 >
-                  <ShoppingCart size={16} />
-                  Agregar Set al Carrito
+                  {addedSuccess ? (
+                    <>
+                      <Check size={16} />
+                      ¡Set agregado al Carrito!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={16} />
+                      Agregar Set al Carrito
+                    </>
+                  )}
                 </button>
 
                 <a

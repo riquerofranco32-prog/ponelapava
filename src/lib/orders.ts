@@ -32,6 +32,13 @@ export interface CreateOrderInput {
   customerName: string;
   customerPhone?: string;
   items: CartItem[];
+  subtotal?: number;
+  discount?: number;
+  couponCode?: string;
+  shippingCost?: number;
+  deliveryMethod?: "pickup" | "delivery";
+  deliveryAddress?: string;
+  paymentMethod?: "transfer" | "card" | "cash";
   total: number;
   comment?: string;
 }
@@ -45,12 +52,36 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     subtotal: product.price * quantity,
   }));
 
+  const subtotal = input.subtotal ?? input.total;
+
+  let fullComment = input.comment?.trim() || "";
+  if (input.deliveryMethod === "delivery" && input.deliveryAddress?.trim()) {
+    const deliveryNote = `[Envío a Domicilio: ${input.deliveryAddress.trim()}]`;
+    fullComment = fullComment ? `${deliveryNote} - ${fullComment}` : deliveryNote;
+  } else if (input.deliveryMethod === "pickup") {
+    const pickupNote = `[Retiro en Local - Catriel]`;
+    fullComment = fullComment ? `${pickupNote} - ${fullComment}` : pickupNote;
+  }
+  if (input.paymentMethod) {
+    const payNote =
+      input.paymentMethod === "transfer"
+        ? "[Pago: Transferencia (10% OFF)]"
+        : input.paymentMethod === "cash"
+          ? "[Pago: Efectivo en Local (10% OFF)]"
+          : "[Pago: Tarjeta / Otros]";
+    fullComment = fullComment ? `${fullComment} ${payNote}` : payNote;
+  }
+  if (input.couponCode && input.discount) {
+    const couponNote = `[Cupón: ${input.couponCode} (-$${input.discount})]`;
+    fullComment = fullComment ? `${fullComment} ${couponNote}` : couponNote;
+  }
+
   const payload: Record<string, unknown> = {
     customer_name: input.customerName.trim(),
     items: orderItems,
-    subtotal: input.total,
+    subtotal: subtotal,
     total: input.total,
-    comment: input.comment?.trim() || null,
+    comment: fullComment || null,
     status: "pending",
   };
 

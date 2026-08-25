@@ -224,21 +224,37 @@ export default function ProductDetail({
               {product.name}
             </h1>
 
-            {/* Price & Installments */}
-            <div className="mb-6">
-              <div className="flex items-baseline gap-3">
-                <span className="font-display text-4xl font-bold text-pava-green">
-                  {formatPrice(product.price)}
+            {/* Price & Payment Options */}
+            <div className="mb-6 rounded-card bg-white border border-pava-brown/10 p-4.5 shadow-sm">
+              <div className="flex items-baseline justify-between gap-3 mb-2">
+                <div className="flex items-baseline gap-2.5">
+                  <span className="font-display text-3.5xl lg:text-4xl font-bold text-pava-green">
+                    {formatPrice(product.price)}
+                  </span>
+                  {perUnit && (
+                    <span className="text-xs text-pava-brown-mid/60 font-medium">({perUnit})</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Transfer Discount Callout */}
+              <div className="flex items-center gap-2 rounded-control bg-emerald-50 border border-emerald-200/80 px-3 py-2 text-xs text-emerald-900 mb-3">
+                <span className="font-bold bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded tracking-wide uppercase">
+                  10% OFF
+                </span>
+                <span className="font-medium">
+                  <strong>{formatPrice(Math.round(product.price * 0.9))}</strong> pagando con Transferencia o Efectivo
                 </span>
               </div>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-pava-green/10 px-2.5 py-0.5 font-semibold text-pava-green">
-                  <CreditCard size={13} />
+
+              {/* Installments & Cards */}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-pava-brown-mid/80 pt-1 border-t border-pava-brown/8">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-pava-brown">
+                  <CreditCard size={13} className="text-pava-green" />
                   3 cuotas de {formatPrice(Math.round(product.price / 3))}
                 </span>
-                {perUnit && (
-                  <span className="text-pava-brown-mid/60">{perUnit}</span>
-                )}
+                <span className="text-pava-brown/30">•</span>
+                <span>Hasta 6 cuotas con tarjetas de crédito</span>
               </div>
             </div>
 
@@ -251,8 +267,41 @@ export default function ProductDetail({
             )}
 
             {/* Description */}
-            <div className="prose prose-sm max-w-none mb-8 text-pava-brown-mid/80 leading-relaxed">
+            <div className="prose prose-sm max-w-none mb-6 text-pava-brown-mid/80 leading-relaxed">
               <p>{product.longDescription ?? product.description}</p>
+            </div>
+
+            {/* Category Contextual Care / Ritual Guide */}
+            <div className="mb-8 rounded-card bg-pava-cream-dark/60 border border-pava-brown/10 p-4">
+              <div className="flex items-center gap-2 mb-2 font-display text-sm font-bold text-pava-brown">
+                <span className="text-base">
+                  {product.category === "mates"
+                    ? "🧉"
+                    : product.category === "yerbas"
+                      ? "🌿"
+                      : product.category === "termos"
+                        ? "🌡️"
+                        : "✨"}
+                </span>
+                <span>
+                  {product.category === "mates"
+                    ? "Consejo Matero: Curado y Cuidado"
+                    : product.category === "yerbas"
+                      ? "Perfil y Recomendación de Cebado"
+                      : product.category === "termos"
+                        ? "Rendimiento Térmico y Conservación"
+                        : "Garantía y Experiencia Poné La Pava"}
+                </span>
+              </div>
+              <p className="text-xs text-pava-brown-mid/80 leading-relaxed">
+                {product.category === "mates"
+                  ? "Si es de calabaza o madera, curalo con yerba húmeda durante 24hs antes de su primer uso y secalo siempre boca arriba. Los de acero o vidrio no requieren curado previo."
+                  : product.category === "yerbas"
+                    ? "Recomendamos cebar con agua a 75°C - 80°C. Verté primero un chorrito de agua tibia para hidratar la yerba y no quemar la montañita."
+                    : product.category === "termos"
+                      ? "Para máxima retención de temperatura durante todo el día, templá el termo con un chorro de agua caliente durante 1 minuto antes del llenado definitivo."
+                      : "Producto 100% original seleccionado con el sello de calidad de Poné La Pava Catriel. Asesoramiento personalizado post-venta."}
+              </p>
             </div>
 
             {/* Meta */}
@@ -432,20 +481,36 @@ export default function ProductDetail({
 
       {/* Sticky Mobile Buy Bar */}
       {!isOutOfStock && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-pava-cream/95 backdrop-blur-md border-t border-pava-brown/15 p-3.5 shadow-2xl flex items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-pava-brown truncate">{product.name}</p>
-            <p className="font-display text-base font-bold text-pava-green">{formatPrice(product.price)}</p>
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-pava-cream/95 backdrop-blur-md border-t border-pava-brown/15 p-3 px-4 shadow-2xl flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="relative w-11 h-11 shrink-0 overflow-hidden rounded-control bg-white border border-pava-brown/10">
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="44px"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-pava-brown truncate">{product.name}</p>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-display text-sm font-bold text-pava-green">{formatPrice(product.price)}</span>
+                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                  {formatPrice(Math.round(product.price * 0.9))} efvo/transf
+                </span>
+              </div>
+            </div>
           </div>
           <button
             onClick={handleAddToCart}
             disabled={added}
-            className={`flex items-center justify-center gap-2 rounded-control px-5 py-3 text-xs font-bold uppercase tracking-wider text-pava-cream transition-all duration-200 active:scale-95 cursor-pointer shrink-0 ${
-              added ? "bg-pava-green" : "bg-pava-green hover:bg-pava-green-light shadow-md shadow-pava-green/20"
+            className={`flex items-center justify-center gap-1.5 rounded-control px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pava-cream transition-all duration-200 active:scale-95 cursor-pointer shrink-0 shadow-sm ${
+              added ? "bg-pava-green" : "bg-pava-green hover:bg-pava-green-light shadow-pava-green/20"
             }`}
           >
-            <ShoppingBag size={15} />
-            {added ? "¡Agregado!" : "Agregar"}
+            <ShoppingBag size={14} />
+            {added ? "¡Listo!" : "Agregar"}
           </button>
         </div>
       )}

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
+import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
 import { AdminButton } from "./AdminButton";
 import { TableSkeleton } from "./TableSkeleton";
@@ -28,26 +29,51 @@ type StatusFilter = "all" | Order["status"];
 type SortColumn = "date" | "total";
 type SortDir = "asc" | "desc";
 
-// ponytail: naive CSV field escaping (wrap+double quotes) — covers Excel/Sheets fine
-function csvField(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
+// naive CSV field escaping (wrap+double quotes) — covers Excel/Sheets fine
+function csvField(value: string | number | undefined | null): string {
+  if (value === undefined || value === null) return '""';
+  return `"${String(value).replace(/"/g, '""')}"`;
 }
 
 function exportOrdersToCsv(orders: Order[]) {
-  const header = ["customerName", "items", "total", "createdAt", "status"];
-  const rows = orders.map((o) => [
-    csvField(o.customerName),
-    csvField(o.items.map((i) => `${i.productName} x${i.quantity}`).join("; ")),
-    csvField(String(o.total)),
-    csvField(o.createdAt),
-    csvField(o.status),
-  ]);
+  const header = [
+    "ID Pedido",
+    "Fecha",
+    "Cliente",
+    "Telefono",
+    "Productos",
+    "Cantidad Total Items",
+    "Subtotal",
+    "Total",
+    "Estado",
+    "Observacion",
+  ];
+  const rows = orders.map((o) => {
+    const totalItems = o.items.reduce((sum, i) => sum + i.quantity, 0);
+    const itemsDetail = o.items
+      .map((i) => `${i.productName} (x${i.quantity} @ ${formatPrice(i.price)})`)
+      .join("; ");
+
+    return [
+      csvField(o.id || ""),
+      csvField(new Date(o.createdAt).toLocaleString("es-AR")),
+      csvField(o.customerName),
+      csvField(o.customerPhone || ""),
+      csvField(itemsDetail),
+      csvField(totalItems),
+      csvField(o.subtotal || o.total),
+      csvField(o.total),
+      csvField(STATUS_LABELS[o.status] || o.status),
+      csvField(o.comment || ""),
+    ];
+  });
+
   const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "pedidos.csv";
+  a.download = `pedidos-ponelapava-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -349,6 +375,47 @@ export default function OrdersTable() {
             />
           </div>
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            {/* Quick date presets */}
+            <div style={{ display: "flex", gap: 4, marginRight: 4 }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date().toISOString().slice(0, 10);
+                  setDateFrom(today);
+                  setDateTo(today);
+                }}
+                className="admin-toolbar-pill"
+                style={{ fontSize: 11, padding: "4px 8px" }}
+              >
+                Hoy
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const to = new Date();
+                  const from = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
+                  setDateFrom(from.toISOString().slice(0, 10));
+                  setDateTo(to.toISOString().slice(0, 10));
+                }}
+                className="admin-toolbar-pill"
+                style={{ fontSize: 11, padding: "4px 8px" }}
+              >
+                7 días
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const to = new Date();
+                  const from = new Date(to.getFullYear(), to.getMonth(), 1);
+                  setDateFrom(from.toISOString().slice(0, 10));
+                  setDateTo(to.toISOString().slice(0, 10));
+                }}
+                className="admin-toolbar-pill"
+                style={{ fontSize: 11, padding: "4px 8px" }}
+              >
+                Este mes
+              </button>
+            </div>
             <input
               type="date"
               value={dateFrom}

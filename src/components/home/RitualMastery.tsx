@@ -123,18 +123,39 @@ export default function RitualMastery({ embedded = false }: { embedded?: boolean
           <h3 className="font-display text-2xl sm:text-3xl font-bold text-pava-cream mb-2">
             {current.title}
           </h3>
-          <p className="text-xs font-bold uppercase tracking-widest text-pava-gold mb-6">
-            {current.angleText}
-          </p>
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-xs font-bold uppercase tracking-widest text-pava-gold">
+              {current.angleText}
+            </span>
+            <span className="text-pava-cream/30">•</span>
+            <span className="text-xs text-pava-cream/60">
+              {activeStep === 0 ? "Filtro natural de hojas" : activeStep === 1 ? "Reserva de sabor" : activeStep === 2 ? "Hidratación sin quemar" : "Hermetismo total"}
+            </span>
+          </div>
 
-          <div className="rounded-control border border-pava-cream/15 bg-pava-green/40 p-6 mb-8">
+          <div className="rounded-control border border-pava-cream/15 bg-pava-green/40 p-6 mb-6">
             <p className="text-sm sm:text-base leading-relaxed text-pava-cream/90 font-medium">
               &ldquo;{current.fullTip}&rdquo;
             </p>
           </div>
 
+          {/* Action to browse ideal yerbas & mates */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 p-3 rounded-control bg-pava-cream/5 border border-pava-cream/10">
+            <div className="text-xs text-pava-cream/80">
+              <span className="font-bold text-pava-gold block">¿Querés probar esta técnica?</span>
+              <span>Recomendamos yerba con estacionamiento natural</span>
+            </div>
+            <a
+              href={activeStep <= 1 ? "/catalogo?cat=mates" : "/catalogo?cat=yerbas"}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-chip bg-pava-gold text-pava-brown text-xs font-bold uppercase tracking-wider hover:bg-pava-gold-light transition-colors"
+            >
+              <span>Ver {activeStep <= 1 ? "Mates" : "Yerbas"}</span>
+              <ArrowRight size={13} />
+            </a>
+          </div>
+
           {/* Progress bar across 4 steps */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-pava-cream/15">
             <div className="flex items-center gap-2">
               {RITUAL_STEPS.map((_, i) => (
                 <button

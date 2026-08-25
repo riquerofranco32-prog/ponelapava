@@ -11,6 +11,15 @@ import {
   MessageCircle,
   ChevronLeft,
   AlertTriangle,
+  Truck,
+  Store,
+  Tag,
+  Check,
+  Loader2,
+  X,
+  CreditCard,
+  Banknote,
+  Sparkles,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -23,6 +32,7 @@ import type { ProductStatus } from "@/types";
 export default function CartPage() {
   const {
     items,
+    addItem,
     updateQuantity,
     removeItem,
     clearCart,
@@ -34,6 +44,24 @@ export default function CartPage() {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [comment, setComment] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryNotes, setDeliveryNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cash" | "card">("transfer");
+  
+  // Upsell state
+  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
+  
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountType: "percent" | "fixed";
+    discountValue: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+
   const [isSyncing, setIsSyncing] = useState(true);
   const [syncNotices, setSyncNotices] = useState<string[]>([]);
   // Starts null (matches server HTML, avoids a hydration mismatch, same
@@ -43,6 +71,47 @@ export default function CartPage() {
   useEffect(() => {
     setIsOpen(isStoreOpenNow(settings.hoursWeekday, settings.hoursSaturday));
   }, [settings.hoursWeekday, settings.hoursSaturday]);
+
+  // Load complementary products for upsell
+  useEffect(() => {
+    fetch("/api/products/search?q=")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          // pick items not currently in cart
+          const cartIds = new Set(items.map((i) => i.product.id));
+          const available = data.filter((p: any) => !cartIds.has(p.id) && p.status !== "out_of_stock");
+          setSuggestedProducts(available.slice(0, 4));
+        }
+      })
+      .catch(() => {});
+  }, [items]);
+
+  // Shipping & discount calculations
+  const FREE_SHIPPING_THRESHOLD = 65000;
+  const standardShippingCost = 3500;
+  const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
+  const shippingCost = deliveryMethod === "delivery" ? (isFreeShipping ? 0 : standardShippingCost) : 0;
+
+  // Coupon discount
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "percent") {
+      couponDiscount = Math.round((total * appliedCoupon.discountValue) / 100);
+    } else {
+      couponDiscount = Math.min(total, appliedCoupon.discountValue);
+    }
+  }
+
+  // Payment method discount (10% OFF for Transfer or Cash in store)
+  const baseForPaymentDiscount = Math.max(0, total - couponDiscount);
+  const paymentDiscount =
+    paymentMethod === "transfer" || paymentMethod === "cash"
+      ? Math.round(baseForPaymentDiscount * 0.1)
+      : 0;
+
+  const totalDiscount = couponDiscount + paymentDiscount;
+  const finalTotal = Math.max(0, total - totalDiscount + shippingCost);
 
   // Re-check price/stock/status against the DB on load — the cart snapshot
   // in localStorage can be days old. Runs once against the items present
@@ -122,22 +191,64 @@ export default function CartPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    setCouponError(null);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode }),
+      });
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        setAppliedCoupon(data.coupon);
+        setCouponCode("");
+      } else {
+        setCouponError(data.error || "Cupón no válido");
+      }
+    } catch {
+      setCouponError("Error al validar el cupón");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError(null);
+  };
+
   const handleWhatsApp = () => {
     if (items.length === 0) return;
+
+    const fullAddress =
+      deliveryMethod === "delivery"
+        ? `${deliveryAddress.trim()}${deliveryNotes.trim() ? ` (${deliveryNotes.trim()})` : ""}`
+        : undefined;
+
     const orderData = {
       customerName: customerName || "Sin nombre",
       customerPhone: customerPhone.trim() || undefined,
       items,
-      total,
-      comment,
+      subtotal: total,
+      discount: totalDiscount > 0 ? totalDiscount : undefined,
+      couponCode: appliedCoupon?.code,
+      shippingCost: shippingCost > 0 ? shippingCost : undefined,
+      deliveryMethod,
+      deliveryAddress: fullAddress,
+      paymentMethod,
+      total: finalTotal,
+      comment: comment.trim() || undefined,
     };
-    // Open WhatsApp synchronously, in the same click, or iOS Safari treats
-    // it as an unrequested popup and blocks it — awaiting the fetch first
-    // (as this used to) loses that user-gesture window on mobile.
+
+    // Open WhatsApp synchronously
     const url = buildWhatsAppUrl(settings.whatsappNumber, orderData);
     window.open(url, "_blank", "noopener,noreferrer");
-    // Best-effort order log, fire-and-forget — a DB hiccup shouldn't block
-    // the customer from ordering; WhatsApp is already open by this point.
+
+    // Best-effort order log in backend
     fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -231,12 +342,6 @@ export default function CartPage() {
                     </p>
 
                     <div className="flex items-center justify-between">
-                      {/* Quantity — acá el grupo tiene `overflow-hidden` (para
-                          recortar el hover contra el borde redondeado), y eso
-                          también recorta el hit-testing, así que el truco del
-                          pseudo-elemento de `tap-44` no sirve. En mobile los
-                          botones crecen a 44px de verdad; de sm para arriba
-                          quedan como estaban. El ícono no cambia de tamaño. */}
                       <div className="flex items-center overflow-hidden rounded-control border border-pava-brown/15">
                         <button
                           onClick={() =>
@@ -279,6 +384,50 @@ export default function CartPage() {
               ))}
             </ul>
 
+            {/* Upsell recommendation */}
+            {suggestedProducts.length > 0 && (
+              <div className="mt-8 rounded-card bg-pava-cream-dark/50 border border-pava-brown/10 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles size={16} className="text-pava-gold-deep" />
+                  <h3 className="font-display text-base font-bold text-pava-brown">
+                    Completá tu ronda matera
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {suggestedProducts.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 p-2.5 rounded-control bg-white border border-pava-brown/10 shadow-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="relative w-12 h-12 shrink-0 rounded-chip overflow-hidden bg-pava-cream">
+                          <Image
+                            src={p.images[0]}
+                            alt={p.name}
+                            fill
+                            className="object-cover"
+                            sizes="48px"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-pava-brown truncate">{p.name}</p>
+                          <p className="text-xs font-bold text-pava-green">{formatPrice(p.price)}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addItem(p, 1)}
+                        className="shrink-0 px-2.5 py-1.5 rounded-chip bg-pava-green/10 text-pava-green hover:bg-pava-green hover:text-pava-cream text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <Plus size={12} />
+                        <span>Sumar</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <Link
               href="/catalogo"
               className="inline-flex items-center gap-2 mt-8 text-sm text-pava-brown/50 hover:text-pava-green transition-colors"
@@ -303,7 +452,6 @@ export default function CartPage() {
             <div className="rounded-card bg-white border border-pava-brown/8 p-6 sticky top-24">
               {/* Free shipping progress */}
               {(() => {
-                const FREE_SHIPPING_THRESHOLD = 65000;
                 const qualifies = total >= FREE_SHIPPING_THRESHOLD;
                 const amountLeft = FREE_SHIPPING_THRESHOLD - total;
                 const progressPct = Math.min(100, Math.max(0, (total / FREE_SHIPPING_THRESHOLD) * 100));
@@ -332,32 +480,218 @@ export default function CartPage() {
                 );
               })()}
 
-              <h2 className="font-display text-xl font-bold text-pava-brown mb-6">
+              <h2 className="font-display text-xl font-bold text-pava-brown mb-5">
                 Resumen del pedido
               </h2>
 
-              {/* Line items */}
-              <div className="space-y-3 mb-5 pb-5 border-b border-pava-brown/10">
-                {items.map(({ product, quantity }) => (
-                  <div
-                    key={product.id}
-                    className="flex justify-between text-sm"
+              {/* Delivery method selector */}
+              <div className="mb-5">
+                <label className="block text-xs font-semibold text-pava-brown/80 mb-2">
+                  1. Método de entrega
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod("pickup")}
+                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                      deliveryMethod === "pickup"
+                        ? "border-pava-green bg-pava-green/8 shadow-sm"
+                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
+                    }`}
                   >
-                    <span className="text-pava-brown-mid/70 line-clamp-1 flex-1 mr-2">
-                      {product.name} x{quantity}
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
+                      <Store size={14} className={deliveryMethod === "pickup" ? "text-pava-green" : "text-pava-brown/60"} />
+                      <span>Retiro Local</span>
+                    </div>
+                    <span className="text-[11px] text-emerald-700 font-medium">Gratis (Catriel)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod("delivery")}
+                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                      deliveryMethod === "delivery"
+                        ? "border-pava-green bg-pava-green/8 shadow-sm"
+                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
+                      <Truck size={14} className={deliveryMethod === "delivery" ? "text-pava-green" : "text-pava-brown/60"} />
+                      <span>A Domicilio</span>
+                    </div>
+                    <span className="text-[11px] text-pava-brown/60 font-medium">
+                      {isFreeShipping ? <span className="text-emerald-700 font-semibold">Gratis</span> : formatPrice(standardShippingCost)}
                     </span>
-                    <span className="text-pava-brown font-medium shrink-0">
-                      {formatPrice(product.price * quantity)}
-                    </span>
+                  </button>
+                </div>
+
+                {/* Delivery Address fields */}
+                {deliveryMethod === "delivery" && (
+                  <div className="mt-3 space-y-2 p-3 rounded-xl bg-pava-cream-dark/60 border border-pava-brown/10 animate-in fade-in duration-200">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-pava-brown/70 mb-1">
+                        Dirección de Entrega *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Calle y altura (ej: Av. San Martín 450)"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        className="w-full rounded-control px-2.5 py-1.5 bg-white border border-pava-brown/15 text-pava-brown text-xs placeholder-pava-brown/40 focus:outline-none focus:border-pava-green"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Piso / Dpto / Barrio / Entre calles (opcional)"
+                        value={deliveryNotes}
+                        onChange={(e) => setDeliveryNotes(e.target.value)}
+                        className="w-full rounded-control px-2.5 py-1.5 bg-white border border-pava-brown/15 text-pava-brown text-xs placeholder-pava-brown/40 focus:outline-none focus:border-pava-green"
+                      />
+                    </div>
                   </div>
-                ))}
+                )}
+              </div>
+
+              {/* Payment method selector */}
+              <div className="mb-5">
+                <label className="block text-xs font-semibold text-pava-brown/80 mb-2">
+                  2. Forma de pago
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("transfer")}
+                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                      paymentMethod === "transfer"
+                        ? "border-emerald-600 bg-emerald-50 shadow-sm ring-1 ring-emerald-600"
+                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
+                      <Banknote size={14} className={paymentMethod === "transfer" ? "text-emerald-700" : "text-pava-brown/60"} />
+                      <span>Transferencia</span>
+                    </div>
+                    <span className="text-[10px] bg-emerald-600 text-white font-bold px-1.5 py-0.5 rounded">10% OFF</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod(deliveryMethod === "pickup" ? "cash" : "card")}
+                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                      paymentMethod === "card" || paymentMethod === "cash"
+                        ? "border-pava-green bg-pava-green/8 shadow-sm"
+                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
+                      <CreditCard size={14} className={paymentMethod === "card" || paymentMethod === "cash" ? "text-pava-green" : "text-pava-brown/60"} />
+                      <span>{deliveryMethod === "pickup" ? "Efectivo Local" : "Tarjeta"}</span>
+                    </div>
+                    <span className="text-[11px] text-pava-brown/60 font-medium">
+                      {deliveryMethod === "pickup" ? "10% OFF en local" : "Hasta 6 cuotas"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Coupon Code Section */}
+              <div className="mb-6">
+                <label className="block text-xs font-semibold text-pava-brown/80 mb-1.5">
+                  ¿Tenés un cupón de descuento?
+                </label>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <Tag size={13} className="text-emerald-600" />
+                      <span className="font-bold tracking-wider">{appliedCoupon.code}</span>
+                      <span className="text-[11px] bg-emerald-200/80 px-1.5 py-0.5 rounded text-emerald-900 font-semibold">
+                        {appliedCoupon.discountType === "percent"
+                          ? `-${appliedCoupon.discountValue}%`
+                          : `-${formatPrice(appliedCoupon.discountValue)}`}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="p-1 text-emerald-700 hover:text-emerald-900 transition-colors"
+                      title="Quitar cupón"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Código de cupón"
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value.toUpperCase());
+                        setCouponError(null);
+                      }}
+                      className="flex-1 rounded-control px-3 py-2 bg-pava-cream border border-pava-brown/15 text-pava-brown text-xs uppercase placeholder-pava-brown/40 focus:outline-none focus:border-pava-green"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!couponCode.trim() || validatingCoupon}
+                      className="px-3.5 py-2 rounded-control bg-pava-brown text-pava-cream hover:bg-pava-green text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1"
+                    >
+                      {validatingCoupon ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : (
+                        "Aplicar"
+                      )}
+                    </button>
+                  </form>
+                )}
+                {couponError && (
+                  <p className="text-[11px] text-red-600 mt-1 font-medium">{couponError}</p>
+                )}
+              </div>
+
+              {/* Breakdown */}
+              <div className="space-y-2 mb-4 pb-4 border-b border-pava-brown/10 text-xs">
+                <div className="flex justify-between text-pava-brown-mid/80">
+                  <span>Subtotal ({itemCount} {itemCount === 1 ? "ítem" : "ítems"})</span>
+                  <span className="font-semibold text-pava-brown">{formatPrice(total)}</span>
+                </div>
+
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-700 font-medium">
+                    <span className="flex items-center gap-1">
+                      <Tag size={12} /> Cupón ({appliedCoupon?.code})
+                    </span>
+                    <span className="font-bold">-{formatPrice(couponDiscount)}</span>
+                  </div>
+                )}
+
+                {paymentDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-700 font-medium">
+                    <span className="flex items-center gap-1">
+                      <Banknote size={12} /> 10% OFF {paymentMethod === "transfer" ? "Transferencia" : "Efectivo"}
+                    </span>
+                    <span className="font-bold">-{formatPrice(paymentDiscount)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-pava-brown-mid/80">
+                  <span>Envío ({deliveryMethod === "pickup" ? "Retiro en local" : "A domicilio"})</span>
+                  <span className="font-semibold text-pava-brown">
+                    {deliveryMethod === "pickup" || isFreeShipping ? (
+                      <span className="text-emerald-700">Gratis</span>
+                    ) : (
+                      formatPrice(shippingCost)
+                    )}
+                  </span>
+                </div>
               </div>
 
               {/* Total */}
               <div className="flex justify-between items-baseline mb-6">
-                <span className="text-pava-brown font-medium">Total</span>
+                <span className="text-pava-brown font-semibold text-sm">Total final</span>
                 <span className="font-display text-2xl font-bold text-pava-green">
-                  {formatPrice(total)}
+                  {formatPrice(finalTotal)}
                 </span>
               </div>
 
@@ -389,7 +723,7 @@ export default function CartPage() {
                   <input
                     id="customer-phone"
                     type="tel"
-                    placeholder="Ej: 11 2345-6789"
+                    placeholder="Ej: 299 123-4567"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors"
@@ -400,14 +734,14 @@ export default function CartPage() {
                     htmlFor="order-comment"
                     className="block text-xs font-medium text-pava-brown/70 mb-1"
                   >
-                    Comentario (opcional)
+                    Comentario o detalle (opcional)
                   </label>
                   <textarea
                     id="order-comment"
-                    placeholder="¿Alguna aclaración sobre tu pedido?"
+                    placeholder="¿Alguna aclaración sobre tu pedido o personalización?"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    rows={3}
+                    rows={2}
                     className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors resize-none"
                   />
                 </div>
@@ -416,8 +750,12 @@ export default function CartPage() {
               {/* WhatsApp CTA */}
               <button
                 onClick={handleWhatsApp}
-                disabled={!customerName.trim() || isSyncing}
-                className="flex items-center justify-center gap-2 w-full rounded-control py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  !customerName.trim() ||
+                  isSyncing ||
+                  (deliveryMethod === "delivery" && !deliveryAddress.trim())
+                }
+                className="flex items-center justify-center gap-2 w-full rounded-control py-4 bg-whatsapp text-white text-sm font-semibold border-2 border-whatsapp hover:bg-whatsapp-dark hover:border-whatsapp-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 <MessageCircle size={18} />
                 {isSyncing
@@ -429,11 +767,16 @@ export default function CartPage() {
                   Completá tu nombre para continuar
                 </p>
               )}
+              {!isSyncing && deliveryMethod === "delivery" && !deliveryAddress.trim() && customerName.trim() && (
+                <p className="text-xs text-amber-800 text-center mt-2 font-medium">
+                  Completá la dirección de entrega
+                </p>
+              )}
 
               <p className="text-xs text-pava-brown/40 text-center mt-4 leading-relaxed">
                 {isOpen === false
                   ? `Estamos cerrados — te respondemos ${getNextOpeningLabel(settings.hoursWeekday, settings.hoursSaturday)}.`
-                  : "Se abrirá WhatsApp con tu pedido pre-armado. Coordinamos la entrega o retiro en el local."}
+                  : "Se abrirá WhatsApp con tu pedido pre-armado y los datos de entrega para coordinar el pago."}
               </p>
             </div>
           </div>

@@ -1,12 +1,14 @@
-import { Star, ExternalLink } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Star, ExternalLink, MessageSquarePlus } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
-// Real reviews from Poné La Pava's Google Maps listing (5.0, 6 reseñas) —
-// only the two that actually left written text are quoted; the other four
-// left a star rating with no comment, and are shown as such below rather
-// than inventing text for them.
 const GOOGLE_PLACE_URL =
   "https://www.google.com/maps/place/Pon%C3%A9+la+pava/@-37.8839523,-67.8090713,14.62z/data=!4m8!3m7!1s0x960acb005520266d:0x9a1a68896ad3d5a9!8m2!3d-37.8827105!4d-67.7981453!9m1!1b1!16s%2Fg%2F11mlfl_28d";
+
+const GOOGLE_WRITE_REVIEW_URL =
+  "https://search.google.com/local/writereview?placeid=ChIJbSYgVQCrCpYRqdXTaploGpo";
 
 interface WrittenReview {
   name: string;
@@ -122,9 +124,6 @@ function ReviewChip({ name, time }: RatingOnlyReview) {
   );
 }
 
-// Two columns, each mixing the two real quotes with the rating-only
-// reviews in a different order so the columns don't feel identical —
-// still 100% real content, just interleaved differently.
 const COLUMN_A = [
   WRITTEN[0],
   RATING_ONLY[0],
@@ -175,17 +174,33 @@ function Column({
 }
 
 export default function GoogleReviews() {
+  const [filter, setFilter] = useState<"all" | "written" | "rating">("all");
+
+  const filteredColumnA =
+    filter === "written"
+      ? COLUMN_A.filter(isWritten)
+      : filter === "rating"
+        ? COLUMN_A.filter((r) => !isWritten(r))
+        : COLUMN_A;
+
+  const filteredColumnB =
+    filter === "written"
+      ? COLUMN_B.filter(isWritten)
+      : filter === "rating"
+        ? COLUMN_B.filter((r) => !isWritten(r))
+        : COLUMN_B;
+
   return (
     <section className="overflow-hidden bg-pava-cream-dark py-20 sm:py-24 lg:py-28 border-y border-pava-brown/10">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <ScrollReveal
           direction="up"
-          className="mb-12 flex flex-col items-center gap-4 text-center"
+          className="mb-10 flex flex-col items-center gap-4 text-center"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-white/80 px-4 py-1.5 backdrop-blur-sm shadow-xs">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-pava-brown">
-              Google Maps Rating · 5.0 ★
+              Google Maps Rating · 5.0 ★ (Catriel, Río Negro)
             </span>
           </div>
           <h2 className="font-display text-4xl font-bold leading-[0.95] tracking-tight text-pava-brown sm:text-5xl lg:text-6xl">
@@ -193,19 +208,67 @@ export default function GoogleReviews() {
             <br />
             <em className="not-italic text-pava-green">comparten la ronda.</em>
           </h2>
-          <a
-            href={GOOGLE_PLACE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group mt-2 inline-flex items-center gap-2.5 rounded-control border border-pava-brown/20 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-pava-brown shadow-xs transition-all hover:border-pava-green hover:text-pava-green hover:shadow-sm"
-          >
-            <Stars size={15} />
-            Ver perfil y reseñas en Google Maps
-            <ExternalLink
-              size={13}
-              className="transition-transform group-hover:translate-x-0.5"
-            />
-          </a>
+
+          {/* Action buttons */}
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={GOOGLE_PLACE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2.5 rounded-control border border-pava-brown/20 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-pava-brown shadow-xs transition-all hover:border-pava-green hover:text-pava-green hover:shadow-sm"
+            >
+              <Stars size={15} />
+              Ver reseñas en Google Maps
+              <ExternalLink
+                size={13}
+                className="transition-transform group-hover:translate-x-0.5"
+              />
+            </a>
+
+            <a
+              href={GOOGLE_WRITE_REVIEW_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-control bg-pava-green px-5 py-2.5 text-xs sm:text-sm font-bold text-pava-cream shadow-xs transition-all hover:bg-pava-green-light"
+            >
+              <MessageSquarePlus size={15} />
+              Dejanos tu opinión
+            </a>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+                filter === "all"
+                  ? "bg-pava-brown text-pava-cream border-pava-brown"
+                  : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
+              }`}
+            >
+              Todas (6)
+            </button>
+            <button
+              onClick={() => setFilter("written")}
+              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+                filter === "written"
+                  ? "bg-pava-brown text-pava-cream border-pava-brown"
+                  : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
+              }`}
+            >
+              Con opinión escrita (2)
+            </button>
+            <button
+              onClick={() => setFilter("rating")}
+              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+                filter === "rating"
+                  ? "bg-pava-brown text-pava-cream border-pava-brown"
+                  : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
+              }`}
+            >
+              5 estrellas (4)
+            </button>
+          </div>
         </ScrollReveal>
 
         <ScrollReveal direction="scale">
@@ -213,9 +276,9 @@ export default function GoogleReviews() {
             className="grid grid-cols-1 gap-5 sm:grid-cols-2"
             style={{ height: 560 }}
           >
-            <Column items={COLUMN_A} duration={38} />
+            <Column items={filteredColumnA} duration={38} />
             <div className="hidden sm:block">
-              <Column items={COLUMN_B} duration={46} />
+              <Column items={filteredColumnB} duration={46} />
             </div>
           </div>
         </ScrollReveal>

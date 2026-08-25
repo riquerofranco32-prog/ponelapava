@@ -120,16 +120,29 @@ export default function QuickViewModal({
             {product.name}
           </h2>
 
-          <span className="font-display mb-4 text-xl font-bold text-pava-green">
-            {formatPrice(product.price)}
-          </span>
+          {/* Pricing & Transfer Discount */}
+          <div className="mb-4">
+            <div className="flex items-baseline gap-2">
+              <span className="font-display text-2xl font-bold text-pava-green">
+                {formatPrice(product.price)}
+              </span>
+            </div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="rounded-chip bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                10% OFF: {formatPrice(Math.round(product.price * 0.9))} efvo/transf
+              </span>
+              <span className="text-[11px] text-pava-brown/60">
+                3 cuotas de {formatPrice(Math.round(product.price / 3))}
+              </span>
+            </div>
+          </div>
 
-          <p className="mb-6 text-sm leading-relaxed text-pava-brown-mid/75">
-            {product.longDescription ?? product.description}
+          <p className="mb-6 text-xs sm:text-sm leading-relaxed text-pava-brown-mid/75 line-clamp-3">
+            {product.description}
           </p>
 
           {(product.brand || product.weight) && (
-            <div className="mb-6 flex gap-6 border-t border-pava-brown/8 pt-4 text-xs text-pava-brown-mid/70">
+            <div className="mb-6 flex gap-6 border-t border-pava-brown/8 pt-3 text-xs text-pava-brown-mid/70">
               {product.brand && (
                 <span>
                   <span className="block text-[10px] uppercase tracking-wide text-pava-brown-mid/50">
@@ -149,7 +162,7 @@ export default function QuickViewModal({
             </div>
           )}
 
-          <div className="mt-auto flex flex-col gap-3">
+          <div className="mt-auto flex flex-col gap-2.5">
             <AddToCartButton
               product={product}
               disabled={isOutOfStock}
@@ -157,9 +170,10 @@ export default function QuickViewModal({
             />
             <Link
               href={`/producto/${product.id}`}
-              className="text-center text-xs font-medium text-pava-brown-mid/60 underline underline-offset-2 transition-colors hover:text-pava-green"
+              onClick={onClose}
+              className="text-center text-xs font-semibold text-pava-brown/60 hover:text-pava-green transition-colors py-1"
             >
-              Ver ficha completa
+              Ver detalles completos del producto →
             </Link>
           </div>
         </div>

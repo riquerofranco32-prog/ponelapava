@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingBag } from "lucide-react";
+import { Menu, X, ShoppingBag, Search } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
 import { InstagramIcon } from "@/components/ui/icons";
@@ -13,6 +13,7 @@ import { INSTAGRAM_URL, INSTAGRAM_HANDLE } from "@/lib/site";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import TopAnnouncementBar from "@/components/layout/TopAnnouncementBar";
+import StoreSearchModal from "@/components/layout/StoreSearchModal";
 
 const mainLinks = NAV_LINKS.filter((link) => link.href !== "/catalogo");
 
@@ -26,6 +27,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const isScrolled = hasHero ? scrolled : true;
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { itemCount, toggleDrawer } = useCart();
 
   useEffect(() => {
@@ -45,8 +47,31 @@ export default function Navbar() {
     };
   }, [isMobileOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.key === "k" && (e.metaKey || e.ctrlKey)) ||
+        (e.key === "/" &&
+          !(
+            e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement ||
+            (e.target instanceof HTMLElement && e.target.isContentEditable)
+          ))
+      ) {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <>
+      <StoreSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
@@ -145,6 +170,36 @@ export default function Navbar() {
 
             {/* Right actions */}
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Search trigger — desktop */}
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                className={cn(
+                  "hidden lg:flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 border",
+                  isScrolled
+                    ? "bg-pava-brown/5 border-pava-brown/10 text-pava-brown/70 hover:bg-pava-brown/10 hover:text-pava-green"
+                    : "bg-pava-cream/10 border-pava-cream/20 text-pava-cream/80 hover:bg-pava-cream/20 hover:text-pava-cream",
+                )}
+                aria-label="Buscar productos (Ctrl+K)"
+              >
+                <Search size={14} />
+                <span>Buscar</span>
+                <kbd className="text-[10px] font-mono px-1 py-0.5 rounded bg-pava-brown/10 text-inherit opacity-75">⌘K</kbd>
+              </button>
+
+              {/* Search trigger — mobile */}
+              <button
+                onClick={() => setIsSearchOpen(true)}
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center transition-colors duration-200 lg:hidden",
+                  isScrolled
+                    ? "text-pava-brown/70 hover:text-pava-green"
+                    : "text-pava-cream/80 hover:text-pava-cream",
+                )}
+                aria-label="Buscar productos"
+              >
+                <Search size={20} strokeWidth={1.75} />
+              </button>
+
               {/* Instagram — desktop only */}
               <a
                 href={INSTAGRAM_URL}
@@ -263,9 +318,28 @@ export default function Navbar() {
             </button>
           </div>
 
+          {/* Quick search button */}
+          <div className="px-6 pt-4">
+            <button
+              onClick={() => {
+                setIsMobileOpen(false);
+                setIsSearchOpen(true);
+              }}
+              className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-pava-cream-dark border border-pava-brown/10 text-pava-brown/60 text-sm font-medium hover:text-pava-green hover:border-pava-green/30 transition-all"
+            >
+              <span className="flex items-center gap-2">
+                <Search size={16} className="text-pava-green" />
+                <span>Buscar productos...</span>
+              </span>
+              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 bg-pava-brown/5 rounded text-pava-brown/40">
+                Buscar
+              </span>
+            </button>
+          </div>
+
           {/* Nav links */}
           <nav
-            className="flex-1 flex flex-col px-6 pt-6 gap-0"
+            className="flex-1 flex flex-col px-6 pt-2 gap-0"
             role="navigation"
             aria-label="Menú mobile"
           >

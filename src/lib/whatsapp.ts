@@ -7,7 +7,19 @@ export const WHATSAPP_BASE_URL = "https://wa.me";
  * Generates a formatted WhatsApp message for an order.
  */
 export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
-  const { customerName, items, total, comment } = data;
+  const {
+    customerName,
+    customerPhone,
+    items,
+    subtotal,
+    discount,
+    couponCode,
+    shippingCost,
+    deliveryMethod,
+    deliveryAddress,
+    total,
+    comment,
+  } = data;
 
   const itemLines = items
     .map(
@@ -17,16 +29,34 @@ export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
     .join("\n");
 
   const message = [
-    `Hola Poné La Pava 👋`,
+    `Hola Poné La Pava 👋🧉`,
     ``,
     `Quiero realizar el siguiente pedido:`,
     ``,
     itemLines,
     ``,
-    `*Total: ${formatPrice(total)}*`,
+    couponCode && discount
+      ? `*Cupón ${couponCode}:* -${formatPrice(discount)}`
+      : null,
+    data.paymentMethod === "transfer"
+      ? `*Pago:* 💳 Transferencia Bancaria (10% OFF)`
+      : data.paymentMethod === "cash"
+        ? `*Pago:* 💵 Efectivo en Local (10% OFF)`
+        : data.paymentMethod === "card"
+          ? `*Pago:* 💳 Tarjeta de Crédito / Débito`
+          : null,
+    deliveryMethod === "pickup"
+      ? `*Entrega:* 🏪 Retiro en Local (Catriel)`
+      : deliveryMethod === "delivery"
+        ? `*Entrega:* 🛵 Envío a Domicilio ${shippingCost ? `(${formatPrice(shippingCost)})` : "(Gratis)"}`
+        : null,
+    deliveryAddress ? `*Dirección:* ${deliveryAddress}` : null,
     ``,
-    `*Nombre:* ${customerName}`,
-    comment ? `*Comentario:* ${comment}` : null,
+    `*TOTAL: ${formatPrice(total)}*`,
+    ``,
+    `*Cliente:* ${customerName}`,
+    customerPhone ? `*Teléfono:* ${customerPhone}` : null,
+    comment ? `*Nota/Comentario:* ${comment}` : null,
   ]
     .filter((line) => line !== null)
     .join("\n");

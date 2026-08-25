@@ -2,28 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  LogOut,
-  type LucideIcon,
-} from "lucide-react";
+import { usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight, ExternalLink, LogOut } from "lucide-react";
 import { useAdminUserEmail } from "@/context/AdminUserContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import PendingOrdersBadge from "@/components/admin/PendingOrdersBadge";
+import { type AdminNavItem, ADMIN_NAV_ITEMS } from "@/lib/admin-nav";
 
-export interface AdminNavItem {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-}
+export type { AdminNavItem };
 
 interface AdminShellProps {
   children: React.ReactNode;
-  navItems: AdminNavItem[];
-  activeSection: string;
-  onSectionChange: (id: string) => void;
+  navItems?: AdminNavItem[];
 }
 
 const SIDEBAR_COLLAPSED_KEY = "pava-admin-sidebar-collapsed";
@@ -33,14 +23,15 @@ const MOBILE_TAB_COUNT = 4;
 
 export default function AdminShell({
   children,
-  navItems,
-  activeSection,
-  onSectionChange,
+  navItems = ADMIN_NAV_ITEMS,
 }: AdminShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [clockTime, setClockTime] = useState<string | null>(null);
   const email = useAdminUserEmail();
+  const pathname = usePathname();
+  const activeItem =
+    navItems.find((item) => pathname?.startsWith(item.href)) ?? navItems[0];
 
   useEffect(() => {
     function tick() {
@@ -74,11 +65,6 @@ export default function AdminShell({
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
-
-  function selectSection(id: string) {
-    onSectionChange(id);
-    setMobileOpen(false);
-  }
 
   const sidebarWidth = collapsed ? "64px" : "232px";
 
@@ -183,19 +169,20 @@ export default function AdminShell({
         }}
       >
         {navItems.map((item) => {
-          const isActive = item.id === activeSection;
+          const isActive = item.href === activeItem.href;
           return (
-            <button
-              key={item.id}
-              onClick={() => selectSection(item.id)}
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
               aria-current={isActive ? "page" : undefined}
               className="admin-nav-item"
               style={{ padding: "12px 14px" }}
             >
               <item.icon size={16} />
               <span style={{ flex: 1 }}>{item.label}</span>
-              {item.id === "pedidos" && <PendingOrdersBadge />}
-            </button>
+              {item.href === "/admin/pedidos" && <PendingOrdersBadge />}
+            </Link>
           );
         })}
         <Link
@@ -250,11 +237,11 @@ export default function AdminShell({
         }}
       >
         {navItems.slice(0, MOBILE_TAB_COUNT).map((item) => {
-          const isActive = item.id === activeSection;
+          const isActive = item.href === activeItem.href;
           return (
-            <button
-              key={item.id}
-              onClick={() => selectSection(item.id)}
+            <Link
+              key={item.href}
+              href={item.href}
               aria-current={isActive ? "page" : undefined}
               style={{
                 flex: 1,
@@ -272,12 +259,14 @@ export default function AdminShell({
             >
               <span style={{ position: "relative", display: "flex" }}>
                 <item.icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
-                {item.id === "pedidos" && <PendingOrdersBadge collapsed />}
+                {item.href === "/admin/pedidos" && (
+                  <PendingOrdersBadge collapsed />
+                )}
               </span>
               <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500 }}>
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -366,11 +355,11 @@ export default function AdminShell({
           }}
         >
           {navItems.map((item) => {
-            const isActive = item.id === activeSection;
+            const isActive = item.href === activeItem.href;
             return (
-              <button
-                key={item.id}
-                onClick={() => onSectionChange(item.id)}
+              <Link
+                key={item.href}
+                href={item.href}
                 title={collapsed ? item.label : undefined}
                 aria-current={isActive ? "page" : undefined}
                 className="admin-nav-item"
@@ -382,14 +371,16 @@ export default function AdminShell({
               >
                 <item.icon size={16} />
                 {collapsed ? (
-                  item.id === "pedidos" && <PendingOrdersBadge collapsed />
+                  item.href === "/admin/pedidos" && (
+                    <PendingOrdersBadge collapsed />
+                  )
                 ) : (
                   <>
                     <span style={{ flex: 1 }}>{item.label}</span>
-                    {item.id === "pedidos" && <PendingOrdersBadge />}
+                    {item.href === "/admin/pedidos" && <PendingOrdersBadge />}
                   </>
                 )}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -469,7 +460,19 @@ export default function AdminShell({
         }}
         className="lg:pt-8 lg:pb-8 lg:px-8"
       >
-        <div key={activeSection} className="admin-section-in">
+        <div key={pathname} className="admin-section-in">
+          <h1
+            style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: 22,
+              fontWeight: 700,
+              marginBottom: 24,
+              color: "var(--dash-text)",
+              textTransform: "capitalize",
+            }}
+          >
+            {activeItem.label}
+          </h1>
           {children}
         </div>
       </main>

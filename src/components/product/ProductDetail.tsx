@@ -378,7 +378,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Retiro gratis en el local</span>
-                  <span className="text-pava-brown-mid/70">Villa Mercedes, San Luis</span>
+                  <span className="text-pava-brown-mid/70">Av. San Martín 374, Catriel (Río Negro)</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -387,7 +387,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Medios de pago</span>
-                  <span className="text-pava-brown-mid/70">Tarjeta, transferencia y efectivo</span>
+                  <span className="text-pava-brown-mid/70">Transferencia (10% OFF), tarjeta y efectivo</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -395,8 +395,8 @@ export default function ProductDetail({
                   <ShieldCheck size={17} />
                 </div>
                 <div className="text-xs">
-                  <span className="font-bold text-pava-brown block">Garantía de calidad</span>
-                  <span className="text-pava-brown-mid/70">Productos 100% originales</span>
+                  <span className="font-bold text-pava-brown block">Garantía y Asesoramiento</span>
+                  <span className="text-pava-brown-mid/70">Soporte directo por WhatsApp para curado</span>
                 </div>
               </div>
             </div>
@@ -429,6 +429,26 @@ export default function ProductDetail({
           </div>
         )}
       </div>
+
+      {/* Sticky Mobile Buy Bar */}
+      {!isOutOfStock && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-pava-cream/95 backdrop-blur-md border-t border-pava-brown/15 p-3.5 shadow-2xl flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-pava-brown truncate">{product.name}</p>
+            <p className="font-display text-base font-bold text-pava-green">{formatPrice(product.price)}</p>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            disabled={added}
+            className={`flex items-center justify-center gap-2 rounded-control px-5 py-3 text-xs font-bold uppercase tracking-wider text-pava-cream transition-all duration-200 active:scale-95 cursor-pointer shrink-0 ${
+              added ? "bg-pava-green" : "bg-pava-green hover:bg-pava-green-light shadow-md shadow-pava-green/20"
+            }`}
+          >
+            <ShoppingBag size={15} />
+            {added ? "¡Agregado!" : "Agregar"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

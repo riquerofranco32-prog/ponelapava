@@ -49,9 +49,112 @@ function getTempState(temp: number): TempState {
   };
 }
 
-export default function WaterTempSimulator() {
+export default function WaterTempSimulator({ embedded = false }: { embedded?: boolean }) {
   const [temp, setTemp] = useState(78);
   const state = getTempState(temp);
+
+  const cardContent = (
+    <div className="max-w-3xl mx-auto">
+      <div className="relative rounded-card border border-pava-brown/15 bg-white p-7 sm:p-12 shadow-xl backdrop-blur-md overflow-hidden">
+        <BorderBeam
+          size={200}
+          duration={10}
+          borderWidth={1.5}
+          colorFrom={state.color}
+          colorTo="transparent"
+        />
+
+        {/* Temperature Big Display */}
+        <div className="flex flex-col items-center text-center mb-8">
+          <span className="text-4xl sm:text-5xl mb-3 animate-float-slow">
+            {state.icon}
+          </span>
+
+          <div className="flex items-baseline justify-center gap-1">
+            <span
+              className="font-display text-6xl sm:text-7xl font-extrabold tracking-tight transition-colors duration-300"
+              style={{ color: state.color }}
+            >
+              {temp}
+            </span>
+            <span className="font-display text-3xl sm:text-4xl font-bold text-pava-brown/60">
+              °C
+            </span>
+          </div>
+
+          <div
+            className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider transition-all duration-300"
+            style={{ background: state.badgeBg, color: state.color }}
+          >
+            {state.status === "perfect" && <Sparkles size={13} />}
+            {state.status === "cold" && <Droplets size={13} />}
+            {state.status === "hot" && <AlertTriangle size={13} />}
+            <span>{state.label}</span>
+          </div>
+        </div>
+
+        {/* Range Slider */}
+        <div className="mb-10 max-w-lg mx-auto">
+          <div className="relative flex items-center">
+            <input
+              type="range"
+              min={60}
+              max={95}
+              step={1}
+              value={temp}
+              onChange={(e) => setTemp(Number(e.target.value))}
+              aria-label="Temperatura del agua en grados Celsius"
+              className="w-full h-3 bg-pava-cream-dark rounded-lg appearance-none cursor-pointer accent-pava-green focus:outline-none"
+            />
+          </div>
+
+          {/* Slider scale markers */}
+          <div className="flex justify-between items-center text-[11px] font-bold text-pava-brown-mid/60 mt-3 px-1">
+            <span className="hover:text-pava-brown cursor-pointer" onClick={() => setTemp(65)}>65°C (Tibia)</span>
+            <span
+              className="hover:text-pava-gold-deep cursor-pointer font-extrabold text-pava-gold-deep flex items-center gap-1"
+              onClick={() => setTemp(78)}
+            >
+              ★ 75°–80°C (Ideal)
+            </span>
+            <span className="hover:text-pava-brown cursor-pointer" onClick={() => setTemp(90)}>90°C+ (Hirviendo)</span>
+          </div>
+        </div>
+
+        {/* Explanation Box */}
+        <div
+          className="rounded-control border p-5 sm:p-6 transition-all duration-300"
+          style={{
+            borderColor: `${state.color}40`,
+            backgroundColor: `${state.color}08`,
+          }}
+        >
+          <div className="flex items-center gap-2 font-display text-lg font-bold text-pava-brown mb-2">
+            <span>{state.summary}</span>
+          </div>
+          <p className="text-xs sm:text-sm leading-relaxed text-pava-brown-mid/85 font-medium">
+            {state.explanation}
+          </p>
+        </div>
+
+        {/* Pro Tips Footer */}
+        <div className="mt-8 pt-6 border-t border-pava-brown/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-pava-brown-mid/75">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 size={15} className="text-pava-green shrink-0 mt-0.5" />
+            <span><strong>Para yerbas uruguayas (Canarias/Sara):</strong> 74°C a 78°C para abrir la hoja sin compactar el polvillo.</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <CheckCircle2 size={15} className="text-pava-green shrink-0 mt-0.5" />
+            <span><strong>Para yerbas argentinas (Playadito/Amanda):</strong> 78°C a 82°C para extraer la madera y aromas serranos.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return cardContent;
+  }
 
   return (
     <section className="relative overflow-hidden bg-pava-cream-dark/60 py-24 sm:py-28 lg:py-36 border-b border-pava-brown/10">
@@ -75,102 +178,8 @@ export default function WaterTempSimulator() {
           </p>
         </ScrollReveal>
 
-        {/* Interactive Gauge Card */}
-        <ScrollReveal direction="scale" delay={100} className="max-w-3xl mx-auto">
-          <div className="relative rounded-card border border-pava-brown/15 bg-white p-7 sm:p-12 shadow-xl backdrop-blur-md overflow-hidden">
-            <BorderBeam
-              size={200}
-              duration={10}
-              borderWidth={1.5}
-              colorFrom={state.color}
-              colorTo="transparent"
-            />
-
-            {/* Temperature Big Display */}
-            <div className="flex flex-col items-center text-center mb-8">
-              <span className="text-4xl sm:text-5xl mb-3 animate-float-slow">
-                {state.icon}
-              </span>
-
-              <div className="flex items-baseline justify-center gap-1">
-                <span
-                  className="font-display text-6xl sm:text-7xl font-extrabold tracking-tight transition-colors duration-300"
-                  style={{ color: state.color }}
-                >
-                  {temp}
-                </span>
-                <span className="font-display text-3xl sm:text-4xl font-bold text-pava-brown/60">
-                  °C
-                </span>
-              </div>
-
-              <div
-                className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-1 text-xs font-bold uppercase tracking-wider transition-all duration-300"
-                style={{ background: state.badgeBg, color: state.color }}
-              >
-                {state.status === "perfect" && <Sparkles size={13} />}
-                {state.status === "cold" && <Droplets size={13} />}
-                {state.status === "hot" && <AlertTriangle size={13} />}
-                <span>{state.label}</span>
-              </div>
-            </div>
-
-            {/* Range Slider */}
-            <div className="mb-10 max-w-lg mx-auto">
-              <div className="relative flex items-center">
-                <input
-                  type="range"
-                  min={60}
-                  max={95}
-                  step={1}
-                  value={temp}
-                  onChange={(e) => setTemp(Number(e.target.value))}
-                  aria-label="Temperatura del agua en grados Celsius"
-                  className="w-full h-3 bg-pava-cream-dark rounded-lg appearance-none cursor-pointer accent-pava-green focus:outline-none"
-                />
-              </div>
-
-              {/* Slider scale markers */}
-              <div className="flex justify-between items-center text-[11px] font-bold text-pava-brown-mid/60 mt-3 px-1">
-                <span className="hover:text-pava-brown cursor-pointer" onClick={() => setTemp(65)}>65°C (Tibia)</span>
-                <span
-                  className="hover:text-pava-gold-deep cursor-pointer font-extrabold text-pava-gold-deep flex items-center gap-1"
-                  onClick={() => setTemp(78)}
-                >
-                  ★ 75°–80°C (Ideal)
-                </span>
-                <span className="hover:text-pava-brown cursor-pointer" onClick={() => setTemp(90)}>90°C+ (Hirviendo)</span>
-              </div>
-            </div>
-
-            {/* Explanation Box */}
-            <div
-              className="rounded-control border p-5 sm:p-6 transition-all duration-300"
-              style={{
-                borderColor: `${state.color}40`,
-                backgroundColor: `${state.color}08`,
-              }}
-            >
-              <div className="flex items-center gap-2 font-display text-lg font-bold text-pava-brown mb-2">
-                <span>{state.summary}</span>
-              </div>
-              <p className="text-xs sm:text-sm leading-relaxed text-pava-brown-mid/85 font-medium">
-                {state.explanation}
-              </p>
-            </div>
-
-            {/* Pro Tips Footer */}
-            <div className="mt-8 pt-6 border-t border-pava-brown/10 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-pava-brown-mid/75">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 size={15} className="text-pava-green shrink-0 mt-0.5" />
-                <span><strong>Para yerbas uruguayas (Canarias/Sara):</strong> 74°C a 78°C para abrir la hoja sin compactar el polvillo.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 size={15} className="text-pava-green shrink-0 mt-0.5" />
-                <span><strong>Para yerbas argentinas (Playadito/Amanda):</strong> 78°C a 82°C para extraer la madera y aromas serranos.</span>
-              </div>
-            </div>
-          </div>
+        <ScrollReveal direction="scale" delay={100}>
+          {cardContent}
         </ScrollReveal>
       </div>
     </section>

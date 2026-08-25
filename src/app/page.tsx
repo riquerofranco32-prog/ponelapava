@@ -5,11 +5,7 @@ import FeaturedProducts from "@/components/home/FeaturedProducts";
 import CustomKitBuilder from "@/components/home/CustomKitBuilder";
 import Categories from "@/components/home/Categories";
 import BrandsSection from "@/components/home/BrandsSection";
-import MateAnatomy from "@/components/home/MateAnatomy";
-import RitualMastery from "@/components/home/RitualMastery";
-import MateMatcher from "@/components/home/MateMatcher";
-import WaterTempSimulator from "@/components/home/WaterTempSimulator";
-import CuringGuide from "@/components/home/CuringGuide";
+import MateroExperienceHub from "@/components/home/MateroExperienceHub";
 import AboutSection from "@/components/home/AboutSection";
 import LocalSection from "@/components/home/LocalSection";
 import GoogleReviews from "@/components/home/GoogleReviews";
@@ -39,13 +35,9 @@ export default function HomePage() {
       <FeaturedProducts />
       <CustomKitBuilder />
       <AboutSection />
-      <MateAnatomy />
-      <RitualMastery />
       <Categories />
       <BrandsSection />
-      <MateMatcher />
-      <WaterTempSimulator />
-      <CuringGuide />
+      <MateroExperienceHub />
       <LocalSection />
       <GoogleReviews />
       <FAQSection />

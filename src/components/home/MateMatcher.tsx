@@ -85,7 +85,7 @@ const QUESTIONS: QuestionConfig[] = [
   },
 ];
 
-export default function MateMatcher() {
+export default function MateMatcher({ embedded = false }: { embedded?: boolean }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AnswerKey[]>([]);
 
@@ -113,6 +113,157 @@ export default function MateMatcher() {
     setStep(0);
   }
 
+  const content = (
+    <div className="relative overflow-hidden rounded-card border border-pava-brown/15 bg-white p-6 shadow-sm sm:p-10 max-w-3xl mx-auto">
+      {/* Progress dots & bar */}
+      <div className="mb-8 flex items-center justify-between border-b border-pava-brown/10 pb-5">
+        <div className="flex items-center gap-2">
+          {QUESTIONS.map((_, i) => (
+            <span
+              key={i}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                i === step
+                  ? "w-8 bg-pava-terracotta"
+                  : i < step
+                    ? "w-2 bg-pava-green"
+                    : "w-2 bg-pava-brown/15"
+              }`}
+            />
+          ))}
+        </div>
+        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-pava-brown-mid/80">
+          {isDone ? "Resultado" : `Paso ${step + 1} de ${QUESTIONS.length}`}
+        </span>
+      </div>
+
+      {/* Question / Result container */}
+      <div className="relative min-h-[280px] overflow-hidden">
+        {/* Question slider */}
+        {QUESTIONS.map((q, qIndex) => (
+          <div
+            key={q.question}
+            className={`transition-all duration-300 ${
+              qIndex === step && !isDone
+                ? "opacity-100 translate-x-0 relative"
+                : "opacity-0 absolute inset-0 pointer-events-none translate-x-12"
+            }`}
+            aria-hidden={qIndex !== step || isDone}
+          >
+            {qIndex === step && !isDone && (
+              <>
+                <h3 className="font-display mb-2 text-xl font-bold text-pava-brown sm:text-2xl text-center">
+                  {q.question}
+                </h3>
+                <p className="text-xs text-pava-brown-mid/70 text-center mb-6">
+                  {q.subtitle}
+                </p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {q.options.map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => selectAnswer(opt.key)}
+                      className="group flex flex-col items-start rounded-control border-2 border-pava-brown/15 bg-white p-4 text-left transition-all duration-200 hover:border-pava-green hover:bg-pava-cream/40 hover:shadow-md cursor-pointer active:scale-[0.98]"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">{opt.icon}</span>
+                        <span className="font-display font-bold text-pava-brown group-hover:text-pava-green text-sm">
+                          {opt.label}
+                        </span>
+                      </div>
+                      <span className="text-xs text-pava-brown-mid/70 leading-relaxed">
+                        {opt.desc}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+
+        {/* Result pane */}
+        <div
+          className="w-full shrink-0 text-center"
+          aria-hidden={!isDone}
+        >
+          {isDone && result && (
+            <div className="flex flex-col items-center py-2">
+              <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
+                <Sparkles size={28} />
+              </span>
+              <span className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-pava-gold-deep">
+                Recomendación para vos
+              </span>
+              <h3 className="font-display mb-3 text-2xl font-bold text-pava-brown sm:text-3xl">
+                ¡Tu combinación ideal!
+              </h3>
+              <div className="relative overflow-hidden mb-8 max-w-md rounded-control border border-pava-green/30 bg-pava-cream-dark/50 p-5 shadow-sm">
+                <BorderBeam
+                  size={160}
+                  duration={8}
+                  borderWidth={1.5}
+                  colorFrom="#26402e"
+                  colorTo="#c7a67a"
+                />
+                <p className="font-bold text-pava-brown text-base">
+                  {result.title}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <Link
+                  href={query}
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-control bg-pava-green px-8 py-4 text-sm font-bold tracking-wide text-pava-cream shadow-lg shadow-pava-green/20 transition-all duration-200 hover:bg-pava-green-light active:scale-[0.98]"
+                >
+                  Explorar productos sugeridos
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <a
+                  href={`https://wa.me/5492994119330?text=${encodeURIComponent(
+                    `¡Hola Poné La Pava! Hice el test en la web y me recomendó: ${result.title}. ¿Qué opciones tienen disponibles?`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-pava-brown/20 bg-white px-6 py-4 text-sm font-semibold tracking-wide text-pava-brown transition-all duration-200 hover:border-whatsapp hover:text-whatsapp active:scale-[0.98]"
+                >
+                  Consultar por WhatsApp
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="mt-8 flex items-center justify-between border-t border-pava-brown/10 pt-4 text-xs font-semibold uppercase tracking-[0.14em]">
+        {step > 0 && !isDone ? (
+          <button
+            type="button"
+            onClick={goBack}
+            className="inline-flex items-center gap-1.5 text-pava-brown-mid transition-colors hover:text-pava-brown"
+          >
+            <ArrowLeft size={14} aria-hidden="true" /> Volver
+          </button>
+        ) : (
+          <div />
+        )}
+        {step > 0 && (
+          <button
+            type="button"
+            onClick={restart}
+            className="inline-flex items-center gap-1.5 text-pava-brown-mid/75 transition-colors hover:text-pava-brown"
+          >
+            <RotateCcw size={13} /> Reiniciar test
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
   return (
     <section className="bg-pava-cream py-24 sm:py-28 lg:py-32">
       <div className="mx-auto max-w-3xl px-5 sm:px-8 lg:px-10">
@@ -134,151 +285,9 @@ export default function MateMatcher() {
         </ScrollReveal>
 
         <ScrollReveal direction="up" delay={100}>
-          <div className="relative overflow-hidden rounded-card border border-pava-brown/15 bg-white p-6 shadow-sm sm:p-10">
-            {/* Progress dots & bar */}
-            <div className="mb-8 flex items-center justify-between border-b border-pava-brown/10 pb-5">
-              <div className="flex items-center gap-2">
-                {QUESTIONS.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      step === i
-                        ? "w-8 bg-pava-green"
-                        : step > i
-                          ? "w-2 bg-pava-gold"
-                          : "w-2 bg-pava-brown/15"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-pava-gold-deep">
-                {isDone ? "¡Listo!" : `Paso ${step + 1} de ${QUESTIONS.length}`}
-              </span>
-            </div>
-
-            {/* Sliding panes */}
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{
-                transform: `translateX(-${Math.min(step, QUESTIONS.length) * 100}%)`,
-              }}
-            >
-              {QUESTIONS.map((q, i) => (
-                <div
-                  key={q.question}
-                  className="w-full shrink-0 text-center"
-                  aria-hidden={step !== i}
-                  inert={step !== i}
-                >
-                  <h3 className="font-display text-2xl font-bold text-pava-brown sm:text-3xl">
-                    {q.question}
-                  </h3>
-                  <p className="mb-8 mt-2 text-xs text-pava-brown-mid/70 sm:text-sm">
-                    {q.subtitle}
-                  </p>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {q.options.map((opt) => (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => selectAnswer(opt.key)}
-                        className="group flex flex-col items-center rounded-control border-2 border-pava-brown/15 bg-white p-5 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-pava-green hover:bg-pava-cream-dark/50 active:scale-[0.98]"
-                      >
-                        <span className="mb-3 text-3xl transition-transform duration-200 group-hover:scale-110">
-                          {opt.icon}
-                        </span>
-                        <span className="font-display text-base font-bold text-pava-brown group-hover:text-pava-green">
-                          {opt.label}
-                        </span>
-                        <span className="mt-1 text-xs text-pava-brown-mid/70">
-                          {opt.desc}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* Result pane */}
-              <div
-                className="w-full shrink-0 text-center"
-                aria-hidden={!isDone}
-              >
-                {isDone && result && (
-                  <div className="flex flex-col items-center py-2">
-                    <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-pava-green/10 text-pava-green">
-                      <Sparkles size={28} />
-                    </span>
-                    <span className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-pava-gold-deep">
-                      Recomendación para vos
-                    </span>
-                    <h3 className="font-display mb-3 text-2xl font-bold text-pava-brown sm:text-3xl">
-                      ¡Tu combinación ideal!
-                    </h3>
-                    <div className="relative overflow-hidden mb-8 max-w-md rounded-control border border-pava-green/30 bg-pava-cream-dark/50 p-5 shadow-sm">
-                      <BorderBeam
-                        size={160}
-                        duration={8}
-                        borderWidth={1.5}
-                        colorFrom="#26402e"
-                        colorTo="#c7a67a"
-                      />
-                      <p className="font-bold text-pava-brown text-base">
-                        {result.title}
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <Link
-                        href={query}
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-control bg-pava-green px-8 py-4 text-sm font-bold tracking-wide text-pava-cream shadow-lg shadow-pava-green/20 transition-all duration-200 hover:bg-pava-green-light active:scale-[0.98]"
-                      >
-                        Explorar productos sugeridos
-                        <ArrowRight size={16} aria-hidden="true" />
-                      </Link>
-                      <a
-                        href={`https://wa.me/5492994119330?text=${encodeURIComponent(
-                          `¡Hola Poné La Pava! Hice el test en la web y me recomendó: ${result.title}. ¿Qué opciones tienen disponibles?`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-control border border-pava-brown/20 bg-white px-6 py-4 text-sm font-semibold tracking-wide text-pava-brown transition-all duration-200 hover:border-whatsapp hover:text-whatsapp active:scale-[0.98]"
-                      >
-                        Consultar por WhatsApp
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="mt-8 flex items-center justify-between border-t border-pava-brown/10 pt-4 text-xs font-semibold uppercase tracking-[0.14em]">
-              {step > 0 && !isDone ? (
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="inline-flex items-center gap-1.5 text-pava-brown-mid transition-colors hover:text-pava-brown"
-                >
-                  <ArrowLeft size={14} aria-hidden="true" /> Volver
-                </button>
-              ) : (
-                <div />
-              )}
-              {step > 0 && (
-                <button
-                  type="button"
-                  onClick={restart}
-                  className="inline-flex items-center gap-1.5 text-pava-brown-mid/75 transition-colors hover:text-pava-brown"
-                >
-                  <RotateCcw size={13} /> Reiniciar test
-                </button>
-              )}
-            </div>
-          </div>
+          {content}
         </ScrollReveal>
       </div>
     </section>
   );
 }
-

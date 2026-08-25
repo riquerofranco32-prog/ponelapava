@@ -114,9 +114,113 @@ const GUIDES: MaterialGuide[] = [
   },
 ];
 
-export default function CuringGuide() {
+export default function CuringGuide({ embedded = false }: { embedded?: boolean }) {
   const [selectedId, setSelectedId] = useState<string>("calabaza");
   const currentGuide = GUIDES.find((g) => g.id === selectedId) ?? GUIDES[0];
+
+  const content = (
+    <div>
+      {/* Material Tabs */}
+      <div className="mb-8 flex flex-wrap justify-center gap-3">
+        {GUIDES.map((guide) => {
+          const isSelected = guide.id === selectedId;
+          return (
+            <button
+              key={guide.id}
+              type="button"
+              onClick={() => setSelectedId(guide.id)}
+              className={`flex items-center gap-3 rounded-control border-2 px-5 py-3 text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer ${
+                isSelected
+                  ? "border-pava-green bg-pava-green text-pava-cream shadow-md shadow-pava-green/20 scale-[1.02]"
+                  : "border-pava-brown/15 bg-white text-pava-brown hover:border-pava-green/50 hover:bg-pava-cream-dark/30"
+              }`}
+            >
+              <span className="text-lg sm:text-xl">{guide.icon}</span>
+              <span>{guide.name}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Steps Grid */}
+      <div className="rounded-card border border-pava-brown/12 bg-white p-6 sm:p-10 shadow-lg">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-pava-brown/10 pb-6">
+          <div>
+            <span className="inline-block rounded-chip bg-pava-gold/15 border border-pava-gold/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-pava-gold-deep mb-2">
+              {currentGuide.badge}
+            </span>
+            <h3 className="font-display text-2xl sm:text-3xl font-bold text-pava-brown">
+              {currentGuide.name}
+            </h3>
+            <p className="text-xs sm:text-sm text-pava-brown-mid/75 mt-0.5">
+              {currentGuide.tagline}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-control bg-pava-cream-dark/50 border border-pava-brown/10 px-4 py-2 text-xs font-semibold text-pava-brown">
+            <ShieldCheck size={16} className="text-pava-green" />
+            <span>Garantía de sabor</span>
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {currentGuide.steps.map((step, i) => (
+            <div
+              key={step.title}
+              className="relative flex flex-col justify-between rounded-control border border-pava-brown/10 bg-pava-cream/20 p-5 transition-all hover:bg-pava-cream/40"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-pava-green text-pava-cream text-xs font-bold">
+                    {i + 1}
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-pava-gold-deep bg-pava-gold/10 px-2 py-0.5 rounded-chip">
+                    <Clock size={11} /> {step.time}
+                  </span>
+                </div>
+                <h4 className="font-display text-base font-bold text-pava-brown mb-2">
+                  {step.title}
+                </h4>
+                <p className="text-xs leading-relaxed text-pava-brown-mid/80">
+                  {step.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Pro Tip Box */}
+        <div className="mt-8 flex items-start gap-3.5 rounded-control border border-pava-gold/40 bg-pava-gold/10 p-4 sm:p-5 text-pava-brown">
+          <Sparkles size={20} className="shrink-0 text-pava-gold-deep mt-0.5" />
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.12em] text-pava-gold-deep block mb-1">
+              Consejo de cebador Poné La Pava
+            </span>
+            <p className="text-xs sm:text-sm text-pava-brown-mid/90 leading-relaxed font-medium">
+              {currentGuide.proTip}
+            </p>
+          </div>
+        </div>
+
+        {/* Bottom action */}
+        <div className="mt-8 pt-6 border-t border-pava-brown/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-pava-brown-mid/70 text-center sm:text-left">
+            ¿Tenés dudas sobre cómo curar un modelo específico? Escribinos por WhatsApp y te asesoramos al instante.
+          </p>
+          <Link
+            href="/catalogo?cat=mates"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-pava-green hover:text-pava-terracotta transition-colors shrink-0"
+          >
+            Ver todos los mates <ArrowRight size={15} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
 
   return (
     <section id="guia-curado" className="relative overflow-hidden bg-pava-cream py-24 sm:py-28 lg:py-36 border-b border-pava-brown/10">
@@ -139,103 +243,8 @@ export default function CuringGuide() {
             Un buen curado define el sabor, la durabilidad y la nobleza de tu mate para toda la vida. Elegí el material de tu mate:
           </p>
         </ScrollReveal>
-
-        {/* Material Tabs */}
-        <ScrollReveal direction="up" delay={80} className="mb-10 flex flex-wrap justify-center gap-3">
-          {GUIDES.map((guide) => {
-            const isSelected = guide.id === selectedId;
-            return (
-              <button
-                key={guide.id}
-                type="button"
-                onClick={() => setSelectedId(guide.id)}
-                className={`flex items-center gap-3 rounded-control border-2 px-6 py-3.5 text-sm font-bold transition-all duration-200 cursor-pointer ${
-                  isSelected
-                    ? "border-pava-green bg-pava-green text-pava-cream shadow-md shadow-pava-green/20 scale-[1.02]"
-                    : "border-pava-brown/15 bg-white text-pava-brown hover:border-pava-green/50 hover:bg-pava-cream-dark/30"
-                }`}
-              >
-                <span className="text-xl">{guide.icon}</span>
-                <span>{guide.name}</span>
-              </button>
-            );
-          })}
-        </ScrollReveal>
-
-        {/* Steps Grid */}
         <ScrollReveal direction="scale" delay={120}>
-          <div className="rounded-card border border-pava-brown/12 bg-white p-6 sm:p-10 shadow-lg">
-            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-pava-brown/10 pb-6">
-              <div>
-                <span className="inline-block rounded-chip bg-pava-gold/15 border border-pava-gold/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-pava-gold-deep mb-2">
-                  {currentGuide.badge}
-                </span>
-                <h3 className="font-display text-2xl sm:text-3xl font-bold text-pava-brown">
-                  {currentGuide.name}
-                </h3>
-                <p className="text-xs sm:text-sm text-pava-brown-mid/75 mt-0.5">
-                  {currentGuide.tagline}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 rounded-control bg-pava-cream-dark/50 border border-pava-brown/10 px-4 py-2 text-xs font-semibold text-pava-brown">
-                <ShieldCheck size={16} className="text-pava-green" />
-                <span>Garantía de sabor</span>
-              </div>
-            </div>
-
-            {/* Steps */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {currentGuide.steps.map((step, i) => (
-                <div
-                  key={step.title}
-                  className="relative flex flex-col justify-between rounded-control border border-pava-brown/10 bg-pava-cream/20 p-5 transition-all hover:bg-pava-cream/40"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-pava-green text-pava-cream text-xs font-bold">
-                        {i + 1}
-                      </span>
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-pava-gold-deep bg-pava-gold/10 px-2 py-0.5 rounded-chip">
-                        <Clock size={11} /> {step.time}
-                      </span>
-                    </div>
-                    <h4 className="font-display text-base font-bold text-pava-brown mb-2">
-                      {step.title}
-                    </h4>
-                    <p className="text-xs leading-relaxed text-pava-brown-mid/80">
-                      {step.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pro Tip Box */}
-            <div className="mt-8 flex items-start gap-3.5 rounded-control border border-pava-gold/40 bg-pava-gold/10 p-4 sm:p-5 text-pava-brown">
-              <Sparkles size={20} className="shrink-0 text-pava-gold-deep mt-0.5" />
-              <div>
-                <span className="text-xs font-bold uppercase tracking-[0.12em] text-pava-gold-deep block mb-1">
-                  Consejo de cebador Poné La Pava
-                </span>
-                <p className="text-xs sm:text-sm text-pava-brown-mid/90 leading-relaxed font-medium">
-                  {currentGuide.proTip}
-                </p>
-              </div>
-            </div>
-
-            {/* Bottom action */}
-            <div className="mt-8 pt-6 border-t border-pava-brown/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-xs text-pava-brown-mid/70 text-center sm:text-left">
-                ¿Tenés dudas sobre cómo curar un modelo específico? Escribinos por WhatsApp y te asesoramos al instante.
-              </p>
-              <Link
-                href="/catalogo?cat=mates"
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-pava-green hover:text-pava-terracotta transition-colors shrink-0"
-              >
-                Ver todos los mates <ArrowRight size={15} />
-              </Link>
-            </div>
-          </div>
+          {content}
         </ScrollReveal>
       </div>
     </section>

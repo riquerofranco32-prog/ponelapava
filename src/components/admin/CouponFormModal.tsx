@@ -121,26 +121,71 @@ export default function CouponFormModal({
         )}
 
         <AdminField label="Código del Cupón *">
-          <div style={{ position: "relative" }}>
-            <Tag
-              size={15}
-              style={{
-                position: "absolute",
-                left: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--dash-text-muted)",
-              }}
-            />
-            <input
-              type="text"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="Ej: BIENVENIDO10, MATEROVIP"
-              className="admin-input"
-              style={{ paddingLeft: 34, letterSpacing: "0.05em", fontWeight: 600 }}
-            />
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ position: "relative" }}>
+              <Tag
+                size={15}
+                style={{
+                  position: "absolute",
+                  left: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--dash-text-muted)",
+                }}
+              />
+              <input
+                type="text"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="Ej: BIENVENIDO10, MATEROVIP"
+                className="admin-input"
+                style={{ paddingLeft: 34, letterSpacing: "0.05em", fontWeight: 600 }}
+              />
+            </div>
+
+            {/* Quick Generator & Presets */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const words = ["MATERO", "RONDA", "PAVA", "YERBA", "ESPECIAL"];
+                  const randWord = words[Math.floor(Math.random() * words.length)];
+                  const randNum = Math.floor(10 + Math.random() * 90);
+                  setCode(`${randWord}${randNum}`);
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: "3px 8px",
+                  borderRadius: 4,
+                  border: "1px solid var(--dash-border)",
+                  background: "var(--dash-surface-2)",
+                  color: "var(--dash-accent)",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                ⚡ Generar Código
+              </button>
+              {["BIENVENIDO10", "MATERO15", "RONDA20"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setCode(preset)}
+                  style={{
+                    fontSize: 11,
+                    padding: "3px 8px",
+                    borderRadius: 4,
+                    border: "1px solid var(--dash-border)",
+                    background: "var(--dash-surface-2)",
+                    color: "var(--dash-text-muted)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
           </div>
         </AdminField>
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { Eye, MessageCircle } from "lucide-react";
+import { Eye, MessageCircle, Printer } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
+import { printOrderRemito } from "@/lib/orderPrint";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 
 const td: React.CSSProperties = {
@@ -56,6 +57,25 @@ export function OrderDesktopRow({
             <Eye size={13} style={{ opacity: 0.6 }} />
             {order.customerName}
           </button>
+
+          <button
+            type="button"
+            onClick={() => printOrderRemito(order)}
+            title="Imprimir remito de despacho / checklist"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--dash-muted)",
+              padding: 2,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              borderRadius: 4,
+            }}
+          >
+            <Printer size={13} />
+          </button>
+
           {order.customerPhone && (
             <a
               href={buildAdminCustomerWhatsAppUrl(

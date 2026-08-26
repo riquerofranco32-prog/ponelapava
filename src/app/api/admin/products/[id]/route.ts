@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import {
   deleteProduct,
   getProductById,
@@ -32,6 +33,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     },
   });
 
+  // Automatically update the public store instantly
+  try {
+    revalidatePath("/");
+    revalidatePath("/catalogo");
+    revalidatePath(`/producto/${id}`);
+  } catch {
+    // ignore
+  }
+
   return NextResponse.json(product);
 }
 
@@ -49,6 +59,15 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     entityId: id,
     details: { name: before?.name ?? id },
   });
+
+  // Automatically update the public store instantly
+  try {
+    revalidatePath("/");
+    revalidatePath("/catalogo");
+    revalidatePath(`/producto/${id}`);
+  } catch {
+    // ignore
+  }
 
   return NextResponse.json({ ok: true });
 }

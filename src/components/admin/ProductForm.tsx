@@ -464,14 +464,7 @@ export default function ProductForm({
         </AdminField>
 
         {/* Price & Weight Row */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.3fr 1fr",
-            gap: 16,
-            alignItems: "flex-start",
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-start">
           <div>
             <div
               style={{
@@ -578,13 +571,7 @@ export default function ProductForm({
         </div>
 
         {/* Category & Status */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AdminField label="Categoría *">
             <select
               value={category}
@@ -615,13 +602,7 @@ export default function ProductForm({
         </div>
 
         {/* Stock & Brand */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 16,
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AdminField label="Stock disponible (unidades) *">
             <input
               required

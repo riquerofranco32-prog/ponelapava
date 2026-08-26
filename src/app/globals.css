@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./animations-extra.css";
 
 @theme inline {
   /* ── Brand Colors — from the Poné La Pava brand book ────

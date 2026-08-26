@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Plus, Search, PackageSearch } from "lucide-react";
+import { Plus, Search, PackageSearch, Zap } from "lucide-react";
 import { Product } from "@/types";
 import ProductForm from "@/components/admin/ProductForm";
+import { BulkPriceModal } from "@/components/admin/products/BulkPriceModal";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState } from "@/components/admin/EmptyState";
@@ -20,6 +21,7 @@ export default function AdminProductosPage() {
     categories,
     loading,
     loadError,
+    loadProducts,
     handleCreate,
     handleFormUpdate,
     handleStockChange,
@@ -32,6 +34,7 @@ export default function AdminProductosPage() {
   const [creating, setCreating] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [cloningProduct, setCloningProduct] = useState<Product | null>(null);
+  const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   function handleDuplicate(product: Product) {
@@ -94,7 +97,7 @@ export default function AdminProductosPage() {
   });
 
   return (
-    <div>
+    <div className="admin-page-reveal">
       {loadError && <AdminErrorBanner message={loadError} />}
 
       {/* Valuation & Stock Health Stats */}
@@ -110,7 +113,8 @@ export default function AdminProductosPage() {
           gap: 8,
           marginBottom: 16,
           overflowX: "auto",
-          paddingBottom: 4,
+          paddingBottom: 6,
+          WebkitOverflowScrolling: "touch",
         }}
       >
         <button
@@ -137,6 +141,8 @@ export default function AdminProductosPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <span>Todos</span>
@@ -174,6 +180,8 @@ export default function AdminProductosPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <span>⚠️ Stock Crítico (≤ 3)</span>
@@ -217,6 +225,8 @@ export default function AdminProductosPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <span>⛔ Sin Stock</span>
@@ -260,6 +270,8 @@ export default function AdminProductosPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
           }}
         >
           <span>✅ En Stock</span>
@@ -282,12 +294,12 @@ export default function AdminProductosPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 16,
+          gap: 12,
           marginBottom: 20,
           flexWrap: "wrap",
         }}
       >
-        <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+        <div style={{ position: "relative", flex: "1 1 200px" }}>
           <Search
             size={15}
             style={{
@@ -305,14 +317,14 @@ export default function AdminProductosPage() {
             value={searchProduct}
             onChange={(e) => setSearchProduct(e.target.value)}
             className="admin-input"
-            style={{ paddingLeft: 36 }}
+            style={{ paddingLeft: 36, width: "100%" }}
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="admin-input"
-          style={{ width: "auto", minWidth: 160 }}
+          style={{ flex: "1 1 160px", width: "auto" }}
         >
           <option value="all">Todas las categorías</option>
           {categories.map((c) => (
@@ -321,7 +333,15 @@ export default function AdminProductosPage() {
             </option>
           ))}
         </select>
-        <AdminButton onClick={() => setCreating(true)}>
+        <AdminButton
+          variant="secondary"
+          onClick={() => setBulkPriceOpen(true)}
+          style={{ whiteSpace: "nowrap" }}
+        >
+          <Zap size={14} style={{ color: "var(--dash-accent)", marginRight: 4 }} />
+          Ajuste Masivo
+        </AdminButton>
+        <AdminButton onClick={() => setCreating(true)} style={{ whiteSpace: "nowrap" }}>
           <Plus size={15} />
           Nuevo producto
         </AdminButton>
@@ -350,6 +370,15 @@ export default function AdminProductosPage() {
           onDuplicate={handleDuplicate}
           onDelete={setDeletingProduct}
           onStockChange={handleStockChange}
+        />
+      )}
+
+      {bulkPriceOpen && (
+        <BulkPriceModal
+          products={products}
+          categories={categories}
+          onClose={() => setBulkPriceOpen(false)}
+          onSuccess={() => loadProducts(true)}
         />
       )}
 

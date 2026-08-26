@@ -103,11 +103,9 @@ export default function ProductCard({
               <span className="font-display text-lg font-bold text-pava-green block">
                 {formatPrice(product.price)}
               </span>
-              {perUnit && (
-                <span className="text-[11px] text-pava-brown-mid/60">
-                  {perUnit}
-                </span>
-              )}
+              <span className="text-[11px] text-emerald-700 font-semibold block">
+                {formatPrice(Math.round(product.price * 0.9))} <span className="text-[10px] text-pava-brown-mid/60 font-normal">(10% OFF transf.)</span>
+              </span>
             </span>
             <div className="w-32">
               <AddToCartButton
@@ -224,15 +222,9 @@ export default function ProductCard({
             <span className="font-display block text-lg font-bold leading-none text-pava-green">
               {formatPrice(product.price)}
             </span>
-            {perUnit ? (
-              <span className="mt-1 block text-[11px] text-pava-brown-mid/60">
-                {perUnit}
-              </span>
-            ) : (
-              <span className="mt-1 block text-[10px] font-medium text-pava-olive-light">
-                3 cuotas de {formatPrice(Math.round(product.price / 3))}
-              </span>
-            )}
+            <span className="mt-1 block text-[11px] font-semibold text-emerald-700">
+              {formatPrice(Math.round(product.price * 0.9))} <span className="text-[10px] font-normal text-pava-brown-mid/70">(10% OFF transf.)</span>
+            </span>
           </span>
         </div>
 

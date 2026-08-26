@@ -151,11 +151,11 @@ export default function CustomKitBuilder() {
           <div className="lg:col-span-7 space-y-8">
             {/* Step 1: Mate */}
             <ScrollReveal direction="up" delay={50}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-xs font-bold">1</span>
-                <h3 className="font-display text-lg font-bold text-pava-cream">Elegí tu Mate</h3>
+              <div className="flex items-center gap-2 mb-2.5">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-[11px] sm:text-xs font-bold">1</span>
+                <h3 className="font-display text-base sm:text-lg font-bold text-pava-cream">Elegí tu Mate</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {MATES.map((m) => {
                   const isSelected = m.id === selectedMate.id;
                   return (
@@ -163,30 +163,31 @@ export default function CustomKitBuilder() {
                       key={m.id}
                       type="button"
                       onClick={() => setSelectedMate(m)}
-                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
+                      className={`group relative flex flex-col justify-between p-2 sm:p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
                           ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
                           : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                      <div className="relative w-full aspect-square sm:aspect-4/3 rounded-chip overflow-hidden mb-1.5 sm:mb-2.5 bg-pava-cream/10">
                         <Image
                           src={m.image}
                           alt={m.name}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 640px) 100vw, 33vw"
+                          sizes="(max-width: 640px) 33vw, 33vw"
                         />
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
-                            <Check size={12} strokeWidth={3} />
+                          <div className="absolute top-1 right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={10} className="sm:hidden" strokeWidth={3} />
+                            <Check size={12} className="hidden sm:block" strokeWidth={3} />
                           </div>
                         )}
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{m.tag}</span>
-                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{m.name}</span>
-                        <span className="text-xs font-bold text-pava-gold">{formatPrice(m.price)}</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5 truncate">{m.tag}</span>
+                        <span className="font-semibold text-[10px] sm:text-xs text-pava-cream block leading-tight mb-1 line-clamp-2 sm:line-clamp-1">{m.name}</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-pava-gold">{formatPrice(m.price)}</span>
                       </div>
                     </button>
                   );
@@ -196,11 +197,11 @@ export default function CustomKitBuilder() {
 
             {/* Step 2: Bombilla */}
             <ScrollReveal direction="up" delay={100}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-xs font-bold">2</span>
-                <h3 className="font-display text-lg font-bold text-pava-cream">Elegí tu Bombilla</h3>
+              <div className="flex items-center gap-2 mb-2.5">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-[11px] sm:text-xs font-bold">2</span>
+                <h3 className="font-display text-base sm:text-lg font-bold text-pava-cream">Elegí tu Bombilla</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {BOMBILLAS.map((b) => {
                   const isSelected = b.id === selectedBombilla.id;
                   return (
@@ -208,30 +209,31 @@ export default function CustomKitBuilder() {
                       key={b.id}
                       type="button"
                       onClick={() => setSelectedBombilla(b)}
-                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
+                      className={`group relative flex flex-col justify-between p-2 sm:p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
                           ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
                           : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                      <div className="relative w-full aspect-square sm:aspect-4/3 rounded-chip overflow-hidden mb-1.5 sm:mb-2.5 bg-pava-cream/10">
                         <Image
                           src={b.image}
                           alt={b.name}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 640px) 100vw, 33vw"
+                          sizes="(max-width: 640px) 33vw, 33vw"
                         />
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
-                            <Check size={12} strokeWidth={3} />
+                          <div className="absolute top-1 right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={10} className="sm:hidden" strokeWidth={3} />
+                            <Check size={12} className="hidden sm:block" strokeWidth={3} />
                           </div>
                         )}
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{b.tag}</span>
-                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{b.name}</span>
-                        <span className="text-xs font-bold text-pava-gold">{formatPrice(b.price)}</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5 truncate">{b.tag}</span>
+                        <span className="font-semibold text-[10px] sm:text-xs text-pava-cream block leading-tight mb-1 line-clamp-2 sm:line-clamp-1">{b.name}</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-pava-gold">{formatPrice(b.price)}</span>
                       </div>
                     </button>
                   );
@@ -241,11 +243,11 @@ export default function CustomKitBuilder() {
 
             {/* Step 3: Yerba */}
             <ScrollReveal direction="up" delay={150}>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-xs font-bold">3</span>
-                <h3 className="font-display text-lg font-bold text-pava-cream">Elegí tu Yerba</h3>
+              <div className="flex items-center gap-2 mb-2.5">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-pava-gold text-pava-brown text-[11px] sm:text-xs font-bold">3</span>
+                <h3 className="font-display text-base sm:text-lg font-bold text-pava-cream">Elegí tu Yerba</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {YERBAS.map((y) => {
                   const isSelected = y.id === selectedYerba.id;
                   return (
@@ -253,30 +255,31 @@ export default function CustomKitBuilder() {
                       key={y.id}
                       type="button"
                       onClick={() => setSelectedYerba(y)}
-                      className={`group relative flex flex-col justify-between p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
+                      className={`group relative flex flex-col justify-between p-2 sm:p-3.5 rounded-control border-2 text-left transition-all duration-200 cursor-pointer overflow-hidden ${
                         isSelected
                           ? "border-pava-gold bg-pava-cream/15 shadow-md shadow-pava-gold/10 ring-1 ring-pava-gold"
                           : "border-pava-cream/15 bg-pava-green/40 hover:border-pava-cream/40 hover:bg-pava-green/60"
                       }`}
                     >
-                      <div className="relative w-full aspect-4/3 rounded-chip overflow-hidden mb-2.5 bg-pava-cream/10">
+                      <div className="relative w-full aspect-square sm:aspect-4/3 rounded-chip overflow-hidden mb-1.5 sm:mb-2.5 bg-pava-cream/10">
                         <Image
                           src={y.image}
                           alt={y.name}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          sizes="(max-width: 640px) 100vw, 33vw"
+                          sizes="(max-width: 640px) 33vw, 33vw"
                         />
                         {isSelected && (
-                          <div className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
-                            <Check size={12} strokeWidth={3} />
+                          <div className="absolute top-1 right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-pava-gold text-pava-brown shadow-sm">
+                            <Check size={10} className="sm:hidden" strokeWidth={3} />
+                            <Check size={12} className="hidden sm:block" strokeWidth={3} />
                           </div>
                         )}
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5">{y.tag}</span>
-                        <span className="font-semibold text-xs text-pava-cream block leading-tight mb-1">{y.name}</span>
-                        <span className="text-xs font-bold text-pava-gold">{formatPrice(y.price)}</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-pava-gold uppercase tracking-wider block mb-0.5 truncate">{y.tag}</span>
+                        <span className="font-semibold text-[10px] sm:text-xs text-pava-cream block leading-tight mb-1 line-clamp-2 sm:line-clamp-1">{y.name}</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-pava-gold">{formatPrice(y.price)}</span>
                       </div>
                     </button>
                   );

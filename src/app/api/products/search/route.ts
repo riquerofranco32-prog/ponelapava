@@ -12,9 +12,12 @@ export async function GET(req: NextRequest) {
       .select("id, name, slug, price, category, status, stock, images, tags, brand, weight")
       .order("id");
 
-    if (q) {
+    // Sanitize query to prevent PostgREST filter injection / malformed syntax errors
+    const sanitized = q.replace(/[,().%*"\\]/g, " ").trim();
+
+    if (sanitized) {
       query = query.or(
-        `name.ilike.%${q}%,description.ilike.%${q}%,category.ilike.%${q}%,brand.ilike.%${q}%`
+        `name.ilike.%${sanitized}%,description.ilike.%${sanitized}%,category.ilike.%${sanitized}%,brand.ilike.%${sanitized}%`
       );
     }
 

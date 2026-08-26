@@ -102,10 +102,19 @@ export default function CategoriesPanel({
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: 20,
+          flexWrap: "wrap",
+          gap: 12,
         }}
       >
+        <div>
+          <h1 className="admin-page-title">Categorías ({categories.length})</h1>
+          <p style={{ fontSize: 13, color: "var(--dash-muted)", marginTop: 2 }}>
+            Organización y orden de aparición en la tienda.
+          </p>
+        </div>
         <AdminButton onClick={() => setCreating(true)}>
           <Plus size={15} />
           Nueva categoría

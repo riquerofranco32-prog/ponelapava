@@ -184,14 +184,35 @@ export default function CategoryForm({
           />
         </AdminField>
 
-        <AdminField label="Ícono (emoji, opcional)">
-          <input
-            value={icon}
-            onChange={(e) => setIcon(e.target.value)}
-            placeholder="🌿"
-            className="admin-input"
-            style={{ maxWidth: 120 }}
-          />
+        <AdminField label="Ícono / Emoji identificador">
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {["🧉", "🌿", "🪵", "👜", "🫖", "⚡", "⭐", "🎁", "🔥", "✨", "🍵", "🏔️"].map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => setIcon(emoji)}
+                  style={{
+                    fontSize: 16,
+                    padding: "4px 8px",
+                    borderRadius: 6,
+                    border: icon === emoji ? "1.5px solid var(--dash-accent)" : "1px solid var(--dash-border)",
+                    background: icon === emoji ? "var(--dash-accent-subtle)" : "var(--dash-surface-2)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <input
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="O escribí un emoji: 🧉"
+              className="admin-input"
+              style={{ maxWidth: 200 }}
+            />
+          </div>
         </AdminField>
 
         {error && (

@@ -237,10 +237,11 @@ export default function GoogleReviews() {
           </div>
 
           {/* Filter Pills */}
-          <div className="mt-4 flex items-center justify-center gap-2">
+          {/* Reviews category filters */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
             <button
               onClick={() => setFilter("all")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+              className={`px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full border transition-all ${
                 filter === "all"
                   ? "bg-pava-brown text-pava-cream border-pava-brown"
                   : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
@@ -250,17 +251,17 @@ export default function GoogleReviews() {
             </button>
             <button
               onClick={() => setFilter("written")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+              className={`px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full border transition-all ${
                 filter === "written"
                   ? "bg-pava-brown text-pava-cream border-pava-brown"
                   : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
               }`}
             >
-              Con opinión escrita (2)
+              Con opinión (2)
             </button>
             <button
               onClick={() => setFilter("rating")}
-              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+              className={`px-3 py-1 text-[11px] sm:text-xs font-semibold rounded-full border transition-all ${
                 filter === "rating"
                   ? "bg-pava-brown text-pava-cream border-pava-brown"
                   : "bg-white/80 text-pava-brown/70 border-pava-brown/15 hover:border-pava-brown/40"
@@ -273,8 +274,7 @@ export default function GoogleReviews() {
 
         <ScrollReveal direction="scale">
           <div
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2"
-            style={{ height: 560 }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 h-[420px] sm:h-[560px]"
           >
             <Column items={filteredColumnA} duration={38} />
             <div className="hidden sm:block">

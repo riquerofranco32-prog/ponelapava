@@ -122,9 +122,7 @@ export default function SettingsForm() {
           />
         </AdminField>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AdminField label="WhatsApp (solo dígitos, con código de país)">
             <input
               required
@@ -163,9 +161,7 @@ export default function SettingsForm() {
           />
         </AdminField>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <AdminField label="Horario Lun–Vie">
             <input
               required
@@ -225,33 +221,31 @@ export default function SettingsForm() {
           <AdminButton
             type="button"
             variant="secondary"
-            onClick={() => {
-              const dataStr =
-                "data:text/json;charset=utf-8," +
-                encodeURIComponent(
-                  JSON.stringify(
-                    {
-                      settings,
-                      exportedAt: new Date().toISOString(),
-                      store: "Poné La Pava - Catriel",
-                    },
-                    null,
-                    2,
-                  ),
+            onClick={async () => {
+              try {
+                showToast("Generando backup completo...");
+                const res = await fetch("/api/admin/backup");
+                if (!res.ok) throw new Error("Error al exportar");
+                const backupData = await res.json();
+                const dataStr =
+                  "data:text/json;charset=utf-8," +
+                  encodeURIComponent(JSON.stringify(backupData, null, 2));
+                const downloadAnchor = document.createElement("a");
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute(
+                  "download",
+                  `backup-ponelapava-completo-${new Date().toISOString().slice(0, 10)}.json`,
                 );
-              const downloadAnchor = document.createElement("a");
-              downloadAnchor.setAttribute("href", dataStr);
-              downloadAnchor.setAttribute(
-                "download",
-                `backup-ponelapava-${new Date().toISOString().slice(0, 10)}.json`,
-              );
-              document.body.appendChild(downloadAnchor);
-              downloadAnchor.click();
-              downloadAnchor.remove();
-              showToast("Backup descargado con éxito");
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                showToast("Backup completo descargado con éxito");
+              } catch {
+                showToast("No se pudo generar el backup");
+              }
             }}
           >
-            Exportar Backup JSON
+            Exportar Backup Completo (.JSON)
           </AdminButton>
         </div>
       </form>

@@ -22,6 +22,7 @@ import { EmptyState } from "./EmptyState";
 import { StockStepper } from "./products/StockStepper";
 import { SalesAreaChart } from "./SalesAreaChart";
 import { RecentOrdersWidget } from "./orders/RecentOrdersWidget";
+import { SalesGoalWidget } from "./dashboard/SalesGoalWidget";
 import { assertOk } from "@/lib/admin-fetch";
 
 // Renders as AdminKpiCard's change/trend props, or nothing when there's no
@@ -155,98 +156,8 @@ export default function DashboardStats({
         </div>
       )}
 
-      {/* Sales Goal Widget */}
-      {stats && (
-        <AdminCard style={{ marginBottom: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 10,
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            <div>
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--dash-accent)",
-                  display: "block",
-                  marginBottom: 2,
-                }}
-              >
-                🎯 Meta Mensual de Facturación
-              </span>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "var(--dash-text)",
-                }}
-              >
-                {formatPrice(stats.totalRevenue)}{" "}
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "var(--dash-muted)",
-                  }}
-                >
-                  / objetivo $2.500.000
-                </span>
-              </div>
-            </div>
-
-            <div style={{ textAlign: "right" }}>
-              <span
-                style={{
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: "var(--dash-accent)",
-                }}
-              >
-                {Math.min(100, Math.round((stats.totalRevenue / 2500000) * 100))}%
-              </span>
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 11,
-                  color: "var(--dash-muted)",
-                }}
-              >
-                alcanzado
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              height: 10,
-              width: "100%",
-              borderRadius: 999,
-              background: "var(--dash-surface-2)",
-              overflow: "hidden",
-              border: "1px solid var(--dash-border)",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${Math.min(100, Math.max(0, (stats.totalRevenue / 2500000) * 100))}%`,
-                background:
-                  "linear-gradient(90deg, var(--dash-accent), #10b981)",
-                borderRadius: 999,
-                transition: "width 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
-              }}
-            />
-          </div>
-        </AdminCard>
-      )}
+      {/* Interactive Sales Goal Widget */}
+      {stats && <SalesGoalWidget currentRevenue={stats.totalRevenue} />}
 
       {/* Real-time Recent Orders Section */}
       <RecentOrdersWidget onOrderUpdated={() => fetchStats(true)} />

@@ -310,6 +310,20 @@ export default function CatalogClient({
           )}
         </div>
 
+        {/* In Stock toggle */}
+        <button
+          onClick={() => setInStockOnly((prev) => !prev)}
+          aria-pressed={inStockOnly}
+          className={`inline-flex items-center gap-1.5 rounded-control px-4 py-3 text-sm font-medium border transition-colors ${
+            inStockOnly
+              ? "bg-pava-green text-white border-pava-green"
+              : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green hover:text-pava-green"
+          }`}
+        >
+          <span className={`w-2 h-2 rounded-full ${inStockOnly ? "bg-white" : "bg-emerald-500"}`} />
+          En Stock
+        </button>
+
         {/* Favorites toggle */}
         <button
           onClick={() => setFavoritesOnly((prev) => !prev)}
@@ -379,29 +393,28 @@ export default function CatalogClient({
       </div>
 
       {/* Category tabs */}
-      <div className="flex gap-2 flex-wrap mb-4">
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-none snap-x">
         {categoryTabs.map(({ slug, name, count }) => (
           <button
             key={slug}
             onClick={() =>
               handleCategoryChange(slug as ProductCategory | "all")
             }
-            className={`inline-flex items-center gap-1.5 rounded-control px-4 py-2 text-sm font-medium border-2 transition-all duration-200 ${
+            className={`inline-flex items-center gap-1.5 rounded-control px-3.5 py-2 text-xs sm:text-sm font-medium border-2 transition-all duration-200 shrink-0 snap-start cursor-pointer ${
               activeCategory === slug
-                ? "bg-pava-green text-pava-cream border-pava-green shadow-xs"
-                : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green hover:text-pava-green"
+                ? "bg-pava-green text-pava-cream border-pava-green font-semibold shadow-xs"
+                : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green/50"
             }`}
-            aria-pressed={activeCategory === slug}
           >
-            {name}
+            <span>{name}</span>
             <span
-              className={`text-xs ${
+              className={`text-[11px] px-1.5 py-0.2 rounded-full ${
                 activeCategory === slug
-                  ? "text-pava-cream/70"
-                  : "text-pava-brown/70"
+                  ? "bg-pava-cream/20 text-pava-cream"
+                  : "bg-pava-cream-dark text-pava-brown/60"
               }`}
             >
-              ({count})
+              {count}
             </span>
           </button>
         ))}

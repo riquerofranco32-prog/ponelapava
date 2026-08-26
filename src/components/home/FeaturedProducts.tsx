@@ -16,6 +16,8 @@ export default async function FeaturedProducts() {
       id="productos-destacados"
       className="relative overflow-hidden bg-pava-cream py-24 sm:py-28 lg:py-36"
     >
+      {/* Subtle dot-grid pattern for depth */}
+      <div className="bg-dots-pattern absolute inset-0 pointer-events-none opacity-70" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         {/* Header — asimétrico */}
         <ScrollReveal

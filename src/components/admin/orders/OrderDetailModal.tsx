@@ -5,6 +5,7 @@ import { Copy, Check, MessageCircle, Printer } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
+import { printOrderRemito } from "@/lib/orderPrint";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminButton } from "@/components/admin/AdminButton";
 
@@ -35,67 +36,7 @@ export function OrderDetailModal({
   const [copyError, setCopyError] = useState(false);
 
   function handlePrint() {
-    const printWindow = window.open("", "_blank", "width=600,height=700");
-    if (!printWindow) return;
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Pedido - ${order.customerName}</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; padding: 24px; color: #111; max-width: 420px; margin: 0 auto; line-height: 1.4; }
-            .header { text-align: center; border-bottom: 2px dashed #26402e; padding-bottom: 12px; margin-bottom: 14px; }
-            .title { font-size: 20px; font-weight: 800; letter-spacing: 0.05em; color: #26402e; }
-            .subtitle { font-size: 12px; color: #666; margin-top: 2px; }
-            .meta { font-size: 13px; margin-bottom: 14px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
-            .meta div { margin-bottom: 3px; }
-            .items { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 14px; }
-            .items th { text-align: left; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 11px; text-transform: uppercase; color: #888; }
-            .items td { padding: 6px 0; border-bottom: 1px dashed #f0f0f0; }
-            .items td.right { text-align: right; }
-            .total { font-size: 18px; font-weight: 800; border-top: 2px dashed #26402e; padding-top: 10px; text-align: right; margin-bottom: 14px; color: #26402e; }
-            .comment { background: #fdfbf7; border: 1px solid #ecd899; padding: 8px; border-radius: 4px; font-size: 12px; margin-bottom: 12px; }
-            .footer { text-align: center; font-size: 11px; color: #777; border-top: 1px dashed #ccc; padding-top: 12px; margin-top: 16px; }
-            @media print { body { padding: 0; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">PONÉ LA PAVA</div>
-            <div class="subtitle">Comprobante de Pedido / Despacho</div>
-          </div>
-          <div class="meta">
-            <div><strong>Cliente:</strong> ${order.customerName}</div>
-            ${order.customerPhone ? `<div><strong>Teléfono:</strong> ${order.customerPhone}</div>` : ""}
-            <div><strong>Fecha:</strong> ${new Date(order.createdAt).toLocaleString("es-AR")}</div>
-            <div><strong>Estado:</strong> ${order.status.toUpperCase()}</div>
-          </div>
-          ${order.comment ? `<div class="comment"><strong>Observación:</strong> ${order.comment}</div>` : ""}
-          <table class="items">
-            <thead>
-              <tr><th>Cant.</th><th>Producto</th><th class="right">Subtotal</th></tr>
-            </thead>
-            <tbody>
-              ${order.items
-                .map(
-                  (i) => `<tr>
-                    <td style="font-weight:bold;">${i.quantity}x</td>
-                    <td>${i.productName}</td>
-                    <td class="right">${formatPrice(i.subtotal)}</td>
-                  </tr>`
-                )
-                .join("")}
-            </tbody>
-          </table>
-          <div class="total">TOTAL: ${formatPrice(order.total)}</div>
-          <div class="footer">¡Gracias por elegir Poné La Pava! 🧉</div>
-          <script>
-            window.onload = function() { window.print(); }
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+    printOrderRemito(order);
   }
 
   async function handleCopy() {
@@ -197,6 +138,72 @@ export function OrderDetailModal({
         )}
       </div>
 
+      {/* Payment & Delivery Badges */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "10px 0 6px" }}>
+        {order.paymentMethod && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              padding: "3px 8px",
+              borderRadius: "var(--radius-chip, 4px)",
+              background: order.paymentMethod === "transfer" ? "rgba(16, 185, 129, 0.15)" : "var(--dash-surface-2)",
+              color: order.paymentMethod === "transfer" ? "#10b981" : "var(--dash-text)",
+              border: "1px solid var(--dash-border)",
+            }}
+          >
+            {order.paymentMethod === "transfer" ? "💳 Transferencia (10% OFF)" : order.paymentMethod === "cash" ? "💵 Efectivo (10% OFF)" : "💳 Tarjeta"}
+          </span>
+        )}
+        {order.deliveryMethod && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              padding: "3px 8px",
+              borderRadius: "var(--radius-chip, 4px)",
+              background: order.deliveryMethod === "pickup" ? "rgba(199, 166, 122, 0.15)" : "var(--dash-surface-2)",
+              color: order.deliveryMethod === "pickup" ? "var(--dash-accent)" : "var(--dash-text)",
+              border: "1px solid var(--dash-border)",
+            }}
+          >
+            {order.deliveryMethod === "pickup" ? "🏪 Retiro en Local" : "🛵 Envío a Domicilio"}
+          </span>
+        )}
+        {order.couponCode && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              padding: "3px 8px",
+              borderRadius: "var(--radius-chip, 4px)",
+              background: "rgba(199, 166, 122, 0.15)",
+              color: "var(--dash-accent)",
+              border: "1px solid var(--dash-border)",
+            }}
+          >
+            🏷️ Cupón: {order.couponCode}
+          </span>
+        )}
+      </div>
+
+      {order.deliveryAddress && (
+        <div
+          style={{
+            fontSize: 12,
+            padding: "8px 10px",
+            background: "var(--dash-surface-2)",
+            borderRadius: 6,
+            border: "1px solid var(--dash-border)",
+            color: "var(--dash-text)",
+            margin: "4px 0 10px",
+          }}
+        >
+          <span style={{ color: "var(--dash-muted)", fontWeight: 600 }}>📍 Dirección: </span>
+          {order.deliveryAddress}
+        </div>
+      )}
+
       <div
         style={{
           display: "flex",
@@ -236,6 +243,22 @@ export function OrderDetailModal({
         ))}
       </div>
 
+      {/* Subtotal, discounts, shipping */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "var(--dash-muted)", paddingTop: 4 }}>
+        {order.discount && order.discount > 0 ? (
+          <div style={{ display: "flex", justifyContent: "space-between", color: "#10b981" }}>
+            <span>Descuento aplicado</span>
+            <span>-{formatPrice(order.discount)}</span>
+          </div>
+        ) : null}
+        {order.shippingCost && order.shippingCost > 0 ? (
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Costo de envío</span>
+            <span>{formatPrice(order.shippingCost)}</span>
+          </div>
+        ) : null}
+      </div>
+
       {order.comment && (
         <div>
           <div
@@ -261,6 +284,8 @@ export function OrderDetailModal({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "baseline",
+          paddingTop: 8,
+          borderTop: "1px solid var(--dash-border)",
         }}
       >
         <span style={{ fontSize: 14, color: "var(--dash-muted)" }}>Total</span>

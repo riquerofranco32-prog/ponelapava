@@ -84,9 +84,9 @@ export default function MateroExperienceHub() {
         </ScrollReveal>
 
         {/* Tab Navigation Strip */}
-        <ScrollReveal direction="up" delay={60} className="mb-10">
-          <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none">
-            <div className="inline-flex max-w-full p-1.5 rounded-card bg-pava-cream border border-pava-brown/12 shadow-sm gap-1.5 shrink-0">
+        <ScrollReveal direction="up" delay={60} className="mb-8 sm:mb-10">
+          <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-3 -mx-5 px-5 sm:mx-0 sm:px-0 scrollbar-none snap-x">
+            <div className="inline-flex w-max p-1.5 rounded-card bg-pava-cream border border-pava-brown/12 shadow-sm gap-1.5 shrink-0">
               {TABS.map((tab) => {
                 const isActive = tab.id === activeTab;
                 return (
@@ -94,7 +94,7 @@ export default function MateroExperienceHub() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 rounded-control px-3.5 py-2.5 sm:px-4 text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer ${
+                    className={`flex items-center gap-2 rounded-control px-3.5 py-2 sm:py-2.5 sm:px-4 text-xs font-bold transition-all duration-200 shrink-0 cursor-pointer snap-start ${
                       isActive
                         ? "bg-pava-green text-pava-cream shadow-md shadow-pava-green/25 scale-[1.02]"
                         : "text-pava-brown hover:text-pava-green hover:bg-pava-cream-dark/50"

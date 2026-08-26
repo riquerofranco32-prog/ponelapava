@@ -15,9 +15,12 @@ import {
   Gift,
   Send,
   Save,
+  Printer,
+  Check,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { STATUS_LABELS } from "@/lib/orderStatus";
+import { printOrderRemito } from "@/lib/orderPrint";
 import { AdminButton } from "./AdminButton";
 
 export interface CustomerData {
@@ -51,12 +54,28 @@ export function CustomerDetailModal({
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<string>("gift");
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [copiedMsg, setCopiedMsg] = useState(false);
 
   useEffect(() => {
     if (customer) {
       const savedNote = localStorage.getItem(`pava-crm-note-${customer.id}`) || "";
       setNote(savedNote);
       setNoteSaved(false);
+
+      try {
+        const savedTags = localStorage.getItem(`pava-crm-tags-${customer.id}`);
+        if (savedTags) {
+          setTags(JSON.parse(savedTags));
+        } else {
+          // Defaults based on segment
+          const initial = customer.segment === "vip" ? ["VIP"] : customer.segment === "recurring" ? ["Recurrente"] : [];
+          setTags(initial);
+        }
+      } catch {
+        setTags([]);
+      }
     }
   }, [customer]);
 
@@ -67,6 +86,33 @@ export function CustomerDetailModal({
     localStorage.setItem(`pava-crm-note-${customer.id}`, note);
     setNoteSaved(true);
     setTimeout(() => setNoteSaved(false), 2000);
+  }
+
+  function handleAddTag(tagText: string) {
+    if (!customer) return;
+    const clean = tagText.trim();
+    if (!clean || tags.includes(clean)) return;
+    const next = [...tags, clean];
+    setTags(next);
+    localStorage.setItem(`pava-crm-tags-${customer.id}`, JSON.stringify(next));
+    setNewTagInput("");
+  }
+
+  function handleRemoveTag(tagToRemove: string) {
+    if (!customer) return;
+    const next = tags.filter((t) => t !== tagToRemove);
+    setTags(next);
+    localStorage.setItem(`pava-crm-tags-${customer.id}`, JSON.stringify(next));
+  }
+
+  async function handleCopyTemplate(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMsg(true);
+      setTimeout(() => setCopiedMsg(false), 2000);
+    } catch {
+      // ignore
+    }
   }
 
   const cleanPhone = customer.phone?.replace(/\D/g, "");
@@ -182,6 +228,77 @@ export function CustomerDetailModal({
           </div>
         </div>
 
+        {/* Tags / Custom Labels Manager */}
+        <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
+              <Crown size={14} /> Etiquetas & Preferencias del Cliente
+            </label>
+            <span className="text-[10px] text-[var(--dash-muted)] font-mono">
+              {tags.length} activas
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[var(--dash-surface-3)] text-[var(--dash-text)] border border-[var(--dash-border)]"
+              >
+                <span>{tag}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="text-[var(--dash-muted)] hover:text-red-400 p-0.5 rounded transition-colors cursor-pointer"
+                  title={`Eliminar etiqueta ${tag}`}
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+
+          {/* Add tag form & quick suggestions */}
+          <div className="flex items-center gap-2 pt-1">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleAddTag(newTagInput);
+              }}
+              className="flex items-center gap-2 flex-1"
+            >
+              <input
+                type="text"
+                placeholder="Nueva etiqueta (ej: Yerba Canarias, Retiro Local)..."
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                className="admin-input flex-1 py-1.5 text-xs"
+              />
+              <button
+                type="submit"
+                disabled={!newTagInput.trim()}
+                className="px-3 py-1.5 rounded-lg bg-[var(--dash-accent)] text-[#182b1d] text-xs font-bold transition-all disabled:opacity-40 cursor-pointer"
+              >
+                + Agregar
+              </button>
+            </form>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1 pt-1 text-[10px] text-[var(--dash-muted)]">
+            <span>Sugerencias rápidas:</span>
+            {["Yerba Intensa", "Yerba Suave", "Mate Imperial", "Retira en Tienda", "Envío a Domicilio", "Regalo Empresarial"].map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => handleAddTag(suggestion)}
+                className="px-2 py-0.5 rounded bg-[var(--dash-surface)] hover:bg-[var(--dash-surface-3)] text-[var(--dash-text)]/80 border border-[var(--dash-border)] transition-colors cursor-pointer"
+              >
+                + {suggestion}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* CRM Internal Private Notes */}
         <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-2">
           <div className="flex items-center justify-between">
@@ -246,21 +363,32 @@ export function CustomerDetailModal({
             &ldquo;{currentTemplate.text}&rdquo;
           </p>
 
-          {whatsappUrl ? (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-transform active:scale-98"
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handleCopyTemplate(currentTemplate.text)}
+              className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[var(--dash-surface-3)] hover:bg-[var(--dash-border)] text-[var(--dash-text)] font-bold text-xs border border-[var(--dash-border)] transition-colors cursor-pointer"
             >
-              <Send size={14} />
-              Enviar mensaje a {customer.name}
-            </a>
-          ) : (
-            <p className="text-xs text-[var(--dash-muted)] text-center">
-              Sin número de teléfono registrado
-            </p>
-          )}
+              {copiedMsg ? <Check size={14} className="text-emerald-400" /> : <Gift size={14} />}
+              {copiedMsg ? "¡Texto Copiado!" : "Copiar Texto"}
+            </button>
+
+            {whatsappUrl ? (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-transform active:scale-98"
+              >
+                <Send size={14} />
+                Abrir en WhatsApp
+              </a>
+            ) : (
+              <p className="text-xs text-[var(--dash-muted)] text-center flex-1">
+                Sin número registrado
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Top products purchased */}
@@ -308,6 +436,32 @@ export function CustomerDetailModal({
                     })}
                   </span>
                   <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        printOrderRemito({
+                          id: o.id,
+                          customerName: customer.name,
+                          customerPhone: customer.phone,
+                          items: o.items.map((item) => ({
+                            productId: "",
+                            productName: item.productName,
+                            quantity: item.quantity,
+                            price: item.price,
+                            subtotal: item.price * item.quantity,
+                          })),
+                          subtotal: o.total,
+                          total: o.total,
+                          comment: o.comment,
+                          status: (o.status as "pending" | "confirmed" | "delivered" | "cancelled") || "delivered",
+                          createdAt: o.createdAt,
+                        })
+                      }
+                      title="Imprimir remito de despacho"
+                      className="p-1 rounded text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-3)] transition-colors cursor-pointer"
+                    >
+                      <Printer size={13} />
+                    </button>
                     <span className="font-bold text-[var(--dash-text)]">
                       {formatPrice(o.total)}
                     </span>

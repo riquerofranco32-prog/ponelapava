@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { X, MessageCircle } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
@@ -162,19 +162,30 @@ export default function QuickViewModal({
             </div>
           )}
 
-          <div className="mt-auto flex flex-col gap-2.5">
+          <div className="mt-auto flex flex-col gap-2">
             <AddToCartButton
               product={product}
               disabled={isOutOfStock}
               size="md"
             />
-            <Link
-              href={`/producto/${product.id}`}
-              onClick={onClose}
-              className="text-center text-xs font-semibold text-pava-brown/60 hover:text-pava-green transition-colors py-1"
-            >
-              Ver detalles completos del producto →
-            </Link>
+            <div className="flex items-center justify-between pt-1 text-xs">
+              <a
+                href={`https://wa.me/5492996070624?text=${encodeURIComponent(`¡Hola! Tengo una consulta sobre "${product.name}" (${formatPrice(product.price)}) de Poné La Pava 🧉`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 font-semibold"
+              >
+                <MessageCircle size={13} />
+                Consultar por WhatsApp
+              </a>
+              <Link
+                href={`/producto/${product.id}`}
+                onClick={onClose}
+                className="font-semibold text-pava-brown/70 hover:text-pava-green transition-colors"
+              >
+                Ver ficha completa →
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -109,7 +109,7 @@ export default function WaterTempSimulator({ embedded = false }: { embedded?: bo
           </div>
 
           {/* Slider scale markers */}
-          <div className="flex justify-between items-center text-[11px] font-bold text-pava-brown-mid/60 mt-3 px-1">
+          <div className="flex justify-between items-center text-[9px] sm:text-[11px] font-bold text-pava-brown-mid/60 mt-3 px-1">
             <span className="hover:text-pava-brown cursor-pointer" onClick={() => setTemp(65)}>65°C (Tibia)</span>
             <span
               className="hover:text-pava-gold-deep cursor-pointer font-extrabold text-pava-gold-deep flex items-center gap-1"

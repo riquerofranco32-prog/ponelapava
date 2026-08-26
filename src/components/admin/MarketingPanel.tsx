@@ -216,12 +216,12 @@ export default function MarketingPanel() {
       </div>
 
       {/* Navigation Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, borderBottom: "1px solid var(--dash-border)", paddingBottom: 8 }}>
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-5 border-b border-[var(--dash-border)] scrollbar-none">
         <button
           type="button"
           onClick={() => setActiveTab("hero")}
           className={`admin-toolbar-pill${activeTab === "hero" ? " admin-toolbar-pill--active" : ""}`}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13, flexShrink: 0, whiteSpace: "nowrap" }}
         >
           <Layers size={15} />
           <span>Hero Principal</span>
@@ -231,7 +231,7 @@ export default function MarketingPanel() {
           type="button"
           onClick={() => setActiveTab("promos")}
           className={`admin-toolbar-pill${activeTab === "promos" ? " admin-toolbar-pill--active" : ""}`}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13, flexShrink: 0, whiteSpace: "nowrap" }}
         >
           <Megaphone size={15} />
           <span>Banners & Anuncios</span>
@@ -241,7 +241,7 @@ export default function MarketingPanel() {
           type="button"
           onClick={() => setActiveTab("gallery")}
           className={`admin-toolbar-pill${activeTab === "gallery" ? " admin-toolbar-pill--active" : ""}`}
-          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13 }}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", fontSize: 13, flexShrink: 0, whiteSpace: "nowrap" }}
         >
           <Grid size={15} />
           <span>Fotos de Instagram ({content.galleryPosts.length})</span>
@@ -250,7 +250,7 @@ export default function MarketingPanel() {
 
       {/* TAB 1: HERO PRINCIPAL */}
       {activeTab === "hero" && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
           {/* Text & CTAs configuration */}
           <AdminCard>
             <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
@@ -272,7 +272,7 @@ export default function MarketingPanel() {
                 />
               </AdminField>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <AdminField label="Título L1">
                   <input
                     type="text"
@@ -332,7 +332,7 @@ export default function MarketingPanel() {
                 />
               </AdminField>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <AdminField label="Botón Principal">
                   <input
                     type="text"

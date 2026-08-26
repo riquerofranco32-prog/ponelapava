@@ -148,7 +148,7 @@ export default function AdminReportesPage() {
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(h) => `${h}h`}
-                  interval={1}
+                  interval={2}
                 />
                 <YAxis
                   stroke="#9c9280"
@@ -176,31 +176,149 @@ export default function AdminReportesPage() {
         )}
       </AdminCard>
 
+      {/* Grid: Payment & Delivery Methods Breakdown */}
+      {stats && stats.orderCount > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+          {/* Payment Methods */}
+          <AdminCard>
+            <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
+              💳 Métodos de Pago ({days} días)
+            </h2>
+            {(() => {
+              const total = stats.orderCount || 1;
+              const transf = stats.paymentMethods?.transfer || 0;
+              const cash = stats.paymentMethods?.cash || 0;
+              const card = stats.paymentMethods?.card || 0;
+
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>⚡ Transferencia Bancaria (10% OFF)</span>
+                      <span style={{ color: "#10b981", fontWeight: 700 }}>
+                        {transf} ({Math.round((transf / total) * 100)}%)
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(transf / total) * 100}%`, background: "#10b981", borderRadius: 4 }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💵 Efectivo / Contraentrega</span>
+                      <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                        {cash} ({Math.round((cash / total) * 100)}%)
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(cash / total) * 100}%`, background: "var(--dash-accent)", borderRadius: 4 }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💳 Tarjeta de Crédito / Débito</span>
+                      <span style={{ color: "#60a5fa", fontWeight: 700 }}>
+                        {card} ({Math.round((card / total) * 100)}%)
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(card / total) * 100}%`, background: "#60a5fa", borderRadius: 4 }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </AdminCard>
+
+          {/* Delivery Methods */}
+          <AdminCard>
+            <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
+              🚚 Formas de Entrega ({days} días)
+            </h2>
+            {(() => {
+              const total = stats.orderCount || 1;
+              const pickup = stats.deliveryMethods?.pickup || 0;
+              const delivery = stats.deliveryMethods?.delivery || 0;
+
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>📦 Envío a Domicilio / Cadetería</span>
+                      <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                        {delivery} ({Math.round((delivery / total) * 100)}%)
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(delivery / total) * 100}%`, background: "linear-gradient(90deg, var(--dash-accent), #e2cead)", borderRadius: 4 }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>🏪 Retiro en Local / Tienda</span>
+                      <span style={{ color: "#34d399", fontWeight: 700 }}>
+                        {pickup} ({Math.round((pickup / total) * 100)}%)
+                      </span>
+                    </div>
+                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${(pickup / total) * 100}%`, background: "#34d399", borderRadius: 4 }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </AdminCard>
+        </div>
+      )}
+
+      {/* Top Products */}
       {stats && stats.topProducts.length > 0 && (
         <AdminCard>
-          <h2 className="admin-section-title">Más vendidos ({days} días)</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {stats.topProducts.map((p, i) => (
-              <div
-                key={p.name}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ color: "var(--dash-text)" }}>
-                  <span style={{ color: "var(--dash-muted)", marginRight: 8 }}>
-                    {i + 1}.
-                  </span>
-                  {p.name}
-                </span>
-                <span style={{ color: "var(--dash-muted)" }}>
-                  {p.quantity} vendidos
-                </span>
-              </div>
-            ))}
+          <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
+            🏆 Más vendidos ({days} días)
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {(() => {
+              const maxQty = stats.topProducts[0]?.quantity || 1;
+              const medals = ["🥇", "🥈", "🥉"];
+
+              return stats.topProducts.map((p, i) => (
+                <div key={p.name}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontSize: 13,
+                      marginBottom: 4,
+                    }}
+                  >
+                    <span style={{ color: "var(--dash-text)", fontWeight: 600 }}>
+                      <span style={{ marginRight: 8, fontSize: i < 3 ? 15 : 12 }}>
+                        {i < 3 ? medals[i] : `${i + 1}.`}
+                      </span>
+                      {p.name}
+                    </span>
+                    <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                      {p.quantity} vendidos
+                    </span>
+                  </div>
+                  <div style={{ height: 5, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                    <div
+                      style={{
+                        height: "100%",
+                        width: `${(p.quantity / maxQty) * 100}%`,
+                        background: i === 0 ? "var(--dash-accent)" : "var(--dash-muted)",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </div>
+                </div>
+              ));
+            })()}
           </div>
         </AdminCard>
       )}

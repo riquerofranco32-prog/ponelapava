@@ -66,16 +66,16 @@ export function ProductMobileCard({
               {getCategoryLabel(product.category)}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
             <a
               href={`/producto/${product.id}`}
               target="_blank"
               rel="noopener noreferrer"
               title="Ver en la tienda"
               className="admin-icon-btn"
-              style={{ textDecoration: "none", width: 28, height: 28 }}
+              style={{ textDecoration: "none", width: 32, height: 32 }}
             >
-              <ExternalLink size={13} />
+              <ExternalLink size={14} />
             </a>
             {onDuplicate && (
               <IconButton

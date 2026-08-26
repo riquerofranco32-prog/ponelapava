@@ -45,7 +45,7 @@ export function SalesAreaChart({
             tickLine={false}
             axisLine={false}
             interval={
-              chartData.length > 30 ? Math.ceil(chartData.length / 15) : 0
+              chartData.length > 7 ? Math.ceil(chartData.length / 6) : 0
             }
           />
           <YAxis

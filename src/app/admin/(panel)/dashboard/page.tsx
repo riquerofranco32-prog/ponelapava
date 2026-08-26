@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
     useAdminProducts();
 
   return (
-    <div>
+    <div className="admin-page-reveal">
       {loadError && <AdminErrorBanner message={loadError} />}
 
       <DashboardStats products={products} onStockChange={handleStockChange} />

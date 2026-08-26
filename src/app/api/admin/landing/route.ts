@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getLandingContent, updateLandingContent } from "@/lib/landing";
 import { LandingContent } from "@/types/landing";
 import { logAudit } from "@/lib/auditLog";
@@ -21,6 +22,12 @@ export async function PUT(request: NextRequest) {
     entityType: "settings",
     details: { section: "landing_content" },
   });
+
+  try {
+    revalidatePath("/");
+  } catch {
+    // ignore
+  }
 
   return NextResponse.json(updated);
 }

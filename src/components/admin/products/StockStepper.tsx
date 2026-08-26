@@ -74,23 +74,23 @@ export function StockStepper({
         disabled={localValue <= 0}
         onClick={() => step(-1)}
       >
-        <Minus size={12} />
+        <Minus size={13} />
       </StepButton>
       <span
         key={confirmedTick}
         className="admin-stock-pulse"
         style={{
-          minWidth: 22,
+          minWidth: 26,
           textAlign: "center",
-          fontSize: 13,
-          fontWeight: 600,
+          fontSize: 14,
+          fontWeight: 700,
           color: stockColor(localValue),
         }}
       >
         {localValue}
       </span>
       <StepButton label="Sumar una unidad" onClick={() => step(1)}>
-        <Plus size={12} />
+        <Plus size={13} />
       </StepButton>
     </div>
   );
@@ -114,7 +114,16 @@ function StepButton({
       disabled={disabled}
       aria-label={label}
       className="admin-icon-btn"
-      style={{ width: 22, height: 22, opacity: disabled ? 0.5 : 1 }}
+      style={{
+        width: 30,
+        height: 30,
+        opacity: disabled ? 0.4 : 1,
+        cursor: disabled ? "not-allowed" : "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+      }}
     >
       {children}
     </button>

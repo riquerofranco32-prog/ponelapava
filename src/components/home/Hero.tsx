@@ -59,6 +59,11 @@ export default function Hero({ content }: { content?: LandingHero }) {
         className="absolute inset-0 z-0 transition-transform duration-300 ease-out"
         style={{ transform: "scale(1.06) translate(0px, 0px)" }}
       >
+        {/* Ambient color orbs for depth & warmth */}
+        <span className="hero-orb hero-orb-1" aria-hidden="true" />
+        <span className="hero-orb hero-orb-2" aria-hidden="true" />
+        <span className="hero-orb hero-orb-3" aria-hidden="true" />
+
         {/* La imagen queda montada SIEMPRE como fallback debajo del video */}
         <Image
           src={hero.backgroundImage || "/hero_background_1786545961305.png"}
@@ -184,7 +189,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
               <Link
                 href={hero.ctaPrimaryLink || "/catalogo"}
                 id="hero-cta-catalogo"
-                className="inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-lg shadow-pava-gold/10"
+                className="cta-pulse-ring inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-lg shadow-pava-gold/10"
               >
                 {hero.ctaPrimaryText || "Explorar el catálogo"}
                 <span className="text-base" aria-hidden="true">

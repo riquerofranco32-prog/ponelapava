@@ -109,6 +109,7 @@ export function useAdminProducts() {
     categories,
     loading,
     loadError,
+    loadProducts,
     loadCategories,
     handleCreate,
     handleUpdate,

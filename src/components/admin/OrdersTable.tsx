@@ -321,7 +321,16 @@ export default function OrdersTable() {
           marginBottom: 16,
         }}
       >
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            overflowX: "auto",
+            paddingBottom: 4,
+            WebkitOverflowScrolling: "touch",
+            maxWidth: "100%",
+          }}
+        >
           {(
             [
               { value: "all", label: "Todos" },
@@ -337,7 +346,13 @@ export default function OrdersTable() {
               className={`admin-toolbar-pill${
                 statusFilter === f.value ? " admin-toolbar-pill--active" : ""
               }`}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+              }}
             >
               <span>{f.label}</span>
               <span
@@ -353,8 +368,8 @@ export default function OrdersTable() {
           ))}
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{ position: "relative" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", width: "100%", marginTop: 8 }}>
+          <div style={{ position: "relative", flex: "1 1 200px" }}>
             <Search
               size={14}
               style={{
@@ -371,10 +386,10 @@ export default function OrdersTable() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar cliente o producto..."
               className="admin-toolbar-input"
-              style={{ padding: "6px 14px 6px 30px", minWidth: 200 }}
+              style={{ padding: "6px 14px 6px 30px", width: "100%" }}
             />
           </div>
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
             {/* Quick date presets */}
             <div style={{ display: "flex", gap: 4, marginRight: 4 }}>
               <button
@@ -416,23 +431,25 @@ export default function OrdersTable() {
                 Este mes
               </button>
             </div>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              aria-label="Desde"
-              className="admin-toolbar-input"
-              style={{ padding: "6px 10px" }}
-            />
-            <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              aria-label="Hasta"
-              className="admin-toolbar-input"
-              style={{ padding: "6px 10px" }}
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                aria-label="Desde"
+                className="admin-toolbar-input"
+                style={{ padding: "4px 8px", fontSize: 12 }}
+              />
+              <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                aria-label="Hasta"
+                className="admin-toolbar-input"
+                style={{ padding: "4px 8px", fontSize: 12 }}
+              />
+            </div>
             {(dateFrom || dateTo) && (
               <button
                 onClick={() => {

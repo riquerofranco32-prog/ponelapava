@@ -1,9 +1,10 @@
 "use client";
 
-import { Eye, MessageCircle } from "lucide-react";
+import { Eye, MessageCircle, Printer } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice, truncate } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
+import { printOrderRemito } from "@/lib/orderPrint";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 
 export function OrderMobileCard({
@@ -72,6 +73,25 @@ export function OrderMobileCard({
               {order.customerName}
             </span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => printOrderRemito(order)}
+            title="Imprimir remito de despacho"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--dash-muted)",
+              padding: 2,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Printer size={14} />
+          </button>
+
           {order.customerPhone && (
             <a
               href={buildAdminCustomerWhatsAppUrl(

@@ -1,0 +1,245 @@
+/* ══════════════════════════════════════════════════════
+   ANIMATION ENHANCEMENTS — Landing & Admin
+   Importado desde globals.css
+   ══════════════════════════════════════════════════════ */
+
+/* ── Ambient orbs behind hero ───────────────────── */
+@keyframes orbFloat1 {
+  0%,100% { transform: translate(0,0) scale(1); opacity: 0.18; }
+  33%     { transform: translate(40px,-30px) scale(1.05); opacity: 0.28; }
+  66%     { transform: translate(-20px,20px) scale(0.95); opacity: 0.15; }
+}
+@keyframes orbFloat2 {
+  0%,100% { transform: translate(0,0) scale(1); opacity: 0.12; }
+  50%     { transform: translate(-55px,40px) scale(1.08); opacity: 0.22; }
+}
+@keyframes orbFloat3 {
+  0%,100% { transform: translate(0,0) scale(1); opacity: 0.10; }
+  40%     { transform: translate(30px,-50px) scale(1.12); opacity: 0.20; }
+  80%     { transform: translate(-15px,25px) scale(0.92); opacity: 0.08; }
+}
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+  will-change: transform, opacity;
+}
+.hero-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(199,166,122,0.35) 0%, transparent 70%);
+  top: -10%; left: -15%;
+  animation: orbFloat1 18s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(38,64,46,0.50) 0%, transparent 70%);
+  bottom: 5%; right: -10%;
+  animation: orbFloat2 22s ease-in-out infinite;
+}
+.hero-orb-3 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(199,166,122,0.20) 0%, transparent 70%);
+  top: 45%; left: 40%;
+  animation: orbFloat3 16s ease-in-out infinite;
+}
+
+/* ── CTA pulse ring ─────────────────────────────── */
+@keyframes ctaPulseRing {
+  0%  { box-shadow: 0 0 0 0 rgba(199,166,122,0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(199,166,122,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(199,166,122,0); }
+}
+.cta-pulse-ring {
+  animation: ctaPulseRing 2.4s ease-out infinite;
+}
+
+/* ── Gradient text ──────────────────────────────── */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #c7a67a 0%, #f0dab0 50%, #c7a67a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Hover underline reveal ─────────────────────── */
+.hover-underline-reveal {
+  position: relative;
+}
+.hover-underline-reveal::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0;
+  width: 0; height: 2px;
+  background: currentColor;
+  transition: width 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.hover-underline-reveal:hover::after { width: 100%; }
+
+/* ── Background dot pattern ─────────────────────── */
+.bg-dots-pattern {
+  background-image: radial-gradient(circle, rgba(38,64,46,0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.bg-diagonal-lines {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(199,166,122,0.04) 0px,
+    rgba(199,166,122,0.04) 1px,
+    transparent 1px,
+    transparent 14px
+  );
+}
+
+/* ── Grid items stagger in ──────────────────────── */
+@keyframes gridItemIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.grid-item-in {
+  animation: gridItemIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Section gradient line divider ─────────────── */
+.section-grad-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(38,64,46,0.18) 20%,
+    rgba(199,166,122,0.4) 50%,
+    rgba(38,64,46,0.18) 80%,
+    transparent
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   ADMIN ENHANCEMENTS
+   ══════════════════════════════════════════════════ */
+
+/* ── Glass surface ──────────────────────────────── */
+.admin-glass {
+  background: rgba(24,43,29,0.70);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(199,166,122,0.15);
+}
+.admin-glass--bright {
+  background: rgba(33,57,39,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(199,166,122,0.20);
+}
+
+/* ── KPI number animated reveal ────────────────── */
+@keyframes kpiNumberReveal {
+  from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.admin-kpi-number {
+  animation: kpiNumberReveal 0.55s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Dashboard page reveal ──────────────────────── */
+@keyframes adminPageReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.admin-page-reveal {
+  animation: adminPageReveal 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Admin top accent line ──────────────────────── */
+.admin-top-accent {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(199,166,122,0.3) 30%,
+    rgba(199,166,122,0.6) 50%,
+    rgba(199,166,122,0.3) 70%,
+    transparent
+  );
+  height: 1px;
+}
+
+/* ── Urgent neon border pulse (sin stock) ───────── */
+@keyframes neonBorderPulse {
+  0%,100% { border-color: rgba(229,154,122,0.35); box-shadow: 0 0 0 0 rgba(229,154,122,0.12); }
+  50%     { border-color: rgba(229,154,122,0.75); box-shadow: 0 0 10px 2px rgba(229,154,122,0.10); }
+}
+.admin-urgent-border {
+  animation: neonBorderPulse 2.8s ease-in-out infinite;
+}
+
+/* ── Row flash on update ────────────────────────── */
+@keyframes adminRowFlash {
+  0%   { background-color: rgba(199,166,122,0.18); }
+  100% { background-color: transparent; }
+}
+.admin-row-flash {
+  animation: adminRowFlash 1.2s ease-out;
+}
+
+/* ── Trend indicators ───────────────────────────── */
+@keyframes trendArrowUp {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-3px); }
+}
+.admin-trend-up   { color: var(--dash-success); animation: trendArrowUp 1.8s ease-in-out infinite; }
+.admin-trend-down { color: var(--dash-danger); }
+
+/* ── Card glow on hover ─────────────────────────── */
+.admin-card--glow:hover {
+  box-shadow:
+    0 8px 30px -4px rgba(199,166,122,0.18),
+    inset 0 0 0 1px rgba(199,166,122,0.12);
+}
+
+/* ── Button shimmer on hover ────────────────────── */
+.admin-btn--primary {
+  position: relative;
+  overflow: hidden;
+}
+.admin-btn--primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+  background-size: 250% 100%;
+  background-position: -100% 0;
+  transition: background-position 0.5s ease;
+  pointer-events: none;
+}
+.admin-btn--primary:hover::after {
+  background-position: 200% 0;
+}
+
+/* ── Sidebar nav active item shimmer ────────────── */
+@keyframes sidebarActiveShine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.admin-nav-item[aria-current="page"] {
+  background: linear-gradient(
+    100deg,
+    var(--dash-accent) 0%,
+    #d8c093 40%,
+    var(--dash-accent) 60%,
+    #c7a67a 100%
+  );
+  background-size: 200% auto;
+  color: #1e1b15;
+  font-weight: 600;
+  animation: sidebarActiveShine 4s linear infinite;
+}
+
+/* ── Reduced motion overrides ───────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-orb-1, .hero-orb-2, .hero-orb-3,
+  .cta-pulse-ring, .admin-kpi-number, .admin-page-reveal,
+  .admin-urgent-border, .admin-row-flash, .admin-trend-up,
+  .grid-item-in {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}

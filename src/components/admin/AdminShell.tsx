@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, ExternalLink, LogOut, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, LogOut, Search, Volume2, VolumeX } from "lucide-react";
 import { useAdminUserEmail } from "@/context/AdminUserContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { playOrderChime } from "@/lib/audioAlert";
 import PendingOrdersBadge from "@/components/admin/PendingOrdersBadge";
 import AdminCommandPalette from "@/components/admin/AdminCommandPalette";
 import AdminShortcutsModal from "@/components/admin/AdminShortcutsModal";
@@ -19,6 +20,7 @@ interface AdminShellProps {
 }
 
 const SIDEBAR_COLLAPSED_KEY = "pava-admin-sidebar-collapsed";
+const SOUND_ENABLED_KEY = "pava-admin-sound-enabled";
 // Bottom tab bar only has room for a few items — cap at 4, matching the
 // most-used sections (mirrors the sidebar order, no separate config needed).
 const MOBILE_TAB_COUNT = 4;
@@ -31,11 +33,70 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [clockTime, setClockTime] = useState<string | null>(null);
+  const prevCountRef = useRef<number | null>(null);
   const email = useAdminUserEmail();
   const pathname = usePathname();
   const activeItem =
     navItems.find((item) => pathname?.startsWith(item.href)) ?? navItems[0];
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SOUND_ENABLED_KEY);
+      if (saved !== null) {
+        setSoundEnabled(saved === "true");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function toggleSound() {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SOUND_ENABLED_KEY, String(next));
+      } catch {
+        // ignore
+      }
+      if (next) {
+        playOrderChime();
+      }
+      return next;
+    });
+  }
+
+  // Poll for incoming orders and trigger pleasant chime when a new order arrives
+  useEffect(() => {
+    let mounted = true;
+    async function checkPendingOrders() {
+      try {
+        const res = await fetch("/api/admin/orders/pending-count");
+        if (!res.ok) return;
+        const data = await res.json();
+        const currentCount = Number(data.count ?? 0);
+
+        if (prevCountRef.current !== null && currentCount > prevCountRef.current) {
+          if (soundEnabled) {
+            playOrderChime();
+          }
+        }
+        if (mounted) {
+          prevCountRef.current = currentCount;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    checkPendingOrders();
+    const interval = setInterval(checkPendingOrders, 20_000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [soundEnabled]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -148,28 +209,72 @@ export default function AdminShell({
             )}
           </svg>
         </button>
-        <span
-          style={{ fontWeight: 700, fontSize: 14, color: "var(--dash-text)" }}
-        >
-          Poné La Pava — Admin
-        </span>
-        <button
-          onClick={() => setPaletteOpen(true)}
-          aria-label="Buscar"
+        <div
           style={{
-            width: 44,
-            height: 44,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--dash-text)",
+            gap: 6,
+            minWidth: 0,
+            overflow: "hidden",
           }}
         >
-          <Search size={18} />
-        </button>
+          <span
+            style={{
+              fontWeight: 700,
+              fontSize: 14,
+              color: "var(--dash-text)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {activeItem.label}
+          </span>
+          <span style={{ fontSize: 11, color: "var(--dash-muted)" }}>•</span>
+          <span style={{ fontSize: 11, color: "var(--dash-accent)", fontWeight: 600 }}>
+            Admin
+          </span>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <button
+            onClick={toggleSound}
+            aria-label={soundEnabled ? "Silenciar timbre de pedidos" : "Activar timbre de pedidos"}
+            title={soundEnabled ? "Timbre de pedidos activado" : "Timbre silenciado"}
+            style={{
+              width: 38,
+              height: 38,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: soundEnabled ? "var(--dash-accent)" : "var(--dash-muted)",
+              borderRadius: 8,
+            }}
+          >
+            {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
+          <button
+            onClick={() => setPaletteOpen(true)}
+            aria-label="Buscar"
+            style={{
+              width: 38,
+              height: 38,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--dash-text)",
+              borderRadius: 8,
+            }}
+          >
+            <Search size={18} />
+          </button>
+        </div>
       </header>
 
       {/* ── MOBILE OVERLAY + DROPDOWN ── */}
@@ -377,6 +482,8 @@ export default function AdminShell({
           overflow: "hidden",
         }}
       >
+        {/* Gold accent line at the very top of the sidebar */}
+        <div className="admin-top-accent" />
         <div
           style={{
             display: "flex",
@@ -583,10 +690,10 @@ export default function AdminShell({
         style={{
           flex: 1,
           minHeight: "100vh",
-          paddingTop: "calc(56px + 16px)",
-          paddingBottom: "calc(64px + 20px)",
-          paddingLeft: 16,
-          paddingRight: 16,
+          paddingTop: "calc(56px + 14px)",
+          paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px) + 20px)",
+          paddingLeft: "max(12px, env(safe-area-inset-left, 0px))",
+          paddingRight: "max(12px, env(safe-area-inset-right, 0px))",
         }}
         className="lg:pt-6 lg:pb-10 lg:px-10"
       >
@@ -666,6 +773,25 @@ export default function AdminShell({
               >
                 ⌘K
               </kbd>
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="admin-btn admin-btn--secondary"
+              style={{
+                fontSize: 12,
+                padding: "0 10px",
+                height: 32,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                color: soundEnabled ? "var(--dash-accent)" : "var(--dash-muted)",
+              }}
+              title={soundEnabled ? "Timbre de pedidos activado (Click para silenciar)" : "Timbre de pedidos silenciado (Click para activar)"}
+            >
+              {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+              <span className="hidden xl:inline">{soundEnabled ? "Alertas ON" : "Silenciado"}</span>
             </button>
 
             <button

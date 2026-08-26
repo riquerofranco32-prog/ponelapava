@@ -27,11 +27,11 @@ export default function AboutSection() {
             </div>
 
             {/* Floating card */}
-            <div className="absolute bottom-5 right-0 translate-x-4 border border-pava-cream/30 bg-pava-brown/80 px-5 py-4 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:translate-x-6 lg:translate-x-8">
+            <div className="absolute bottom-4 right-3 translate-x-0 border border-pava-cream/30 bg-pava-brown/90 px-4 py-3 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:right-0 sm:translate-x-6 sm:px-5 sm:py-4 lg:translate-x-8">
               <span className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-gold">
                 Desde Argentina
               </span>
-              <span className="mt-1 block font-display text-lg font-bold">
+              <span className="mt-1 block font-display text-base font-bold sm:text-lg">
                 Para cada ronda
               </span>
             </div>

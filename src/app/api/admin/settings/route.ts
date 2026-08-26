@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import {
   getSiteSettings,
   updateSiteSettings,
@@ -24,6 +25,13 @@ export async function PUT(request: NextRequest) {
     entityType: "settings",
     details: { ...input },
   });
+
+  try {
+    revalidatePath("/");
+    revalidatePath("/catalogo");
+  } catch {
+    // ignore
+  }
 
   return NextResponse.json(settings);
 }

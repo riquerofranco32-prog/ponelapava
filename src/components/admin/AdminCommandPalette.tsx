@@ -320,11 +320,11 @@ export default function AdminCommandPalette({
             borderBottom: "1px solid var(--dash-border)",
           }}
         >
-          <Search size={18} style={{ color: "var(--dash-accent)" }} />
+          <Search size={18} style={{ color: "var(--dash-accent)", flexShrink: 0 }} />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar páginas, productos, clientes o acciones... (↑↓ para navegar)"
+            placeholder="Buscar páginas, productos, clientes..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -337,19 +337,21 @@ export default function AdminCommandPalette({
               border: "none",
               outline: "none",
               color: "var(--dash-text)",
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: 500,
+              minWidth: 0,
             }}
           />
           <kbd
             style={{
-              fontSize: 11,
+              fontSize: 10,
               padding: "2px 6px",
               borderRadius: 4,
               background: "var(--dash-surface-elevated)",
               border: "1px solid var(--dash-border)",
               color: "var(--dash-text-muted)",
               fontFamily: "monospace",
+              flexShrink: 0,
             }}
           >
             ESC
@@ -490,8 +492,11 @@ export default function AdminCommandPalette({
             color: "var(--dash-text-muted)",
           }}
         >
-          <span>
+          <span className="hidden sm:inline">
             Navegá con <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↑</kbd> <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↓</kbd> y seleccioná con <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↵</kbd>
+          </span>
+          <span className="sm:hidden">
+            Tocá cualquier opción para abrir
           </span>
           <span>Poné La Pava Admin</span>
         </div>

@@ -71,7 +71,7 @@ export function AdminKpiCard({
     <div
       onClick={onClick}
       className={cn(
-        "admin-card admin-card--interactive group",
+        "admin-card admin-card--interactive admin-card--glow group",
         active && "border-pava-gold ring-1 ring-pava-gold",
       )}
       style={{
@@ -123,6 +123,7 @@ export function AdminKpiCard({
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
         <span
+          className="admin-kpi-number"
           style={{
             fontFamily: "var(--font-playfair), Georgia, serif",
             fontSize: 28,

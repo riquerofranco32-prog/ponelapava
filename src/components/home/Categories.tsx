@@ -52,24 +52,32 @@ export default async function Categories() {
 
         {/* Photo cards — real category imagery instead of generic icons.
             First card gets the bento hero spot on desktop. */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:gap-5">
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 lg:gap-5">
           {categories.map((cat, i) => {
-            const isTrailing =
-              remainder > 0 && i >= categories.length - remainder;
+            // Mobile: if odd count, first card spans 2 columns. If even count, first card is 1 col on mobile or last card spans 2 if odd remainder.
+            const isFirst = i === 0;
+            const isLast = i === categories.length - 1;
+            const isOddTotal = categories.length % 2 !== 0;
+
+            let mobileSpan = "col-span-1";
+            if (isOddTotal && isFirst) {
+              mobileSpan = "col-span-2";
+            }
+
+            const desktopSpan = isFirst
+              ? "sm:col-span-1 lg:col-span-2 lg:row-span-2"
+              : remainder > 0 && i >= categories.length - remainder
+                ? trailingSpanClass
+                : "sm:col-span-1 lg:col-span-2";
+
             return (
               <ScrollReveal
                 key={cat.id}
                 direction="up"
-                delay={i * 60}
-                className={
-                  i === 0
-                    ? "col-span-2 sm:col-span-1 lg:col-span-2 lg:row-span-2"
-                    : isTrailing
-                      ? trailingSpanClass
-                      : ""
-                }
+                delay={i * 50}
+                className={`${mobileSpan} ${desktopSpan}`}
               >
-                <CategoryCard cat={cat} featured={i === 0} />
+                <CategoryCard cat={cat} featured={isFirst} />
               </ScrollReveal>
             );
           })}

@@ -261,171 +261,350 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
             )}
           </div>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Descuento</th>
-                  <th>Período de Validez</th>
-                  <th>Estado</th>
-                  <th style={{ textAlign: "right" }}>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCoupons.map((coupon) => {
-                  const expired = isExpired(coupon);
-                  const isCopied = copiedCode === coupon.code;
-                  return (
-                    <tr key={coupon.id}>
-                      <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <>
+            {/* Desktop Table View */}
+            <div className="admin-desktop-only" style={{ overflowX: "auto" }}>
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descuento</th>
+                    <th>Período de Validez</th>
+                    <th>Estado</th>
+                    <th style={{ textAlign: "right" }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCoupons.map((coupon) => {
+                    const expired = isExpired(coupon);
+                    const isCopied = copiedCode === coupon.code;
+                    return (
+                      <tr key={coupon.id}>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span
+                              style={{
+                                fontFamily: "monospace",
+                                fontWeight: 700,
+                                fontSize: 13,
+                                background: "var(--dash-surface-elevated)",
+                                color: "var(--dash-text)",
+                                padding: "3px 8px",
+                                borderRadius: "var(--radius-chip)",
+                                border: "1px solid var(--dash-border)",
+                                letterSpacing: "0.06em",
+                              }}
+                            >
+                              {coupon.code}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(coupon.code)}
+                              title="Copiar código del cupón"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: 4,
+                                color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                borderRadius: 4,
+                              }}
+                            >
+                              {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                            </button>
+                          </div>
+                        </td>
+                        <td>
                           <span
                             style={{
-                              fontFamily: "monospace",
-                              fontWeight: 700,
-                              fontSize: 13,
-                              background: "var(--dash-surface-elevated)",
-                              color: "var(--dash-text)",
-                              padding: "3px 8px",
-                              borderRadius: "var(--radius-chip)",
-                              border: "1px solid var(--dash-border)",
-                              letterSpacing: "0.06em",
+                              fontWeight: 600,
+                              color: "var(--dash-accent)",
+                              fontSize: 14,
                             }}
                           >
-                            {coupon.code}
+                            {coupon.discountType === "percent"
+                              ? `${coupon.discountValue}% OFF`
+                              : `${formatPrice(coupon.discountValue)} OFF`}
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(coupon.code)}
-                            title="Copiar código del cupón"
+                        </td>
+                        <td>
+                          <div
                             style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              padding: 4,
-                              color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
-                              display: "inline-flex",
+                              fontSize: 12,
+                              color: "var(--dash-text-muted)",
+                              display: "flex",
                               alignItems: "center",
-                              borderRadius: 4,
+                              gap: 4,
                             }}
                           >
-                            {isCopied ? <Check size={13} /> : <Copy size={13} />}
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            fontWeight: 600,
-                            color: "var(--dash-accent)",
-                            fontSize: 14,
-                          }}
-                        >
-                          {coupon.discountType === "percent"
-                            ? `${coupon.discountValue}% OFF`
-                            : `${formatPrice(coupon.discountValue)} OFF`}
-                        </span>
-                      </td>
-                      <td>
-                        <div
-                          style={{
-                            fontSize: 12,
-                            color: "var(--dash-text-muted)",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 4,
-                          }}
-                        >
-                          <Calendar size={13} />
-                          {coupon.validFrom || coupon.validUntil ? (
-                            <span>
-                              {coupon.validFrom
-                                ? new Date(coupon.validFrom).toLocaleDateString("es-AR")
-                                : "Inicio"}{" "}
-                              al{" "}
-                              {coupon.validUntil
-                                ? new Date(coupon.validUntil).toLocaleDateString("es-AR")
-                                : "Sin límite"}
+                            <Calendar size={13} />
+                            {coupon.validFrom || coupon.validUntil ? (
+                              <span>
+                                {coupon.validFrom
+                                  ? new Date(coupon.validFrom).toLocaleDateString("es-AR")
+                                  : "Inicio"}{" "}
+                                al{" "}
+                                {coupon.validUntil
+                                  ? new Date(coupon.validUntil).toLocaleDateString("es-AR")
+                                  : "Sin límite"}
+                              </span>
+                            ) : (
+                              <span>Siempre válido</span>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          {expired ? (
+                            <span
+                              className="admin-badge"
+                              style={{
+                                background: "rgba(220, 38, 38, 0.12)",
+                                color: "var(--dash-danger)",
+                                border: "1px solid rgba(220, 38, 38, 0.25)",
+                              }}
+                            >
+                              <XCircle size={12} style={{ marginRight: 4 }} />
+                              Expirado
+                            </span>
+                          ) : coupon.active ? (
+                            <span
+                              className="admin-badge"
+                              style={{
+                                background: "rgba(34, 197, 94, 0.12)",
+                                color: "var(--dash-success, #16a34a)",
+                                border: "1px solid rgba(34, 197, 94, 0.25)",
+                              }}
+                            >
+                              <CheckCircle2 size={12} style={{ marginRight: 4 }} />
+                              Activo
                             </span>
                           ) : (
-                            <span>Siempre válido</span>
+                            <span
+                              className="admin-badge"
+                              style={{
+                                background: "var(--dash-surface-elevated)",
+                                color: "var(--dash-text-muted)",
+                                border: "1px solid var(--dash-border)",
+                              }}
+                            >
+                              Pausado
+                            </span>
                           )}
-                        </div>
-                      </td>
-                      <td>
-                        {expired ? (
-                          <span
-                            className="admin-badge"
+                        </td>
+                        <td style={{ textAlign: "right" }}>
+                          <div
                             style={{
-                              background: "rgba(220, 38, 38, 0.12)",
-                              color: "var(--dash-danger)",
-                              border: "1px solid rgba(220, 38, 38, 0.25)",
+                              display: "inline-flex",
+                              gap: 6,
+                              alignItems: "center",
                             }}
                           >
-                            <XCircle size={12} style={{ marginRight: 4 }} />
-                            Expirado
-                          </span>
-                        ) : coupon.active ? (
-                          <span
-                            className="admin-badge"
-                            style={{
-                              background: "rgba(34, 197, 94, 0.12)",
-                              color: "var(--dash-success, #16a34a)",
-                              border: "1px solid rgba(34, 197, 94, 0.25)",
-                            }}
-                          >
-                            <CheckCircle2 size={12} style={{ marginRight: 4 }} />
-                            Activo
-                          </span>
-                        ) : (
-                          <span
-                            className="admin-badge"
-                            style={{
-                              background: "var(--dash-surface-elevated)",
-                              color: "var(--dash-text-muted)",
-                              border: "1px solid var(--dash-border)",
-                            }}
-                          >
-                            Pausado
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        <div
+                            <button
+                              type="button"
+                              onClick={() => handleToggleActive(coupon)}
+                              className="admin-btn admin-btn--secondary"
+                              style={{ fontSize: 12, padding: "4px 8px" }}
+                            >
+                              {coupon.active ? "Pausar" : "Activar"}
+                            </button>
+                            <IconButton
+                              icon={Pencil}
+                              title="Editar cupón"
+                              onClick={() => setEditing(coupon)}
+                            />
+                            <IconButton
+                              icon={Trash2}
+                              title="Eliminar cupón"
+                              danger
+                              onClick={() => setDeleting(coupon)}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card List View */}
+            <div className="admin-mobile-only" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {filteredCoupons.map((coupon, index) => {
+                const expired = isExpired(coupon);
+                const isCopied = copiedCode === coupon.code;
+                return (
+                  <div
+                    key={coupon.id}
+                    className="admin-row-in"
+                    style={
+                      {
+                        padding: 14,
+                        background: "var(--dash-surface)",
+                        border: "1px solid var(--dash-border)",
+                        borderRadius: 10,
+                        "--i": index,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {/* Header: Code + Copy + Status */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
                           style={{
-                            display: "inline-flex",
-                            gap: 6,
-                            alignItems: "center",
+                            fontFamily: "monospace",
+                            fontWeight: 700,
+                            fontSize: 14,
+                            background: "var(--dash-surface-elevated)",
+                            color: "var(--dash-text)",
+                            padding: "3px 8px",
+                            borderRadius: "var(--radius-chip)",
+                            border: "1px solid var(--dash-border)",
+                            letterSpacing: "0.06em",
                           }}
                         >
-                          <button
-                            type="button"
-                            onClick={() => handleToggleActive(coupon)}
-                            className="admin-btn admin-btn--secondary"
-                            style={{ fontSize: 12, padding: "4px 8px" }}
-                          >
-                            {coupon.active ? "Pausar" : "Activar"}
-                          </button>
-                          <IconButton
-                            icon={Pencil}
-                            title="Editar cupón"
-                            onClick={() => setEditing(coupon)}
-                          />
-                          <IconButton
-                            icon={Trash2}
-                            title="Eliminar cupón"
-                            danger
-                            onClick={() => setDeleting(coupon)}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          {coupon.code}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(coupon.code)}
+                          title="Copiar código del cupón"
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: 6,
+                            color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            borderRadius: 4,
+                          }}
+                        >
+                          {isCopied ? <Check size={15} /> : <Copy size={15} />}
+                        </button>
+                      </div>
+
+                      {expired ? (
+                        <span
+                          className="admin-badge"
+                          style={{
+                            background: "rgba(220, 38, 38, 0.12)",
+                            color: "var(--dash-danger)",
+                            border: "1px solid rgba(220, 38, 38, 0.25)",
+                            fontSize: 11,
+                          }}
+                        >
+                          <XCircle size={11} style={{ marginRight: 3 }} />
+                          Expirado
+                        </span>
+                      ) : coupon.active ? (
+                        <span
+                          className="admin-badge"
+                          style={{
+                            background: "rgba(34, 197, 94, 0.12)",
+                            color: "var(--dash-success, #16a34a)",
+                            border: "1px solid rgba(34, 197, 94, 0.25)",
+                            fontSize: 11,
+                          }}
+                        >
+                          <CheckCircle2 size={11} style={{ marginRight: 3 }} />
+                          Activo
+                        </span>
+                      ) : (
+                        <span
+                          className="admin-badge"
+                          style={{
+                            background: "var(--dash-surface-elevated)",
+                            color: "var(--dash-text-muted)",
+                            border: "1px solid var(--dash-border)",
+                            fontSize: 11,
+                          }}
+                        >
+                          Pausado
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Discount & Validity */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, margin: "10px 0" }}>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          color: "var(--dash-accent)",
+                          fontSize: 16,
+                        }}
+                      >
+                        {coupon.discountType === "percent"
+                          ? `${coupon.discountValue}% OFF`
+                          : `${formatPrice(coupon.discountValue)} OFF`}
+                      </span>
+
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "var(--dash-text-muted)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <Calendar size={12} />
+                        {coupon.validFrom || coupon.validUntil ? (
+                          <span>
+                            {coupon.validFrom
+                              ? new Date(coupon.validFrom).toLocaleDateString("es-AR")
+                              : "Inicio"}{" "}
+                            al{" "}
+                            {coupon.validUntil
+                              ? new Date(coupon.validUntil).toLocaleDateString("es-AR")
+                              : "Sin límite"}
+                          </span>
+                        ) : (
+                          <span>Siempre válido</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions Bar */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        borderTop: "1px solid var(--dash-border)",
+                        paddingTop: 10,
+                        marginTop: 10,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleToggleActive(coupon)}
+                        className="admin-btn admin-btn--secondary"
+                        style={{ fontSize: 12, padding: "6px 12px" }}
+                      >
+                        {coupon.active ? "Pausar Cupón" : "Activar Cupón"}
+                      </button>
+
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <IconButton
+                          icon={Pencil}
+                          title="Editar cupón"
+                          onClick={() => setEditing(coupon)}
+                        />
+                        <IconButton
+                          icon={Trash2}
+                          title="Eliminar cupón"
+                          danger
+                          onClick={() => setDeleting(coupon)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </AdminCard>
 

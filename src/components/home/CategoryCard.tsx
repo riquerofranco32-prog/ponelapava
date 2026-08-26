@@ -42,19 +42,24 @@ export default function CategoryCard({
         className="spotlight-overlay absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
       <div
-        className={`absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3.5 sm:p-4 ${featured ? "lg:p-6" : ""}`}
+        className={`absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 sm:p-5 ${featured ? "lg:p-7" : ""}`}
       >
-        {cat.icon && (
-          <span
-            className={`leading-none ${featured ? "text-2xl lg:text-3xl" : "text-lg"}`}
-            aria-hidden="true"
-          >
-            {cat.icon}
+        <div className="flex items-center justify-between gap-2">
+          {cat.icon && (
+            <span
+              className={`leading-none transition-transform duration-300 group-hover:-translate-y-1 ${featured ? "text-3xl lg:text-4xl" : "text-xl sm:text-2xl"}`}
+              aria-hidden="true"
+            >
+              {cat.icon}
+            </span>
+          )}
+          <span className="opacity-0 translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 text-pava-gold text-xs font-bold">
+            Ver →
           </span>
-        )}
+        </div>
         <span
-          className={`font-semibold uppercase tracking-[0.12em] text-pava-cream ${
-            featured ? "text-xs lg:text-base" : "text-[11px] sm:text-xs"
+          className={`font-display font-bold uppercase tracking-[0.1em] text-pava-cream drop-shadow-sm ${
+            featured ? "text-sm sm:text-base lg:text-lg" : "text-xs sm:text-sm"
           }`}
         >
           {cat.name}

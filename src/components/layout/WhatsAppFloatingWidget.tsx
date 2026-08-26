@@ -18,11 +18,11 @@ interface QuickOption {
 
 const QUICK_OPTIONS: QuickOption[] = [
   {
-    id: "custom",
+    id: "asesoramiento",
     icon: Sparkles,
-    title: "Armar set personalizado",
-    desc: "Mates grabados, combos para regalo o empresas",
-    message: "¡Hola Poné La Pava! 👋 Quisiera asesoramiento para armar un set matero personalizado / grabado.",
+    title: "Asesoramiento matero",
+    desc: "Te ayudamos a elegir tu mate o combo ideal",
+    message: "¡Hola Poné La Pava! 👋 Quisiera asesoramiento para elegir mi mate / armar un set matero.",
   },
   {
     id: "local",

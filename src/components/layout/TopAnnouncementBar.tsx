@@ -30,10 +30,10 @@ const ANNOUNCEMENTS: Announcement[] = [
     text: "a Río Negro, Neuquén y todo el país",
   },
   {
-    id: "custom",
+    id: "calidad",
     icon: Sparkles,
-    highlight: "Personalizados",
-    text: "Grabados láser en mates de calabaza e imperial",
+    highlight: "Calidad Artesanal",
+    text: "Mates de calabaza seleccionada, alpaca y cuero genuino",
   },
 ];
 

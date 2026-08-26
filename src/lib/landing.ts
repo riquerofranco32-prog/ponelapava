@@ -33,9 +33,9 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
       text: "a Río Negro, Neuquén y todo el país",
     },
     {
-      id: "custom",
-      highlight: "Personalizados",
-      text: "Grabados láser en mates de calabaza e imperial",
+      id: "calidad",
+      highlight: "Calidad Artesanal",
+      text: "Mates de calabaza seleccionada, alpaca y cuero genuino",
     },
   ],
   promoBanner: {

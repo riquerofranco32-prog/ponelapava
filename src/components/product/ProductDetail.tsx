@@ -39,6 +39,7 @@ export default function ProductDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showCuradoSteps, setShowCuradoSteps] = useState(false);
   const { addItem, setDrawer } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.id);
@@ -273,35 +274,67 @@ export default function ProductDetail({
 
             {/* Category Contextual Care / Ritual Guide */}
             <div className="mb-8 rounded-card bg-pava-cream-dark/60 border border-pava-brown/10 p-4">
-              <div className="flex items-center gap-2 mb-2 font-display text-sm font-bold text-pava-brown">
-                <span className="text-base">
-                  {product.category === "mates"
-                    ? "🧉"
-                    : product.category === "yerbas"
-                      ? "🌿"
-                      : product.category === "termos"
-                        ? "🌡️"
-                        : "✨"}
-                </span>
-                <span>
-                  {product.category === "mates"
-                    ? "Consejo Matero: Curado y Cuidado"
-                    : product.category === "yerbas"
-                      ? "Perfil y Recomendación de Cebado"
-                      : product.category === "termos"
-                        ? "Rendimiento Térmico y Conservación"
-                        : "Garantía y Experiencia Poné La Pava"}
-                </span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 font-display text-sm font-bold text-pava-brown">
+                  <span className="text-base">
+                    {product.category === "mates"
+                      ? "🧉"
+                      : product.category === "yerbas"
+                        ? "🌿"
+                        : product.category === "termos"
+                          ? "🌡️"
+                          : "✨"}
+                  </span>
+                  <span>
+                    {product.category === "mates"
+                      ? "Guía de Curado y Cuidado del Mate"
+                      : product.category === "yerbas"
+                        ? "Perfil y Recomendación de Cebado"
+                        : product.category === "termos"
+                          ? "Rendimiento Térmico y Conservación"
+                          : "Garantía y Experiencia Poné La Pava"}
+                  </span>
+                </div>
+                {product.category === "mates" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCuradoSteps(!showCuradoSteps)}
+                    className="text-[11px] font-semibold text-pava-green hover:underline cursor-pointer"
+                  >
+                    {showCuradoSteps ? "Ocultar pasos" : "Ver 4 pasos"}
+                  </button>
+                )}
               </div>
               <p className="text-xs text-pava-brown-mid/80 leading-relaxed">
                 {product.category === "mates"
-                  ? "Si es de calabaza o madera, curalo con yerba húmeda durante 24hs antes de su primer uso y secalo siempre boca arriba. Los de acero o vidrio no requieren curado previo."
+                  ? "Si es de calabaza o madera, curalo antes del primer uso para sellar los poros y lograr el mejor sabor en cada ronda."
                   : product.category === "yerbas"
                     ? "Recomendamos cebar con agua a 75°C - 80°C. Verté primero un chorrito de agua tibia para hidratar la yerba y no quemar la montañita."
                     : product.category === "termos"
                       ? "Para máxima retención de temperatura durante todo el día, templá el termo con un chorro de agua caliente durante 1 minuto antes del llenado definitivo."
                       : "Producto 100% original seleccionado con el sello de calidad de Poné La Pava Catriel. Asesoramiento personalizado post-venta."}
               </p>
+
+              {product.category === "mates" && showCuradoSteps && (
+                <div className="mt-3.5 pt-3 border-t border-pava-brown/10 space-y-2.5 text-xs text-pava-brown">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">1</span>
+                    <p><strong>Enjuague inicial:</strong> Lavá el interior solo con agua tibia (sin detergente ni agua hirviendo).</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">2</span>
+                    <p><strong>Llenado con yerba:</strong> Colocá yerba usada húmeda hasta el tope y agregá un chorrito de agua tibia. Dejá reposar 24 hs.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">3</span>
+                    <p><strong>Raspado suave:</strong> Vaciá el mate y con una cuchara sopera raspá suavemente las paredes interiores para desprender el hollejo suelto.</p>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">4</span>
+                    <p><strong>Secado correcto:</strong> Repetí el proceso 1 o 2 veces más. Luego, secá siempre el mate boca arriba o de costado en un lugar ventilado.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Meta */}

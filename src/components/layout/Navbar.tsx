@@ -174,16 +174,25 @@ export default function Navbar() {
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className={cn(
-                  "hidden lg:flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 border",
+                  "hidden lg:flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200 border cursor-pointer",
                   isScrolled
-                    ? "bg-pava-brown/5 border-pava-brown/10 text-pava-brown/70 hover:bg-pava-brown/10 hover:text-pava-green"
-                    : "bg-pava-cream/10 border-pava-cream/20 text-pava-cream/80 hover:bg-pava-cream/20 hover:text-pava-cream",
+                    ? "bg-pava-brown/5 border-pava-brown/12 text-pava-brown/75 hover:bg-pava-brown/10 hover:text-pava-green"
+                    : "bg-white/10 border-white/25 text-pava-cream hover:bg-white/20 hover:text-white backdrop-blur-sm shadow-sm",
                 )}
                 aria-label="Buscar productos (Ctrl+K)"
               >
-                <Search size={14} />
+                <Search size={13} className="shrink-0 opacity-85" />
                 <span>Buscar</span>
-                <kbd className="text-[10px] font-mono px-1 py-0.5 rounded bg-pava-brown/10 text-inherit opacity-75">⌘K</kbd>
+                <kbd
+                  className={cn(
+                    "text-[10px] font-mono px-1.5 py-0.5 rounded border text-inherit",
+                    isScrolled
+                      ? "bg-pava-brown/10 border-pava-brown/15 opacity-75"
+                      : "bg-white/15 border-white/25 text-white opacity-95",
+                  )}
+                >
+                  ⌘K
+                </kbd>
               </button>
 
               {/* Search trigger — mobile */}

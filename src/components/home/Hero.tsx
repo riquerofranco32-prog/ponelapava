@@ -80,10 +80,10 @@ export default function Hero({ content }: { content?: LandingHero }) {
             <source src={hero.videoUrl} type="video/mp4" />
           </video>
         )}
-        {/* Multi-layer gradient for editorial feel */}
+        {/* Multi-layer gradient for editorial feel and crystal clear navbar readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-pava-brown via-pava-brown/55 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/80 via-pava-brown/25 to-transparent" />
-        <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-pava-brown/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-pava-brown/85 via-pava-brown/30 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-52 bg-gradient-to-b from-pava-brown/85 via-pava-brown/40 to-transparent" />
       </div>
 
       {/* Vertical brand text — editorial decoration */}
@@ -106,22 +106,21 @@ export default function Hero({ content }: { content?: LandingHero }) {
         <span className="block h-16 w-px bg-pava-cream/40" />
       </div>
 
-      {/* Main content — fills screen, content at bottom; shallower parallax depth than bg */}
-      {/* pt matches Navbar's initial height (h-20 lg:h-24) so content never renders under the fixed header on short viewports */}
+      {/* Main content — fills screen, with safe top clearance under fixed announcement + navbar */}
       <div
         ref={contentRef}
-        className="relative z-10 flex flex-1 flex-col justify-end pt-20 transition-transform duration-300 ease-out lg:pt-24"
+        className="relative z-10 flex flex-1 flex-col justify-end pt-36 sm:pt-40 lg:pt-44 pb-14 sm:pb-16 lg:pb-20 transition-transform duration-300 ease-out"
         style={{ transform: "translate(0px, 0px)" }}
       >
-        <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8 sm:pb-20 lg:px-10 lg:pb-24">
+        <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10">
           {/* Tag line — shimmer badge */}
           <div
-            className={`mb-6 flex items-center gap-3 sm:mb-8
+            className={`mb-5 flex items-center gap-3 sm:mb-7
               transition-all duration-700 ease-out delay-100
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           >
             <span className="h-px w-10 bg-pava-gold" />
-            <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-pava-gold/40 bg-pava-cream/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold backdrop-blur-[2px] sm:text-[11px]">
+            <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-pava-gold/40 bg-pava-cream/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold backdrop-blur-[2px] sm:text-[11px]">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-pava-gold animate-pulse-dot" />
               {hero.badge || "Poné La Pava · Tienda Matera"}
               <span className="shine-sweep" aria-hidden="true" />

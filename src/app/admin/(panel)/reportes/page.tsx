@@ -10,10 +10,11 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { DollarSign, ShoppingCart, Receipt } from "lucide-react";
+import { DollarSign, ShoppingCart, Receipt, Download } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
 import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
+import { AdminButton } from "@/components/admin/AdminButton";
 import { KpiSkeleton } from "@/components/admin/TableSkeleton";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { SalesAreaChart } from "@/components/admin/SalesAreaChart";
@@ -31,6 +32,35 @@ function kpiDelta(pct: number | null) {
     change: `${Math.abs(Math.round(pct))}%`,
     trend: (pct >= 0 ? "up" : "down") as "up" | "down",
   };
+}
+
+function exportReportsCsv(stats: Stats, days: number) {
+  const lines: string[] = [
+    `"Reporte de Ventas Poné La Pava - Últimos ${days} días"`,
+    `"Fecha de generación","${new Date().toLocaleString("es-AR")}"`,
+    `"Total Ingresos","${stats.totalRevenue}"`,
+    `"Total Pedidos","${stats.orderCount}"`,
+    `"Ticket Promedio","${stats.avgTicket}"`,
+    "",
+    `"Ventas por Día"`,
+    `"Fecha","Total Ventas ($)"`,
+    ...stats.salesByDay.map(
+      (d) => `"${d.date}","${d.total}"`,
+    ),
+    "",
+    `"Productos Más Vendidos"`,
+    `"Producto","Unidades Vendidas"`,
+    ...stats.topProducts.map((p) => `"${p.name.replace(/"/g, '""')}","${p.quantity}"`),
+  ];
+
+  const csv = lines.join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reporte-ventas-ponelapava-${days}dias-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function AdminReportesPage() {
@@ -59,21 +89,43 @@ export default function AdminReportesPage() {
   );
 
   return (
-    <div>
+    <div className="admin-page-reveal">
       {error && <AdminErrorBanner message={error} />}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        {RANGES.map((r) => (
-          <button
-            key={r.days}
-            onClick={() => setDays(r.days)}
-            className="admin-nav-item"
-            aria-current={days === r.days ? "page" : undefined}
-            style={{ padding: "6px 14px", width: "auto" }}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 10,
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ display: "flex", gap: 8 }}>
+          {RANGES.map((r) => (
+            <button
+              key={r.days}
+              onClick={() => setDays(r.days)}
+              className="admin-nav-item"
+              aria-current={days === r.days ? "page" : undefined}
+              style={{ padding: "6px 14px", width: "auto" }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        {stats && (
+          <AdminButton
+            variant="secondary"
+            onClick={() => exportReportsCsv(stats, days)}
+            title="Descargar reporte en formato CSV / Excel"
           >
-            {r.label}
-          </button>
-        ))}
+            <Download size={14} />
+            Exportar CSV
+          </AdminButton>
+        )}
       </div>
 
       {loading || !stats ? (

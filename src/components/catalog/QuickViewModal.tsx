@@ -81,7 +81,7 @@ export default function QuickViewModal({
         role="dialog"
         aria-modal="true"
         aria-label={product.name}
-        className="grid max-h-[90vh] w-full max-w-3xl grid-cols-1 overflow-y-auto bg-white sm:grid-cols-2"
+        className="grid max-h-[90vh] w-full max-w-3xl grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-2xl border border-pava-brown/10 sm:grid-cols-2"
       >
         <div className="relative aspect-square shrink-0 bg-pava-cream-dark sm:aspect-auto">
           <Image

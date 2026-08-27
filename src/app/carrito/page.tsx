@@ -27,7 +27,7 @@ import { isStoreOpenNow, getNextOpeningLabel } from "@/lib/hours";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
-import type { ProductStatus } from "@/types";
+import type { Product, ProductStatus } from "@/types";
 
 export default function CartPage() {
   const {
@@ -50,7 +50,7 @@ export default function CartPage() {
   const [paymentMethod, setPaymentMethod] = useState<"transfer" | "cash" | "card">("transfer");
   
   // Upsell state
-  const [suggestedProducts, setSuggestedProducts] = useState<any[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   
   // Coupon state
   const [couponCode, setCouponCode] = useState("");
@@ -76,11 +76,11 @@ export default function CartPage() {
   useEffect(() => {
     fetch("/api/products/search?q=")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: Product[]) => {
         if (Array.isArray(data)) {
           // pick items not currently in cart
           const cartIds = new Set(items.map((i) => i.product.id));
-          const available = data.filter((p: any) => !cartIds.has(p.id) && p.status !== "out_of_stock");
+          const available = data.filter((p) => !cartIds.has(p.id) && p.status !== "out_of_stock");
           setSuggestedProducts(available.slice(0, 4));
         }
       })

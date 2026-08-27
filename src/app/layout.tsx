@@ -3,6 +3,7 @@ import { Montserrat, Playfair_Display, Caveat } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { ComparisonProvider } from "@/context/ComparisonContext";
 import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import SiteChrome from "@/components/layout/SiteChrome";
 import Footer from "@/components/layout/Footer";
@@ -141,11 +142,13 @@ export default async function RootLayout({
         />
         <SiteSettingsProvider settings={settings}>
           <FavoritesProvider>
-            <CartProvider>
-              <SiteChrome footer={<Footer />} whatsAppFab={<WhatsAppFAB />}>
-                {children}
-              </SiteChrome>
-            </CartProvider>
+            <ComparisonProvider>
+              <CartProvider>
+                <SiteChrome footer={<Footer />} whatsAppFab={<WhatsAppFAB />}>
+                  {children}
+                </SiteChrome>
+              </CartProvider>
+            </ComparisonProvider>
           </FavoritesProvider>
         </SiteSettingsProvider>
       </body>

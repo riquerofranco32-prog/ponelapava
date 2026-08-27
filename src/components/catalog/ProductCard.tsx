@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Heart } from "lucide-react";
+import { Eye, Heart, Scale } from "lucide-react";
 import { Product } from "@/types";
 import {
   formatPrice,
@@ -14,6 +14,7 @@ import {
   unitPrice,
 } from "@/lib/utils";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useComparison } from "@/context/ComparisonContext";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "./AddToCartButton";
 import QuickViewModal from "./QuickViewModal";
@@ -31,7 +32,9 @@ export default function ProductCard({
 }: ProductCardProps) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addToComparison, isComparing } = useComparison();
   const favorite = isFavorite(product.id);
+  const comparing = isComparing(product.id);
   const isOutOfStock = product.status === "out_of_stock";
   const isFeatured = product.status === "featured";
   const isLowStock =
@@ -184,6 +187,18 @@ export default function ProductCard({
               size={14}
               className={favorite ? "fill-pava-terracotta" : ""}
             />
+          </button>
+          <button
+            onClick={() => addToComparison(product)}
+            aria-label={comparing ? `En comparador: ${product.name}` : `Comparar ${product.name}`}
+            title={comparing ? "En comparador" : "Comparar producto"}
+            className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 cursor-pointer ${
+              comparing
+                ? "bg-pava-green text-white opacity-100"
+                : "bg-white/90 text-pava-brown opacity-0 hover:bg-pava-green hover:text-white group-hover:opacity-100"
+            }`}
+          >
+            <Scale size={13} />
           </button>
           <button
             onClick={() => setQuickViewOpen(true)}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
+import GiftMessageModal from "@/components/cart/GiftMessageModal";
 
 export default function CartDrawer() {
   const {
@@ -195,6 +196,9 @@ export default function CartDrawer() {
                 </span>
               </div>
             </div>
+
+            {/* Gift Dedication Option */}
+            <GiftMessageModal />
 
             {/* Actions */}
             <div className="space-y-2">

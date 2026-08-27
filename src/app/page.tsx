@@ -15,6 +15,8 @@ import FAQSection from "@/components/home/FAQSection";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
 import YerbaYieldCalculator from "@/components/home/YerbaYieldCalculator";
+import YerbaFlavourFinderModal from "@/components/home/YerbaFlavourFinderModal";
+import TerereGuideSection from "@/components/home/TerereGuideSection";
 import { getLandingContent } from "@/lib/landing";
 
 // Products and landing content come from Supabase and are editable from /admin — revalidate
@@ -40,9 +42,11 @@ export default async function HomePage() {
       <ComboPacksSection />
       <CustomKitBuilder />
       <YerbaYieldCalculator />
+      <YerbaFlavourFinderModal />
       <AboutSection />
       <Categories />
       <BrandsSection />
+      <TerereGuideSection />
       <MateroExperienceHub />
       <LocalSection />
       <GoogleReviews />

@@ -27,6 +27,7 @@ import { isStoreOpenNow, getNextOpeningLabel } from "@/lib/hours";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import GiftMessageModal from "@/components/cart/GiftMessageModal";
 import type { Product, ProductStatus } from "@/types";
 
 export default function CartPage() {
@@ -229,6 +230,18 @@ export default function CartPage() {
         ? `${deliveryAddress.trim()}${deliveryNotes.trim() ? ` (${deliveryNotes.trim()})` : ""}`
         : undefined;
 
+    let fullComment = comment.trim();
+    try {
+      const giftSaved = localStorage.getItem("pava_gift_message");
+      if (giftSaved) {
+        const gift = JSON.parse(giftSaved);
+        if (gift.enabled && gift.message) {
+          const giftText = `[🎁 TARJETA REGALO - Para: ${gift.to || "Especial"} | De: ${gift.from || "Un amigo"} | Mensaje: "${gift.message}"]`;
+          fullComment = fullComment ? `${fullComment} ${giftText}` : giftText;
+        }
+      }
+    } catch {}
+
     const orderData = {
       customerName: customerName || "Sin nombre",
       customerPhone: customerPhone.trim() || undefined,
@@ -241,7 +254,7 @@ export default function CartPage() {
       deliveryAddress: fullAddress,
       paymentMethod,
       total: finalTotal,
-      comment: comment.trim() || undefined,
+      comment: fullComment || undefined,
     };
 
     // Open WhatsApp synchronously
@@ -745,6 +758,11 @@ export default function CartPage() {
                     className="w-full rounded-control px-3 py-2.5 bg-pava-cream border border-pava-brown/15 text-pava-brown text-sm placeholder-pava-brown/40 focus:outline-none focus:border-pava-green transition-colors resize-none"
                   />
                 </div>
+              </div>
+
+              {/* Gift Message Option */}
+              <div className="mb-6">
+                <GiftMessageModal />
               </div>
 
               {/* WhatsApp CTA */}

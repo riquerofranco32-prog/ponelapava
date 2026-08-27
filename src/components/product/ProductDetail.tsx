@@ -25,6 +25,7 @@ import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import ShippingCalculator from "@/components/product/ShippingCalculator";
 
 interface ProductDetailProps {
   product: Product;
@@ -442,6 +443,11 @@ export default function ProductDetail({
               <MessageCircle size={16} />
               Consultar por WhatsApp
             </a>
+
+            {/* Interactive Shipping Estimator */}
+            <div className="mt-6">
+              <ShippingCalculator productPrice={product.price} />
+            </div>
 
             {/* Value proposition badges */}
             <div className="mt-8 grid grid-cols-1 gap-3 rounded-card border border-pava-brown/10 bg-white/70 p-4 sm:grid-cols-2">

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import CartDrawer from "@/components/cart/CartDrawer";
+import SocialProofToaster from "@/components/ui/SocialProofToaster";
 
 // /admin has its own dark dashboard shell (AdminShell), and /login is a
 // bare full-screen form — the storefront nav/footer/cart/WhatsApp FAB
@@ -31,6 +32,7 @@ export default function SiteChrome({
     <>
       <Navbar />
       <CartDrawer />
+      <SocialProofToaster />
       <main>{children}</main>
       {footer}
       {whatsAppFab}

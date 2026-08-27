@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import GiftMessageModal from "@/components/cart/GiftMessageModal";
+import CartKitUpsell from "@/components/cart/CartKitUpsell";
 
 export default function CartDrawer() {
   const {
@@ -174,6 +175,9 @@ export default function CartDrawer() {
             </ul>
           )}
         </div>
+
+        {/* Smart kit upsell */}
+        <CartKitUpsell />
 
         {/* Footer */}
         {items.length > 0 && (

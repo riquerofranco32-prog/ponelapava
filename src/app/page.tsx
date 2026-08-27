@@ -17,6 +17,8 @@ import InstagramSection from "@/components/home/InstagramSection";
 import YerbaYieldCalculator from "@/components/home/YerbaYieldCalculator";
 import YerbaFlavourFinderModal from "@/components/home/YerbaFlavourFinderModal";
 import TerereGuideSection from "@/components/home/TerereGuideSection";
+import SeasonalMateCalendar from "@/components/home/SeasonalMateCalendar";
+import MateMoments from "@/components/home/MateMoments";
 import { getLandingContent } from "@/lib/landing";
 
 // Products and landing content come from Supabase and are editable from /admin — revalidate
@@ -47,9 +49,11 @@ export default async function HomePage() {
       <Categories />
       <BrandsSection />
       <TerereGuideSection />
+      <SeasonalMateCalendar />
       <MateroExperienceHub />
       <LocalSection />
       <GoogleReviews />
+      <MateMoments />
       <FAQSection />
       <FinalCTA />
       <InstagramSection posts={landing.galleryPosts} />

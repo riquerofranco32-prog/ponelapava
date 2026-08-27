@@ -178,13 +178,29 @@ export default async function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-pava-cream/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-pava-cream/65">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-pava-cream/65 text-center md:text-left">
               © {currentYear} Poné La Pava. Todos los derechos reservados.
             </p>
-            <p className="text-xs text-pava-cream/65">
-              Hecho con mate 🧉 en Río Negro, Argentina
-            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-pava-cream/65">
+              <span>Hecho con mate 🧉 en Río Negro, Argentina</span>
+              <span className="text-pava-cream/25 hidden sm:inline">•</span>
+              <div className="inline-flex items-center gap-1.5 text-pava-cream/75">
+                <span>Hecho por</span>
+                <span className="inline-flex items-center gap-1.5 font-medium text-pava-cream">
+                  <Image
+                    src="/se7en-logo.png"
+                    alt="se7en studios"
+                    width={18}
+                    height={18}
+                    className="h-4.5 w-4.5 rounded-sm object-cover"
+                  />
+                  <span>se7en studios</span>
+                </span>
+              </div>
+            </div>
+
             <Link
               href="/login"
               className="inline-flex items-center gap-1.5 text-xs text-pava-cream/40 transition-colors duration-200 hover:text-pava-cream/70"

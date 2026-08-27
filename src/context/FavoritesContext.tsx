@@ -8,6 +8,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
 } from "react";
 
 const FAVORITES_STORAGE_KEY = "ponelapava_favorites";
@@ -37,6 +38,9 @@ interface FavoritesContextValue {
   favoriteIds: Set<string>;
   isFavorite: (productId: string) => boolean;
   toggleFavorite: (productId: string) => void;
+  isOpen: boolean;
+  setDrawer: (open: boolean) => void;
+  toggleDrawer: () => void;
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | undefined>(
@@ -48,6 +52,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     favoritesReducer,
     new Set<string>(),
   );
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -83,9 +88,24 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     [favoriteIds],
   );
 
+  const setDrawer = useCallback((open: boolean) => {
+    setIsOpen(open);
+  }, []);
+
+  const toggleDrawer = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
   const value = useMemo(
-    () => ({ favoriteIds, isFavorite, toggleFavorite }),
-    [favoriteIds, isFavorite, toggleFavorite],
+    () => ({
+      favoriteIds,
+      isFavorite,
+      toggleFavorite,
+      isOpen,
+      setDrawer,
+      toggleDrawer,
+    }),
+    [favoriteIds, isFavorite, toggleFavorite, isOpen, setDrawer, toggleDrawer],
   );
 
   return (

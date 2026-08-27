@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ShoppingBag, Search } from "lucide-react";
+import { Menu, X, ShoppingBag, Search, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import { cn } from "@/lib/utils";
 import { InstagramIcon } from "@/components/ui/icons";
 import { NAV_LINKS } from "@/lib/nav";
@@ -29,6 +30,7 @@ export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { itemCount, toggleDrawer } = useCart();
+  const { favoriteIds, toggleDrawer: toggleFavoritesDrawer } = useFavorites();
 
   useEffect(() => {
     if (!hasHero) return;
@@ -225,6 +227,34 @@ export default function Navbar() {
                 <InstagramIcon />
               </a>
 
+              {/* Favorites */}
+              <button
+                onClick={toggleFavoritesDrawer}
+                className={cn(
+                  "relative flex h-10 w-10 items-center justify-center transition-colors duration-200",
+                  isScrolled
+                    ? "text-pava-brown/70 hover:text-pava-terracotta"
+                    : "text-pava-cream/80 hover:text-pava-cream",
+                )}
+                aria-label={`Favoritos, ${favoriteIds.size} productos guardados`}
+                title="Ver mis favoritos"
+              >
+                <Heart
+                  size={19}
+                  strokeWidth={1.75}
+                  className={
+                    favoriteIds.size > 0
+                      ? "fill-pava-terracotta/30 text-pava-terracotta"
+                      : ""
+                  }
+                />
+                {favoriteIds.size > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-pava-terracotta text-white text-[9px] font-bold rounded-full animate-scale-in">
+                    {favoriteIds.size > 9 ? "9+" : favoriteIds.size}
+                  </span>
+                )}
+              </button>
+
               {/* Cart */}
               <button
                 onClick={toggleDrawer}
@@ -238,7 +268,7 @@ export default function Navbar() {
               >
                 <ShoppingBag size={20} strokeWidth={1.75} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-pava-terracotta text-white text-[9px] font-bold rounded-full">
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center bg-pava-green text-white text-[9px] font-bold rounded-full">
                     {itemCount > 9 ? "9+" : itemCount}
                   </span>
                 )}

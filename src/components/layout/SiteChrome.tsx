@@ -3,7 +3,9 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import CartDrawer from "@/components/cart/CartDrawer";
+import FavoritesDrawer from "@/components/cart/FavoritesDrawer";
 import SocialProofToaster from "@/components/ui/SocialProofToaster";
+import { useFavorites } from "@/context/FavoritesContext";
 
 // /admin has its own dark dashboard shell (AdminShell), and /login is a
 // bare full-screen form — the storefront nav/footer/cart/WhatsApp FAB
@@ -24,6 +26,8 @@ export default function SiteChrome({
   whatsAppFab: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { isOpen: isFavoritesOpen, setDrawer: setFavoritesDrawer } = useFavorites();
+
   if (pathname?.startsWith("/admin") || pathname?.startsWith("/login")) {
     return <>{children}</>;
   }
@@ -32,6 +36,10 @@ export default function SiteChrome({
     <>
       <Navbar />
       <CartDrawer />
+      <FavoritesDrawer
+        isOpen={isFavoritesOpen}
+        onClose={() => setFavoritesDrawer(false)}
+      />
       <SocialProofToaster />
       <main>{children}</main>
       {footer}

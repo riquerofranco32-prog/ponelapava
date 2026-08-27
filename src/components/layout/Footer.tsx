@@ -188,16 +188,24 @@ export default async function Footer() {
               <span className="text-pava-cream/25 hidden sm:inline">•</span>
               <div className="inline-flex items-center gap-1.5 text-pava-cream/75">
                 <span>Hecho por</span>
-                <span className="inline-flex items-center gap-1.5 font-medium text-pava-cream">
+                <a
+                  href="https://se7endev.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-medium text-pava-cream hover:text-white transition-all duration-200 group"
+                  aria-label="se7en studios"
+                >
                   <Image
                     src="/se7en-logo.png"
-                    alt="se7en studios"
-                    width={18}
-                    height={18}
-                    className="h-4.5 w-4.5 rounded-sm object-cover"
+                    alt="SE7EN"
+                    width={72}
+                    height={20}
+                    className="h-4 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                   />
-                  <span>se7en studios</span>
-                </span>
+                  <span className="text-[11px] font-semibold tracking-wider lowercase text-pava-cream/85 group-hover:text-pava-cream">
+                    studios
+                  </span>
+                </a>
               </div>
             </div>
 

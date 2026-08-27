@@ -14,6 +14,7 @@ import HowToBuy from "@/components/home/HowToBuy";
 import FAQSection from "@/components/home/FAQSection";
 import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
+import YerbaYieldCalculator from "@/components/home/YerbaYieldCalculator";
 import { getLandingContent } from "@/lib/landing";
 
 // Products and landing content come from Supabase and are editable from /admin — revalidate
@@ -38,6 +39,7 @@ export default async function HomePage() {
       <FeaturedProducts />
       <ComboPacksSection />
       <CustomKitBuilder />
+      <YerbaYieldCalculator />
       <AboutSection />
       <Categories />
       <BrandsSection />

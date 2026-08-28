@@ -76,3 +76,78 @@ export async function deleteCoupon(id: string): Promise<void> {
   const { error } = await supabaseAdmin().from("coupons").delete().eq("id", id);
   if (error) throw error;
 }
+
+// Postgres "undefined_table" (direct) / PostgREST "table not in schema cache"
+// — both mean supabase-migration-store-integrity.sql hasn't been run yet.
+export const MISSING_TABLE_CODES = ["42P01", "PGRST205"];
+
+export interface ValidCoupon {
+  code: string;
+  discountType: Coupon["discountType"];
+  discountValue: number;
+}
+
+export type CouponCheck =
+  | { valid: true; coupon: ValidCoupon }
+  | { valid: false; error: string; status: number };
+
+// Single validation path for both the storefront's "aplicar cupón" button and
+// the order endpoint's server-side recompute — a coupon that the cart shows as
+// valid is exactly the one the order is priced with.
+//
+// Uses the service-role client on purpose: `coupons` has RLS with no public
+// policy, so the anon client always comes back empty (every code would read as
+// "no existe"). Only the discount fields are ever returned to the browser.
+export async function checkCoupon(rawCode: string): Promise<CouponCheck> {
+  const code = rawCode.trim().toUpperCase();
+  if (!code) {
+    return { valid: false, error: "Código de cupón requerido", status: 400 };
+  }
+
+  const { data, error } = await supabaseAdmin()
+    .from("coupons")
+    .select("code, discount_type, discount_value, valid_from, valid_until")
+    .eq("code", code)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    if (MISSING_TABLE_CODES.includes(error.code ?? "")) {
+      return {
+        valid: false,
+        error: "Los cupones no están disponibles por el momento",
+        status: 503,
+      };
+    }
+    throw error;
+  }
+
+  if (!data) {
+    return {
+      valid: false,
+      error: "El cupón no existe o está inactivo",
+      status: 404,
+    };
+  }
+
+  const now = new Date();
+  if (data.valid_from && new Date(data.valid_from) > now) {
+    return {
+      valid: false,
+      error: "Este cupón todavía no está vigente",
+      status: 400,
+    };
+  }
+  if (data.valid_until && new Date(data.valid_until) < now) {
+    return { valid: false, error: "Este cupón ya ha expirado", status: 400 };
+  }
+
+  return {
+    valid: true,
+    coupon: {
+      code: data.code,
+      discountType: data.discount_type,
+      discountValue: data.discount_value,
+    },
+  };
+}

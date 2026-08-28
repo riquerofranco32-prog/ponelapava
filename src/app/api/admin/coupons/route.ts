@@ -1,34 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCoupon, getCoupons } from "@/lib/coupons";
-import { CouponInput } from "@/types";
+import { handle, validateCoupon } from "@/lib/api-guard";
+
 
 export async function GET() {
-  try {
-    const coupons = await getCoupons();
-    return NextResponse.json(coupons);
-  } catch (error) {
-    console.error("Error fetching coupons:", error);
-    return NextResponse.json(
-      { error: "No se pudieron obtener los cupones" },
-      { status: 500 },
-    );
-  }
+  return handle("GET /api/admin/coupons", () => getCoupons());
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const input = (await request.json()) as CouponInput;
-    if (!input.code || !input.discountValue) {
-      return NextResponse.json(
-        { error: "Código y valor de descuento son obligatorios" },
-        { status: 400 },
-      );
-    }
-    const coupon = await createCoupon(input);
-    return NextResponse.json(coupon, { status: 201 });
-  } catch (error: unknown) {
-    console.error("Error creating coupon:", error);
-    const msg = error instanceof Error ? error.message : "Error al crear cupón";
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
+  const body = await request.json().catch(() => null);
+  const result = await handle("POST /api/admin/coupons", () =>
+    createCoupon(validateCoupon(body)),
+  );
+  if (!result.ok) return result;
+  return NextResponse.json(await result.json(), { status: 201 });
 }

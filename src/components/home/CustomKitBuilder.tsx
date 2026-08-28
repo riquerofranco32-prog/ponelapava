@@ -7,6 +7,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { formatPrice } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/BorderBeam";
 import { useCart } from "@/context/CartContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const MATES = [
   {
@@ -90,6 +91,7 @@ const YERBAS = [
 ];
 
 export default function CustomKitBuilder() {
+  const settings = useSiteSettings();
   const [selectedMate, setSelectedMate] = useState(MATES[0]);
   const [selectedBombilla, setSelectedBombilla] = useState(BOMBILLAS[0]);
   const [selectedYerba, setSelectedYerba] = useState(YERBAS[0]);
@@ -382,7 +384,7 @@ export default function CustomKitBuilder() {
                 </button>
 
                 <a
-                  href={`https://wa.me/5492994119330?text=${encodeURIComponent(whatsappMessage)}`}
+                  href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-2 rounded-control border border-pava-cream/20 bg-pava-cream/5 py-3 text-xs font-semibold text-pava-cream transition-all hover:border-whatsapp hover:bg-whatsapp/15 hover:text-whatsapp"

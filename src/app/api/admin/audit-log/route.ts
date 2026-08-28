@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { getAuditLog } from "@/lib/auditLog";
+import { handle } from "@/lib/api-guard";
 
 export async function GET() {
-  const entries = await getAuditLog();
-  return NextResponse.json(entries);
+  return handle("GET /api/admin/audit-log", () => getAuditLog());
 }

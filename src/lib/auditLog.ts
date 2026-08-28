@@ -52,9 +52,11 @@ interface AuditLogRow {
   created_at: string;
 }
 
-// Postgres "undefined_table" — thrown if supabase-migration-audit-log.sql
-// hasn't been run yet. The admin UI should show an empty state, not crash.
-const UNDEFINED_TABLE = "42P01";
+// Table missing — "42P01" straight from Postgres, "PGRST205" when PostgREST
+// can't find it in its schema cache (what Supabase actually returns). Thrown
+// until supabase-migration-store-integrity.sql is run; the admin UI should
+// show an empty state, not crash.
+const MISSING_TABLE_CODES = ["42P01", "PGRST205"];
 
 export async function getAuditLog(limit = 100): Promise<AuditLogEntry[]> {
   const { data, error } = await supabaseAdmin()
@@ -62,7 +64,7 @@ export async function getAuditLog(limit = 100): Promise<AuditLogEntry[]> {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
-  if (error?.code === UNDEFINED_TABLE) return [];
+  if (error && MISSING_TABLE_CODES.includes(error.code)) return [];
   if (error) throw error;
   return (data as AuditLogRow[]).map((row) => ({
     id: row.id,

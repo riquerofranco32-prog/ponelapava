@@ -82,3 +82,38 @@ export async function deleteCategory(id: string): Promise<void> {
     .eq("id", id);
   if (error) throw error;
 }
+
+export async function getCategoryById(id: string): Promise<Category | null> {
+  const { data, error } = await supabaseAdmin()
+    .from("categories")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? fromRow(data as CategoryRow) : null;
+}
+
+// `products.category` stores the category *slug*, and there is no foreign key
+// behind it — so the slug is a join key that the admin can edit. Renaming one
+// without carrying the products along silently orphans every product in it
+// (they vanish from the category filter and from the public menu's grouping).
+export async function countProductsInCategory(slug: string): Promise<number> {
+  const { count, error } = await supabaseAdmin()
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("category", slug);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function moveProductsToCategory(
+  fromSlug: string,
+  toSlug: string,
+): Promise<void> {
+  if (fromSlug === toSlug) return;
+  const { error } = await supabaseAdmin()
+    .from("products")
+    .update({ category: toSlug })
+    .eq("category", fromSlug);
+  if (error) throw error;
+}

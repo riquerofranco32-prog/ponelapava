@@ -2,62 +2,88 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { Order, OrderItem } from "@/types";
 
+// Public endpoint, so the lookup key has to be something only the customer
+// knows. Two changes from the first version, both about not handing strangers
+// other people's orders:
+//
+//  · the order id is matched exactly, not with `ilike %q%` — a 3-character
+//    query used to match a slice of every id in the table (and `ilike` on a
+//    uuid column errors outright);
+//  · the phone needs at least 8 digits and matches on the ending, so a couple
+//    of digits can't sweep the customer list.
+const MIN_PHONE_DIGITS = 8;
+
+// The stored comment carries the delivery address and any internal note. The
+// status page only needs to know *how* it ships, never the street.
+function redactComment(comment: string | null): string | undefined {
+  if (!comment) return undefined;
+  return comment.replace(
+    /\[Envío a Domicilio:[^\]]*\]/g,
+    "[Envío a Domicilio]",
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const q = searchParams.get("q")?.trim() || "";
+    const q = request.nextUrl.searchParams.get("q")?.trim() ?? "";
+    const digits = q.replace(/\D/g, "");
+    const looksLikePhone = /^[0-9+\s()-]+$/.test(q) && digits.length > 0;
 
-    if (!q || q.length < 3) {
+    if (looksLikePhone && digits.length < MIN_PHONE_DIGITS) {
       return NextResponse.json(
-        { error: "Ingresá un número de pedido o teléfono válido (mínimo 3 caracteres)" },
-        { status: 400 }
+        {
+          error: `Ingresá el teléfono completo (al menos ${MIN_PHONE_DIGITS} dígitos)`,
+        },
+        { status: 400 },
+      );
+    }
+    if (!looksLikePhone && q.length < 8) {
+      return NextResponse.json(
+        { error: "Ingresá el número de pedido completo o tu teléfono" },
+        { status: 400 },
       );
     }
 
     const admin = supabaseAdmin();
-    
-    // Clean numeric phone query if applicable
-    const isPhone = /^[0-9+\s-]{6,}$/.test(q);
-    const cleanedDigits = q.replace(/\D/g, "");
+    let query = admin
+      .from("orders")
+      .select(
+        "id, customer_name, items, subtotal, total, comment, status, created_at",
+      );
 
-    let queryBuilder = admin.from("orders").select("id, customer_name, customer_phone, items, subtotal, total, comment, status, created_at");
+    query = looksLikePhone
+      ? query.ilike("customer_phone", `%${digits}`)
+      : query.eq("id", q.replace("#", ""));
 
-    if (isPhone && cleanedDigits.length >= 6) {
-      queryBuilder = queryBuilder.ilike("customer_phone", `%${cleanedDigits}%`);
-    } else {
-      // UUID search or partial ID
-      queryBuilder = queryBuilder.ilike("id", `%${q.replace("#", "")}%`);
-    }
-
-    const { data, error } = await queryBuilder.order("created_at", { ascending: false }).limit(5);
+    const { data, error } = await query
+      .order("created_at", { ascending: false })
+      .limit(5);
 
     if (error) {
       console.error("Error querying tracking orders:", error);
-      return NextResponse.json({ error: "Error al consultar el pedido" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al consultar el pedido" },
+        { status: 500 },
+      );
     }
 
-    if (!data || data.length === 0) {
-      return NextResponse.json({ orders: [] });
-    }
-
-    // Sanitize results for public viewing (hide full phone, mask sensitive data)
-    const sanitizedOrders: Order[] = data.map((row) => ({
+    const orders: Order[] = (data ?? []).map((row) => ({
       id: row.id,
       customerName: row.customer_name,
-      customerPhone: row.customer_phone
-        ? `${row.customer_phone.slice(0, 3)}***${row.customer_phone.slice(-3)}`
-        : undefined,
       items: row.items as OrderItem[],
       subtotal: row.subtotal,
       total: row.total,
-      comment: row.comment,
+      comment: redactComment(row.comment),
       status: row.status,
       createdAt: row.created_at,
     }));
 
-    return NextResponse.json({ orders: sanitizedOrders });
+    return NextResponse.json({ orders });
   } catch (err) {
     console.error("Tracking API error:", err);
-    return NextResponse.json({ error: "Error de servidor al buscar pedido" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error de servidor al buscar pedido" },
+      { status: 500 },
+    );
   }
 }

@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { getDashboardStats } from "@/lib/orders";
+import { handle } from "@/lib/api-guard";
 
 export async function GET() {
-  const stats = await getDashboardStats();
-  return NextResponse.json(stats);
+  return handle("GET /api/admin/stats", () => getDashboardStats());
 }

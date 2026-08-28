@@ -1,4 +1,4 @@
-import { Order } from "@/types";
+import type { Order } from "@/types";
 
 export const STATUS_LABELS: Record<Order["status"], string> = {
   pending: "Pendiente",
@@ -16,3 +16,15 @@ export const STATUS_COLORS: Record<
   delivered: { color: "var(--dash-muted)", bg: "var(--dash-surface-2)" },
   cancelled: { color: "var(--dash-danger)", bg: "var(--dash-danger-bg)" },
 };
+
+export const ORDER_STATUSES: Order["status"][] = [
+  "pending",
+  "confirmed",
+  "delivered",
+  "cancelled",
+];
+
+export function isOrderStatus(value: unknown): value is Order["status"] {
+  return ORDER_STATUSES.includes(value as Order["status"]);
+}
+

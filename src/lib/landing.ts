@@ -76,9 +76,6 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
   ],
 };
 
-// In-memory fallback if Supabase table doesn't exist yet
-let memoryLandingContent: LandingContent = { ...DEFAULT_LANDING_CONTENT };
-
 export const getLandingContent = cache(async (): Promise<LandingContent> => {
   try {
     const { data, error } = await supabase
@@ -88,7 +85,7 @@ export const getLandingContent = cache(async (): Promise<LandingContent> => {
       .maybeSingle();
 
     if (error || !data || !data.content) {
-      return memoryLandingContent;
+      return DEFAULT_LANDING_CONTENT;
     }
 
     return {
@@ -100,10 +97,14 @@ export const getLandingContent = cache(async (): Promise<LandingContent> => {
       galleryPosts: data.content.galleryPosts?.length ? data.content.galleryPosts : DEFAULT_LANDING_CONTENT.galleryPosts,
     };
   } catch {
-    return memoryLandingContent;
+    return DEFAULT_LANDING_CONTENT;
   }
 });
 
+// Writes straight to Supabase and throws on failure. An earlier version fell
+// back to a module-level variable when the write failed, which made the admin
+// show "guardado" for changes that only existed in one serverless instance and
+// vanished on the next request — a false success, worse than an error.
 export async function updateLandingContent(
   input: LandingContent,
 ): Promise<LandingContent> {
@@ -112,22 +113,17 @@ export async function updateLandingContent(
     updatedAt: new Date().toISOString(),
   };
 
-  memoryLandingContent = contentToSave;
+  const { error } = await supabaseAdmin().from("landing_content").upsert({
+    id: "default",
+    content: contentToSave,
+    updated_at: contentToSave.updatedAt,
+  });
 
-  try {
-    const { error } = await supabaseAdmin()
-      .from("landing_content")
-      .upsert({
-        id: "default",
-        content: contentToSave,
-        updated_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      console.warn("Could not persist to landing_content table (using memory cache):", error.message);
-    }
-  } catch (err) {
-    console.warn("Landing content saved in memory fallback:", err);
+  if (error) {
+    throw new Error(
+      `No se pudo guardar el contenido de la landing: ${error.message}. ` +
+        "Verificá que la tabla landing_content exista (supabase-migration-store-integrity.sql).",
+    );
   }
 
   return contentToSave;

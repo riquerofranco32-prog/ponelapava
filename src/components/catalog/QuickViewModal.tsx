@@ -9,6 +9,7 @@ import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "@/components/catalog/AddToCartButton";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface QuickViewModalProps {
   product: Product;
@@ -19,6 +20,7 @@ export default function QuickViewModal({
   product,
   onClose,
 }: QuickViewModalProps) {
+  const settings = useSiteSettings();
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -170,7 +172,7 @@ export default function QuickViewModal({
             />
             <div className="flex items-center justify-between pt-1 text-xs">
               <a
-                href={`https://wa.me/5492996070624?text=${encodeURIComponent(`¡Hola! Tengo una consulta sobre "${product.name}" (${formatPrice(product.price)}) de Poné La Pava 🧉`)}`}
+                href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(`¡Hola! Tengo una consulta sobre "${product.name}" (${formatPrice(product.price)}) de Poné La Pava 🧉`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 font-semibold"

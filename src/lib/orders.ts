@@ -1,6 +1,14 @@
-import { supabase, supabaseAdmin } from "@/lib/supabase";
-import { Order, OrderItem, CartItem, ProductStatus } from "@/types";
+import { supabaseAdmin } from "@/lib/supabase";
+import { Order, OrderItem, ProductStatus } from "@/types";
 import { STORE_TIMEZONE } from "@/lib/hours";
+import { isOrderStatus } from "@/lib/orderStatus";
+import { checkCoupon } from "@/lib/coupons";
+import {
+  computeOrderTotals,
+  DeliveryMethod,
+  OrderTotals,
+  PaymentMethod,
+} from "@/lib/pricing";
 
 interface OrderRow {
   id: string;
@@ -28,65 +36,148 @@ function fromRow(row: OrderRow): Order {
   };
 }
 
+// Only the fields the customer actually gets to choose. Prices, discounts and
+// totals are NOT part of the input — they're recomputed from the DB in
+// createOrder, so a tampered payload can't buy a mate for $1.
 export interface CreateOrderInput {
   customerName: string;
   customerPhone?: string;
-  items: CartItem[];
-  subtotal?: number;
-  discount?: number;
+  items: { productId: string; quantity: number }[];
   couponCode?: string;
-  shippingCost?: number;
-  deliveryMethod?: "pickup" | "delivery";
+  deliveryMethod?: DeliveryMethod;
   deliveryAddress?: string;
-  paymentMethod?: "transfer" | "card" | "cash";
-  total: number;
+  paymentMethod?: PaymentMethod;
   comment?: string;
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<Order> {
-  const orderItems: OrderItem[] = input.items.map(({ product, quantity }) => ({
-    productId: product.id,
-    productName: product.name,
-    quantity,
-    price: product.price,
-    subtotal: product.price * quantity,
-  }));
+export class OrderValidationError extends Error {}
 
-  const subtotal = input.subtotal ?? input.total;
+const MAX_QUANTITY_PER_ITEM = 100;
 
-  let fullComment = input.comment?.trim() || "";
+// Builds the order's lines from the products table — the request only says
+// *which* product and *how many*; name, price and subtotal come from the DB.
+async function priceItems(
+  requested: { productId: string; quantity: number }[],
+): Promise<OrderItem[]> {
+  const ids = [...new Set(requested.map((i) => i.productId))];
+  const { data, error } = await supabaseAdmin()
+    .from("products")
+    .select("id, name, price, stock, status")
+    .in("id", ids);
+  if (error) throw error;
+
+  const byId = new Map(
+    (data as { id: string; name: string; price: number; stock: number; status: string }[]).map(
+      (p) => [p.id, p],
+    ),
+  );
+
+  return requested.map(({ productId, quantity }) => {
+    const product = byId.get(productId);
+    if (!product) {
+      throw new OrderValidationError(
+        "Uno de los productos del pedido ya no está disponible. Actualizá el carrito.",
+      );
+    }
+    if (product.status === "out_of_stock" || product.stock <= 0) {
+      throw new OrderValidationError(`${product.name} está agotado.`);
+    }
+    if (quantity > product.stock) {
+      throw new OrderValidationError(
+        `Sólo quedan ${product.stock} unidades de ${product.name}.`,
+      );
+    }
+    return {
+      productId: product.id,
+      productName: product.name,
+      quantity,
+      price: product.price,
+      subtotal: product.price * quantity,
+    };
+  });
+}
+
+function buildComment(
+  input: CreateOrderInput,
+  totals: OrderTotals,
+  couponCode: string | null,
+): string | null {
+  const parts: string[] = [];
   if (input.deliveryMethod === "delivery" && input.deliveryAddress?.trim()) {
-    const deliveryNote = `[Envío a Domicilio: ${input.deliveryAddress.trim()}]`;
-    fullComment = fullComment ? `${deliveryNote} - ${fullComment}` : deliveryNote;
+    parts.push(`[Envío a Domicilio: ${input.deliveryAddress.trim()}]`);
   } else if (input.deliveryMethod === "pickup") {
-    const pickupNote = `[Retiro en Local - Catriel]`;
-    fullComment = fullComment ? `${pickupNote} - ${fullComment}` : pickupNote;
+    parts.push("[Retiro en Local - Catriel]");
   }
+  if (input.comment?.trim()) parts.push(input.comment.trim());
   if (input.paymentMethod) {
-    const payNote =
+    parts.push(
       input.paymentMethod === "transfer"
         ? "[Pago: Transferencia (10% OFF)]"
         : input.paymentMethod === "cash"
           ? "[Pago: Efectivo en Local (10% OFF)]"
-          : "[Pago: Tarjeta / Otros]";
-    fullComment = fullComment ? `${fullComment} ${payNote}` : payNote;
+          : "[Pago: Tarjeta / Otros]",
+    );
   }
-  if (input.couponCode && input.discount) {
-    const couponNote = `[Cupón: ${input.couponCode} (-$${input.discount})]`;
-    fullComment = fullComment ? `${fullComment} ${couponNote}` : couponNote;
+  if (couponCode && totals.couponDiscount > 0) {
+    parts.push(`[Cupón: ${couponCode} (-$${totals.couponDiscount})]`);
+  }
+  return parts.join(" ") || null;
+}
+
+export async function createOrder(input: CreateOrderInput): Promise<Order> {
+  const customerName = input.customerName.trim();
+  if (customerName.length < 2 || customerName.length > 100) {
+    throw new OrderValidationError("Nombre de cliente inválido.");
+  }
+  if (!Array.isArray(input.items) || input.items.length === 0) {
+    throw new OrderValidationError("El pedido no tiene productos.");
+  }
+  for (const item of input.items) {
+    if (
+      !item?.productId ||
+      !Number.isInteger(item.quantity) ||
+      item.quantity <= 0 ||
+      item.quantity > MAX_QUANTITY_PER_ITEM
+    ) {
+      throw new OrderValidationError("Cantidades del pedido inválidas.");
+    }
   }
 
+  const orderItems = await priceItems(input.items);
+
+  // A coupon code that no longer validates is simply not applied — the order
+  // still goes through at full price rather than failing at the last step.
+  let coupon = null;
+  if (input.couponCode?.trim()) {
+    const check = await checkCoupon(input.couponCode);
+    if (check.valid) coupon = check.coupon;
+  }
+
+  const deliveryMethod: DeliveryMethod =
+    input.deliveryMethod === "delivery" ? "delivery" : "pickup";
+  const paymentMethod: PaymentMethod =
+    input.paymentMethod === "cash" || input.paymentMethod === "card"
+      ? input.paymentMethod
+      : "transfer";
+
+  const totals = computeOrderTotals({
+    lines: orderItems,
+    deliveryMethod,
+    paymentMethod,
+    coupon,
+  });
+
   const payload: Record<string, unknown> = {
-    customer_name: input.customerName.trim(),
+    customer_name: customerName,
     items: orderItems,
-    subtotal: subtotal,
-    total: input.total,
-    comment: fullComment || null,
+    subtotal: totals.subtotal,
+    total: totals.total,
+    comment: buildComment(input, totals, coupon?.code ?? null),
     status: "pending",
   };
 
   if (input.customerPhone?.trim()) {
-    payload.customer_phone = input.customerPhone.trim();
+    payload.customer_phone = input.customerPhone.trim().slice(0, 30);
   }
 
   const admin = supabaseAdmin();
@@ -97,8 +188,10 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     .single();
 
   if (error) {
-    // If customer_phone column doesn't exist yet, retry without it
-    if (error.code === UNDEFINED_COLUMN && payload.customer_phone) {
+    // If customer_phone column doesn't exist yet, retry without it. PostgREST
+    // reports this as PGRST204, not Postgres' 42703 — checking only the latter
+    // meant every order that carried a phone number failed outright.
+    if (MISSING_COLUMN_CODES.includes(error.code) && payload.customer_phone) {
       delete payload.customer_phone;
       const retry = await admin
         .from("orders")
@@ -134,8 +227,10 @@ async function adjustStock(items: OrderItem[], sign: -1 | 1): Promise<void> {
       .from("products")
       .select("stock, status")
       .eq("id", item.productId)
-      .single();
+      .maybeSingle();
     if (fetchError) throw fetchError;
+    // Product deleted since the order was placed — nothing left to adjust.
+    if (!data) continue;
 
     const stock = Math.max(0, data.stock + sign * item.quantity);
     let status = data.status as ProductStatus;
@@ -150,79 +245,82 @@ async function adjustStock(items: OrderItem[], sign: -1 | 1): Promise<void> {
   }
 }
 
-// Postgres "undefined_column" — thrown if supabase-migration-order-stock-applied.sql
-// hasn't been run yet. Order status changes must keep working even then;
-// they just skip stock adjustment until the migration lands.
+// Missing column — "42703" straight from Postgres, "PGRST204" when PostgREST
+// rejects the payload against its cached schema. Both mean
+// supabase-migration-store-integrity.sql hasn't been run yet; order status
+// changes must keep working, they just skip stock adjustment until it lands.
 const UNDEFINED_COLUMN = "42703";
+const MISSING_COLUMN_CODES = [UNDEFINED_COLUMN, "PGRST204"];
 
+// Stock moves exactly once per order, guarded by a compare-and-swap on
+// `stock_applied`: the flag is flipped in the same UPDATE that filters on its
+// previous value, so of two concurrent "Confirmado" clicks only one gets rows
+// back and only that one adjusts stock. Reading the flag and then writing it
+// (the previous shape) let both requests read `false` and decrement twice.
 export async function updateOrderStatus(
   id: string,
   status: Order["status"],
 ): Promise<void> {
-  const admin = supabaseAdmin();
-
-  // stock_applied is an idempotency guard so a double-click on "Confirmado",
-  // or a delivered->confirmed->delivered round-trip, can't decrement (or
-  // restore) stock twice.
-  let current: {
-    status: Order["status"];
-    items: OrderItem[];
-    stock_applied?: boolean;
-  };
-  let hasStockColumn = true;
-  const first = await admin
-    .from("orders")
-    .select("status, stock_applied, items")
-    .eq("id", id)
-    .single();
-  if (first.error?.code === UNDEFINED_COLUMN) {
-    hasStockColumn = false;
-    const fallback = await admin
-      .from("orders")
-      .select("status, items")
-      .eq("id", id)
-      .single();
-    if (fallback.error) throw fallback.error;
-    current = fallback.data;
-  } else if (first.error) {
-    throw first.error;
-  } else {
-    current = first.data;
+  if (!isOrderStatus(status)) {
+    throw new Error(`Estado de pedido inválido: ${status}`);
   }
 
-  const currentStatus = current.status as Order["status"];
-  const stockApplied = hasStockColumn
-    ? (current.stock_applied as boolean)
-    : false;
-  const items = current.items as OrderItem[];
+  const admin = supabaseAdmin();
 
-  const update: { status: Order["status"]; stock_applied?: boolean } = {
-    status,
-  };
+  const current = await admin
+    .from("orders")
+    .select("status, items")
+    .eq("id", id)
+    .maybeSingle();
+  if (current.error) throw current.error;
+  if (!current.data) throw new Error("El pedido no existe");
 
-  if (hasStockColumn) {
-    if (
-      status === "confirmed" &&
-      currentStatus !== "confirmed" &&
-      !stockApplied
-    ) {
-      await adjustStock(items, -1);
-      update.stock_applied = true;
-    } else if (
-      currentStatus === "confirmed" &&
-      status === "cancelled" &&
-      stockApplied
-    ) {
-      await adjustStock(items, 1);
-      update.stock_applied = false;
-    }
-  } else {
+  const currentStatus = current.data.status as Order["status"];
+  const items = current.data.items as OrderItem[];
+
+  // Claim the stock transition, if this change is one.
+  let claim: { rows: unknown[] | null; error: { code?: string } | null } | null =
+    null;
+  let sign: -1 | 1 | null = null;
+
+  if (status === "confirmed" && currentStatus !== "confirmed") {
+    sign = -1;
+    const res = await admin
+      .from("orders")
+      .update({ status, stock_applied: true })
+      .eq("id", id)
+      .eq("stock_applied", false)
+      .select("id");
+    claim = { rows: res.data, error: res.error };
+  } else if (currentStatus === "confirmed" && status === "cancelled") {
+    sign = 1;
+    const res = await admin
+      .from("orders")
+      .update({ status, stock_applied: false })
+      .eq("id", id)
+      .eq("stock_applied", true)
+      .select("id");
+    claim = { rows: res.data, error: res.error };
+  }
+
+  if (claim && !claim.error) {
+    // Won the race (rows came back) → move stock. Lost it (empty) → the other
+    // request already did, and it also already wrote the status.
+    if (claim.rows?.length && sign) await adjustStock(items, sign);
+    if (claim.rows?.length) return;
+  }
+
+  const missingColumn = MISSING_COLUMN_CODES.includes(claim?.error?.code ?? "");
+  if (claim?.error && !missingColumn) {
+    throw claim.error;
+  }
+  if (missingColumn) {
     console.warn(
-      "orders.stock_applied column missing — run supabase-migration-order-stock-applied.sql. Skipping stock adjustment.",
+      "orders.stock_applied column missing — run supabase-migration-store-integrity.sql. Skipping stock adjustment.",
     );
   }
 
-  const { error } = await admin.from("orders").update(update).eq("id", id);
+  const { error } = await admin.from("orders").update({ status }).eq("id", id);
   if (error) throw error;
 }
 

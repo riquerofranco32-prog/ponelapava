@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminButton } from "@/components/admin/AdminButton";
 import { useAdminToast } from "@/components/admin/AdminToast";
+import { assertOk } from "@/lib/admin-fetch";
 
 interface BulkPriceModalProps {
   products: Product[];
@@ -79,11 +80,12 @@ export function BulkPriceModal({
 
     try {
       let count = 0;
+      let updated = 0;
       for (const product of targetProducts) {
         const newPrice = calculateNewPrice(product.price);
         if (newPrice !== product.price) {
           const { id, createdAt: _c, ...rest } = product;
-          await fetch(`/api/admin/products/${id}`, {
+          const res = await fetch(`/api/admin/products/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -91,12 +93,20 @@ export function BulkPriceModal({
               price: newPrice,
             }),
           });
+          // Each PUT is checked: without this the loop reported "N productos
+          // actualizados" even when every request came back 401 or 500.
+          assertOk(res, `No se pudo actualizar "${product.name}"`);
+          updated++;
         }
         count++;
         setProgress({ current: count, total: targetProducts.length });
       }
 
-      showToast(`¡Se actualizaron ${targetProducts.length} productos con éxito!`);
+      showToast(
+        updated === 0
+          ? "Ningún precio cambió con ese ajuste"
+          : `¡Se actualizaron ${updated} producto${updated === 1 ? "" : "s"} con éxito!`,
+      );
       onSuccess();
       onClose();
     } catch (err) {
@@ -104,6 +114,9 @@ export function BulkPriceModal({
         err instanceof Error ? err.message : "Error al aplicar ajuste masivo",
         "error",
       );
+      // Some rows may have gone through before the failure — refetch so the
+      // table shows the real state instead of a half-applied guess.
+      onSuccess();
     } finally {
       setSaving(false);
       setProgress(null);

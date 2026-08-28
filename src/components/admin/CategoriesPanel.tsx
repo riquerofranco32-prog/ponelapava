@@ -74,11 +74,12 @@ export default function CategoriesPanel({
 
   async function saveSortOrder(category: Category, sortOrder: number) {
     const { id, productCount: _productCount, ...rest } = category;
-    await fetch(`/api/admin/categories/${id}`, {
+    const res = await fetch(`/api/admin/categories/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...rest, sortOrder }),
     });
+    assertOk(res, "No se pudo cambiar el orden de las categorías");
   }
 
   async function moveCategory(index: number, direction: -1 | 1) {
@@ -91,8 +92,15 @@ export default function CategoriesPanel({
         saveSortOrder(current, target.sortOrder ?? 0),
         saveSortOrder(target, current.sortOrder ?? 0),
       ]);
-      onChange();
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "No se pudo reordenar",
+        "error",
+      );
     } finally {
+      // Refetch either way: on failure one of the two writes may still have
+      // landed, and the on-screen order would no longer match the DB.
+      onChange();
       setMovingId(null);
     }
   }
@@ -237,7 +245,7 @@ export default function CategoriesPanel({
                   productCount(deleting.slug) === 1 ? "" : "s"
                 } asignado${
                   productCount(deleting.slug) === 1 ? "" : "s"
-                }. Si la eliminás, esos productos quedan con una categoría que ya no existe. ¿Eliminar de todos modos?`
+                }. Movelos a otra categoría antes de eliminarla — si no, quedarían sin categoría y desaparecerían de los filtros de la tienda.`
               : `¿Eliminar "${deleting.name}"? Esta acción no se puede deshacer.`
           }
           onConfirm={() => handleDelete(deleting)}

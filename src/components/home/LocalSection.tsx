@@ -26,11 +26,8 @@ const LOCAL_PHOTOS = [
 
 export default async function LocalSection() {
   const settings = await getSiteSettings();
-  const mapsUrl = buildMapsUrl(settings.addressLine, settings.addressCity);
-  const mapsEmbedUrl = buildMapsEmbedUrl(
-    settings.addressLine,
-    settings.addressCity,
-  );
+  const mapsUrl = buildMapsUrl();
+  const mapsEmbedUrl = buildMapsEmbedUrl();
 
   return (
     <section

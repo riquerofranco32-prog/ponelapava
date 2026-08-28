@@ -29,6 +29,11 @@ import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import GiftMessageModal from "@/components/cart/GiftMessageModal";
 import type { Product, ProductStatus } from "@/types";
+import {
+  computeOrderTotals,
+  FREE_SHIPPING_THRESHOLD,
+  STANDARD_SHIPPING_COST,
+} from "@/lib/pricing";
 
 export default function CartPage() {
   const {
@@ -88,31 +93,19 @@ export default function CartPage() {
       .catch(() => {});
   }, [items]);
 
-  // Shipping & discount calculations
-  const FREE_SHIPPING_THRESHOLD = 65000;
-  const standardShippingCost = 3500;
+  // Shipping & discounts — computed by the same module the server uses to
+  // price the order, so what is shown here is what gets stored.
+  const { couponDiscount, paymentDiscount, totalDiscount, shippingCost, total: finalTotal } =
+    computeOrderTotals({
+      lines: items.map(({ product, quantity }) => ({
+        price: product.price,
+        quantity,
+      })),
+      deliveryMethod,
+      paymentMethod,
+      coupon: appliedCoupon,
+    });
   const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = deliveryMethod === "delivery" ? (isFreeShipping ? 0 : standardShippingCost) : 0;
-
-  // Coupon discount
-  let couponDiscount = 0;
-  if (appliedCoupon) {
-    if (appliedCoupon.discountType === "percent") {
-      couponDiscount = Math.round((total * appliedCoupon.discountValue) / 100);
-    } else {
-      couponDiscount = Math.min(total, appliedCoupon.discountValue);
-    }
-  }
-
-  // Payment method discount (10% OFF for Transfer or Cash in store)
-  const baseForPaymentDiscount = Math.max(0, total - couponDiscount);
-  const paymentDiscount =
-    paymentMethod === "transfer" || paymentMethod === "cash"
-      ? Math.round(baseForPaymentDiscount * 0.1)
-      : 0;
-
-  const totalDiscount = couponDiscount + paymentDiscount;
-  const finalTotal = Math.max(0, total - totalDiscount + shippingCost);
 
   // Re-check price/stock/status against the DB on load — the cart snapshot
   // in localStorage can be days old. Runs once against the items present
@@ -261,11 +254,24 @@ export default function CartPage() {
     const url = buildWhatsAppUrl(settings.whatsappNumber, orderData);
     window.open(url, "_blank", "noopener,noreferrer");
 
-    // Best-effort order log in backend
+    // Best-effort order log in backend. Only the customer's choices travel —
+    // prices and totals are recomputed server-side from the products table.
     fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(orderData),
+      body: JSON.stringify({
+        customerName: orderData.customerName,
+        customerPhone: orderData.customerPhone,
+        items: items.map(({ product, quantity }) => ({
+          productId: product.id,
+          quantity,
+        })),
+        couponCode: appliedCoupon?.code,
+        deliveryMethod,
+        deliveryAddress: fullAddress,
+        paymentMethod,
+        comment: fullComment || undefined,
+      }),
     }).catch(() => {});
   };
 
@@ -533,7 +539,7 @@ export default function CartPage() {
                       <span>A Domicilio</span>
                     </div>
                     <span className="text-[11px] text-pava-brown/60 font-medium">
-                      {isFreeShipping ? <span className="text-emerald-700 font-semibold">Gratis</span> : formatPrice(standardShippingCost)}
+                      {isFreeShipping ? <span className="text-emerald-700 font-semibold">Gratis</span> : formatPrice(STANDARD_SHIPPING_COST)}
                     </span>
                   </button>
                 </div>

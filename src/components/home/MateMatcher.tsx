@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { BorderBeam } from "@/components/ui/BorderBeam";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const ANSWER_MAP = {
   recien_arranco: { slug: "mates", tag: "iniciacion", title: "Mates fáciles de curar y kits de inicio" },
@@ -86,6 +87,7 @@ const QUESTIONS: QuestionConfig[] = [
 ];
 
 export default function MateMatcher({ embedded = false }: { embedded?: boolean }) {
+  const settings = useSiteSettings();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<AnswerKey[]>([]);
 
@@ -229,7 +231,7 @@ export default function MateMatcher({ embedded = false }: { embedded?: boolean }
                   <ArrowRight size={16} aria-hidden="true" />
                 </Link>
                 <a
-                  href={`https://wa.me/5492994119330?text=${encodeURIComponent(
+                  href={`https://wa.me/${settings.whatsappNumber}?text=${encodeURIComponent(
                     `¡Hola Poné La Pava! Hice el test en la web y me recomendó: ${result.title}. ¿Qué opciones tienen disponibles?`
                   )}`}
                   target="_blank"

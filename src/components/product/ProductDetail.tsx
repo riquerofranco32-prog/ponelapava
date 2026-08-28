@@ -26,7 +26,6 @@ import ProductCard from "@/components/catalog/ProductCard";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import ShippingCalculator from "@/components/product/ShippingCalculator";
-import LaserEngravingPreview from "@/components/product/LaserEngravingPreview";
 
 interface ProductDetailProps {
   product: Product;
@@ -42,15 +41,6 @@ export default function ProductDetail({
   const [added, setAdded] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [showCuradoSteps, setShowCuradoSteps] = useState(false);
-  const [engravingData, setEngravingData] = useState<{
-    enabled: boolean;
-    text: string;
-    font: string;
-  }>({
-    enabled: false,
-    text: "",
-    font: "serif",
-  });
   const { addItem, setDrawer } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = isFavorite(product.id);
@@ -85,16 +75,7 @@ export default function ProductDetail({
 
   const handleAddToCart = () => {
     if (isOutOfStock) return;
-    if (engravingData.enabled && engravingData.text.trim()) {
-      const customProduct: Product = {
-        ...product,
-        name: `${product.name} (Grabado: "${engravingData.text.trim()}")`,
-        price: product.price + 3500,
-      };
-      addItem(customProduct, quantity);
-    } else {
-      addItem(product, quantity);
-    }
+    addItem(product, quantity);
     setAdded(true);
     setTimeout(() => {
       setAdded(false);
@@ -400,17 +381,6 @@ export default function ProductDetail({
               </div>
             )}
 
-            {/* Custom Laser Engraving for Mates & Combos */}
-            {(product.category === "mates" || product.category === "combos") && !isOutOfStock && (
-              <div className="mb-5">
-                <LaserEngravingPreview
-                  onEngravingChange={(enabled, text, font) =>
-                    setEngravingData({ enabled, text, font })
-                  }
-                />
-              </div>
-            )}
-
             {/* Quantity + Add to cart */}
             {!isOutOfStock ? (
               <div className="flex items-stretch gap-3 mb-4">
@@ -464,9 +434,7 @@ export default function ProductDetail({
             <a
               href={whatsappChatUrl(
                 settings.whatsappNumber,
-                engravingData.enabled && engravingData.text.trim()
-                  ? `Hola! Me interesa el producto: ${product.name} con grabado láser "${engravingData.text.trim()}" (${formatPrice(product.price + 3500)})`
-                  : `Hola! Me interesa el producto: ${product.name} (${formatPrice(product.price)})`,
+                `Hola! Me interesa el producto: ${product.name} (${formatPrice(product.price)})`,
               )}
               target="_blank"
               rel="noopener noreferrer"

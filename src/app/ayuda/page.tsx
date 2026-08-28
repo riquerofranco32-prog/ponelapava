@@ -100,20 +100,20 @@ const FAQS: FAQItem[] = [
     answer:
       "Sí, tenés 30 días para realizar cambios de productos que no hayan sido curados ni utilizados, conservando su empaque original.",
   },
-  // Personalizados
+  // Regalos
   {
     id: "per-1",
     category: "personalizados",
-    question: "¿Hacen grabados personalizados en las virolas?",
+    question: "¿Puedo enviar un pedido como regalo con dedicatoria?",
     answer:
-      "¡Sí! Realizamos grabado láser de fibra óptica de alta precisión sobre las virolas de alpaca, acero y plata. Podés grabar nombres, iniciales, fechas especiales o frases cortas seleccionando la opción en la ficha del producto.",
+      "¡Sí! En el carrito de compras podés tildar la opción '¿Es para regalo?' y escribir tu dedicatoria personalizada. La imprimiremos en una tarjeta kraft artesanal sin ningún costo adicional.",
   },
   {
     id: "per-2",
     category: "personalizados",
-    question: "¿Realizan regalos empresariales o ventas por mayor?",
+    question: "¿Realizan regalos empresariales o ventas corporativas?",
     answer:
-      "Sí, armamos cajas de regalo personalizadas con grabado de logo de empresas, termos, mates y yerbas seleccionadas. Escribinos directamente por WhatsApp para solicitar cotización y lista de precios corporativa.",
+      "Sí, armamos cajas de regalo personalizadas con termos, mates y yerbas seleccionadas. Escribinos directamente por WhatsApp para solicitar cotización y asesoramiento corporativo.",
   },
 ];
 
@@ -123,7 +123,7 @@ const CATEGORIES = [
   { id: "pagos", label: "Pagos y Descuentos", icon: CreditCard },
   { id: "curado", label: "Curado y Cuidado", icon: Sparkles },
   { id: "garantia", label: "Garantía y Cambios", icon: RotateCcw },
-  { id: "personalizados", label: "Grabados y Regalos", icon: PackageCheck },
+  { id: "personalizados", label: "Regalos y Dedicatorias", icon: PackageCheck },
 ];
 
 export default function HelpCenterPage() {

@@ -1,24 +1,18 @@
 import type { Metadata } from "next";
 import Hero from "@/components/home/Hero";
 import TrustBar from "@/components/home/TrustBar";
-import FeaturedProducts from "@/components/home/FeaturedProducts";
-import CustomKitBuilder from "@/components/home/CustomKitBuilder";
-import ComboPacksSection from "@/components/home/ComboPacksSection";
 import Categories from "@/components/home/Categories";
+import FeaturedProducts from "@/components/home/FeaturedProducts";
+import ComboPacksSection from "@/components/home/ComboPacksSection";
+import CustomKitBuilder from "@/components/home/CustomKitBuilder";
 import BrandsSection from "@/components/home/BrandsSection";
-import MateroExperienceHub from "@/components/home/MateroExperienceHub";
-import AboutSection from "@/components/home/AboutSection";
+import HowToBuy from "@/components/home/HowToBuy";
 import LocalSection from "@/components/home/LocalSection";
 import GoogleReviews from "@/components/home/GoogleReviews";
-import HowToBuy from "@/components/home/HowToBuy";
+import AboutSection from "@/components/home/AboutSection";
 import FAQSection from "@/components/home/FAQSection";
-import FinalCTA from "@/components/home/FinalCTA";
 import InstagramSection from "@/components/home/InstagramSection";
-import YerbaYieldCalculator from "@/components/home/YerbaYieldCalculator";
-import YerbaFlavourFinderModal from "@/components/home/YerbaFlavourFinderModal";
-import TerereGuideSection from "@/components/home/TerereGuideSection";
-import SeasonalMateCalendar from "@/components/home/SeasonalMateCalendar";
-import MateMoments from "@/components/home/MateMoments";
+import FinalCTA from "@/components/home/FinalCTA";
 import { getLandingContent } from "@/lib/landing";
 
 // Products and landing content come from Supabase and are editable from /admin — revalidate
@@ -39,24 +33,18 @@ export default async function HomePage() {
     <>
       <Hero content={landing.hero} />
       <TrustBar />
-      <HowToBuy />
+      <Categories />
       <FeaturedProducts />
       <ComboPacksSection />
       <CustomKitBuilder />
-      <YerbaYieldCalculator />
-      <YerbaFlavourFinderModal />
-      <AboutSection />
-      <Categories />
       <BrandsSection />
-      <TerereGuideSection />
-      <SeasonalMateCalendar />
-      <MateroExperienceHub />
+      <HowToBuy />
       <LocalSection />
       <GoogleReviews />
-      <MateMoments />
+      <AboutSection />
       <FAQSection />
-      <FinalCTA />
       <InstagramSection posts={landing.galleryPosts} />
+      <FinalCTA />
     </>
   );
 }

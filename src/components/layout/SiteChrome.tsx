@@ -5,7 +5,6 @@ import Navbar from "@/components/layout/Navbar";
 import CartDrawer from "@/components/cart/CartDrawer";
 import FavoritesDrawer from "@/components/cart/FavoritesDrawer";
 import SocialProofToaster from "@/components/ui/SocialProofToaster";
-import LuckyWheelModal from "@/components/ui/LuckyWheelModal";
 import ProductComparisonDrawer from "@/components/catalog/ProductComparisonDrawer";
 import { useFavorites } from "@/context/FavoritesContext";
 
@@ -43,7 +42,6 @@ export default function SiteChrome({
         onClose={() => setFavoritesDrawer(false)}
       />
       <ProductComparisonDrawer />
-      <LuckyWheelModal />
       <SocialProofToaster />
       <main>{children}</main>
       {footer}

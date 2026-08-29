@@ -392,8 +392,13 @@ export default function CatalogClient({
         </div>
       </div>
 
-      {/* Category tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap scrollbar-none snap-x">
+      {/* Category tabs.
+          scroll-pl-4 no es decorativo: sin él el scroll-snap alinea el primer
+          chip contra el borde del scrollport ignorando el px-4, la fila queda
+          con scrollLeft 16 al cargar y "Todos" pegado al borde de la pantalla
+          mientras el resto de la página respeta su margen. El scroll-padding
+          mueve el snapport hacia adentro y el chip cae donde corresponde. */}
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-4 px-4 scroll-pl-4 sm:mx-0 sm:px-0 sm:scroll-pl-0 sm:flex-wrap scrollbar-none snap-x">
         {categoryTabs.map(({ slug, name, count }) => (
           <button
             key={slug}
@@ -408,7 +413,7 @@ export default function CatalogClient({
           >
             <span>{name}</span>
             <span
-              className={`text-[11px] px-1.5 py-0.2 rounded-full ${
+              className={`text-[11px] px-1.5 py-0.5 rounded-full ${
                 activeCategory === slug
                   ? "bg-pava-cream/20 text-pava-cream"
                   : "bg-pava-cream-dark text-pava-brown/60"

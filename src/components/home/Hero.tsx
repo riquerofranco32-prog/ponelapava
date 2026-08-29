@@ -7,13 +7,11 @@ import { Sparkles } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { LandingHero } from "@/types/landing";
 import { DEFAULT_LANDING_CONTENT } from "@/lib/landing";
-import MateQuizModal from "@/components/home/MateQuizModal";
 
 export default function Hero({ content }: { content?: LandingHero }) {
   const hero = content || DEFAULT_LANDING_CONTENT.hero;
   const [loaded, setLoaded] = useState(false);
   const [allowVideo, setAllowVideo] = useState(false);
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
   const bgRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -211,19 +209,16 @@ export default function Hero({ content }: { content?: LandingHero }) {
             </MagneticButton>
           </div>
 
-          {/* Floating Trust Badges + Quiz trigger */}
+          {/* E-commerce Trust Badges */}
           <div
             className={`mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3.5
               transition-all duration-700 ease-out delay-450
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
-            <button
-              onClick={() => setIsQuizOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-pava-gold/50 bg-pava-gold/20 px-4 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold hover:bg-pava-gold hover:text-pava-brown transition-all duration-300 shadow-lg shadow-pava-gold/20 active:scale-95 cursor-pointer"
-            >
-              <Sparkles size={13} className="text-pava-gold animate-pulse" />
-              <span>✨ Hacé el Test Matero</span>
-            </button>
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-pava-gold/15 px-4 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold shadow-lg shadow-pava-gold/10">
+              <span className="text-pava-gold text-xs">💳</span>
+              <span>3 Cuotas Sin Interés</span>
+            </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
               <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>
               <span className="font-bold text-pava-cream">5.0</span>
@@ -235,7 +230,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
               <span className="text-pava-gold text-xs">🧉</span>
-              <span className="font-medium text-pava-cream/95">+1.000 clientes felices</span>
+              <span className="font-medium text-pava-cream/95">Garantía Artesanal</span>
             </div>
           </div>
 
@@ -270,9 +265,6 @@ export default function Hero({ content }: { content?: LandingHero }) {
           <span className="h-8 w-px bg-pava-cream/50 animate-scroll-bounce" />
         </div>
       </div>
-
-      {/* Mate Quiz Modal */}
-      <MateQuizModal isOpen={isQuizOpen} onClose={() => setIsQuizOpen(false)} />
     </section>
   );
 }

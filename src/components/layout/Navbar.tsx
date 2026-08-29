@@ -76,24 +76,18 @@ export default function Navbar() {
       />
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           isScrolled
-            ? "border-b border-pava-brown/8 bg-pava-cream/97 backdrop-blur-lg lg:border-0 lg:bg-transparent lg:px-4 lg:pt-2 lg:backdrop-blur-none"
+            ? "border-b border-pava-brown/10 bg-pava-cream/98 backdrop-blur-md shadow-sm"
             : "bg-transparent",
         )}
       >
         <TopAnnouncementBar />
-        <div
-          className={cn(
-            "mx-auto max-w-7xl px-5 transition-all duration-500 sm:px-8 lg:px-10",
-            isScrolled &&
-              "lg:max-w-6xl lg:rounded-full lg:border lg:border-pava-brown/10 lg:bg-pava-cream/97 lg:px-6 lg:shadow-[0_12px_32px_-14px_rgba(38,64,46,0.35)] lg:backdrop-blur-lg lg:mt-2",
-          )}
-        >
+        <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 transition-all duration-300">
           <div
             className={cn(
-              "flex items-center justify-between transition-all duration-400",
-              isScrolled ? "h-[4.25rem]" : "h-20 lg:h-24",
+              "flex items-center justify-between transition-all duration-300",
+              isScrolled ? "h-16 lg:h-[4.5rem]" : "h-20 lg:h-24",
             )}
           >
             {/* Logo */}
@@ -146,7 +140,7 @@ export default function Navbar() {
                   key={label}
                   href={href}
                   className={cn(
-                    "nav-link text-[13px] font-medium tracking-wide transition-colors duration-200",
+                    "nav-link whitespace-nowrap text-[13px] font-medium tracking-wide transition-colors duration-200",
                     isScrolled
                       ? "text-pava-brown/75 hover:text-pava-green"
                       : "text-pava-cream/80 hover:text-pava-cream",
@@ -160,7 +154,7 @@ export default function Navbar() {
               <Link
                 href="/catalogo"
                 className={cn(
-                  "nav-link text-[13px] font-semibold tracking-wide transition-colors duration-200",
+                  "nav-link whitespace-nowrap text-[13px] font-semibold tracking-wide transition-colors duration-200",
                   isScrolled
                     ? "text-pava-green hover:text-pava-green-light"
                     : "text-pava-gold hover:text-pava-gold-light",
@@ -279,7 +273,7 @@ export default function Navbar() {
                 href="/catalogo"
                 id="navbar-cta"
                 className={cn(
-                  "hidden lg:flex items-center gap-2 rounded-control px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-200",
+                  "hidden lg:flex items-center gap-2 whitespace-nowrap rounded-control px-5 py-2.5 text-[13px] font-semibold tracking-wide transition-all duration-200",
                   isScrolled
                     ? "bg-pava-green text-pava-cream hover:bg-pava-green-light"
                     : "bg-pava-cream/10 border border-pava-cream/30 text-pava-cream hover:bg-pava-cream/18 hover:border-pava-cream/50 backdrop-blur-sm",

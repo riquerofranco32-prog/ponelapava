@@ -194,7 +194,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
               <Link
                 href={hero.ctaPrimaryLink || "/catalogo"}
                 id="hero-cta-catalogo"
-                className="cta-pulse-ring inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-lg shadow-pava-gold/10"
+                className="cta-pulse-ring inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98] sm:px-10 shadow-xl shadow-pava-gold/15"
               >
                 {hero.ctaPrimaryText || "Explorar el catálogo"}
                 <span className="text-base" aria-hidden="true">
@@ -204,35 +204,70 @@ export default function Hero({ content }: { content?: LandingHero }) {
             </MagneticButton>
             <MagneticButton>
               <Link
-                href={hero.ctaSecondaryLink || "/#el-local"}
-                id="hero-cta-local"
-                className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/35 bg-pava-brown/10 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-[3px] transition-all duration-200 hover:border-pava-cream/65 hover:bg-pava-cream/10 sm:px-10"
+                href={hero.ctaSecondaryLink || "/#combos"}
+                id="hero-cta-combos"
+                className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/40 bg-pava-brown/20 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-md transition-all duration-200 hover:border-pava-gold hover:bg-pava-gold/15 sm:px-10"
               >
-                {hero.ctaSecondaryText || "Conocé el local"}
+                {hero.ctaSecondaryText || "Ver Combos con Descuento"}
               </Link>
             </MagneticButton>
           </div>
 
-          {/* E-commerce Trust Badges */}
+          {/* Quick Shop Category Chips */}
           <div
-            className={`mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3.5
+            className={`mt-7 flex flex-wrap items-center gap-2
               transition-all duration-700 ease-out delay-450
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-pava-gold/15 px-4 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold shadow-lg shadow-pava-gold/10">
+            <span className="text-[11px] font-bold text-pava-gold uppercase tracking-wider mr-1 hidden sm:inline-block">
+              Acceso rápido:
+            </span>
+            <Link
+              href="/catalogo?cat=mates"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-pava-cream backdrop-blur-sm transition-all hover:bg-pava-gold hover:text-pava-brown hover:border-pava-gold"
+            >
+              <span>🧉 Mates Imperiales</span>
+            </Link>
+            <Link
+              href="/catalogo?cat=yerbas"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-pava-cream backdrop-blur-sm transition-all hover:bg-pava-gold hover:text-pava-brown hover:border-pava-gold"
+            >
+              <span>🌿 Yerbas Seleccionadas</span>
+            </Link>
+            <Link
+              href="/#arma-tu-set"
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-950/50 px-3 py-1 text-xs font-bold text-emerald-300 backdrop-blur-sm transition-all hover:bg-emerald-400 hover:text-emerald-950 hover:border-emerald-400"
+            >
+              <span>⚡ Armá tu Kit (10% OFF)</span>
+            </Link>
+            <Link
+              href="/catalogo?cat=bombillas"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-pava-cream backdrop-blur-sm transition-all hover:bg-pava-gold hover:text-pava-brown hover:border-pava-gold"
+            >
+              <span>✨ Bombillas Alpaca</span>
+            </Link>
+          </div>
+
+          {/* E-commerce Trust Badges */}
+          <div
+            className={`mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3
+              transition-all duration-700 ease-out delay-500
+              ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-pava-gold/15 px-3.5 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold shadow-lg shadow-pava-gold/10">
               <span className="text-pava-gold text-xs">💳</span>
               <span>3 Cuotas Sin Interés</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
               <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>
               <span className="font-bold text-pava-cream">5.0</span>
               <span className="text-pava-cream/70 text-[11px]">en Google</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
               <span className="text-pava-gold text-xs">🚚</span>
               <span className="font-medium text-pava-cream/95">Envíos a todo el país</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-4 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pava-cream/20 bg-pava-green-dark/60 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/40">
               <span className="text-pava-gold text-xs">🧉</span>
               <span className="font-medium text-pava-cream/95">Garantía Artesanal</span>
             </div>

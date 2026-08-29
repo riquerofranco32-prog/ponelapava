@@ -9,7 +9,7 @@ export default async function FeaturedProducts() {
   const featuredProducts = await getFeaturedProducts();
   const displayed = [...featuredProducts]
     .sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0))
-    .slice(0, 8);
+    .slice(0, 20);
 
   return (
     <section

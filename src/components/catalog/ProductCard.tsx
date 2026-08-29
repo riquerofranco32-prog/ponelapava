@@ -240,20 +240,23 @@ export default function ProductCard({
             <span className="mt-1 block text-[11px] font-semibold text-emerald-700">
               {formatPrice(Math.round(product.price * 0.9))} <span className="text-[10px] font-normal text-pava-brown-mid/70">(10% OFF transf.)</span>
             </span>
+            <span className="text-[10.5px] font-bold text-pava-brown/75 block mt-1">
+              💳 3 cuotas de <strong className="text-pava-green font-bold">{formatPrice(Math.round(product.price / 3))}</strong>
+            </span>
           </span>
         </div>
 
         <Link href={`/producto/${product.id}`}>
-          <h3 className="font-display mb-1.5 text-[1.1rem] font-bold leading-tight text-pava-brown transition-colors hover:text-pava-green">
+          <h3 className="font-display mb-1.5 text-[1.05rem] font-bold leading-tight text-pava-brown transition-colors hover:text-pava-green line-clamp-1">
             {product.name}
           </h3>
         </Link>
 
-        <p className="mb-5 min-h-9 text-[13px] leading-relaxed text-pava-brown-mid/70">
-          {truncate(product.description, 72)}
+        <p className="mb-4 text-xs leading-relaxed text-pava-brown-mid/70 line-clamp-2">
+          {truncate(product.description, 70)}
         </p>
 
-        {/* Desktop fallback button (always visible, not overlaid) */}
+        {/* Action Button */}
         <AddToCartButton product={product} disabled={isOutOfStock} />
       </div>
 

@@ -143,11 +143,42 @@ export default function QuickViewModal({
             {product.description}
           </p>
 
+          {/* Category-Specific Visual Specs */}
+          {product.category === "yerbas" && (
+            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+              <div className="flex justify-between font-semibold mb-1">
+                <span className="text-pava-brown font-bold">🌿 Intensidad & Sabor</span>
+                <span className="text-pava-green font-bold">●●●●○ (Media-Intensa)</span>
+              </div>
+              <span className="text-[11px] text-pava-brown-mid/70 block">Rendimiento: +1.5L de agua sin lavarse</span>
+            </div>
+          )}
+
+          {product.category === "termos" && (
+            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+              <div className="flex justify-between font-semibold mb-1">
+                <span className="text-pava-brown font-bold">🔥 Rendimiento Térmico</span>
+                <span className="text-pava-gold-deep font-bold">+24hs Caliente | +36hs Frío</span>
+              </div>
+              <span className="text-[11px] text-pava-brown-mid/70 block">Acero inoxidable 18/8 con pico cebador</span>
+            </div>
+          )}
+
+          {product.category === "mates" && (
+            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+              <div className="flex justify-between font-semibold mb-1">
+                <span className="text-pava-brown font-bold">🧉 Ficha Artesanal</span>
+                <span className="text-pava-green font-bold">Calabaza & Alpaca</span>
+              </div>
+              <span className="text-[11px] text-pava-brown-mid/70 block">Forrado en cuero vacuno con base reforzada</span>
+            </div>
+          )}
+
           {(product.brand || product.weight) && (
-            <div className="mb-6 flex gap-6 border-t border-pava-brown/8 pt-3 text-xs text-pava-brown-mid/70">
+            <div className="mb-4 flex gap-6 border-t border-pava-brown/8 pt-3 text-xs text-pava-brown-mid/70">
               {product.brand && (
                 <span>
-                  <span className="block text-[10px] uppercase tracking-wide text-pava-brown-mid/50">
+                  <span className="block text-[10px] uppercase tracking-wide text-pava-brown-mid/50 font-bold">
                     Marca
                   </span>
                   {product.brand}
@@ -155,7 +186,7 @@ export default function QuickViewModal({
               )}
               {product.weight && (
                 <span>
-                  <span className="block text-[10px] uppercase tracking-wide text-pava-brown-mid/50">
+                  <span className="block text-[10px] uppercase tracking-wide text-pava-brown-mid/50 font-bold">
                     Peso
                   </span>
                   {product.weight}

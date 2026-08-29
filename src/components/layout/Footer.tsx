@@ -201,7 +201,7 @@ export default async function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 font-medium text-pava-cream hover:text-white transition-all duration-200 group"
-                  aria-label="se7en studios"
+                  aria-label="SE7EN"
                 >
                   <Image
                     src="/se7en-logo.png"
@@ -210,9 +210,6 @@ export default async function Footer() {
                     height={20}
                     className="h-4 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
                   />
-                  <span className="text-[11px] font-semibold tracking-wider lowercase text-pava-cream/85 group-hover:text-pava-cream">
-                    studios
-                  </span>
                 </a>
               </div>
             </div>

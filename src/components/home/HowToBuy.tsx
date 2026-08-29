@@ -1,118 +1,225 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
-  ClipboardList,
+  Sparkles,
   MessageCircle,
-  CheckCircle2,
+  Truck,
   ArrowRight,
+  CheckCircle,
+  CreditCard,
+  MapPin,
+  ShieldCheck,
 } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import MagneticButton from "@/components/ui/MagneticButton";
+import { BorderBeam } from "@/components/ui/BorderBeam";
 
-const steps = [
+interface StepItem {
+  number: string;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  tag: string;
+  title: string;
+  description: string;
+  feature: string;
+  pillColor: string;
+}
+
+const STEPS: StepItem[] = [
   {
+    number: "01",
     icon: ShoppingBag,
-    title: "Elegí tus productos",
-    description:
-      "Navegá nuestro catálogo y encontrá yerbas seleccionadas, mates, termos y accesorios.",
-    badge: "Catálogo online",
+    tag: "Paso 1 · Exploración",
+    title: "Elegí tus piezas favoritas",
+    description: "Navegá nuestro catálogo de mates de calabaza, yerbas seleccionadas, termos y bombillas de alpaca.",
+    feature: "Catálogo online en vivo",
+    pillColor: "from-amber-400 to-amber-600",
   },
   {
-    icon: ClipboardList,
-    title: "Armá tu pedido",
-    description: "Agregá todo a tu carrito con un clic y revisá tu selección cuando quieras.",
-    badge: "Sin registros",
+    number: "02",
+    icon: Sparkles,
+    tag: "Paso 2 · Personalización",
+    title: "Armá tu carrito a medida",
+    description: "Agregá productos individuales o armá tu set personalizado con 10% de descuento automático.",
+    feature: "Sin registros obligatorios",
+    pillColor: "from-emerald-400 to-teal-600",
   },
   {
+    number: "03",
     icon: MessageCircle,
-    title: "Enviános por WhatsApp",
-    description:
-      "Tu lista se convierte en un mensaje automático listo para mandar a nuestro local.",
-    badge: "1 Clic",
+    tag: "Paso 3 · Confirmación",
+    title: "Enviá tu pedido por WhatsApp",
+    description: "Tu selección se transforma en un mensaje ordenado. Te responde una persona real del local en minutos.",
+    feature: "Atención humana instantánea",
+    pillColor: "from-green-400 to-emerald-600",
   },
   {
-    icon: CheckCircle2,
-    title: "Coordinamos entrega",
-    description: "Acordamos envío a todo el país o retiro inmediato en nuestro local en Catriel.",
-    badge: "Rápido y seguro",
+    number: "04",
+    icon: Truck,
+    tag: "Paso 4 · Despacho o Retiro",
+    title: "Elegí cómo recibir tu mate",
+    description: "Coordinamos envío seguro a todo el país o retiro inmediato sin costo en nuestro local de Catriel.",
+    feature: "Envíos a todo el país & Retiro",
+    pillColor: "from-pava-gold to-amber-500",
   },
 ];
 
 export default function HowToBuy() {
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+
   return (
-    <section id="como-comprar" className="bg-pava-green py-24 sm:py-28 lg:py-36 border-b border-pava-cream/10">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
-        {/* Header */}
-        <ScrollReveal direction="up" className="mb-16 lg:mb-20 max-w-2xl">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="h-px w-9 bg-pava-gold" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold">
-              Experiencia simple
-            </span>
+    <section
+      id="como-comprar"
+      className="relative overflow-hidden bg-[#0d1810] py-24 sm:py-28 lg:py-36 text-pava-cream border-y border-pava-gold/15"
+    >
+      {/* Dynamic ambient lighting */}
+      <div className="absolute top-0 left-1/4 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-pava-gold/10 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 translate-y-1/2 w-[550px] h-[550px] rounded-full bg-pava-green/20 blur-[140px] pointer-events-none" />
+      <div className="bg-dots-pattern absolute inset-0 opacity-20 pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+        {/* Section Header */}
+        <ScrollReveal
+          direction="up"
+          className="mb-16 lg:mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-6"
+        >
+          <div className="max-w-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-px w-10 bg-pava-gold" />
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.28em] text-pava-gold">
+                Experiencia Sin Fricción
+              </span>
+            </div>
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[0.92] tracking-tight text-white">
+              En cuatro pasos, <br />
+              <em className="text-shine not-italic text-pava-gold">tu mate en camino.</em>
+            </h2>
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-pava-cream/75 max-w-lg">
+              Comprás fácil desde la web con atención personalizada. Sin formularios eternos, con asesoramiento humano y múltiples medios de pago.
+            </p>
           </div>
-          <h2 className="font-display text-4xl font-bold leading-[0.93] tracking-tight text-pava-cream sm:text-5xl lg:text-6xl">
-            En cuatro pasos,
-            <br />
-            <em className="not-italic text-pava-gold">tu mate en camino.</em>
-          </h2>
-          <p className="mt-5 text-sm leading-relaxed text-pava-cream/75 max-w-md">
-            Comprás directo por WhatsApp con atención humana. Sin formularios eternos, sin complicaciones.
-          </p>
+
+          {/* Quick trust metrics */}
+          <div className="hidden lg:flex items-center gap-6 bg-white/5 border border-white/10 px-5 py-3 rounded-2xl backdrop-blur-md">
+            <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">
+              <CreditCard size={16} className="text-pava-gold" />
+              <span>3 Cuotas sin interés</span>
+            </div>
+            <div className="h-4 w-px bg-white/20" />
+            <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">
+              <ShieldCheck size={16} className="text-emerald-400" />
+              <span>Compra 100% segura</span>
+            </div>
+          </div>
         </ScrollReveal>
 
-        {/* Steps */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, index) => (
-            <ScrollReveal
-              key={step.title}
-              direction="up"
-              delay={index * 80}
-              className="group relative flex flex-col justify-between rounded-card border border-pava-cream/15 bg-pava-green-dark/40 p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-pava-gold/50 hover:bg-pava-green-dark/70 hover:shadow-xl hover:shadow-black/20"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <span className="relative flex h-13 w-13 items-center justify-center rounded-control border border-pava-gold/40 bg-pava-green-dark text-pava-gold transition-colors duration-300 group-hover:border-pava-gold group-hover:bg-pava-gold group-hover:text-pava-brown shadow-md">
-                    <step.icon size={22} strokeWidth={1.75} aria-hidden="true" />
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="font-display text-4xl font-extrabold leading-none text-pava-gold/20 transition-colors duration-300 group-hover:text-pava-gold/40"
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
+        {/* 4 Interactive Step Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 relative">
+          {STEPS.map((step, idx) => {
+            const Icon = step.icon;
+            const isHovered = hoveredStep === idx;
 
-                <div className="mb-2">
-                  <span className="inline-block rounded-chip border border-pava-gold/30 bg-pava-gold/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-pava-gold">
-                    {step.badge}
-                  </span>
-                </div>
+            return (
+              <ScrollReveal
+                key={step.number}
+                direction="up"
+                delay={idx * 90}
+                className="h-full"
+              >
+                <div
+                  onMouseEnter={() => setHoveredStep(idx)}
+                  onMouseLeave={() => setHoveredStep(null)}
+                  className={`group relative flex h-full flex-col justify-between rounded-2xl border p-6 sm:p-7 backdrop-blur-xl transition-all duration-400 overflow-hidden cursor-pointer ${
+                    isHovered
+                      ? "bg-white/10 border-pava-gold shadow-2xl shadow-pava-gold/15 -translate-y-2 scale-[1.02]"
+                      : "bg-[#14261a]/80 border-white/12 hover:border-white/25 shadow-lg"
+                  }`}
+                >
+                  {/* Glowing Border Beam on active/hovered step */}
+                  {isHovered && (
+                    <BorderBeam
+                      size={200}
+                      duration={6}
+                      borderWidth={2}
+                      colorFrom="#d39e4a"
+                      colorTo="#52b788"
+                    />
+                  )}
 
-                <h3 className="font-display mb-2 text-xl font-bold text-pava-cream">
-                  {step.title}
-                </h3>
-                <p className="text-[13px] leading-relaxed text-pava-cream/75">
-                  {step.description}
-                </p>
-              </div>
+                  <div>
+                    {/* Top row: Step Number + Icon Badge */}
+                    <div className="flex items-center justify-between mb-5">
+                      <span
+                        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${step.pillColor} text-pava-brown shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                      >
+                        <Icon size={22} strokeWidth={2.2} />
+                      </span>
 
-              {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-20 text-pava-gold/40">
-                  <ArrowRight size={16} />
+                      <span className="font-display text-4xl font-extrabold tracking-tighter text-white/20 transition-colors duration-300 group-hover:text-pava-gold/60">
+                        {step.number}
+                      </span>
+                    </div>
+
+                    {/* Step Tag */}
+                    <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-pava-gold mb-2">
+                      {step.tag}
+                    </span>
+
+                    {/* Title & Description */}
+                    <h3 className="font-display text-xl font-bold text-white mb-2.5 leading-snug group-hover:text-pava-gold transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-xs sm:text-[13px] leading-relaxed text-pava-cream/75">
+                      {step.description}
+                    </p>
+                  </div>
+
+                  {/* Bottom Feature Pill */}
+                  <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-300">
+                      <CheckCircle size={13} className="text-emerald-400 shrink-0" />
+                      <span>{step.feature}</span>
+                    </span>
+
+                    <span className="text-xs text-pava-gold opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 font-bold">
+                      →
+                    </span>
+                  </div>
                 </div>
-              )}
-            </ScrollReveal>
-          ))}
+              </ScrollReveal>
+            );
+          })}
         </div>
 
-        {/* CTA */}
-        <ScrollReveal direction="up" delay={200} className="mt-14 lg:mt-18 text-center sm:text-left">
-          <Link
-            href="/catalogo"
-            id="howtobuy-cta"
-            className="inline-flex items-center gap-3 rounded-control border-2 border-pava-gold bg-pava-gold px-10 py-4 text-sm font-bold tracking-wide text-pava-brown shadow-lg shadow-pava-gold/10 transition-all duration-200 hover:bg-pava-gold-light hover:border-pava-gold-light active:scale-[0.98]"
-          >
-            Empezar a elegir productos <ArrowRight size={16} aria-hidden="true" />
-          </Link>
+        {/* Bottom Call to Action Bar */}
+        <ScrollReveal
+          direction="up"
+          delay={250}
+          className="mt-14 lg:mt-18 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-2xl border border-white/12 bg-white/5 p-6 sm:p-8 backdrop-blur-xl"
+        >
+          <div className="text-center sm:text-left">
+            <span className="text-xs font-bold text-pava-gold uppercase tracking-wider block mb-1">
+              ¿Tenés dudas sobre qué mate elegir?
+            </span>
+            <h3 className="font-display text-xl sm:text-2xl font-bold text-white">
+              Te asesoramos en el momento por WhatsApp
+            </h3>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto">
+            <MagneticButton>
+              <Link
+                href="/catalogo"
+                id="howtobuy-cta"
+                className="cta-pulse-ring w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown shadow-xl shadow-pava-gold/15 transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98]"
+              >
+                <span>Empezar a elegir productos</span>
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </MagneticButton>
+          </div>
         </ScrollReveal>
       </div>
     </section>

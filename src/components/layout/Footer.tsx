@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, MapPin, Clock, LogIn } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/icons";
-import { NAV_LINKS } from "@/lib/nav";
+import { NAV_LINKS, UTILITY_LINKS } from "@/lib/nav";
 import { INSTAGRAM_URL } from "@/lib/site";
 import { getSiteSettings } from "@/lib/settings";
 import { whatsappChatUrl } from "@/lib/whatsapp";
@@ -79,7 +79,15 @@ export default async function Footer() {
               Navegación
             </h3>
             <ul className="flex flex-col gap-3">
-              {NAV_LINKS.map(({ href, label }) => (
+              <li>
+                <Link
+                  href="/catalogo"
+                  className="text-sm text-pava-cream/65 hover:text-pava-cream transition-colors duration-200"
+                >
+                  Catálogo Completo
+                </Link>
+              </li>
+              {UTILITY_LINKS.map(({ href, label }) => (
                 <li key={label}>
                   <Link
                     href={href}

@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Check, ShoppingBag, Sparkles, Zap, ArrowRight } from "lucide-react";
+import { Check, ShoppingBag, Sparkles, Zap, ArrowRight, ShieldCheck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { Product } from "@/types";
+import { BorderBeam } from "@/components/ui/BorderBeam";
 
 interface ComboPack {
   id: string;
@@ -169,15 +170,26 @@ export default function ComboPacksSection() {
 
         {/* Grid of Packs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-          {COMBO_PACKS.map((pack) => {
+          {COMBO_PACKS.map((pack, i) => {
             const savings = pack.originalPrice - pack.price;
             const savingsPct = Math.round((savings / pack.originalPrice) * 100);
+            const isTopSeller = i === 0 || i === 1;
 
             return (
               <div
                 key={pack.id}
-                className="group relative flex flex-col justify-between rounded-2xl bg-white border border-pava-brown/12 p-6 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(38,64,46,0.15)] hover:border-pava-green/30 transition-all duration-300"
+                className="group relative flex flex-col justify-between rounded-2xl bg-white border border-pava-brown/12 p-6 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(38,64,46,0.18)] hover:border-pava-green/40 transition-all duration-300 overflow-hidden"
               >
+                {isTopSeller && (
+                  <BorderBeam
+                    size={200}
+                    duration={8 + i * 2}
+                    borderWidth={1.5}
+                    colorFrom="#d39e4a"
+                    colorTo="transparent"
+                  />
+                )}
+
                 {/* Badge */}
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <span
@@ -245,10 +257,10 @@ export default function ComboPacksSection() {
                     <button
                       type="button"
                       onClick={() => handleAddCombo(pack)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-pava-green hover:bg-pava-green-light text-pava-cream font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 active:scale-98"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-pava-green hover:bg-pava-green-light text-pava-cream font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 cursor-pointer"
                     >
                       <ShoppingBag size={15} />
-                      <span>{addedId === pack.id ? "¡Agregado!" : "Agregar Combo"}</span>
+                      <span>{addedId === pack.id ? "¡Agregado al Carrito!" : "Agregar Combo al Carrito"}</span>
                     </button>
                   </div>
                 </div>

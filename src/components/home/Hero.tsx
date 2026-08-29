@@ -119,17 +119,21 @@ export default function Hero({ content }: { content?: LandingHero }) {
         style={{ transform: "translate(0px, 0px)" }}
       >
         <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10">
-          {/* Tag line — shimmer badge */}
+          {/* Tag line — shimmer badge + Live dispatch pill */}
           <div
-            className={`mb-5 flex items-center gap-3 sm:mb-7
+            className={`mb-5 flex flex-wrap items-center gap-3 sm:mb-7
               transition-all duration-700 ease-out delay-100
               ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
           >
-            <span className="h-px w-10 bg-pava-gold" />
+            <span className="h-px w-8 sm:w-10 bg-pava-gold" />
             <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-pava-gold/40 bg-pava-cream/5 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.28em] text-pava-gold backdrop-blur-[2px] sm:text-[11px]">
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-pava-gold animate-pulse-dot" />
               {hero.badge || "Poné La Pava · Tienda Matera"}
               <span className="shine-sweep" aria-hidden="true" />
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-3 py-1 text-[10px] font-medium text-emerald-300 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>🟢 Despachos activos hoy</span>
             </span>
           </div>
 

@@ -273,68 +273,154 @@ export default function ProductDetail({
               <p>{product.longDescription ?? product.description}</p>
             </div>
 
-            {/* Category Contextual Care / Ritual Guide */}
-            <div className="mb-8 rounded-card bg-pava-cream-dark/60 border border-pava-brown/10 p-4">
-              <div className="flex items-center justify-between mb-2">
+            {/* Category Contextual Specifications & Craft Radar */}
+            <div className="mb-8 rounded-2xl bg-pava-cream-dark/60 border border-pava-brown/12 p-5 shadow-xs">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 font-display text-sm font-bold text-pava-brown">
-                  <span className="text-base">
+                  <span className="text-lg">
                     {product.category === "mates"
                       ? "🧉"
                       : product.category === "yerbas"
                         ? "🌿"
                         : product.category === "termos"
-                          ? "🌡️"
+                          ? "🔥"
                           : "✨"}
                   </span>
                   <span>
                     {product.category === "mates"
-                      ? "Guía de Curado y Cuidado del Mate"
+                      ? "Ficha Artesanal & Guía de Curado"
                       : product.category === "yerbas"
-                        ? "Perfil y Recomendación de Cebado"
+                        ? "Perfil de Sabor & Notas de Cata"
                         : product.category === "termos"
-                          ? "Rendimiento Térmico y Conservación"
-                          : "Garantía y Experiencia Poné La Pava"}
+                          ? "Rendimiento Térmico & Aislamiento"
+                          : "Especificaciones & Garantía"}
                   </span>
                 </div>
                 {product.category === "mates" && (
                   <button
                     type="button"
                     onClick={() => setShowCuradoSteps(!showCuradoSteps)}
-                    className="text-[11px] font-semibold text-pava-green hover:underline cursor-pointer"
+                    className="text-xs font-bold text-pava-green hover:underline cursor-pointer bg-white px-2.5 py-1 rounded-full border border-pava-brown/10 shadow-xs"
                   >
-                    {showCuradoSteps ? "Ocultar pasos" : "Ver 4 pasos"}
+                    {showCuradoSteps ? "Ocultar pasos" : "Ver Guía de Curado (4 pasos)"}
                   </button>
                 )}
               </div>
-              <p className="text-xs text-pava-brown-mid/80 leading-relaxed">
-                {product.category === "mates"
-                  ? "Si es de calabaza o madera, curalo antes del primer uso para sellar los poros y lograr el mejor sabor en cada ronda."
-                  : product.category === "yerbas"
-                    ? "Recomendamos cebar con agua a 75°C - 80°C. Verté primero un chorrito de agua tibia para hidratar la yerba y no quemar la montañita."
-                    : product.category === "termos"
-                      ? "Para máxima retención de temperatura durante todo el día, templá el termo con un chorro de agua caliente durante 1 minuto antes del llenado definitivo."
-                      : "Producto 100% original seleccionado con el sello de calidad de Poné La Pava Catriel. Asesoramiento personalizado post-venta."}
-              </p>
 
-              {product.category === "mates" && showCuradoSteps && (
-                <div className="mt-3.5 pt-3 border-t border-pava-brown/10 space-y-2.5 text-xs text-pava-brown">
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">1</span>
-                    <p><strong>Enjuague inicial:</strong> Lavá el interior solo con agua tibia (sin detergente ni agua hirviendo).</p>
+              {/* Yerbas Tasting Radar */}
+              {product.category === "yerbas" && (
+                <div className="space-y-3 pt-2">
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10">
+                      <div className="flex justify-between font-semibold mb-1">
+                        <span className="text-pava-brown">Intensidad</span>
+                        <span className="text-pava-green font-bold">Media / Intensa</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <span
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full ${
+                              i <= 4 ? "bg-pava-green" : "bg-pava-brown/15"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10">
+                      <div className="flex justify-between font-semibold mb-1">
+                        <span className="text-pava-brown">Rendimiento</span>
+                        <span className="text-pava-green font-bold">+1.5L de agua</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                          <span
+                            key={i}
+                            className={`h-1.5 flex-1 rounded-full ${
+                              i <= 5 ? "bg-pava-green" : "bg-pava-brown/15"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">2</span>
-                    <p><strong>Llenado con yerba:</strong> Colocá yerba usada húmeda hasta el tope y agregá un chorrito de agua tibia. Dejá reposar 24 hs.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">3</span>
-                    <p><strong>Raspado suave:</strong> Vaciá el mate y con una cuchara sopera raspá suavemente las paredes interiores para desprender el hollejo suelto.</p>
-                  </div>
-                  <div className="flex items-start gap-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">4</span>
-                    <p><strong>Secado correcto:</strong> Repetí el proceso 1 o 2 veces más. Luego, secá siempre el mate boca arriba o de costado en un lugar ventilado.</p>
-                  </div>
+                  <p className="text-xs text-pava-brown-mid/80 leading-relaxed">
+                    💡 <strong>Consejo del Cebador:</strong> Cebar con agua entre 75°C y 80°C. Hidratar previamente con agua tibia en la hendidura para preservar el sabor y la espuma durante toda la ronda.
+                  </p>
                 </div>
+              )}
+
+              {/* Termos Thermal Gauge */}
+              {product.category === "termos" && (
+                <div className="space-y-3 pt-2">
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10 flex items-center gap-3">
+                      <span className="text-2xl">🔥</span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-pava-gold-deep block">Agua Caliente</span>
+                        <span className="text-sm font-bold text-pava-brown">+24 Horas</span>
+                      </div>
+                    </div>
+                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10 flex items-center gap-3">
+                      <span className="text-2xl">❄️</span>
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-sky-700 block">Agua Fría / Hielo</span>
+                        <span className="text-sm font-bold text-pava-brown">+36 Horas</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-pava-brown-mid/80 leading-relaxed">
+                    🔒 <strong>Aislamiento de Doble Pared:</strong> Acero inoxidable 18/8 libre de BPA con pico cebador de precisión para un flujo de agua controlado.
+                  </p>
+                </div>
+              )}
+
+              {/* Mates Specifications & Curing steps */}
+              {product.category === "mates" && (
+                <div>
+                  <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+                    <div className="bg-white/80 rounded-lg p-2.5 border border-pava-brown/10 text-center">
+                      <span className="text-[10px] text-pava-brown/60 block uppercase font-bold">Cuerpo</span>
+                      <span className="font-bold text-pava-brown text-[11px]">Calabaza / Cuero</span>
+                    </div>
+                    <div className="bg-white/80 rounded-lg p-2.5 border border-pava-brown/10 text-center">
+                      <span className="text-[10px] text-pava-brown/60 block uppercase font-bold">Virola</span>
+                      <span className="font-bold text-pava-brown text-[11px]">Alpaca Maciza</span>
+                    </div>
+                    <div className="bg-white/80 rounded-lg p-2.5 border border-pava-brown/10 text-center">
+                      <span className="text-[10px] text-pava-brown/60 block uppercase font-bold">Capacidad</span>
+                      <span className="font-bold text-pava-brown text-[11px]">35g - 45g</span>
+                    </div>
+                  </div>
+
+                  {showCuradoSteps && (
+                    <div className="mt-3 pt-3 border-t border-pava-brown/10 space-y-2.5 text-xs text-pava-brown">
+                      <div className="flex items-start gap-2.5">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">1</span>
+                        <p><strong>Enjuague inicial:</strong> Lavá el interior solo con agua tibia (sin detergente ni agua hirviendo).</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">2</span>
+                        <p><strong>Llenado con yerba:</strong> Colocá yerba usada húmeda hasta el tope y agregá un chorrito de agua tibia. Dejá reposar 24 hs.</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">3</span>
+                        <p><strong>Raspado suave:</strong> Vaciá el mate y con una cuchara sopera raspá suavemente las paredes interiores para desprender el hollejo suelto.</p>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-pava-green text-white text-[10px] font-bold">4</span>
+                        <p><strong>Secado correcto:</strong> Repetí el proceso 1 o 2 veces más. Luego, secá siempre el mate boca arriba o de costado en un lugar ventilado.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Other categories */}
+              {product.category !== "yerbas" && product.category !== "termos" && product.category !== "mates" && (
+                <p className="text-xs text-pava-brown-mid/80 leading-relaxed pt-1">
+                  Producto 100% artesanal seleccionado con el sello de calidad de Poné La Pava Catriel. Asesoramiento personalizado post-venta vía WhatsApp.
+                </p>
               )}
             </div>
 

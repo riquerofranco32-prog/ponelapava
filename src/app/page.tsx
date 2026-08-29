@@ -5,6 +5,7 @@ import Categories from "@/components/home/Categories";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import ComboPacksSection from "@/components/home/ComboPacksSection";
 import CustomKitBuilder from "@/components/home/CustomKitBuilder";
+import MateAnatomy from "@/components/home/MateAnatomy";
 import BrandsSection from "@/components/home/BrandsSection";
 import HowToBuy from "@/components/home/HowToBuy";
 import LocalSection from "@/components/home/LocalSection";
@@ -37,6 +38,7 @@ export default async function HomePage() {
       <FeaturedProducts />
       <ComboPacksSection />
       <CustomKitBuilder />
+      <MateAnatomy />
       <BrandsSection />
       <HowToBuy />
       <LocalSection />

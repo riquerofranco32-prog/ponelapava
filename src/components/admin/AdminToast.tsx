@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -32,6 +33,11 @@ export function AdminToastProvider({
 }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idRef = useRef(0);
+  // Portal must not render during hydration — `document` exists by the time
+  // the client render runs, but not during SSR, so checking it directly in
+  // render always mismatches. Flip this after mount instead.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const showToast = useCallback(
     (message: string, variant: ToastVariant = "success") => {
@@ -53,7 +59,7 @@ export function AdminToastProvider({
   return (
     <AdminToastContext.Provider value={showToast}>
       {children}
-      {typeof document !== "undefined" &&
+      {mounted &&
         createPortal(
           <div className="admin-toast-root fixed bottom-20 left-1/2 z-[200] flex w-[min(360px,calc(100vw-2rem))] -translate-x-1/2 flex-col gap-2 lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0">
             {toasts.map((t) => (

@@ -17,6 +17,7 @@ import { STATUS_LABELS } from "@/lib/orderStatus";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
 import { AdminButton } from "./AdminButton";
+import FailedOrdersNotice from "./orders/FailedOrdersNotice";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
@@ -280,6 +281,7 @@ export default function OrdersTable() {
 
   return (
     <div>
+      <FailedOrdersNotice />
       <div className="admin-kpi-grid">
         <AdminKpiCard
           icon={ShoppingBag}

@@ -254,11 +254,23 @@ export default function CartPage() {
     const url = buildWhatsAppUrl(settings.whatsappNumber, orderData);
     window.open(url, "_blank", "noopener,noreferrer");
 
-    // Best-effort order log in backend. Only the customer's choices travel —
-    // prices and totals are recomputed server-side from the products table.
+    // Order log in backend. Only the customer's choices travel — prices and
+    // totals are recomputed server-side from the products table.
+    //
+    // La venta ya se cerró en la línea de arriba y no se puede deshacer, así
+    // que este POST no bloquea nada. Pero su resultado sí se mira: un 400 es
+    // un fetch exitoso, así que ignorar la respuesta (como se hacía antes)
+    // dejaba el rechazo invisible. El servidor guarda el intento en
+    // failed_orders; acá sólo queda el rastro del caso que allá no puede
+    // registrarse: que la petición nunca haya llegado.
+    //
+    // keepalive: en mobile, abrir WhatsApp manda el navegador a segundo plano
+    // y el request se puede cortar a mitad de camino. Con keepalive el
+    // navegador lo termina igual.
     fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      keepalive: true,
       body: JSON.stringify({
         customerName: orderData.customerName,
         customerPhone: orderData.customerPhone,
@@ -272,7 +284,21 @@ export default function CartPage() {
         paymentMethod,
         comment: fullComment || undefined,
       }),
-    }).catch(() => {});
+    })
+      .then(async (res) => {
+        if (res.ok) return;
+        const detail = await res.text().catch(() => "");
+        console.error(
+          `[carrito] el pedido salió por WhatsApp pero el servidor lo rechazó (${res.status}). Queda registrado en /admin/pedidos.`,
+          detail,
+        );
+      })
+      .catch((err) => {
+        console.error(
+          "[carrito] el pedido salió por WhatsApp y no se pudo contactar al registro:",
+          err,
+        );
+      });
   };
 
   if (items.length === 0) {

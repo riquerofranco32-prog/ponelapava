@@ -35,7 +35,10 @@ export default function ProductCard({
   const { addToComparison, isComparing } = useComparison();
   const favorite = isFavorite(product.id);
   const comparing = isComparing(product.id);
-  const isOutOfStock = product.status === "out_of_stock";
+  // Sin stock es sin stock, lo diga el estado o lo diga el número. Gatear sólo
+  // por `status` dejaba el botón habilitado en productos con stock 0, que
+  // entraban al carrito con cantidad 0 y no se podían comprar ni sumar.
+  const isOutOfStock = product.status === "out_of_stock" || product.stock <= 0;
   const isFeatured = product.status === "featured";
   const isLowStock =
     !isOutOfStock && product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;

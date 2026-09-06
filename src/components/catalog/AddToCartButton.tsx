@@ -21,8 +21,13 @@ export default function AddToCartButton({
   const { addItem, setDrawer } = useCart();
   const [added, setAdded] = useState(false);
 
+  // Red de contención propia: aunque quien lo monta se olvide de pasar
+  // `disabled`, un producto sin stock nunca puede agregarse.
+  const unavailable =
+    disabled || product.status === "out_of_stock" || product.stock <= 0;
+
   const handleAdd = () => {
-    if (disabled || added) return;
+    if (unavailable || added) return;
     addItem(product, 1);
     setAdded(true);
     setTimeout(() => {
@@ -31,7 +36,7 @@ export default function AddToCartButton({
     }, 1000);
   };
 
-  if (disabled) {
+  if (unavailable) {
     return (
       <button
         disabled

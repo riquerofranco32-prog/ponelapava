@@ -36,6 +36,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
       const qty = action.quantity ?? 1;
+      // Un producto sin stock no genera línea. Antes el Math.min de abajo la
+      // creaba con cantidad 0: aparecía en el carrito, sumaba $0, no se podía
+      // aumentar (el botón de más se deshabilita en cantidad >= stock) y el
+      // servidor la rechazaba entera por "cantidades inválidas".
+      if (action.product.stock <= 0) return state;
       const existing = state.items.find(
         (item) => item.product.id === action.product.id,
       );
@@ -58,7 +63,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           ...state.items,
           {
             product: action.product,
-            quantity: Math.min(qty, action.product.stock),
+            quantity: Math.max(1, Math.min(qty, action.product.stock)),
           },
         ],
       };
@@ -103,8 +108,13 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "SET_DRAWER":
       return { ...state, isOpen: action.open };
 
+    // Los carritos guardados antes de este arreglo pueden traer líneas con
+    // cantidad 0, que dejaban el carrito trabado. Se descartan al cargar.
     case "HYDRATE":
-      return { ...state, items: action.items };
+      return {
+        ...state,
+        items: action.items.filter((item) => item.quantity > 0),
+      };
 
     // Reconcile stale localStorage snapshots against fresh DB data: drop
     // items whose product no longer exists or ran out of stock, patch

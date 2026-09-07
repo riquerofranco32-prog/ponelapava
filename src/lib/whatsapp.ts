@@ -14,7 +14,6 @@ export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
     subtotal,
     discount,
     couponCode,
-    shippingCost,
     deliveryMethod,
     deliveryAddress,
     total,
@@ -48,7 +47,7 @@ export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
     deliveryMethod === "pickup"
       ? `*Entrega:* 🏪 Retiro en Local (Catriel)`
       : deliveryMethod === "delivery"
-        ? `*Entrega:* 🛵 Envío a Domicilio ${shippingCost ? `(${formatPrice(shippingCost)})` : "(Gratis)"}`
+        ? `*Entrega:* 🛵 Envío a Domicilio (costo a coordinar)`
         : null,
     deliveryAddress ? `*Dirección:* ${deliveryAddress}` : null,
     ``,

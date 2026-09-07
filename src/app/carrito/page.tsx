@@ -25,11 +25,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import GiftMessageModal from "@/components/cart/GiftMessageModal";
 import type { Product, ProductStatus } from "@/types";
-import {
-  computeOrderTotals,
-  FREE_SHIPPING_THRESHOLD,
-  STANDARD_SHIPPING_COST,
-} from "@/lib/pricing";
+import { computeOrderTotals } from "@/lib/pricing";
 
 // Lo que el local cobra de verdad. El id "card" es el valor histórico del
 // tercer medio y se mantiene para no romper el registro de pedidos; de cara
@@ -107,14 +103,12 @@ export default function CartPage() {
 
   // Shipping & discounts — computed by the same module the server uses to
   // price the order, so what is shown here is what gets stored.
-  const { shippingCost, total: finalTotal } = computeOrderTotals({
+  const { total: finalTotal } = computeOrderTotals({
     lines: items.map(({ product, quantity }) => ({
       price: product.price,
       quantity,
     })),
-    deliveryMethod,
   });
-  const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
 
   // El efectivo sólo existe si el comprador va al local. Se deriva en vez de
   // sincronizarse con un efecto: si eligió efectivo y después cambia a envío,
@@ -226,7 +220,6 @@ export default function CartPage() {
       customerPhone: customerPhone.trim() || undefined,
       items,
       subtotal: total,
-      shippingCost: shippingCost > 0 ? shippingCost : undefined,
       deliveryMethod,
       deliveryAddress: fullAddress,
       paymentMethod: effectivePayment,
@@ -478,36 +471,6 @@ export default function CartPage() {
               </div>
             )}
             <div className="rounded-card bg-white border border-pava-brown/8 p-6 sticky top-24">
-              {/* Free shipping progress */}
-              {(() => {
-                const qualifies = total >= FREE_SHIPPING_THRESHOLD;
-                const amountLeft = FREE_SHIPPING_THRESHOLD - total;
-                const progressPct = Math.min(100, Math.max(0, (total / FREE_SHIPPING_THRESHOLD) * 100));
-
-                return (
-                  <div className="mb-6 rounded-control bg-pava-cream-dark/50 border border-pava-brown/10 p-3.5">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      {qualifies ? (
-                        <span className="font-semibold text-pava-green flex items-center gap-1.5">
-                          <span>🎉</span> ¡Envío gratis incluido!
-                        </span>
-                      ) : (
-                        <span className="text-pava-brown">
-                          Faltan <strong className="font-bold text-pava-green">{formatPrice(amountLeft)}</strong> para <strong className="font-semibold">Envío Gratis</strong>
-                        </span>
-                      )}
-                      <span className="text-[11px] font-bold text-pava-brown-mid/75">{Math.round(progressPct)}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-pava-brown/15 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-pava-green rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${progressPct}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })()}
-
               <h2 className="font-display text-xl font-bold text-pava-brown mb-5">
                 Resumen del pedido
               </h2>
@@ -548,7 +511,7 @@ export default function CartPage() {
                       <span>A Domicilio</span>
                     </div>
                     <span className="text-[11px] text-pava-brown/60 font-medium">
-                      {isFreeShipping ? <span className="text-emerald-700 font-semibold">Gratis</span> : formatPrice(STANDARD_SHIPPING_COST)}
+                      Costo a coordinar
                     </span>
                   </button>
                 </div>
@@ -631,10 +594,10 @@ export default function CartPage() {
                 <div className="flex justify-between text-pava-brown-mid/80">
                   <span>Envío ({deliveryMethod === "pickup" ? "Retiro en local" : "A domicilio"})</span>
                   <span className="font-semibold text-pava-brown">
-                    {deliveryMethod === "pickup" || isFreeShipping ? (
+                    {deliveryMethod === "pickup" ? (
                       <span className="text-emerald-700">Gratis</span>
                     ) : (
-                      formatPrice(shippingCost)
+                      "A coordinar"
                     )}
                   </span>
                 </div>

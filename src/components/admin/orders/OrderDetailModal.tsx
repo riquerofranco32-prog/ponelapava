@@ -243,18 +243,13 @@ export function OrderDetailModal({
         ))}
       </div>
 
-      {/* Subtotal, discounts, shipping */}
+      {/* Descuentos. El costo de envío no se muestra: no se cotiza en el
+          sitio, se coordina por WhatsApp — y el campo nunca tuvo escritor. */}
       <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "var(--dash-muted)", paddingTop: 4 }}>
         {order.discount && order.discount > 0 ? (
           <div style={{ display: "flex", justifyContent: "space-between", color: "#10b981" }}>
             <span>Descuento aplicado</span>
             <span>-{formatPrice(order.discount)}</span>
-          </div>
-        ) : null}
-        {order.shippingCost && order.shippingCost > 0 ? (
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span>Costo de envío</span>
-            <span>{formatPrice(order.shippingCost)}</span>
           </div>
         ) : null}
       </div>

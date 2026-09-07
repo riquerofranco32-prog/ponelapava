@@ -155,14 +155,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     if (check.valid) coupon = check.coupon;
   }
 
-  const deliveryMethod: DeliveryMethod =
-    input.deliveryMethod === "delivery" ? "delivery" : "pickup";
-
-  const totals = computeOrderTotals({
-    lines: orderItems,
-    deliveryMethod,
-    coupon,
-  });
+  const totals = computeOrderTotals({ lines: orderItems, coupon });
 
   const payload: Record<string, unknown> = {
     customer_name: customerName,

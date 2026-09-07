@@ -84,7 +84,8 @@ export interface Order {
   subtotal: number;
   discount?: number;
   couponCode?: string;
-  shippingCost?: number;
+  // Sin shippingCost a propósito: el envío no se cotiza en el sitio, se
+  // coordina por WhatsApp. El campo existía sin que nadie lo escribiera.
   deliveryMethod?: DeliveryMethod;
   deliveryAddress?: string;
   paymentMethod?: PaymentMethod;
@@ -102,7 +103,6 @@ export interface WhatsAppOrderData {
   subtotal?: number;
   discount?: number;
   couponCode?: string;
-  shippingCost?: number;
   deliveryMethod?: DeliveryMethod;
   deliveryAddress?: string;
   paymentMethod?: PaymentMethod;

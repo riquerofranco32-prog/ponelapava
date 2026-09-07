@@ -5,8 +5,11 @@
 // by the same code. The server still recomputes from DB prices — these
 // constants only fix the *rules*, never the inputs.
 
-export const FREE_SHIPPING_THRESHOLD = 65_000;
-export const STANDARD_SHIPPING_COST = 3_500;
+// El envío no se cotiza en el sitio: el pedido se cierra por WhatsApp y ahí se
+// coordina el costo, que paga el comprador. Acá vivían un umbral de envío
+// gratis sobre $65.000 y una tarifa fija de $3.500, ninguno confirmado por el
+// negocio: el umbral prometía algo que el local no da, y la tarifa se sumaba
+// al total que se guardaba en la tabla orders.
 
 export type DeliveryMethod = "pickup" | "delivery";
 // "card" es el valor histórico del tercer medio de pago; de cara al cliente
@@ -29,20 +32,17 @@ export interface OrderTotals {
   subtotal: number;
   couponDiscount: number;
   totalDiscount: number;
-  shippingCost: number;
   total: number;
 }
 
-// `paymentMethod` ya no entra en el cálculo: el medio de pago se registra,
-// pero no cambia el precio. El 10% por transferencia/efectivo que vivía acá
-// nunca fue una promo del local — restaba 10% al total de toda orden real,
-// incluido el que se guardaba en la base.
+// Ni el medio de pago ni el método de entrega entran en el cálculo: los dos se
+// registran, pero ninguno cambia el precio. El 10% por transferencia/efectivo
+// y el envío gratis sobre $65.000 vivían acá y no eran promos del local.
 export function computeOrderTotals(params: {
   lines: PricedLine[];
-  deliveryMethod: DeliveryMethod;
   coupon?: AppliedCoupon | null;
 }): OrderTotals {
-  const { lines, deliveryMethod, coupon } = params;
+  const { lines, coupon } = params;
 
   const subtotal = lines.reduce(
     (acc, line) => acc + line.price * line.quantity,
@@ -57,18 +57,12 @@ export function computeOrderTotals(params: {
         : Math.min(subtotal, coupon.discountValue);
   }
 
-  const shippingCost =
-    deliveryMethod === "delivery" && subtotal < FREE_SHIPPING_THRESHOLD
-      ? STANDARD_SHIPPING_COST
-      : 0;
-
   const totalDiscount = couponDiscount;
 
   return {
     subtotal,
     couponDiscount,
     totalDiscount,
-    shippingCost,
-    total: Math.max(0, subtotal - totalDiscount + shippingCost),
+    total: Math.max(0, subtotal - totalDiscount),
   };
 }

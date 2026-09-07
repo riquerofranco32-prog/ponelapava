@@ -451,8 +451,41 @@ body {
    outline sigue el radio real del elemento, así que sacándolo el anillo
    abraza la forma del control. */
 :focus-visible {
-  outline: 2px solid #26402e;
+  outline: 2px solid var(--focus-ring, #26402e);
   outline-offset: 2px;
+}
+
+/* Superficies oscuras: el verde del anillo es el mismo verde de esos fondos
+   (medido 1.00–1.61:1 — invisible; sobre footer/LocalSection/FinalCTA es
+   exactamente 1:1). Ningún color único pasa 3:1 a la vez sobre crema-oscura
+   (pide L≤0.185) y sobre pava-green (pide L≥0.228), así que el anillo se
+   resuelve por superficie: el contenedor oscuro setea la variable y el
+   anillo pasa a dorado (4.94–7.93:1 sobre las superficies oscuras del
+   sitio). En superficies claras sigue el verde por defecto (7.6–11.3:1). */
+.focus-ring-gold {
+  --focus-ring: var(--color-pava-gold);
+}
+
+/* Los iframes entran en la cadena de Tab pero el foco vive en el documento
+   embebido: en el host ni :focus-visible ni :focus ni :focus-within matchean
+   con Tab real (el embed cross-origin corre en otro proceso). El mapa del
+   local era la única parada sin ningún anillo. :focus queda como red para
+   iframes same-origin; el caso real lo cubre LocalMapEmbed por JS con la
+   clase --focus. Inset porque el frame recorta con overflow-hidden. */
+iframe:focus,
+.local-map-iframe--focus {
+  outline: 2px solid var(--focus-ring, #26402e);
+  outline-offset: -2px;
+}
+
+/* El re-snap de un scroller horizontal pelea con el auto-reveal del foco de
+   teclado: al tabular a un chip el UA lo trae a la vista, y el snap vuelve a
+   alinear el inicio del chip más cercano, dejando al enfocado hasta 77 px
+   fuera del scrollport (medido en los chips de /catalogo mobile, también en
+   producción). Mientras el foco de teclado esté adentro, el snap se apaga;
+   el scroll táctil no pasa por :focus-visible así que no pierde nada. */
+.snap-x:has(:focus-visible) {
+  scroll-snap-type: none;
 }
 
 /* Para controles que viven dentro de un contenedor con overflow hidden (el

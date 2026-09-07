@@ -128,7 +128,7 @@ export default function CustomKitBuilder() {
   }
 
   return (
-    <section id="arma-tu-set" className="relative overflow-hidden bg-pava-green-dark py-24 sm:py-28 lg:py-36 text-pava-cream border-b border-pava-cream/10">
+    <section id="arma-tu-set" className="focus-ring-gold relative overflow-hidden bg-pava-green-dark py-24 sm:py-28 lg:py-36 text-pava-cream border-b border-pava-cream/10">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         {/* Header */}
         <ScrollReveal direction="up" className="mb-14 max-w-2xl">

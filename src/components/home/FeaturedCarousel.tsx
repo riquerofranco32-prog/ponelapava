@@ -84,7 +84,11 @@ export default function FeaturedCarousel({ products }: FeaturedCarouselProps) {
   return (
     <div className="relative">
       {/* Category Quick Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none snap-x -mx-4 px-4 sm:mx-0 sm:px-0">
+      {/* En ≥sm el scroller necesita un pelo de padding (compensado con el
+          margen negativo, mismo layout): el chip activo escala 1.05 y al ser
+          el primero su mitad izquierda (~5px) sobresalía del scrollport y se
+          recortaba junto con el anillo de foco. En mobile el px-4 ya lo cubre. */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none snap-x -mx-4 px-4 sm:-mx-1.5 sm:px-1.5">
         {CATEGORY_TABS.map((tab) => {
           const isActive = selectedCategory === tab.id;
           const count =
@@ -99,7 +103,12 @@ export default function FeaturedCarousel({ products }: FeaturedCarouselProps) {
               key={tab.id}
               type="button"
               onClick={() => setSelectedCategory(tab.id)}
-              className={`snap-start shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer shadow-xs ${
+              // Mismo reveal manual que los chips del catálogo: Chrome no
+              // trae a la vista un chip enfocado que asoma parcialmente.
+              onFocus={(e) =>
+                e.currentTarget.scrollIntoView({ block: "nearest", inline: "nearest" })
+              }
+              className={`focus-ring-inset snap-start shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 cursor-pointer shadow-xs ${
                 isActive
                   ? "bg-pava-green text-pava-cream shadow-md scale-105"
                   : "bg-white/80 border border-pava-brown/12 text-pava-brown/75 hover:border-pava-green/40 hover:bg-white hover:text-pava-green"

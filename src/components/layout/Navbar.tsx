@@ -74,7 +74,9 @@ export default function Navbar() {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           isScrolled
             ? "border-b border-pava-brown/10 bg-pava-cream/98 backdrop-blur-md shadow-sm text-pava-brown"
-            : "bg-transparent text-pava-cream",
+            : // Sin scroll el header es transparente sobre el hero oscuro: el
+              // anillo de foco verde desaparece ahí, así que va en dorado.
+              "focus-ring-gold bg-transparent text-pava-cream",
         )}
       >
         <TopAnnouncementBar />

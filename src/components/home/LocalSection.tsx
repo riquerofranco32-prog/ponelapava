@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MapPin, Clock, MessageCircle, ExternalLink } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import StoreLivePill from "@/components/ui/StoreLivePill";
+import LocalMapEmbed from "@/components/home/LocalMapEmbed";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import {
   getSiteSettings,
@@ -32,7 +33,7 @@ export default async function LocalSection() {
   return (
     <section
       id="el-local"
-      className="overflow-hidden bg-pava-green py-20 text-pava-cream sm:py-24 lg:py-32"
+      className="focus-ring-gold overflow-hidden bg-pava-green py-20 text-pava-cream sm:py-24 lg:py-32"
     >
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
@@ -40,12 +41,9 @@ export default async function LocalSection() {
             <div className="grid grid-cols-3 gap-3">
               {/* Live map — desaturated + brand-tinted until hovered */}
               <div className="local-map-frame group relative col-span-3 aspect-[16/10] overflow-hidden rounded-card bg-pava-green-dark sm:aspect-[16/9]">
-                <iframe
+                <LocalMapEmbed
                   src={mapsEmbedUrl}
                   title="Ubicación de Poné La Pava en el mapa"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="local-map-iframe h-full w-full border-0"
                 />
                 <div
                   className="local-map-tint pointer-events-none absolute inset-0"

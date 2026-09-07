@@ -154,7 +154,7 @@ export default function FAQSection() {
                   type="button"
                   onClick={() => toggle(index)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 p-5 sm:p-6 text-left transition-colors hover:bg-pava-cream/20 cursor-pointer"
+                  className="focus-ring-inset flex w-full items-center justify-between gap-4 p-5 sm:p-6 text-left transition-colors hover:bg-pava-cream/20 cursor-pointer"
                 >
                   <span className="font-display text-base sm:text-lg font-bold text-pava-brown">
                     {faq.question}

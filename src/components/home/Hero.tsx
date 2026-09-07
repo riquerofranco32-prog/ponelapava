@@ -51,7 +51,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
       id="inicio"
       onMouseMove={handleMouseMove}
       onMouseLeave={resetParallax}
-      className="grain-overlay relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="focus-ring-gold grain-overlay relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label="Bienvenida a Poné La Pava"
     >
       {/* Background image — mouse-driven parallax depth layer */}

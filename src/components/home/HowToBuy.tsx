@@ -72,7 +72,7 @@ export default function HowToBuy() {
   return (
     <section
       id="como-comprar"
-      className="relative overflow-hidden bg-[#0d1810] py-24 sm:py-28 lg:py-36 text-pava-cream border-y border-pava-gold/15"
+      className="focus-ring-gold relative overflow-hidden bg-[#0d1810] py-24 sm:py-28 lg:py-36 text-pava-cream border-y border-pava-gold/15"
     >
       {/* Dynamic ambient lighting */}
       <div className="absolute top-0 left-1/4 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-pava-gold/10 blur-[130px] pointer-events-none" />

@@ -178,7 +178,7 @@ export default function MateAnatomy({ embedded = false }: { embedded?: boolean }
   }
 
   return (
-    <section className="relative overflow-hidden bg-pava-green py-24 sm:py-28 lg:py-36 text-pava-cream">
+    <section className="focus-ring-gold relative overflow-hidden bg-pava-green py-24 sm:py-28 lg:py-36 text-pava-cream">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
         {/* Header */}
         <ScrollReveal direction="up" className="mb-14 max-w-2xl">

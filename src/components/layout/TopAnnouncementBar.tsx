@@ -94,7 +94,7 @@ export default function TopAnnouncementBar() {
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative z-50 bg-[#132519] text-pava-cream border-b border-pava-gold/20 px-3 py-2 text-xs font-medium select-none shadow-sm transition-colors"
+      className="focus-ring-gold relative z-50 bg-[#132519] text-pava-cream border-b border-pava-gold/20 px-3 py-2 text-xs font-medium select-none shadow-sm transition-colors"
       role="region"
       aria-label="Anuncios destacados"
     >
@@ -112,7 +112,7 @@ export default function TopAnnouncementBar() {
         <div className="flex-1 flex items-center justify-center min-w-0 overflow-hidden">
           <Link
             href={current.link || "/catalogo"}
-            className="group flex items-center justify-center gap-2 text-center transition-all duration-300 max-w-full hover:opacity-95"
+            className="focus-ring-inset group flex items-center justify-center gap-2 text-center transition-all duration-300 max-w-full hover:opacity-95"
           >
             <span className="flex items-center justify-center w-5 h-5 rounded-full bg-pava-gold/20 text-pava-gold shrink-0 transition-transform duration-200 group-hover:scale-110">
               <Icon size={12} />

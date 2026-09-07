@@ -20,7 +20,7 @@ export default function FinalCTA() {
   };
 
   return (
-    <section className="grain-overlay relative overflow-hidden bg-pava-brown py-24 sm:py-28 lg:py-36 text-pava-cream border-t border-pava-cream/10">
+    <section className="focus-ring-gold grain-overlay relative overflow-hidden bg-pava-brown py-24 sm:py-28 lg:py-36 text-pava-cream border-t border-pava-cream/10">
       <FinalCTABackground />
 
       {/* Ambient glowing circles */}

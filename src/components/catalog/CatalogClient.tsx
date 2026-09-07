@@ -405,7 +405,13 @@ export default function CatalogClient({
             onClick={() =>
               handleCategoryChange(slug as ProductCategory | "all")
             }
-            className={`inline-flex items-center gap-1.5 rounded-control px-3.5 py-2 text-xs sm:text-sm font-medium border-2 transition-all duration-200 shrink-0 snap-start cursor-pointer ${
+            // Chrome no revela un chip enfocado que ya asoma parcialmente en
+            // el scroller (medido: quedaba 48px afuera, scrollLeft intacto);
+            // el reveal completo hay que pedirlo. "nearest" respeta scroll-pl.
+            onFocus={(e) =>
+              e.currentTarget.scrollIntoView({ block: "nearest", inline: "nearest" })
+            }
+            className={`focus-ring-inset inline-flex items-center gap-1.5 rounded-control px-3.5 py-2 text-xs sm:text-sm font-medium border-2 transition-all duration-200 shrink-0 snap-start cursor-pointer ${
               activeCategory === slug
                 ? "bg-pava-green text-pava-cream border-pava-green font-semibold shadow-xs"
                 : "bg-white text-pava-brown border-pava-brown/15 hover:border-pava-green/50"

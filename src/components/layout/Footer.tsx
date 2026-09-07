@@ -21,7 +21,7 @@ export default async function Footer() {
   const settings = await getSiteSettings();
 
   return (
-    <footer id="contacto" className="bg-pava-brown text-pava-cream/80">
+    <footer id="contacto" className="focus-ring-gold bg-pava-brown text-pava-cream/80">
       {/* Main footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">

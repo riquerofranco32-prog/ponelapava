@@ -42,7 +42,7 @@ const STEPS: StepItem[] = [
     icon: Sparkles,
     tag: "Paso 2 · Personalización",
     title: "Armá tu carrito a medida",
-    description: "Agregá productos individuales o armá tu set personalizado con 10% de descuento automático.",
+    description: "Agregá productos individuales o armá tu set personalizado eligiendo mate, bombilla y yerba.",
     feature: "Sin registros obligatorios",
     pillColor: "from-emerald-400 to-teal-600",
   },
@@ -105,7 +105,7 @@ export default function HowToBuy() {
           <div className="hidden lg:flex items-center gap-6 bg-white/5 border border-white/10 px-5 py-3 rounded-control backdrop-blur-md">
             <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">
               <CreditCard size={16} className="text-pava-gold" />
-              <span>3 Cuotas sin interés</span>
+              <span>Transferencia o Mercado Pago</span>
             </div>
             <div className="h-4 w-px bg-white/20" />
             <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">

@@ -14,7 +14,7 @@ interface FAQItem {
 
 const CATEGORIES = [
   { id: "all", label: "Todas las dudas", icon: HelpCircle },
-  { id: "pagos", label: "Pagos & 3 Cuotas", icon: CreditCard },
+  { id: "pagos", label: "Pagos", icon: CreditCard },
   { id: "envios", label: "Envíos & Retiro", icon: Truck },
   { id: "curado", label: "Curado & Mates", icon: Sparkles },
   { id: "garantia", label: "Garantía & Local", icon: ShieldCheck },
@@ -23,9 +23,9 @@ const CATEGORIES = [
 const FAQS: FAQItem[] = [
   {
     category: "pagos",
-    question: "¿Qué medios de pago aceptan y cómo obtengo el 10% OFF?",
+    question: "¿Qué medios de pago aceptan?",
     answer:
-      "Aceptamos tarjetas de crédito en hasta 3 cuotas sin interés, tarjetas de débito, Mercado Pago y transferencia bancaria. Si elegís pagar por transferencia bancaria o en efectivo en nuestro local, ¡accedés a un 10% de descuento automático acumulable con tu compra!",
+      "Transferencia bancaria, Mercado Pago y efectivo al retirar en nuestro local de Catriel. Cuando confirmás el pedido por WhatsApp te pasamos los datos para transferir o el link de Mercado Pago. Si desde tu Mercado Pago pagás con una tarjeta en cuotas, los intereses los define tu tarjeta.",
   },
   {
     category: "pagos",
@@ -109,7 +109,7 @@ export default function FAQSection() {
             Todo lo que necesitás saber
           </h2>
           <p className="mt-3 text-sm text-pava-brown-mid/75 max-w-xl mx-auto leading-relaxed">
-            Respuestas a las preguntas más habituales sobre compras, 3 cuotas, envíos y cuidados de tus piezas.
+            Respuestas a las preguntas más habituales sobre compras, medios de pago, envíos y cuidados de tus piezas.
           </p>
         </ScrollReveal>
 

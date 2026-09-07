@@ -11,15 +11,15 @@ interface TrustItemData {
 const items: TrustItemData[] = [
   {
     icon: CreditCard,
-    title: "3 Cuotas Sin Interés",
-    subtitle: "Con todas las tarjetas bancarias",
-    badge: "3 CUOTAS",
+    title: "Transferencia o Mercado Pago",
+    subtitle: "Coordinamos el pago por WhatsApp",
+    badge: "PAGO SIMPLE",
   },
   {
     icon: Sparkles,
-    title: "10% OFF con Transferencia",
-    subtitle: "O en efectivo retirando en el local",
-    badge: "10% OFF",
+    title: "Efectivo en el Local",
+    subtitle: "Pagás al retirar tu pedido",
+    badge: "EFECTIVO",
   },
   {
     icon: Truck,

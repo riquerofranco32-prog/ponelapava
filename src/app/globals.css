@@ -528,6 +528,22 @@ body {
   transform: translate(-50%, -50%);
 }
 
+/* ── FAB de WhatsApp ──────────────────────────────────
+   La posición vive acá y no inline porque la variante de PDP necesita un
+   breakpoint, y un style inline no puede expresar media queries. En la PDP
+   mobile la barra sticky de compra (69px, z-40 igual que el FAB) ocupa el
+   borde inferior: medido, el FAB tapaba 56×32 px del botón "Agregar". Con
+   la barra presente (<lg), el FAB sube por encima de ella. */
+.wa-fab {
+  bottom: max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+  right: max(1.25rem, calc(env(safe-area-inset-right) + 0.75rem));
+}
+@media (max-width: 1023px) {
+  .wa-fab--pdp {
+    bottom: calc(max(1.25rem, env(safe-area-inset-bottom) + 0.75rem) + 3.75rem);
+  }
+}
+
 /* ── Hide scrollbar on horizontal touch scrollers ───── */
 .no-scrollbar {
   scrollbar-width: none;

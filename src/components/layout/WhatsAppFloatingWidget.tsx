@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, X, Sparkles, MapPin, Truck, HelpCircle, Send } from "lucide-react";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 
@@ -50,6 +51,9 @@ const QUICK_OPTIONS: QuickOption[] = [
 export default function WhatsAppFloatingWidget({
   whatsappNumber,
 }: WhatsAppFloatingWidgetProps) {
+  const pathname = usePathname();
+  // En la PDP mobile convive con la barra sticky de compra: ver .wa-fab--pdp
+  const onProductPage = pathname.startsWith("/producto/");
   const [isOpen, setIsOpen] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -69,11 +73,7 @@ export default function WhatsAppFloatingWidget({
   return (
     <div
       ref={widgetRef}
-      style={{
-        bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.75rem))",
-        right: "max(1.25rem, calc(env(safe-area-inset-right) + 0.75rem))",
-      }}
-      className="fixed z-40 flex flex-col items-end"
+      className={`wa-fab fixed z-40 flex flex-col items-end ${onProductPage ? "wa-fab--pdp" : ""}`}
     >
       {/* Popover Menu */}
       {isOpen && (

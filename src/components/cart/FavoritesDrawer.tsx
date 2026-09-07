@@ -120,7 +120,7 @@ export default function FavoritesDrawer({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/50 hover:bg-pava-brown/10 hover:text-pava-brown transition-colors"
+            className="tap-44 flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/50 hover:bg-pava-brown/10 hover:text-pava-brown transition-colors"
             aria-label="Cerrar favoritos"
           >
             <X size={18} />

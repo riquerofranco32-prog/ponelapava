@@ -102,7 +102,7 @@ export default function TopAnnouncementBar() {
         {/* Prev button */}
         <button
           onClick={handlePrev}
-          className="flex items-center justify-center w-7 h-7 rounded-full text-pava-cream/70 hover:text-pava-gold hover:bg-white/10 transition-colors shrink-0"
+          className="tap-44 flex items-center justify-center w-7 h-7 rounded-full text-pava-cream/70 hover:text-pava-gold hover:bg-white/10 transition-colors shrink-0"
           aria-label="Anuncio anterior"
         >
           <ChevronLeft size={15} />
@@ -150,7 +150,7 @@ export default function TopAnnouncementBar() {
 
           <button
             onClick={handleNext}
-            className="flex items-center justify-center w-7 h-7 rounded-full text-pava-cream/70 hover:text-pava-gold hover:bg-white/10 transition-colors shrink-0"
+            className="tap-44 flex items-center justify-center w-7 h-7 rounded-full text-pava-cream/70 hover:text-pava-gold hover:bg-white/10 transition-colors shrink-0"
             aria-label="Siguiente anuncio"
           >
             <ChevronRight size={15} />

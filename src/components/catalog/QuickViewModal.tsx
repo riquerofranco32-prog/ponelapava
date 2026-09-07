@@ -106,7 +106,7 @@ export default function QuickViewModal({
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center text-pava-brown/40 transition-colors hover:text-pava-brown"
+            className="tap-44 absolute right-4 top-4 flex h-8 w-8 items-center justify-center text-pava-brown/40 transition-colors hover:text-pava-brown"
           >
             <X size={18} />
           </button>

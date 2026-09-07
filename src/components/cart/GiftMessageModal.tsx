@@ -90,7 +90,10 @@ export default function GiftMessageModal({ onSave }: GiftMessageModalProps) {
               onChange={(e) => handleToggle(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-9 h-5 bg-pava-brown/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-pava-green" />
+            {/* El input es sr-only (0×0): el anillo global de :focus-visible
+                cae en una caja invisible. El indicador de foco va en el track,
+                como el patrón admin-toggle del admin. */}
+            <div className="w-9 h-5 bg-pava-brown/20 peer-focus-visible:outline-2 peer-focus-visible:outline-pava-green peer-focus-visible:outline-offset-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-pava-green" />
           </label>
         </div>
       </div>
@@ -118,7 +121,8 @@ export default function GiftMessageModal({ onSave }: GiftMessageModalProps) {
           <div className="relative w-full max-w-lg rounded-3xl border border-pava-brown/15 bg-pava-cream p-6 sm:p-8 shadow-2xl animate-scale-in">
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/50 hover:bg-pava-brown/10 hover:text-pava-brown transition-colors"
+              aria-label="Cerrar tarjeta de regalo"
+              className="tap-44 absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/50 hover:bg-pava-brown/10 hover:text-pava-brown transition-colors"
             >
               <X size={18} />
             </button>

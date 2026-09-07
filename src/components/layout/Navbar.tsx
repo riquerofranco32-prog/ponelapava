@@ -319,7 +319,7 @@ export default function Navbar() {
             </div>
             <button
               onClick={() => setIsMobileOpen(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/60 hover:text-pava-green hover:bg-pava-brown/5 transition-colors"
+              className="tap-44 flex h-8 w-8 items-center justify-center rounded-full text-pava-brown/60 hover:text-pava-green hover:bg-pava-brown/5 transition-colors"
               aria-label="Cerrar menú"
             >
               <X size={18} />

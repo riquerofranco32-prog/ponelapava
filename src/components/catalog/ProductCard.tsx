@@ -183,7 +183,10 @@ export default function ProductCard({
             className={`flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold ${
               favorite
                 ? "text-pava-terracotta opacity-100"
-                : "text-pava-brown opacity-0 group-hover:opacity-100"
+                : // pointer-events acompaña a la visibilidad (mismo precedente
+                  // que .product-card-btn): invisible no puede ser clickeable.
+                  // Con foco de teclado se muestra, porque Tab sí llega.
+                  "text-pava-brown opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
             }`}
           >
             <Heart
@@ -198,7 +201,7 @@ export default function ProductCard({
             className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 cursor-pointer ${
               comparing
                 ? "bg-pava-green text-white opacity-100"
-                : "bg-white/90 text-pava-brown opacity-0 hover:bg-pava-green hover:text-white group-hover:opacity-100"
+                : "bg-white/90 text-pava-brown opacity-0 pointer-events-none hover:bg-pava-green hover:text-white group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto"
             }`}
           >
             <Scale size={13} />
@@ -206,7 +209,7 @@ export default function ProductCard({
           <button
             onClick={() => setQuickViewOpen(true)}
             aria-label={`Vista rápida de ${product.name}`}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-pava-brown opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100 cursor-pointer"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-pava-brown opacity-0 pointer-events-none backdrop-blur-sm transition-all duration-200 hover:bg-pava-gold hover:text-pava-brown group-hover:opacity-100 group-hover:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto cursor-pointer"
           >
             <Eye size={14} />
           </button>

@@ -102,7 +102,7 @@ export default function WhatsAppFloatingWidget({
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-pava-cream hover:bg-white/20 transition-colors"
+              className="tap-44 flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-pava-cream hover:bg-white/20 transition-colors"
               aria-label="Cerrar menú WhatsApp"
             >
               <X size={16} />

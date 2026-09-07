@@ -54,7 +54,7 @@ export default function CartDrawer() {
           </div>
           <button
             onClick={() => setDrawer(false)}
-            className="flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green transition-colors"
+            className="tap-44 flex items-center justify-center w-8 h-8 text-pava-brown hover:text-pava-green transition-colors"
             aria-label="Cerrar carrito"
           >
             <X size={18} />

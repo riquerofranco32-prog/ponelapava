@@ -30,23 +30,16 @@ const FAQS: FAQItem[] = [
   {
     id: "env-1",
     category: "envios",
-    question: "¿Cómo realizan los envíos y cuánto demoran?",
+    question: "¿Cómo realizan los envíos y cuánto sale?",
     answer:
-      "Despachamos a todo el país mediante Andreani y Correo Argentino con código de seguimiento en tiempo real. Los envíos suelen demorar entre 2 y 5 días hábiles según la provincia y localidad. En Catriel y zonas aledañas la entrega es en el día o retiro gratis en nuestro local.",
+      "Despachamos a todo el país. El costo del envío lo coordinamos por WhatsApp al confirmar tu pedido, según tu localidad. También podés retirar sin cargo en nuestro local de Catriel.",
   },
   {
     id: "env-2",
     category: "envios",
-    question: "¿Cómo hago el seguimiento de mi paquete?",
+    question: "¿Cómo hago el seguimiento de mi pedido?",
     answer:
-      "Una vez despachado tu pedido, te enviamos el número de guía por WhatsApp o email. Además, podés ingresar a nuestra sección 'Seguimiento' en la web con tu número de pedido o teléfono para ver el estado en vivo.",
-  },
-  {
-    id: "env-3",
-    category: "envios",
-    question: "¿Cómo se embalan los mates para que no se rompan?",
-    answer:
-      "Cada pieza se envuelve individualmente con varias capas de plástico de burbujas de alta densidad, papel kraft y se coloca en cajas reforzadas con relleno amortiguador para soportar cualquier impacto durante el viaje.",
+      "Podés ingresar a la sección 'Seguimiento' de la web con tu número de pedido o tu teléfono para ver en qué estado está. Cualquier novedad también te la contamos por WhatsApp.",
   },
   // Pagos
   {

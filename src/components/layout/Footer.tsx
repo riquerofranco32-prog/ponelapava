@@ -173,9 +173,8 @@ export default async function Footer() {
               <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Efectivo en local</span>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-2">
-              <span className="font-semibold text-pava-cream mr-1">Envíos seguros:</span>
-              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Correo Argentino</span>
-              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Andreani</span>
+              <span className="font-semibold text-pava-cream mr-1">Entrega:</span>
+              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Envíos a todo el país</span>
               <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Retiro en Catriel</span>
             </div>
           </div>

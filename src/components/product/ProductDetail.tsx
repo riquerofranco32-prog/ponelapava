@@ -533,7 +533,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Envíos a todo el país</span>
-                  <span className="text-pava-brown-mid/70">Gratis superando $65.000</span>
+                  <span className="text-pava-brown-mid/70">El costo lo coordinamos por WhatsApp</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">

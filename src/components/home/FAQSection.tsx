@@ -37,7 +37,7 @@ const FAQS: FAQItem[] = [
     category: "envios",
     question: "¿Hacen envíos a todo el país y cuánto tardan?",
     answer:
-      "¡Sí! Despachamos a toda la Argentina a través de Correo Argentino y Andreani. Los envíos suelen demorar entre 2 y 5 días hábiles según la localidad. Además, para compras superiores a $65.000, el envío es 100% gratuito.",
+      "Despachamos a todo el país. El costo del envío lo coordinamos por WhatsApp al confirmar tu pedido, según tu localidad. También podés retirar sin cargo en nuestro local de Catriel.",
   },
   {
     category: "envios",

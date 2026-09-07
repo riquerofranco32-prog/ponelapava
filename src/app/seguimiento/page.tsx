@@ -297,7 +297,7 @@ export default function TrackingPage() {
                             <div className="text-xs text-pava-brown space-y-1.5">
                               {isDelivery && (
                                 <p className="flex items-center gap-1.5 text-pava-green font-semibold">
-                                  <Truck size={14} /> Envío a Domicilio (Correo / Andreani)
+                                  <Truck size={14} /> Envío a Domicilio
                                 </p>
                               )}
                               {isPickup && (

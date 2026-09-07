@@ -23,9 +23,9 @@ const items: TrustItemData[] = [
   },
   {
     icon: Truck,
-    title: "Envíos Gratis a Todo el País",
-    subtitle: "En compras superiores a $65.000",
-    badge: "GRATIS",
+    title: "Envíos a todo el país",
+    subtitle: "Coordinamos el costo por WhatsApp",
+    badge: "ENVÍOS",
   },
   {
     icon: MapPin,

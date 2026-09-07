@@ -51,7 +51,7 @@ const UPSELL_SUGGESTIONS: UpsellSuggestion[] = [
   {
     emoji: "🎁",
     title: "Combo regalo matero",
-    reason: "Armá el kit completo y ahorrá",
+    reason: "Todo lo que necesita en un solo envío",
     href: "/catalogo",
     triggeredBy: ["termos"],
   },

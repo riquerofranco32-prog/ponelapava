@@ -99,18 +99,19 @@ export default function CustomKitBuilder() {
 
   const { addItem, setDrawer } = useCart();
 
-  const subtotal = selectedMate.price + selectedBombilla.price + selectedYerba.price;
-  const discount = Math.round(subtotal * 0.1);
-  const total = subtotal - discount;
+  // El set vale lo que valen sus piezas. Antes se restaba un 10% acá, que no
+  // era una promo del local: fuera cual fuera el precio cargado desde /admin,
+  // el sitio mostraba un total más bajo del que se iba a cobrar.
+  const total = selectedMate.price + selectedBombilla.price + selectedYerba.price;
 
-  const whatsappMessage = `¡Hola Poné La Pava! Quiero pedir el Set Matero Personalizado con 10% OFF:\n- Mate: ${selectedMate.name}\n- Bombilla: ${selectedBombilla.name}\n- Yerba: ${selectedYerba.name}\nTotal con descuento: ${formatPrice(total)}`;
+  const whatsappMessage = `¡Hola Poné La Pava! Quiero pedir el Set Matero Personalizado:\n- Mate: ${selectedMate.name}\n- Bombilla: ${selectedBombilla.name}\n- Yerba: ${selectedYerba.name}\nTotal: ${formatPrice(total)}`;
 
   function handleAddToCart() {
     addItem({
       id: `combo-${selectedMate.id}-${selectedBombilla.id}-${selectedYerba.id}`,
       name: `Set Personalizado (${selectedMate.name.replace("Mate ", "")} + ${selectedBombilla.name.replace("Bombilla ", "")} + ${selectedYerba.name.replace("Yerba ", "")})`,
       slug: "set-matero-personalizado",
-      description: `Set personalizado con ${selectedMate.name}, ${selectedBombilla.name} y ${selectedYerba.name} con 10% de descuento incluido.`,
+      description: `Set personalizado con ${selectedMate.name}, ${selectedBombilla.name} y ${selectedYerba.name}.`,
       price: total,
       category: "combos",
       status: "available",
@@ -141,10 +142,10 @@ export default function CustomKitBuilder() {
           <h2 className="font-display text-4xl font-bold leading-[0.93] tracking-tight text-pava-cream sm:text-5xl lg:text-6xl">
             Armá tu set matero,
             <br />
-            <em className="not-italic text-pava-gold">llevate 10% de descuento.</em>
+            <em className="not-italic text-pava-gold">pieza por pieza.</em>
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-pava-cream/75 max-w-lg">
-            Elegí tu mate, bombilla y yerba favorita para crear tu combinación ideal a un precio especial.
+            Elegí tu mate, bombilla y yerba favorita para crear tu combinación ideal y pedila en un solo mensaje.
           </p>
         </ScrollReveal>
 
@@ -310,8 +311,8 @@ export default function CustomKitBuilder() {
                     Combo Personalizado
                   </h4>
                 </div>
-                <span className="rounded-chip bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
-                  10% OFF
+                <span className="rounded-chip border border-pava-cream/25 px-2.5 py-1 text-[11px] font-bold text-pava-cream/80">
+                  3 piezas
                 </span>
               </div>
 
@@ -341,17 +342,9 @@ export default function CustomKitBuilder() {
               </div>
 
               {/* Price Calculation */}
-              <div className="space-y-1.5 mb-6 pt-1 border-t border-pava-cream/15">
-                <div className="flex items-center justify-between text-xs text-pava-cream/60">
-                  <span>Precio regular:</span>
-                  <span className="line-through">{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
-                  <span>Descuento Set Matero (10%):</span>
-                  <span>-{formatPrice(discount)}</span>
-                </div>
-                <div className="flex items-baseline justify-between pt-3 border-t border-pava-cream/15">
-                  <span className="text-sm font-bold text-pava-cream">Total Combo:</span>
+              <div className="mb-6 pt-1 border-t border-pava-cream/15">
+                <div className="flex items-baseline justify-between pt-3">
+                  <span className="text-sm font-bold text-pava-cream">Total del Set:</span>
                   <span className="font-display text-3xl font-extrabold text-pava-gold">
                     {formatPrice(total)}
                   </span>

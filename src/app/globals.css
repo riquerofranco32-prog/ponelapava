@@ -169,6 +169,36 @@ body {
   }
 }
 
+/* ── Líneas del H1 del hero ──────────────────────────
+   La revelación del H1 NO puede depender de la hidratación: el H1 es el
+   elemento LCP y el gate por estado React lo dejaba invisible hasta que
+   bajaba el JS (medido en 4G ×4: LCP 8.474 ms con gate → 4.180 ms sin él).
+   Animación CSS pura: arranca con el primer paint del HTML del servidor. */
+@keyframes heroLineIn {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+.hero-line-in {
+  animation: heroLineIn 0.7s cubic-bezier(0, 0, 0.2, 1) both;
+}
+/* text-shine trae su propia animación y el shorthand `animation` no se
+   fusiona entre clases (la última regla pisa a la otra): la línea con brillo
+   declara las dos juntas. El delay inline alcanza a ambas; retrasar 300 ms
+   un brillo infinito es imperceptible. */
+.hero-line-in.text-shine {
+  animation:
+    heroLineIn 0.7s cubic-bezier(0, 0, 0.2, 1) both,
+    textShine 5s linear infinite;
+}
+
 .animate-hero-fade-up {
   animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

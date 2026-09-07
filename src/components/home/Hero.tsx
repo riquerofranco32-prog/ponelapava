@@ -141,26 +141,29 @@ export default function Hero({ content }: { content?: LandingHero }) {
             className="font-display max-w-4xl leading-[1.05] tracking-[-0.04em] text-pava-cream
               text-[3.6rem] sm:text-[5.5rem] lg:text-[7.5rem] xl:text-[8.5rem]"
           >
+            {/* Las líneas se revelan con CSS puro (hero-line-in), nunca
+                gateadas por `loaded`: el H1 es el elemento LCP y esperar la
+                hidratación costaba ~4 s de LCP en 4G. */}
             <span className="-mb-[0.14em] block overflow-hidden">
               <span
-                className={`block pb-[0.14em] transition-all duration-700 ease-out delay-200
-                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+                className="hero-line-in block pb-[0.14em]"
+                style={{ animationDelay: "200ms" }}
               >
                 {hero.titleLine1 || "El ritual"}
               </span>
             </span>
             <span className="-mb-[0.14em] block overflow-hidden">
               <em
-                className={`text-shine not-italic block pb-[0.14em] transition-all duration-700 ease-out delay-300
-                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+                className="hero-line-in text-shine not-italic block pb-[0.14em]"
+                style={{ animationDelay: "300ms" }}
               >
                 {hero.titleLine2 || "del mate"}
               </em>
             </span>
             <span className="-mb-[0.14em] block overflow-hidden">
               <span
-                className={`block pb-[0.14em] transition-all duration-700 ease-out delay-400
-                  ${loaded ? "translate-y-0 opacity-100 blur-none" : "translate-y-full opacity-0 blur-sm"}`}
+                className="hero-line-in block pb-[0.14em]"
+                style={{ animationDelay: "400ms" }}
               >
                 {hero.titleLine3 || "es tuyo."}
               </span>

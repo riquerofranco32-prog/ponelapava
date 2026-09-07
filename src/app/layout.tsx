@@ -10,7 +10,7 @@ import Footer from "@/components/layout/Footer";
 import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
 import { SITE_URL } from "@/lib/site";
 import { getSiteSettings } from "@/lib/settings";
-import { parseOpeningHoursRange } from "@/lib/hours";
+import { parseOpeningHoursRange, MIDWEEK_SCHEMA_DAYS } from "@/lib/hours";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -112,12 +112,12 @@ export default async function RootLayout({
       addressLocality: settings.addressCity,
       addressCountry: "AR",
     },
-    // Closed Sundays, matching the isStoreOpenNow() rule the "open now"
-    // badge uses — keep both in sync if that ever changes.
+    // Martes a sábado, los mismos días que aplica isStoreOpenNow() — la
+    // lista sale de lib/hours para que no se puedan desincronizar.
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        dayOfWeek: MIDWEEK_SCHEMA_DAYS,
         opens: weekdayOpens,
         closes: weekdayCloses,
       },

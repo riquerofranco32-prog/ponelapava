@@ -143,7 +143,7 @@ export default async function Footer() {
                 />
                 <span>
                   <span className="block">
-                    Lun–Vie: {settings.hoursWeekday}
+                    Mar–Vie: {settings.hoursWeekday}
                   </span>
                   <span className="block">Sáb: {settings.hoursSaturday}</span>
                 </span>

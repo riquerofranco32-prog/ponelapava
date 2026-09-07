@@ -136,7 +136,7 @@ export default async function LocalSection() {
                     Horarios
                   </span>
                   <p className="mt-1 text-sm font-medium text-pava-cream">
-                    Lun–Vie: {settings.hoursWeekday} hs
+                    Mar–Vie: {settings.hoursWeekday} hs
                   </p>
                   <p className="text-sm text-pava-cream/70">
                     Sáb: {settings.hoursSaturday} hs

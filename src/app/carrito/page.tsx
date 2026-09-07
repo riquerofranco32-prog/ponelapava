@@ -13,10 +13,6 @@ import {
   AlertTriangle,
   Truck,
   Store,
-  Tag,
-  Check,
-  Loader2,
-  X,
   CreditCard,
   Banknote,
   Sparkles,
@@ -84,16 +80,6 @@ export default function CartPage() {
   // Upsell state
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   
-  // Coupon state
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    code: string;
-    discountType: "percent" | "fixed";
-    discountValue: number;
-  } | null>(null);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [validatingCoupon, setValidatingCoupon] = useState(false);
-
   const [isSyncing, setIsSyncing] = useState(true);
   const [syncNotices, setSyncNotices] = useState<string[]>([]);
   // Starts null (matches server HTML, avoids a hydration mismatch, same
@@ -121,15 +107,13 @@ export default function CartPage() {
 
   // Shipping & discounts — computed by the same module the server uses to
   // price the order, so what is shown here is what gets stored.
-  const { couponDiscount, totalDiscount, shippingCost, total: finalTotal } =
-    computeOrderTotals({
-      lines: items.map(({ product, quantity }) => ({
-        price: product.price,
-        quantity,
-      })),
-      deliveryMethod,
-      coupon: appliedCoupon,
-    });
+  const { shippingCost, total: finalTotal } = computeOrderTotals({
+    lines: items.map(({ product, quantity }) => ({
+      price: product.price,
+      quantity,
+    })),
+    deliveryMethod,
+  });
   const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
 
   // El efectivo sólo existe si el comprador va al local. Se deriva en vez de
@@ -217,36 +201,6 @@ export default function CartPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleApplyCoupon = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!couponCode.trim()) return;
-    setValidatingCoupon(true);
-    setCouponError(null);
-    try {
-      const res = await fetch("/api/coupons/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponCode }),
-      });
-      const data = await res.json();
-      if (res.ok && data.valid) {
-        setAppliedCoupon(data.coupon);
-        setCouponCode("");
-      } else {
-        setCouponError(data.error || "Cupón no válido");
-      }
-    } catch {
-      setCouponError("Error al validar el cupón");
-    } finally {
-      setValidatingCoupon(false);
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponError(null);
-  };
-
   const handleWhatsApp = () => {
     if (items.length === 0) return;
 
@@ -272,8 +226,6 @@ export default function CartPage() {
       customerPhone: customerPhone.trim() || undefined,
       items,
       subtotal: total,
-      discount: totalDiscount > 0 ? totalDiscount : undefined,
-      couponCode: appliedCoupon?.code,
       shippingCost: shippingCost > 0 ? shippingCost : undefined,
       deliveryMethod,
       deliveryAddress: fullAddress,
@@ -310,7 +262,6 @@ export default function CartPage() {
           productId: product.id,
           quantity,
         })),
-        couponCode: appliedCoupon?.code,
         deliveryMethod,
         deliveryAddress: fullAddress,
         paymentMethod: effectivePayment,
@@ -670,76 +621,12 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Coupon Code Section */}
-              <div className="mb-6">
-                <label className="block text-xs font-semibold text-pava-brown/80 mb-1.5">
-                  ¿Tenés un cupón de descuento?
-                </label>
-                {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-2.5 rounded-control bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <Tag size={13} className="text-emerald-600" />
-                      <span className="font-bold tracking-wider">{appliedCoupon.code}</span>
-                      <span className="text-[11px] bg-emerald-200/80 px-1.5 py-0.5 rounded text-emerald-900 font-semibold">
-                        {appliedCoupon.discountType === "percent"
-                          ? `-${appliedCoupon.discountValue}%`
-                          : `-${formatPrice(appliedCoupon.discountValue)}`}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      className="p-1 text-emerald-700 hover:text-emerald-900 transition-colors"
-                      title="Quitar cupón"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Código de cupón"
-                      value={couponCode}
-                      onChange={(e) => {
-                        setCouponCode(e.target.value.toUpperCase());
-                        setCouponError(null);
-                      }}
-                      className="flex-1 rounded-control px-3 py-2 bg-pava-cream border border-pava-brown/15 text-pava-brown text-xs uppercase placeholder-pava-brown/40 focus:outline-none focus:border-pava-green"
-                    />
-                    <button
-                      type="submit"
-                      disabled={!couponCode.trim() || validatingCoupon}
-                      className="px-3.5 py-2 rounded-control bg-pava-brown text-pava-cream hover:bg-pava-green text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1"
-                    >
-                      {validatingCoupon ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        "Aplicar"
-                      )}
-                    </button>
-                  </form>
-                )}
-                {couponError && (
-                  <p className="text-[11px] text-red-600 mt-1 font-medium">{couponError}</p>
-                )}
-              </div>
-
               {/* Breakdown */}
               <div className="space-y-2 mb-4 pb-4 border-b border-pava-brown/10 text-xs">
                 <div className="flex justify-between text-pava-brown-mid/80">
                   <span>Subtotal ({itemCount} {itemCount === 1 ? "ítem" : "ítems"})</span>
                   <span className="font-semibold text-pava-brown">{formatPrice(total)}</span>
                 </div>
-
-                {couponDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span className="flex items-center gap-1">
-                      <Tag size={12} /> Cupón ({appliedCoupon?.code})
-                    </span>
-                    <span className="font-bold">-{formatPrice(couponDiscount)}</span>
-                  </div>
-                )}
 
                 <div className="flex justify-between text-pava-brown-mid/80">
                   <span>Envío ({deliveryMethod === "pickup" ? "Retiro en local" : "A domicilio"})</span>

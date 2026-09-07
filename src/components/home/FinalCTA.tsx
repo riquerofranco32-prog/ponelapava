@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { MessageCircle, ShoppingBag, Copy, Check, Sparkles, CreditCard, ShieldCheck } from "lucide-react";
+import { MessageCircle, ShoppingBag, CreditCard, ShieldCheck, Store, Truck } from "lucide-react";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -11,13 +10,6 @@ import { BorderBeam } from "@/components/ui/BorderBeam";
 
 export default function FinalCTA() {
   const settings = useSiteSettings();
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText("TRANSFERENCIA10");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
 
   return (
     <section className="focus-ring-gold grain-overlay relative overflow-hidden bg-pava-brown py-24 sm:py-28 lg:py-36 text-pava-cream border-t border-pava-cream/10">
@@ -90,41 +82,28 @@ export default function FinalCTA() {
                   <CreditCard size={15} />
                 </span>
                 <span className="text-xs font-bold uppercase tracking-wider text-pava-gold">
-                  Beneficio Exclusivo
+                  Cómo pagás
                 </span>
               </div>
 
               <h3 className="font-display text-2xl font-bold text-pava-cream">
-                10% OFF EXTRA <br />
-                <span className="text-pava-gold font-normal text-lg">con Transferencia Bancaria</span>
+                Transferencia, Mercado Pago <br />
+                <span className="text-pava-gold font-normal text-lg">o efectivo en el local</span>
               </h3>
 
               <p className="mt-2 text-xs leading-relaxed text-pava-cream/75">
-                Acumulable con precios de lista y combos especiales. Copiá el cupón o pedilo directo al cerrar tu pedido por WhatsApp.
+                Coordinamos todo por WhatsApp: te pasamos los datos para transferir o el link de Mercado Pago, y confirmás cuando quieras.
               </p>
 
-              {/* Coupon Box */}
-              <div className="mt-5 flex items-center justify-between gap-3 rounded-control border border-dashed border-pava-gold/50 bg-black/30 p-3.5">
-                <div className="font-mono text-sm sm:text-base font-bold tracking-widest text-pava-gold">
-                  TRANSFERENCIA10
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-pava-gold px-3.5 py-1.5 text-xs font-bold text-pava-brown hover:bg-pava-gold-light active:scale-95 transition-all shadow-sm cursor-pointer"
-                >
-                  {copied ? (
-                    <>
-                      <Check size={14} />
-                      <span>¡Copiado!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={14} />
-                      <span>Copiar</span>
-                    </>
-                  )}
-                </button>
+              <div className="mt-5 flex flex-col gap-2 rounded-control border border-dashed border-pava-gold/50 bg-black/30 p-3.5 text-xs text-pava-cream/85">
+                <span className="inline-flex items-center gap-2">
+                  <Store size={14} className="shrink-0 text-pava-gold" />
+                  Retirás sin cargo en {settings.addressLine}, {settings.addressCity}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Truck size={14} className="shrink-0 text-pava-gold" />
+                  O te lo despachamos a todo el país
+                </span>
               </div>
 
               {/* Badges footer */}

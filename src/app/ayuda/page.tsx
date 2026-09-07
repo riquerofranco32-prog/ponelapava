@@ -52,16 +52,9 @@ const FAQS: FAQItem[] = [
   {
     id: "pag-1",
     category: "pagos",
-    question: "¿Qué formas de pago aceptan y cómo funciona el 10% OFF?",
+    question: "¿Qué formas de pago aceptan?",
     answer:
-      "Aceptamos Transferencia Bancaria (con 10% de descuento automático e inmediato sobre el total de productos), Mercado Pago (tarjetas de crédito, débito, dinero en cuenta) y efectivo al retirar en nuestro local de Catriel.",
-  },
-  {
-    id: "pag-2",
-    category: "pagos",
-    question: "¿Cómo aplico los cupones de descuento o premios de la ruleta?",
-    answer:
-      "Al finalizar tu compra en el carrito o coordinar por WhatsApp, ingresás el código del cupón (por ejemplo el que ganaste en la Ruleta Matera) y se descontará del importe total.",
+      "Transferencia bancaria, Mercado Pago y efectivo al retirar en nuestro local de Catriel. Coordinamos el pago por WhatsApp cuando confirmás el pedido. Si pagás desde tu Mercado Pago con una tarjeta en cuotas, los intereses los define tu tarjeta y corren por tu cuenta.",
   },
   // Curado
   {
@@ -120,7 +113,7 @@ const FAQS: FAQItem[] = [
 const CATEGORIES = [
   { id: "all", label: "Todas las preguntas", icon: HelpCircle },
   { id: "envios", label: "Envíos y Entregas", icon: Truck },
-  { id: "pagos", label: "Pagos y Descuentos", icon: CreditCard },
+  { id: "pagos", label: "Pagos", icon: CreditCard },
   { id: "curado", label: "Curado y Cuidado", icon: Sparkles },
   { id: "garantia", label: "Garantía y Cambios", icon: RotateCcw },
   { id: "personalizados", label: "Regalos y Dedicatorias", icon: PackageCheck },

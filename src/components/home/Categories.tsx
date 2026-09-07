@@ -70,6 +70,11 @@ export default async function Categories() {
                 ? trailingSpanClass
                 : "sm:col-span-1 lg:col-span-2";
 
+            // La card estirada a col-span-4 (resto 1) cambia a aspecto
+            // apaisado para quedar a la altura de la fila (ver CategoryCard).
+            const isStretched =
+              remainder === 1 && isLast && trailingSpanClass === "lg:col-span-4";
+
             return (
               <ScrollReveal
                 key={cat.id}
@@ -77,7 +82,12 @@ export default async function Categories() {
                 delay={i * 50}
                 className={`${mobileSpan} ${desktopSpan}`}
               >
-                <CategoryCard cat={cat} featured={isFirst} />
+                <CategoryCard
+                  cat={cat}
+                  featured={isFirst}
+                  wideMobile={isOddTotal && isFirst}
+                  stretched={isStretched}
+                />
               </ScrollReveal>
             );
           })}

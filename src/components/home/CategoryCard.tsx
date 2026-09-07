@@ -9,20 +9,31 @@ import type { Category } from "@/types";
 export default function CategoryCard({
   cat,
   featured = false,
+  wideMobile = false,
+  stretched = false,
 }: {
   cat: Category;
   featured?: boolean;
+  /* La featured solo usa el aspecto apaisado 16/10 cuando de verdad ocupa
+     dos columnas en mobile (total impar). Con total par queda en una columna
+     y el 16/10 la dejaba en 168×105 al lado de hermanas de 168×224. */
+  wideMobile?: boolean;
+  /* La card que el bento estira a col-span-4 (resto 1) no puede conservar el
+     3/4 vertical: a 793px de ancho daba 1058px de alto. Apaisada 8/5 queda
+     a la altura (~500px) de la fila de sus hermanas. */
+  stretched?: boolean;
 }) {
+  const aspect = featured
+    ? `${wideMobile ? "aspect-[16/10] sm:aspect-[3/4]" : "aspect-[3/4]"} lg:aspect-auto lg:h-full`
+    : stretched
+      ? "aspect-[3/4] lg:aspect-[8/5]"
+      : "aspect-[3/4]";
   return (
     <Link
       href={`/catalogo?cat=${cat.slug}`}
       aria-label={`Ver categoría ${cat.name}`}
       onMouseMove={trackSpotlight}
-      className={`img-hover-zoom group relative block overflow-hidden rounded-2xl bg-pava-brown border border-pava-brown/20 transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:border-pava-gold/40 ${
-        featured
-          ? "aspect-[16/10] sm:aspect-[3/4] lg:aspect-auto lg:h-full"
-          : "aspect-[3/4]"
-      }`}
+      className={`img-hover-zoom group relative block overflow-hidden rounded-2xl bg-pava-brown border border-pava-brown/20 transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:border-pava-gold/40 ${aspect}`}
     >
       {cat.image && (
         <Image

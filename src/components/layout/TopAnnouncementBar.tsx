@@ -98,7 +98,12 @@ export default function TopAnnouncementBar() {
       role="region"
       aria-label="Anuncios destacados"
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between gap-2">
+      {/* min-h por rango = la variante más alta de los 4 anuncios en ese
+          rango (medido: <480 llega a 53 de contenido, 480–639 a 40, 640–767
+          a 42 porque a partir de sm el texto sube a 12px, ≥768 todos en una
+          línea). Sin esto la barra cambiaba de altura en cada rotación de
+          4,5 s y el navbar saltaba 13,7 px en mobile. */}
+      <div className="mx-auto max-w-7xl flex items-center justify-between gap-2 min-h-[53px] min-[480px]:min-h-[40px] sm:min-h-[42px] md:min-h-0">
         {/* Prev button */}
         <button
           onClick={handlePrev}

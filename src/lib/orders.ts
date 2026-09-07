@@ -110,12 +110,14 @@ function buildComment(
   }
   if (input.comment?.trim()) parts.push(input.comment.trim());
   if (input.paymentMethod) {
+    // Los prefijos "[Pago: Transferencia" y "[Pago: Efectivo" los lee
+    // getDashboardStats para clasificar el medio de pago — no cambiarlos.
     parts.push(
       input.paymentMethod === "transfer"
-        ? "[Pago: Transferencia (10% OFF)]"
+        ? "[Pago: Transferencia]"
         : input.paymentMethod === "cash"
-          ? "[Pago: Efectivo en Local (10% OFF)]"
-          : "[Pago: Tarjeta / Otros]",
+          ? "[Pago: Efectivo en Local]"
+          : "[Pago: Mercado Pago]",
     );
   }
   if (couponCode && totals.couponDiscount > 0) {
@@ -155,15 +157,10 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 
   const deliveryMethod: DeliveryMethod =
     input.deliveryMethod === "delivery" ? "delivery" : "pickup";
-  const paymentMethod: PaymentMethod =
-    input.paymentMethod === "cash" || input.paymentMethod === "card"
-      ? input.paymentMethod
-      : "transfer";
 
   const totals = computeOrderTotals({
     lines: orderItems,
     deliveryMethod,
-    paymentMethod,
     coupon,
   });
 

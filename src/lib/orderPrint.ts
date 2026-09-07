@@ -16,10 +16,10 @@ export function printOrderRemito(order: Order) {
 
   const paymentLabel =
     order.paymentMethod === "transfer"
-      ? "Transferencia Bancaria (10% OFF)"
+      ? "Transferencia Bancaria"
       : order.paymentMethod === "cash"
-        ? "Efectivo / Contraentrega"
-        : "Tarjeta de Crédito / Débito";
+        ? "Efectivo en el Local"
+        : "Mercado Pago";
 
   const deliveryLabel =
     order.deliveryMethod === "pickup"

@@ -39,11 +39,11 @@ export function generateWhatsAppMessage(data: WhatsAppOrderData): string {
       ? `*Cupón ${couponCode}:* -${formatPrice(discount)}`
       : null,
     data.paymentMethod === "transfer"
-      ? `*Pago:* 💳 Transferencia Bancaria (10% OFF)`
+      ? `*Pago:* 🏦 Transferencia Bancaria`
       : data.paymentMethod === "cash"
-        ? `*Pago:* 💵 Efectivo en Local (10% OFF)`
+        ? `*Pago:* 💵 Efectivo en el Local`
         : data.paymentMethod === "card"
-          ? `*Pago:* 💳 Tarjeta de Crédito / Débito`
+          ? `*Pago:* 💳 Mercado Pago`
           : null,
     deliveryMethod === "pickup"
       ? `*Entrega:* 🏪 Retiro en Local (Catriel)`

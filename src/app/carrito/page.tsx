@@ -35,6 +35,32 @@ import {
   STANDARD_SHIPPING_COST,
 } from "@/lib/pricing";
 
+// Lo que el local cobra de verdad. El id "card" es el valor histórico del
+// tercer medio y se mantiene para no romper el registro de pedidos; de cara
+// al cliente es Mercado Pago. No hay cuotas ni descuento por medio de pago:
+// si el comprador paga con tarjeta desde su Mercado Pago, los intereses
+// corren por su cuenta.
+const PAYMENT_OPTIONS = [
+  {
+    id: "transfer" as const,
+    label: "Transferencia",
+    hint: "Bancaria, al confirmar",
+    icon: Banknote,
+  },
+  {
+    id: "card" as const,
+    label: "Mercado Pago",
+    hint: "Te pasamos el link",
+    icon: CreditCard,
+  },
+  {
+    id: "cash" as const,
+    label: "Efectivo",
+    hint: "Al retirar en el local",
+    icon: Store,
+  },
+];
+
 export default function CartPage() {
   const {
     items,
@@ -95,17 +121,23 @@ export default function CartPage() {
 
   // Shipping & discounts — computed by the same module the server uses to
   // price the order, so what is shown here is what gets stored.
-  const { couponDiscount, paymentDiscount, totalDiscount, shippingCost, total: finalTotal } =
+  const { couponDiscount, totalDiscount, shippingCost, total: finalTotal } =
     computeOrderTotals({
       lines: items.map(({ product, quantity }) => ({
         price: product.price,
         quantity,
       })),
       deliveryMethod,
-      paymentMethod,
       coupon: appliedCoupon,
     });
   const isFreeShipping = total >= FREE_SHIPPING_THRESHOLD;
+
+  // El efectivo sólo existe si el comprador va al local. Se deriva en vez de
+  // sincronizarse con un efecto: si eligió efectivo y después cambia a envío,
+  // la opción deja de aplicar sin que haya que reescribir el estado.
+  const allowsCash = deliveryMethod === "pickup";
+  const effectivePayment =
+    paymentMethod === "cash" && !allowsCash ? "transfer" : paymentMethod;
 
   // Re-check price/stock/status against the DB on load — the cart snapshot
   // in localStorage can be days old. Runs once against the items present
@@ -245,7 +277,7 @@ export default function CartPage() {
       shippingCost: shippingCost > 0 ? shippingCost : undefined,
       deliveryMethod,
       deliveryAddress: fullAddress,
-      paymentMethod,
+      paymentMethod: effectivePayment,
       total: finalTotal,
       comment: fullComment || undefined,
     };
@@ -281,7 +313,7 @@ export default function CartPage() {
         couponCode: appliedCoupon?.code,
         deliveryMethod,
         deliveryAddress: fullAddress,
-        paymentMethod,
+        paymentMethod: effectivePayment,
         comment: fullComment || undefined,
       }),
     })
@@ -603,40 +635,38 @@ export default function CartPage() {
                 <label className="block text-xs font-semibold text-pava-brown/80 mb-2">
                   2. Forma de pago
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("transfer")}
-                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
-                      paymentMethod === "transfer"
-                        ? "border-emerald-600 bg-emerald-50 shadow-sm ring-1 ring-emerald-600"
-                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
-                      <Banknote size={14} className={paymentMethod === "transfer" ? "text-emerald-700" : "text-pava-brown/60"} />
-                      <span>Transferencia</span>
-                    </div>
-                    <span className="text-[10px] bg-emerald-600 text-white font-bold px-1.5 py-0.5 rounded">10% OFF</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod(deliveryMethod === "pickup" ? "cash" : "card")}
-                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
-                      paymentMethod === "card" || paymentMethod === "cash"
-                        ? "border-pava-green bg-pava-green/8 shadow-sm"
-                        : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
-                      <CreditCard size={14} className={paymentMethod === "card" || paymentMethod === "cash" ? "text-pava-green" : "text-pava-brown/60"} />
-                      <span>{deliveryMethod === "pickup" ? "Efectivo Local" : "Tarjeta"}</span>
-                    </div>
-                    <span className="text-[11px] text-pava-brown/60 font-medium">
-                      {deliveryMethod === "pickup" ? "10% OFF en local" : "Hasta 6 cuotas"}
-                    </span>
-                  </button>
+                <div
+                  className={`grid gap-2 ${allowsCash ? "grid-cols-3" : "grid-cols-2"}`}
+                >
+                  {PAYMENT_OPTIONS.filter(
+                    (opt) => opt.id !== "cash" || allowsCash,
+                  ).map((opt) => {
+                    const Icon = opt.icon;
+                    const isSelected = effectivePayment === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setPaymentMethod(opt.id)}
+                        className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
+                          isSelected
+                            ? "border-pava-green bg-pava-green/8 shadow-sm ring-1 ring-pava-green"
+                            : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 font-semibold text-xs text-pava-brown mb-1">
+                          <Icon
+                            size={14}
+                            className={isSelected ? "text-pava-green" : "text-pava-brown/60"}
+                          />
+                          <span>{opt.label}</span>
+                        </div>
+                        <span className="text-[11px] text-pava-brown/60 font-medium">
+                          {opt.hint}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -708,15 +738,6 @@ export default function CartPage() {
                       <Tag size={12} /> Cupón ({appliedCoupon?.code})
                     </span>
                     <span className="font-bold">-{formatPrice(couponDiscount)}</span>
-                  </div>
-                )}
-
-                {paymentDiscount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span className="flex items-center gap-1">
-                      <Banknote size={12} /> 10% OFF {paymentMethod === "transfer" ? "Transferencia" : "Efectivo"}
-                    </span>
-                    <span className="font-bold">-{formatPrice(paymentDiscount)}</span>
                   </div>
                 )}
 

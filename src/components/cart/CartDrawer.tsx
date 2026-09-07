@@ -182,23 +182,15 @@ export default function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="border-t border-pava-brown/10 px-5 py-5 space-y-3.5 bg-white/50">
-            {/* Total breakdown */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-pava-brown-mid/70">
-                <span>Subtotal</span>
-                <span className="font-semibold text-pava-brown">{formatPrice(total)}</span>
-              </div>
-              <div className="flex items-baseline justify-between pt-1 border-t border-pava-brown/10">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-pava-gold-deep block">Con Transferencia (10% OFF)</span>
-                  <span className="font-display text-2xl font-bold text-pava-green block">
-                    {formatPrice(Math.round(total * 0.9))}
-                  </span>
-                </div>
-                <span className="text-xs text-pava-brown-mid/60 line-through">
-                  {formatPrice(total)}
-                </span>
-              </div>
+            {/* Total — sin descuento por medio de pago, subtotal y total son
+                el mismo número: se muestra una sola vez. */}
+            <div className="flex items-baseline justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-pava-brown-mid/70">
+                Total
+              </span>
+              <span className="font-display text-2xl font-bold text-pava-green">
+                {formatPrice(total)}
+              </span>
             </div>
 
             {/* Gift Dedication Option */}

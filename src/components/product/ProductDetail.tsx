@@ -239,24 +239,14 @@ export default function ProductDetail({
                 </div>
               </div>
 
-              {/* Transfer Discount Callout */}
-              <div className="flex items-center gap-2 rounded-control bg-emerald-50 border border-emerald-200/80 px-3 py-2 text-xs text-emerald-900 mb-3">
-                <span className="font-bold bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded tracking-wide uppercase">
-                  10% OFF
-                </span>
-                <span className="font-medium">
-                  <strong>{formatPrice(Math.round(product.price * 0.9))}</strong> pagando con Transferencia o Efectivo
-                </span>
-              </div>
-
-              {/* Installments & Cards */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-pava-brown-mid/80 pt-1 border-t border-pava-brown/8">
+              {/* Payment methods — lo que el local cobra de verdad */}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-pava-brown-mid/80 pt-2 border-t border-pava-brown/8">
                 <span className="inline-flex items-center gap-1.5 font-semibold text-pava-brown">
                   <CreditCard size={13} className="text-pava-green" />
-                  3 cuotas de {formatPrice(Math.round(product.price / 3))}
+                  Transferencia, Mercado Pago
                 </span>
                 <span className="text-pava-brown/30">•</span>
-                <span>Hasta 6 cuotas con tarjetas de crédito</span>
+                <span>Efectivo al retirar en el local</span>
               </div>
             </div>
 
@@ -561,7 +551,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Medios de pago</span>
-                  <span className="text-pava-brown-mid/70">Transferencia (10% OFF), tarjeta y efectivo</span>
+                  <span className="text-pava-brown-mid/70">Transferencia, Mercado Pago o efectivo en el local</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -621,9 +611,6 @@ export default function ProductDetail({
               <p className="text-xs font-bold text-pava-brown truncate">{product.name}</p>
               <div className="flex items-baseline gap-1.5">
                 <span className="font-display text-sm font-bold text-pava-green">{formatPrice(product.price)}</span>
-                <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                  {formatPrice(Math.round(product.price * 0.9))} efvo/transf
-                </span>
               </div>
             </div>
           </div>

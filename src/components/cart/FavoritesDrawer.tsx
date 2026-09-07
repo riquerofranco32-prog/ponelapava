@@ -246,9 +246,6 @@ export default function FavoritesDrawer({
                 <span className="font-display text-base font-bold text-pava-brown block">
                   {formatPrice(totalValue)}
                 </span>
-                <span className="text-[10px] text-emerald-700 font-semibold">
-                  {formatPrice(Math.round(totalValue * 0.9))} con transferencia
-                </span>
               </div>
             </div>
 

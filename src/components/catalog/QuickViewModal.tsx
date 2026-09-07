@@ -129,14 +129,6 @@ export default function QuickViewModal({
                 {formatPrice(product.price)}
               </span>
             </div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="rounded-chip bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                10% OFF: {formatPrice(Math.round(product.price * 0.9))} efvo/transf
-              </span>
-              <span className="text-[11px] text-pava-brown/60">
-                3 cuotas de {formatPrice(Math.round(product.price / 3))}
-              </span>
-            </div>
           </div>
 
           <p className="mb-6 text-xs sm:text-sm leading-relaxed text-pava-brown-mid/75 line-clamp-3">

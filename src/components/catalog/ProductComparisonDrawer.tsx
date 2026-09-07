@@ -111,9 +111,6 @@ export default function ProductComparisonDrawer() {
                     <span className="font-display text-lg font-bold text-pava-green block">
                       {formatPrice(product.price)}
                     </span>
-                    <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded">
-                      {formatPrice(Math.round(product.price * 0.9))} c/ Transferencia
-                    </span>
                   </div>
 
                   {/* Specs Rows */}

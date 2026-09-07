@@ -33,6 +33,10 @@
  *   --path   ruta a recorrer (default: /)
  *   --vp     desktop-1440 (default) | mobile-390
  *   --n      cuántas paradas de Tab recorrer (default: 30)
+ *   --settle ms de espera entre el Tab y la lectura (default: 400). No puede
+ *            ser corto: los controles con transition-all también transicionan
+ *            el outline, y leyendo a 130 ms salían colores y offsets
+ *            interpolados a mitad de la transición (falsos FLOJO/RECORTADO).
  *   --label  nombre de la corrida; agrupa en .optical-check/<label>/tab/
  *   --out    directorio de salida (default: .optical-check, gitignoreado)
  *   Chrome se busca en las rutas estándar de Windows; override: env CHROME_PATH.
@@ -53,6 +57,7 @@ const BASE = arg("base", "http://localhost:3000").replace(/\/$/, "");
 const PATH = arg("path", "/");
 const NAME = arg("vp", "desktop-1440");
 const N = +arg("n", "30");
+const SETTLE = +arg("settle", "400");
 const LABEL = arg("label", "run");
 const OUT = join(
   process.cwd(),
@@ -221,6 +226,23 @@ const ESTADO = `(() => {
     p = p.parentElement; }
   if (!bg || bg[3] < 0.999) bg = over(bg || [0,0,0,0], rgba(getComputedStyle(document.body).backgroundColor));
 
+  // La pila de ancestros no ve capas hermanas: un <img> posicionado (next/image
+  // del hero) o un scrim con gradiente viven en OTRA rama del árbol y quedan
+  // debajo igual. Se barre la pila real de elementsFromPoint desde el control
+  // hacia abajo: media o gradiente antes de un fondo opaco => sobre imagen.
+  if (!sobreMedia) {
+    const stack = document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    let debajo = false;
+    for (const e of stack) {
+      if (!debajo) { if (e === el) debajo = true; continue; }
+      if (el.contains(e) || e.contains(el)) continue;
+      if (/^(IMG|VIDEO|CANVAS|PICTURE)$/.test(e.tagName)) { sobreMedia = true; break; }
+      const ecs = getComputedStyle(e);
+      if (ecs.backgroundImage && ecs.backgroundImage !== 'none') { sobreMedia = true; break; }
+      if (rgba(ecs.backgroundColor)[3] >= 0.999) break;
+    }
+  }
+
   const ow = parseFloat(cs.outlineWidth) || 0;
   const oc = rgba(cs.outlineColor);
   const contrasteAnillo = (cs.outlineStyle !== 'none' && ow > 0 && !sobreMedia)
@@ -284,7 +306,7 @@ try {
   console.log(`\n== Tab real — ${NAME} ${PATH} — ${BASE} ==`);
   for (let i = 0; i < N; i++) {
     await tab();
-    await sleep(130);
+    await sleep(SETTLE);
     const s = await evaluate(ESTADO);
     if (!s || s.fin) {
       console.log(`  (fin de la cadena de tabulación en la parada ${i})`);

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Truck, MapPin, Check, Calculator, Clock, Store } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface ShippingCalculatorProps {
   productPrice: number;
@@ -22,6 +23,7 @@ const REGION_RATES: Record<string, { standard: number; express: number; days: st
 };
 
 export default function ShippingCalculator({ productPrice }: ShippingCalculatorProps) {
+  const settings = useSiteSettings();
   const [zipCode, setZipCode] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [calculated, setCalculated] = useState(false);
@@ -168,7 +170,7 @@ export default function ShippingCalculator({ productPrice }: ShippingCalculatorP
                   Retiro Gratis en Local Catriel
                 </span>
                 <span className="text-[10px] text-emerald-700/80">
-                  Av. San Martín 374 • Listo hoy mismo
+                  {settings.addressLine} • Coordinamos por WhatsApp
                 </span>
               </div>
             </div>

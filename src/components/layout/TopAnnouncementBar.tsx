@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Sparkles, Truck, CreditCard, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Truck, Clock, MapPin } from "lucide-react";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { OPEN_DAYS_LABEL } from "@/lib/hours";
 
 interface Announcement {
   id: string;
@@ -12,38 +14,45 @@ interface Announcement {
   link?: string;
 }
 
-const ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: "cuotas-transf",
-    icon: CreditCard,
-    badge: "HASTA 3 CUOTAS SIN INTERÉS",
-    text: "o 10% OFF EXTRA abonando con Transferencia",
-    link: "/catalogo",
-  },
-  {
-    id: "envios",
-    icon: Truck,
-    badge: "ENVÍOS A TODO EL PAÍS",
-    text: "Despacho rápido a Río Negro, Neuquén y toda la Argentina",
-    link: "/catalogo",
-  },
-  {
-    id: "local",
-    icon: MapPin,
-    badge: "LOCAL EN CATRIEL",
-    text: "Retiro GRATIS en San Martín 245 (Río Negro)",
-    link: "/#el-local",
-  },
-  {
-    id: "artesanal",
-    icon: Sparkles,
-    badge: "100% ARTESANAL",
-    text: "Mates seleccionados de calabaza, alpaca y yerbas premium",
-    link: "/catalogo",
-  },
-];
-
 export default function TopAnnouncementBar() {
+  const settings = useSiteSettings();
+  // La dirección y el horario salen de settings, no escritos acá: la copia
+  // hardcodeada decía "San Martín 245" mientras el resto del sitio mostraba
+  // lo que cargan los dueños desde /admin.
+  const ANNOUNCEMENTS: Announcement[] = useMemo(
+    () => [
+      {
+        id: "horario",
+        icon: Clock,
+        badge: OPEN_DAYS_LABEL,
+        text: `Te atendemos de ${settings.hoursWeekday} hs en ${settings.addressLine}`,
+        link: "/#el-local",
+      },
+      {
+        id: "envios",
+        icon: Truck,
+        badge: "ENVÍOS A TODO EL PAÍS",
+        text: "Despacho rápido a Río Negro, Neuquén y toda la Argentina",
+        link: "/catalogo",
+      },
+      {
+        id: "local",
+        icon: MapPin,
+        badge: "LOCAL EN CATRIEL",
+        text: `Retiro GRATIS en ${settings.addressLine} (${settings.addressCity})`,
+        link: "/#el-local",
+      },
+      {
+        id: "artesanal",
+        icon: Sparkles,
+        badge: "100% ARTESANAL",
+        text: "Mates seleccionados de calabaza, alpaca y yerbas premium",
+        link: "/catalogo",
+      },
+    ],
+    [settings.hoursWeekday, settings.addressLine, settings.addressCity],
+  );
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
@@ -54,7 +63,7 @@ export default function TopAnnouncementBar() {
       setCurrentIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, [isHovered]);
+  }, [isHovered, ANNOUNCEMENTS.length]);
 
   const current = ANNOUNCEMENTS[currentIndex];
   const Icon = current.icon;

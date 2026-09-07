@@ -43,7 +43,7 @@ const FAQS: FAQItem[] = [
     category: "envios",
     question: "¿Puedo retirar mi compra sin cargo en el local de Catriel?",
     answer:
-      "¡Claro que sí! Podés seleccionar 'Retiro en el local' y buscar tu pedido por Av. San Martín 374, Catriel (Río Negro). Tu pedido queda preparado en menos de 1 hora para retirar en nuestro horario comercial.",
+      "¡Claro que sí! Podés seleccionar 'Retiro en el local' y buscar tu pedido por nuestra dirección de Catriel (Río Negro). Tu pedido queda preparado para retirar en nuestro horario de atención.",
   },
   {
     category: "curado",

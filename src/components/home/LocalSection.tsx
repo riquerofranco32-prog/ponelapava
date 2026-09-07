@@ -15,7 +15,8 @@ import {
 // neighboring hotel's reception, not this store — bad data on Google's
 // end, not something to propagate onto the site. Worth reporting/fixing
 // on the real listing.
-// Real photos of the store in Catriel (Av. San Martín 374)
+// Fotos reales del local en Catriel. La dirección no se escribe acá: sale de
+// site_settings (settings.addressLine), que es lo que editan los dueños.
 const LOCAL_PHOTOS = [
   { src: "/local/local-1.jpg", alt: "Fachada y vidriera del local Poné La Pava" },
   { src: "/local/local-2.jpg", alt: "Estantería de termos Stanley y yerbas" },

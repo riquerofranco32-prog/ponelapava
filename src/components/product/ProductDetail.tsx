@@ -542,7 +542,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Retiro gratis en el local</span>
-                  <span className="text-pava-brown-mid/70">Av. San Martín 374, Catriel (Río Negro)</span>
+                  <span className="text-pava-brown-mid/70">{settings.addressLine}, {settings.addressCity}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">

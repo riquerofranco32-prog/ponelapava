@@ -315,7 +315,7 @@ export default function HelpCenterPage() {
               <div>
                 <MapPin size={18} className="text-pava-terracotta mb-2" />
                 <h4 className="font-display text-xs font-bold text-pava-brown">Local en Catriel</h4>
-                <p className="text-[11px] text-pava-brown-mid/70 mt-1">San Martín 374, Catriel, Río Negro.</p>
+                <p className="text-[11px] text-pava-brown-mid/70 mt-1">{settings.addressLine}, {settings.addressCity}.</p>
               </div>
               <span className="text-[11px] font-semibold text-pava-brown-mid/80 mt-3 flex items-center gap-1">
                 <Clock size={12} /> {settings.hoursWeekday}

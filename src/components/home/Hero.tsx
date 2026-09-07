@@ -211,7 +211,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
                 id="hero-cta-combos"
                 className="inline-flex items-center justify-center gap-2 rounded-control border border-pava-cream/40 bg-pava-brown/20 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-md transition-all duration-200 hover:border-pava-gold hover:bg-pava-gold/15 sm:px-10"
               >
-                {hero.ctaSecondaryText || "Ver Combos con Descuento"}
+                {hero.ctaSecondaryText || "Conocé el local"}
               </Link>
             </MagneticButton>
           </div>
@@ -241,7 +241,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
               href="/#arma-tu-set"
               className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-950/50 px-3 py-1 text-xs font-bold text-emerald-300 backdrop-blur-sm transition-all hover:bg-emerald-400 hover:text-emerald-950 hover:border-emerald-400"
             >
-              <span>⚡ Armá tu Kit (10% OFF)</span>
+              <span>⚡ Armá tu Kit</span>
             </Link>
             <Link
               href="/catalogo?cat=bombillas"
@@ -259,7 +259,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-pava-gold/15 px-3.5 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold shadow-lg shadow-pava-gold/10">
               <span className="text-pava-gold text-xs">💳</span>
-              <span>3 Cuotas Sin Interés</span>
+              <span>Transferencia o Mercado Pago</span>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
               <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>

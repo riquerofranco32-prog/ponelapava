@@ -18,14 +18,14 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
   },
   announcements: [
     {
-      id: "transf",
-      highlight: "10% OFF EXTRA",
-      text: "abonando con Transferencia Bancaria o Efectivo",
+      id: "pagos",
+      highlight: "Transferencia o Mercado Pago",
+      text: "y efectivo al retirar en el local",
     },
     {
       id: "local",
       highlight: "Retiro GRATIS",
-      text: "en nuestro local de Catriel (San Martín 245)",
+      text: "en nuestro local de Catriel",
     },
     {
       id: "envios",
@@ -40,9 +40,9 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
   ],
   promoBanner: {
     active: true,
-    badge: "PROMO EXCLUSIVA",
-    title: "Armá tu Set Matero con 10% OFF",
-    description: "Elegí tu mate, bombilla y yerba favorita y llevátelos con descuento especial en combo.",
+    badge: "ARMÁ EL TUYO",
+    title: "Armá tu Set Matero pieza por pieza",
+    description: "Elegí tu mate, bombilla y yerba favorita y pedí el set completo en un solo mensaje.",
     image: "/products/mate-camionero-vaqueta.jpg",
     buttonText: "Armar mi Set Ahora",
     buttonLink: "/#arma-tu-set",

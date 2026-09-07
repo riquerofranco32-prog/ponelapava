@@ -10,7 +10,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/catalogo?cat=mates", label: "Mates" },
   { href: "/catalogo?cat=yerbas", label: "Yerbas" },
   { href: "/#combos", label: "Combos & Sets" },
-  { href: "/#arma-tu-set", label: "Armá tu Set", badge: "10% OFF" },
+  { href: "/#arma-tu-set", label: "Armá tu Set" },
   { href: "/#el-local", label: "Local Catriel" },
 ];
 

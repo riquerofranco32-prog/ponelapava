@@ -302,7 +302,7 @@ export default function TrackingPage() {
                               )}
                               {isPickup && (
                                 <p className="flex items-center gap-1.5 text-emerald-800 font-semibold">
-                                  <Store size={14} /> Retiro en Local Catriel (San Martín 374)
+                                  <Store size={14} /> Retiro en Local Catriel ({settings.addressLine})
                                 </p>
                               )}
                               {order.comment && (

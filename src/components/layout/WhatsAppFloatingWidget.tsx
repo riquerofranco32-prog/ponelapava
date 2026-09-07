@@ -29,7 +29,7 @@ const QUICK_OPTIONS: QuickOption[] = [
     id: "local",
     icon: MapPin,
     title: "Consultar local Catriel",
-    desc: "Stock disponible en San Martín 245 y horarios",
+    desc: "Stock disponible en el local y horarios de atención",
     message: "¡Hola! 👋 Quería consultar stock disponible para retirar hoy en el local de Catriel.",
   },
   {

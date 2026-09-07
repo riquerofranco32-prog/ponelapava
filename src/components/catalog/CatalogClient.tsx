@@ -422,7 +422,7 @@ export default function CatalogClient({
               className={`text-[11px] px-1.5 py-0.5 rounded-full ${
                 activeCategory === slug
                   ? "bg-pava-cream/20 text-pava-cream"
-                  : "bg-pava-cream-dark text-pava-brown/60"
+                  : "bg-pava-cream-dark text-pava-brown/80"
               }`}
             >
               {count}

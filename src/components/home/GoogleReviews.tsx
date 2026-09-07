@@ -82,7 +82,7 @@ function ReviewCard({ name, meta, time, text }: WrittenReview) {
             <div className="truncate text-sm font-bold text-pava-brown">
               {name}
             </div>
-            <div className="truncate text-[11px] text-pava-brown-mid/60">
+            <div className="truncate text-[11px] text-pava-brown-mid/70">
               {meta} · {time}
             </div>
           </div>
@@ -117,7 +117,7 @@ function ReviewChip({ name, time }: RatingOnlyReview) {
           <Stars size={11} />
         </div>
       </div>
-      <span className="shrink-0 text-[10px] text-pava-brown-mid/50 font-medium">
+      <span className="shrink-0 text-[10px] text-pava-brown-mid/70 font-medium">
         {time}
       </span>
     </div>

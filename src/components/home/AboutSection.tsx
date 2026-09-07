@@ -27,7 +27,10 @@ export default function AboutSection() {
             </div>
 
             {/* Floating card */}
-            <div className="absolute bottom-4 right-3 translate-x-0 border border-pava-cream/30 bg-pava-brown/90 px-4 py-3 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:right-0 sm:translate-x-6 sm:px-5 sm:py-4 lg:translate-x-8">
+            {/* Superficie sólida a propósito: con /90 la foto se filtraba y el
+                dorado de "Desde Argentina" quedaba en 3,84:1; sobre el verde
+                sólido da 4,94:1 (AA). */}
+            <div className="absolute bottom-4 right-3 translate-x-0 border border-pava-cream/30 bg-pava-brown px-4 py-3 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:right-0 sm:translate-x-6 sm:px-5 sm:py-4 lg:translate-x-8">
               <span className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-gold">
                 Desde Argentina
               </span>

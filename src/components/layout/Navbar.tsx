@@ -117,7 +117,7 @@ export default function Navbar() {
                   className={cn(
                     "mt-0.5 text-[8.5px] font-semibold uppercase tracking-[0.24em] transition-colors duration-300",
                     isScrolled
-                      ? "text-pava-brown-mid/70"
+                      ? "text-pava-brown-mid/75"
                       : "text-pava-cream/65",
                   )}
                 >
@@ -312,7 +312,7 @@ export default function Navbar() {
                 <span className="font-display text-base font-bold text-pava-green block leading-tight">
                   Poné La Pava
                 </span>
-                <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-pava-brown-mid/60">
+                <span className="text-[8.5px] font-semibold uppercase tracking-[0.2em] text-pava-brown-mid/75">
                   Yerbas &amp; Accesorios
                 </span>
               </div>

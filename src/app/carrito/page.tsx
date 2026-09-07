@@ -319,7 +319,7 @@ export default function CartPage() {
               </div>
             </div>
           )}
-          <p className="text-pava-brown-mid/70 mb-8">
+          <p className="text-pava-brown-mid/75 mb-8">
             Explorá nuestro catálogo y encontrá lo que estás buscando.
           </p>
           <Link

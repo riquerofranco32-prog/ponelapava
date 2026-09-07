@@ -157,7 +157,7 @@ export default function HowToBuy() {
                         <Icon size={22} strokeWidth={2.2} />
                       </span>
 
-                      <span className="font-display text-4xl font-extrabold tracking-tighter text-white/20 transition-colors duration-300 group-hover:text-pava-gold/60">
+                      <span className="font-display text-4xl font-extrabold tracking-tighter text-white/40 transition-colors duration-300 group-hover:text-pava-gold/60">
                         {step.number}
                       </span>
                     </div>

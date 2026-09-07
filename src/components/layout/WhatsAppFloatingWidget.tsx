@@ -81,7 +81,7 @@ export default function WhatsAppFloatingWidget({
           role="dialog"
           aria-modal="true"
           aria-label="Atención por WhatsApp"
-          className="mb-3 w-[calc(100vw-2.5rem)] max-w-sm rounded-2xl bg-white shadow-2xl border border-pava-brown/15 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-3"
+          className="mb-3 w-[calc(100vw-2.5rem)] max-w-sm rounded-card bg-white shadow-2xl border border-pava-brown/15 overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-3"
         >
           {/* Popover Header */}
           <div className="bg-[#26402e] text-pava-cream p-4 flex items-center justify-between">
@@ -125,7 +125,7 @@ export default function WhatsAppFloatingWidget({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-pava-cream/80 border border-transparent hover:border-pava-brown/15 transition-all text-left group"
+                  className="flex items-start gap-3 p-2.5 rounded-control hover:bg-pava-cream/80 border border-transparent hover:border-pava-brown/15 transition-all text-left group"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pava-green/10 text-pava-green group-hover:bg-pava-green group-hover:text-white transition-colors mt-0.5">
                     <Icon size={16} />
@@ -154,7 +154,7 @@ export default function WhatsAppFloatingWidget({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsOpen(false)}
-              className="inline-flex items-center justify-center gap-2 w-full py-2 px-4 rounded-xl bg-whatsapp hover:bg-[#20ba57] text-white text-xs font-bold shadow-md transition-transform active:scale-95"
+              className="inline-flex items-center justify-center gap-2 w-full py-2 px-4 rounded-control bg-whatsapp hover:bg-[#20ba57] text-white text-xs font-bold shadow-md transition-transform active:scale-95"
             >
               <MessageCircle size={15} />
               Abrir chat directo

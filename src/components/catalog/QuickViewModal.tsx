@@ -83,7 +83,7 @@ export default function QuickViewModal({
         role="dialog"
         aria-modal="true"
         aria-label={product.name}
-        className="grid max-h-[90vh] w-full max-w-3xl grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-2xl border border-pava-brown/10 sm:grid-cols-2"
+        className="grid max-h-[90vh] w-full max-w-3xl grid-cols-1 overflow-hidden rounded-card bg-white shadow-2xl border border-pava-brown/10 sm:grid-cols-2"
       >
         <div className="relative aspect-square shrink-0 bg-pava-cream-dark sm:aspect-auto">
           <Image
@@ -145,7 +145,7 @@ export default function QuickViewModal({
 
           {/* Category-Specific Visual Specs */}
           {product.category === "yerbas" && (
-            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+            <div className="mb-4 rounded-control bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-pava-brown font-bold">🌿 Intensidad & Sabor</span>
                 <span className="text-pava-green font-bold">●●●●○ (Media-Intensa)</span>
@@ -155,7 +155,7 @@ export default function QuickViewModal({
           )}
 
           {product.category === "termos" && (
-            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+            <div className="mb-4 rounded-control bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-pava-brown font-bold">🔥 Rendimiento Térmico</span>
                 <span className="text-pava-gold-deep font-bold">+24hs Caliente | +36hs Frío</span>
@@ -165,7 +165,7 @@ export default function QuickViewModal({
           )}
 
           {product.category === "mates" && (
-            <div className="mb-4 rounded-xl bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
+            <div className="mb-4 rounded-control bg-pava-cream-dark/60 p-3 border border-pava-brown/10 text-xs">
               <div className="flex justify-between font-semibold mb-1">
                 <span className="text-pava-brown font-bold">🧉 Ficha Artesanal</span>
                 <span className="text-pava-green font-bold">Calabaza & Alpaca</span>

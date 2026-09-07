@@ -274,7 +274,7 @@ export default function ProductDetail({
             </div>
 
             {/* Category Contextual Specifications & Craft Radar */}
-            <div className="mb-8 rounded-2xl bg-pava-cream-dark/60 border border-pava-brown/12 p-5 shadow-xs">
+            <div className="mb-8 rounded-card bg-pava-cream-dark/60 border border-pava-brown/12 p-5 shadow-xs">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2 font-display text-sm font-bold text-pava-brown">
                   <span className="text-lg">
@@ -311,7 +311,7 @@ export default function ProductDetail({
               {product.category === "yerbas" && (
                 <div className="space-y-3 pt-2">
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10">
+                    <div className="bg-white/80 rounded-control p-3 border border-pava-brown/10">
                       <div className="flex justify-between font-semibold mb-1">
                         <span className="text-pava-brown">Intensidad</span>
                         <span className="text-pava-green font-bold">Media / Intensa</span>
@@ -327,7 +327,7 @@ export default function ProductDetail({
                         ))}
                       </div>
                     </div>
-                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10">
+                    <div className="bg-white/80 rounded-control p-3 border border-pava-brown/10">
                       <div className="flex justify-between font-semibold mb-1">
                         <span className="text-pava-brown">Rendimiento</span>
                         <span className="text-pava-green font-bold">+1.5L de agua</span>
@@ -354,14 +354,14 @@ export default function ProductDetail({
               {product.category === "termos" && (
                 <div className="space-y-3 pt-2">
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10 flex items-center gap-3">
+                    <div className="bg-white/80 rounded-control p-3 border border-pava-brown/10 flex items-center gap-3">
                       <span className="text-2xl">🔥</span>
                       <div>
                         <span className="text-[10px] uppercase font-bold text-pava-gold-deep block">Agua Caliente</span>
                         <span className="text-sm font-bold text-pava-brown">+24 Horas</span>
                       </div>
                     </div>
-                    <div className="bg-white/80 rounded-xl p-3 border border-pava-brown/10 flex items-center gap-3">
+                    <div className="bg-white/80 rounded-control p-3 border border-pava-brown/10 flex items-center gap-3">
                       <span className="text-2xl">❄️</span>
                       <div>
                         <span className="text-[10px] uppercase font-bold text-sky-700 block">Agua Fría / Hielo</span>

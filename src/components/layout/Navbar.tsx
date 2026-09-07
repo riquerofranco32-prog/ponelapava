@@ -333,7 +333,7 @@ export default function Navbar() {
                 setIsMobileOpen(false);
                 setIsSearchOpen(true);
               }}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-pava-cream-dark border border-pava-brown/10 text-pava-brown/70 text-xs font-medium hover:text-pava-green transition-all"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-control bg-pava-cream-dark border border-pava-brown/10 text-pava-brown/70 text-xs font-medium hover:text-pava-green transition-all"
             >
               <span className="flex items-center gap-2">
                 <Search size={15} className="text-pava-green" />
@@ -355,7 +355,7 @@ export default function Navbar() {
                 key={label}
                 href={href}
                 onClick={() => setIsMobileOpen(false)}
-                className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold text-pava-brown hover:bg-pava-green/10 hover:text-pava-green transition-all"
+                className="flex items-center justify-between px-3 py-2.5 rounded-control text-sm font-semibold text-pava-brown hover:bg-pava-green/10 hover:text-pava-green transition-all"
               >
                 <span>{label}</span>
                 {badge ? (
@@ -391,7 +391,7 @@ export default function Navbar() {
             <Link
               href="/catalogo"
               onClick={() => setIsMobileOpen(false)}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-pava-green py-3 text-xs font-bold uppercase tracking-wider text-pava-cream shadow-sm hover:bg-pava-green-light transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-control bg-pava-green py-3 text-xs font-bold uppercase tracking-wider text-pava-cream shadow-sm hover:bg-pava-green-light transition-colors"
             >
               <ShoppingBag size={15} />
               <span>Ver Catálogo Completo</span>
@@ -400,7 +400,7 @@ export default function Navbar() {
               href={whatsappChatUrl(settings.whatsappNumber)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-whatsapp/30 bg-whatsapp/10 py-2.5 text-xs font-bold text-whatsapp hover:bg-whatsapp hover:text-white transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-control border border-whatsapp/30 bg-whatsapp/10 py-2.5 text-xs font-bold text-whatsapp hover:bg-whatsapp hover:text-white transition-colors"
             >
               Escribinos por WhatsApp
             </a>

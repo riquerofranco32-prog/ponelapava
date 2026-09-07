@@ -33,7 +33,7 @@ export default function CategoryCard({
       href={`/catalogo?cat=${cat.slug}`}
       aria-label={`Ver categoría ${cat.name}`}
       onMouseMove={trackSpotlight}
-      className={`img-hover-zoom group relative block overflow-hidden rounded-2xl bg-pava-brown border border-pava-brown/20 transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:border-pava-gold/40 ${aspect}`}
+      className={`img-hover-zoom group relative block overflow-hidden rounded-card bg-pava-brown border border-pava-brown/20 transition-all duration-300 hover:shadow-xl hover:shadow-black/20 hover:border-pava-gold/40 ${aspect}`}
     >
       {cat.image && (
         <Image

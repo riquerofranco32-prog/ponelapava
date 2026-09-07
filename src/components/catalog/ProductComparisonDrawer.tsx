@@ -28,7 +28,7 @@ export default function ProductComparisonDrawer() {
       />
 
       {/* Modal Box */}
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-pava-brown/15 bg-pava-cream shadow-2xl p-5 sm:p-8 animate-scale-in">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-t-card sm:rounded-card border border-pava-brown/15 bg-pava-cream shadow-2xl p-5 sm:p-8 animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-pava-brown/10 mb-6">
           <div className="flex items-center gap-2.5">
@@ -71,7 +71,7 @@ export default function ProductComparisonDrawer() {
             return (
               <div
                 key={product.id}
-                className="flex flex-col justify-between rounded-2xl border border-pava-brown/12 bg-white p-4 shadow-sm relative group"
+                className="flex flex-col justify-between rounded-card border border-pava-brown/12 bg-white p-4 shadow-sm relative group"
               >
                 {/* Remove button */}
                 <button
@@ -88,7 +88,7 @@ export default function ProductComparisonDrawer() {
                   <Link
                     href={`/producto/${product.id}`}
                     onClick={() => setIsOpen(false)}
-                    className="relative block h-36 w-full rounded-xl overflow-hidden bg-pava-cream/60 border border-pava-brown/10 mb-3"
+                    className="relative block h-36 w-full rounded-control overflow-hidden bg-pava-cream/60 border border-pava-brown/10 mb-3"
                   >
                     <Image
                       src={product.images[0]}

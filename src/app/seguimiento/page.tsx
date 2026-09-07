@@ -82,7 +82,7 @@ export default function TrackingPage() {
 
       <div className="mx-auto max-w-4xl px-5 sm:px-8 py-10 lg:py-16">
         {/* Search Card */}
-        <div className="rounded-3xl border border-pava-brown/12 bg-white p-6 sm:p-8 shadow-sm backdrop-blur-sm">
+        <div className="rounded-card border border-pava-brown/12 bg-white p-6 sm:p-8 shadow-sm backdrop-blur-sm">
           <h2 className="font-display text-lg sm:text-xl font-bold text-pava-brown mb-2">
             Ingresá tus datos de pedido
           </h2>
@@ -102,14 +102,14 @@ export default function TrackingPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ej: #a1b2c3d4 o 2991234567"
                 required
-                className="w-full rounded-2xl border border-pava-brown/20 bg-pava-cream/30 pl-11 pr-4 py-3.5 text-sm text-pava-brown placeholder:text-pava-brown/40 focus:border-pava-green focus:bg-white focus:outline-none transition-all"
+                className="w-full rounded-control border border-pava-brown/20 bg-pava-cream/30 pl-11 pr-4 py-3.5 text-sm text-pava-brown placeholder:text-pava-brown/40 focus:border-pava-green focus:bg-white focus:outline-none transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-pava-green px-8 py-3.5 text-sm font-bold text-pava-cream hover:bg-pava-green-light transition-all disabled:opacity-50 shadow-md active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 rounded-control bg-pava-green px-8 py-3.5 text-sm font-bold text-pava-cream hover:bg-pava-green-light transition-all disabled:opacity-50 shadow-md active:scale-[0.98]"
             >
               {loading ? (
                 <span className="animate-spin text-base">⏳</span>
@@ -121,7 +121,7 @@ export default function TrackingPage() {
           </form>
 
           {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-red-50 border border-red-200 p-3.5 text-xs text-red-800">
+            <div className="mt-4 flex items-center gap-2 rounded-control bg-red-50 border border-red-200 p-3.5 text-xs text-red-800">
               <AlertCircle size={16} className="shrink-0 text-red-600" />
               <span>{error}</span>
             </div>
@@ -132,7 +132,7 @@ export default function TrackingPage() {
         {orders !== null && (
           <div className="mt-8 space-y-8">
             {orders.length === 0 ? (
-              <div className="rounded-3xl border border-pava-brown/10 bg-white/80 p-10 text-center">
+              <div className="rounded-card border border-pava-brown/10 bg-white/80 p-10 text-center">
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-pava-brown/5 text-pava-brown/30 mx-auto mb-4">
                   <Package size={32} />
                 </span>
@@ -165,7 +165,7 @@ export default function TrackingPage() {
                 return (
                   <div
                     key={order.id}
-                    className="rounded-3xl border border-pava-brown/12 bg-white overflow-hidden shadow-sm"
+                    className="rounded-card border border-pava-brown/12 bg-white overflow-hidden shadow-sm"
                   >
                     {/* Order Header */}
                     <div className="border-b border-pava-brown/10 bg-pava-cream/50 px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -207,7 +207,7 @@ export default function TrackingPage() {
                       </h4>
 
                       {isCancelled ? (
-                        <div className="rounded-2xl bg-red-50 p-4 border border-red-200 text-xs text-red-800">
+                        <div className="rounded-control bg-red-50 p-4 border border-red-200 text-xs text-red-800">
                           Este pedido fue cancelado. Por favor escribinos por WhatsApp si tenés alguna duda sobre el reintegro.
                         </div>
                       ) : (
@@ -289,7 +289,7 @@ export default function TrackingPage() {
                         </div>
 
                         {/* Shipping info & WhatsApp */}
-                        <div className="flex flex-col justify-between rounded-2xl bg-pava-cream/40 p-4 border border-pava-brown/10">
+                        <div className="flex flex-col justify-between rounded-card bg-pava-cream/40 p-4 border border-pava-brown/10">
                           <div>
                             <h5 className="font-display text-xs font-bold text-pava-brown uppercase tracking-wider mb-2">
                               Modalidad de Entrega
@@ -339,17 +339,17 @@ export default function TrackingPage() {
 
         {/* Guarantees bar */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <div className="rounded-2xl border border-pava-brown/10 bg-white/60 p-4">
+          <div className="rounded-card border border-pava-brown/10 bg-white/60 p-4">
             <ShieldCheck size={20} className="text-pava-green mx-auto mb-2" />
             <h4 className="font-display text-xs font-bold text-pava-brown">Garantía Poné La Pava</h4>
             <p className="text-[11px] text-pava-brown-mid/70 mt-0.5">Calidad artesanal y soporte directo</p>
           </div>
-          <div className="rounded-2xl border border-pava-brown/10 bg-white/60 p-4">
+          <div className="rounded-card border border-pava-brown/10 bg-white/60 p-4">
             <Truck size={20} className="text-pava-green mx-auto mb-2" />
             <h4 className="font-display text-xs font-bold text-pava-brown">Envíos Cuidados</h4>
             <p className="text-[11px] text-pava-brown-mid/70 mt-0.5">Embalaje reforzado anti-golpes</p>
           </div>
-          <div className="rounded-2xl border border-pava-brown/10 bg-white/60 p-4">
+          <div className="rounded-card border border-pava-brown/10 bg-white/60 p-4">
             <MessageCircle size={20} className="text-pava-green mx-auto mb-2" />
             <h4 className="font-display text-xs font-bold text-pava-brown">Atención Personalizada</h4>
             <p className="text-[11px] text-pava-brown-mid/70 mt-0.5">Te asesoramos paso a paso por WhatsApp</p>

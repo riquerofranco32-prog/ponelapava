@@ -163,7 +163,7 @@ export default function StoreSearchModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-pava-cream rounded-2xl shadow-2xl border border-pava-brown/15 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-2xl bg-pava-cream rounded-card shadow-2xl border border-pava-brown/15 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header Input */}
@@ -190,7 +190,7 @@ export default function StoreSearchModal({
           )}
           <button
             onClick={onClose}
-            className="text-xs font-semibold px-2 py-1 bg-pava-brown/5 hover:bg-pava-brown/10 text-pava-brown/70 rounded-md transition-colors shrink-0"
+            className="text-xs font-semibold px-2 py-1 bg-pava-brown/5 hover:bg-pava-brown/10 text-pava-brown/70 rounded-chip transition-colors shrink-0"
           >
             ESC
           </button>
@@ -239,7 +239,7 @@ export default function StoreSearchModal({
                 key={product.id}
                 onClick={() => handleSelectProduct(product)}
                 onMouseEnter={() => setSelectedIndex(idx)}
-                className={`py-3 px-3 rounded-xl flex items-center gap-4 cursor-pointer transition-all ${
+                className={`py-3 px-3 rounded-control flex items-center gap-4 cursor-pointer transition-all ${
                   isSelected
                     ? "bg-pava-green/8 shadow-sm"
                     : "hover:bg-pava-brown/5"

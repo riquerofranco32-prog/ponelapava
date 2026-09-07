@@ -538,7 +538,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setDeliveryMethod("pickup")}
-                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
                       deliveryMethod === "pickup"
                         ? "border-pava-green bg-pava-green/8 shadow-sm"
                         : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
@@ -554,7 +554,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setDeliveryMethod("delivery")}
-                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
                       deliveryMethod === "delivery"
                         ? "border-pava-green bg-pava-green/8 shadow-sm"
                         : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
@@ -572,7 +572,7 @@ export default function CartPage() {
 
                 {/* Delivery Address fields */}
                 {deliveryMethod === "delivery" && (
-                  <div className="mt-3 space-y-2 p-3 rounded-xl bg-pava-cream-dark/60 border border-pava-brown/10 animate-in fade-in duration-200">
+                  <div className="mt-3 space-y-2 p-3 rounded-control bg-pava-cream-dark/60 border border-pava-brown/10 animate-in fade-in duration-200">
                     <div>
                       <label className="block text-[11px] font-semibold text-pava-brown/70 mb-1">
                         Dirección de Entrega *
@@ -607,7 +607,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("transfer")}
-                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
                       paymentMethod === "transfer"
                         ? "border-emerald-600 bg-emerald-50 shadow-sm ring-1 ring-emerald-600"
                         : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
@@ -623,7 +623,7 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod(deliveryMethod === "pickup" ? "cash" : "card")}
-                    className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
+                    className={`flex flex-col items-start p-3 rounded-control border text-left transition-all ${
                       paymentMethod === "card" || paymentMethod === "cash"
                         ? "border-pava-green bg-pava-green/8 shadow-sm"
                         : "border-pava-brown/15 hover:border-pava-brown/30 bg-pava-cream/40"
@@ -646,7 +646,7 @@ export default function CartPage() {
                   ¿Tenés un cupón de descuento?
                 </label>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs">
+                  <div className="flex items-center justify-between p-2.5 rounded-control bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs">
                     <div className="flex items-center gap-1.5">
                       <Tag size={13} className="text-emerald-600" />
                       <span className="font-bold tracking-wider">{appliedCoupon.code}</span>

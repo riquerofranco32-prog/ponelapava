@@ -56,7 +56,7 @@ export default function GiftMessageModal({ onSave }: GiftMessageModalProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-pava-gold/30 bg-pava-gold/10 p-4 transition-all">
+    <div className="rounded-card border border-pava-gold/30 bg-pava-gold/10 p-4 transition-all">
       {/* Main Switch Bar */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -118,7 +118,7 @@ export default function GiftMessageModal({ onSave }: GiftMessageModalProps) {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="relative w-full max-w-lg rounded-3xl border border-pava-brown/15 bg-pava-cream p-6 sm:p-8 shadow-2xl animate-scale-in">
+          <div className="relative w-full max-w-lg rounded-card border border-pava-brown/15 bg-pava-cream p-6 sm:p-8 shadow-2xl animate-scale-in">
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Cerrar tarjeta de regalo"
@@ -186,7 +186,7 @@ export default function GiftMessageModal({ onSave }: GiftMessageModalProps) {
             </div>
 
             {/* Realistic Kraft Card Live Preview */}
-            <div className="relative rounded-2xl border-2 border-amber-800/20 bg-[#f4ebd9] p-5 shadow-inner mb-6 text-center">
+            <div className="relative rounded-card border-2 border-amber-800/20 bg-[#f4ebd9] p-5 shadow-inner mb-6 text-center">
               <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-amber-900/60 mb-2">
                 <span>Poné La Pava • Catriel</span>
                 <span>⚜️ Regalo Especial</span>

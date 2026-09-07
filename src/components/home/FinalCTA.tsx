@@ -76,7 +76,7 @@ export default function FinalCTA() {
 
           {/* Exclusive Promo Card Right */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-2xl border border-pava-gold/40 bg-pava-green-dark/80 p-6 sm:p-8 backdrop-blur-xl shadow-2xl overflow-hidden">
+            <div className="relative rounded-card border border-pava-gold/40 bg-pava-green-dark/80 p-6 sm:p-8 backdrop-blur-xl shadow-2xl overflow-hidden">
               <BorderBeam
                 size={280}
                 duration={10}
@@ -104,7 +104,7 @@ export default function FinalCTA() {
               </p>
 
               {/* Coupon Box */}
-              <div className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-dashed border-pava-gold/50 bg-black/30 p-3.5">
+              <div className="mt-5 flex items-center justify-between gap-3 rounded-control border border-dashed border-pava-gold/50 bg-black/30 p-3.5">
                 <div className="font-mono text-sm sm:text-base font-bold tracking-widest text-pava-gold">
                   TRANSFERENCIA10
                 </div>

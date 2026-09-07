@@ -119,7 +119,7 @@ export default function LaserEngravingPreview({ onEngravingChange }: LaserEngrav
             <span className="text-[10px] font-bold uppercase tracking-wider text-pava-brown-mid/70 block mb-1.5">
               Previsualización sobre la virola metálica:
             </span>
-            <div className="relative h-14 w-full rounded-xl overflow-hidden border border-slate-400/50 bg-gradient-to-r from-slate-300 via-slate-100 to-slate-300 shadow-inner flex items-center justify-center px-4">
+            <div className="relative h-14 w-full rounded-control overflow-hidden border border-slate-400/50 bg-gradient-to-r from-slate-300 via-slate-100 to-slate-300 shadow-inner flex items-center justify-center px-4">
               {/* Metallic shine reflection */}
               <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-black/15 pointer-events-none" />
 

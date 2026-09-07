@@ -148,7 +148,7 @@ export default function FAQSection() {
                 key={faq.question}
                 direction="up"
                 delay={index * 40}
-                className="overflow-hidden rounded-2xl border border-pava-brown/10 bg-white shadow-xs transition-all duration-200"
+                className="overflow-hidden rounded-card border border-pava-brown/10 bg-white shadow-xs transition-all duration-200"
               >
                 <button
                   type="button"
@@ -184,7 +184,7 @@ export default function FAQSection() {
         <ScrollReveal
           direction="up"
           delay={200}
-          className="mt-12 rounded-2xl border border-pava-green/20 bg-pava-green/5 p-6 text-center sm:p-8 backdrop-blur-xs"
+          className="mt-12 rounded-card border border-pava-green/20 bg-pava-green/5 p-6 text-center sm:p-8 backdrop-blur-xs"
         >
           <h3 className="font-display text-xl font-bold text-pava-brown mb-2">
             ¿Tenés alguna consulta específica?

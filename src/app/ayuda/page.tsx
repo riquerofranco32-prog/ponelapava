@@ -171,7 +171,7 @@ export default function HelpCenterPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscá tu duda: ej: 'curar mate', 'cuánto demora el envío', 'transferencia'..."
-            className="w-full rounded-2xl border border-pava-brown/15 bg-white pl-12 pr-4 py-4 text-sm text-pava-brown placeholder:text-pava-brown/40 shadow-sm focus:border-pava-green focus:outline-none transition-all"
+            className="w-full rounded-control border border-pava-brown/15 bg-white pl-12 pr-4 py-4 text-sm text-pava-brown placeholder:text-pava-brown/40 shadow-sm focus:border-pava-green focus:outline-none transition-all"
           />
           {search && (
             <button
@@ -193,7 +193,7 @@ export default function HelpCenterPage() {
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${
+                className={`flex items-center gap-2 rounded-control px-4 py-2.5 text-xs font-bold transition-all ${
                   isActive
                     ? "bg-pava-green text-pava-cream shadow-md"
                     : "border border-pava-brown/12 bg-white text-pava-brown hover:border-pava-brown/25"
@@ -209,7 +209,7 @@ export default function HelpCenterPage() {
         {/* FAQ Accordion List */}
         <div className="space-y-3.5 mb-16">
           {filteredFaqs.length === 0 ? (
-            <div className="rounded-3xl border border-pava-brown/10 bg-white/70 p-10 text-center">
+            <div className="rounded-card border border-pava-brown/10 bg-white/70 p-10 text-center">
               <p className="text-sm font-semibold text-pava-brown">
                 No encontramos preguntas que coincidan con &quot;{search}&quot;
               </p>
@@ -236,7 +236,7 @@ export default function HelpCenterPage() {
               return (
                 <div
                   key={faq.id}
-                  className="rounded-2xl border border-pava-brown/10 bg-white overflow-hidden shadow-xs transition-all"
+                  className="rounded-card border border-pava-brown/10 bg-white overflow-hidden shadow-xs transition-all"
                 >
                   <button
                     onClick={() => toggleAccordion(faq.id)}
@@ -266,7 +266,7 @@ export default function HelpCenterPage() {
         </div>
 
         {/* Contact WhatsApp Cards Banner */}
-        <div className="rounded-3xl border border-pava-brown/12 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="rounded-card border border-pava-brown/12 bg-white p-6 sm:p-8 shadow-sm">
           <div className="text-center max-w-xl mx-auto mb-8">
             <span className="text-[10px] font-bold uppercase tracking-widest text-pava-green block mb-1">
               Atención Directa
@@ -287,7 +287,7 @@ export default function HelpCenterPage() {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col justify-between rounded-2xl border border-pava-brown/10 bg-pava-cream/40 p-4.5 hover:border-pava-green/30 hover:bg-pava-cream transition-all group"
+              className="flex flex-col justify-between rounded-card border border-pava-brown/10 bg-pava-cream/40 p-4.5 hover:border-pava-green/30 hover:bg-pava-cream transition-all group"
             >
               <div>
                 <MessageCircle size={18} className="text-whatsapp mb-2 group-hover:scale-110 transition-transform" />
@@ -306,7 +306,7 @@ export default function HelpCenterPage() {
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col justify-between rounded-2xl border border-pava-brown/10 bg-pava-cream/40 p-4.5 hover:border-pava-green/30 hover:bg-pava-cream transition-all group"
+              className="flex flex-col justify-between rounded-card border border-pava-brown/10 bg-pava-cream/40 p-4.5 hover:border-pava-green/30 hover:bg-pava-cream transition-all group"
             >
               <div>
                 <PackageCheck size={18} className="text-pava-gold mb-2 group-hover:scale-110 transition-transform" />
@@ -318,7 +318,7 @@ export default function HelpCenterPage() {
               </span>
             </a>
 
-            <div className="flex flex-col justify-between rounded-2xl border border-pava-brown/10 bg-pava-cream/40 p-4.5">
+            <div className="flex flex-col justify-between rounded-card border border-pava-brown/10 bg-pava-cream/40 p-4.5">
               <div>
                 <MapPin size={18} className="text-pava-terracotta mb-2" />
                 <h4 className="font-display text-xs font-bold text-pava-brown">Local en Catriel</h4>

@@ -102,7 +102,7 @@ export default function HowToBuy() {
           </div>
 
           {/* Quick trust metrics */}
-          <div className="hidden lg:flex items-center gap-6 bg-white/5 border border-white/10 px-5 py-3 rounded-2xl backdrop-blur-md">
+          <div className="hidden lg:flex items-center gap-6 bg-white/5 border border-white/10 px-5 py-3 rounded-control backdrop-blur-md">
             <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">
               <CreditCard size={16} className="text-pava-gold" />
               <span>3 Cuotas sin interés</span>
@@ -131,7 +131,7 @@ export default function HowToBuy() {
                 <div
                   onMouseEnter={() => setHoveredStep(idx)}
                   onMouseLeave={() => setHoveredStep(null)}
-                  className={`group relative flex h-full flex-col justify-between rounded-2xl border p-6 sm:p-7 backdrop-blur-xl transition-all duration-400 overflow-hidden cursor-pointer ${
+                  className={`group relative flex h-full flex-col justify-between rounded-card border p-6 sm:p-7 backdrop-blur-xl transition-all duration-400 overflow-hidden cursor-pointer ${
                     isHovered
                       ? "bg-white/10 border-pava-gold shadow-2xl shadow-pava-gold/15 -translate-y-2 scale-[1.02]"
                       : "bg-[#14261a]/80 border-white/12 hover:border-white/25 shadow-lg"
@@ -152,7 +152,7 @@ export default function HowToBuy() {
                     {/* Top row: Step Number + Icon Badge */}
                     <div className="flex items-center justify-between mb-5">
                       <span
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${step.pillColor} text-pava-brown shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
+                        className={`flex h-12 w-12 items-center justify-center rounded-control bg-gradient-to-br ${step.pillColor} text-pava-brown shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
                       >
                         <Icon size={22} strokeWidth={2.2} />
                       </span>
@@ -197,7 +197,7 @@ export default function HowToBuy() {
         <ScrollReveal
           direction="up"
           delay={250}
-          className="mt-14 lg:mt-18 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-2xl border border-white/12 bg-white/5 p-6 sm:p-8 backdrop-blur-xl"
+          className="mt-14 lg:mt-18 flex flex-col sm:flex-row items-center justify-between gap-6 rounded-card border border-white/12 bg-white/5 p-6 sm:p-8 backdrop-blur-xl"
         >
           <div className="text-center sm:text-left">
             <span className="text-xs font-bold text-pava-gold uppercase tracking-wider block mb-1">

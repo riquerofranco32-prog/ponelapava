@@ -178,7 +178,7 @@ export default function ComboPacksSection() {
             return (
               <div
                 key={pack.id}
-                className="group relative flex flex-col justify-between rounded-2xl bg-white border border-pava-brown/12 p-6 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(38,64,46,0.18)] hover:border-pava-green/40 transition-all duration-300 overflow-hidden"
+                className="group relative flex flex-col justify-between rounded-card bg-white border border-pava-brown/12 p-6 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(38,64,46,0.18)] hover:border-pava-green/40 transition-all duration-300 overflow-hidden"
               >
                 {isTopSeller && (
                   <BorderBeam
@@ -193,7 +193,7 @@ export default function ComboPacksSection() {
                 {/* Badge */}
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold tracking-wide ${pack.badgeColor}`}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-control text-[11px] font-bold tracking-wide ${pack.badgeColor}`}
                   >
                     {pack.badge}
                   </span>
@@ -203,7 +203,7 @@ export default function ComboPacksSection() {
                 </div>
 
                 {/* Product Image */}
-                <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-pava-cream/50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                <div className="relative w-full h-48 mb-4 rounded-control overflow-hidden bg-pava-cream/50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                   <Image
                     src={pack.image}
                     alt={pack.name}
@@ -257,7 +257,7 @@ export default function ComboPacksSection() {
                     <button
                       type="button"
                       onClick={() => handleAddCombo(pack)}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-pava-green hover:bg-pava-green-light text-pava-cream font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 cursor-pointer"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-control bg-pava-green hover:bg-pava-green-light text-pava-cream font-bold text-xs shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 cursor-pointer"
                     >
                       <ShoppingBag size={15} />
                       <span>{addedId === pack.id ? "¡Agregado al Carrito!" : "Agregar Combo al Carrito"}</span>

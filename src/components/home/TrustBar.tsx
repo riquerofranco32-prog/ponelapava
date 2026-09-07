@@ -50,7 +50,7 @@ const items: TrustItemData[] = [
 function TrustItem({ icon: Icon, title, subtitle, badge }: TrustItemData) {
   return (
     <div className="flex shrink-0 items-center gap-3.5 px-6 py-2 transition-all duration-300 group cursor-default">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-pava-gold/40 bg-pava-gold/15 text-pava-gold shadow-md shadow-pava-gold/5 transition-transform duration-300 group-hover:scale-105 group-hover:bg-pava-gold group-hover:text-pava-brown">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-pava-gold/40 bg-pava-gold/15 text-pava-gold shadow-md shadow-pava-gold/5 transition-transform duration-300 group-hover:scale-105 group-hover:bg-pava-gold group-hover:text-pava-brown">
         <Icon size={20} strokeWidth={2} aria-hidden="true" />
       </div>
       <div>

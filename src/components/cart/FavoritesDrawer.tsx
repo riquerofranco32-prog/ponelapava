@@ -162,13 +162,13 @@ export default function FavoritesDrawer({
               return (
                 <div
                   key={product.id}
-                  className="flex items-center gap-3 rounded-2xl border border-pava-brown/10 bg-white p-3 shadow-sm transition-all hover:border-pava-brown/20"
+                  className="flex items-center gap-3 rounded-card border border-pava-brown/10 bg-white p-3 shadow-sm transition-all hover:border-pava-brown/20"
                 >
                   {/* Thumbnail */}
                   <Link
                     href={`/producto/${product.id}`}
                     onClick={onClose}
-                    className="relative h-18 w-18 shrink-0 overflow-hidden rounded-xl bg-pava-cream/60 border border-pava-brown/10"
+                    className="relative h-18 w-18 shrink-0 overflow-hidden rounded-control bg-pava-cream/60 border border-pava-brown/10"
                   >
                     <Image
                       src={product.images[0]}

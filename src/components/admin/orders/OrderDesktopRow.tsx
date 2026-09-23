@@ -7,12 +7,6 @@ import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import { printOrderRemito } from "@/lib/orderPrint";
 import { OrderStatusSelect } from "./OrderStatusSelect";
 
-const td: React.CSSProperties = {
-  padding: "12px 14px",
-  borderTop: "1px solid var(--dash-border)",
-  verticalAlign: "top",
-};
-
 export function OrderDesktopRow({
   order,
   index,
@@ -35,7 +29,7 @@ export function OrderDesktopRow({
       className="admin-row-in admin-row-hover"
       style={{ "--i": index } as React.CSSProperties}
     >
-      <td style={{ ...td, width: 32 }}>
+      <td className="w-8 p-3.5 border-t border-[var(--dash-border)] align-top">
         <input
           type="checkbox"
           checked={selected}
@@ -43,37 +37,21 @@ export function OrderDesktopRow({
           aria-label={`Seleccionar pedido de ${order.customerName}`}
         />
       </td>
-      <td style={td}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => onView(order)}
-            className="admin-link-btn"
-            style={{
-              padding: 0,
-              background: "none",
-              fontWeight: 500,
-              color: "var(--dash-text)",
-              gap: 6,
-            }}
+            className="admin-link-btn p-0 bg-transparent font-medium text-[var(--dash-text)] gap-1.5 flex items-center hover:underline"
           >
-            <Eye size={13} style={{ opacity: 0.6 }} />
-            {order.customerName}
+            <Eye size={13} className="opacity-60" />
+            <span>{order.customerName}</span>
           </button>
 
           <button
             type="button"
             onClick={() => printOrderRemito(order)}
             title="Imprimir remito de despacho / checklist"
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--dash-muted)",
-              padding: 2,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              borderRadius: 4,
-            }}
+            className="bg-transparent border-none text-[var(--dash-muted)] p-0.5 cursor-pointer inline-flex items-center rounded hover:text-[var(--dash-text)]"
           >
             <Printer size={13} />
           </button>
@@ -89,44 +67,25 @@ export function OrderDesktopRow({
               target="_blank"
               rel="noopener noreferrer"
               title={`Chatear con ${order.customerName} por WhatsApp`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "var(--color-whatsapp, #25d366)",
-                padding: 2,
-                borderRadius: 4,
-                opacity: 0.8,
-                transition: "opacity 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.8")}
+              className="inline-flex items-center justify-center text-[#25d366] p-0.5 rounded opacity-80 hover:opacity-100 transition-opacity"
             >
               <MessageCircle size={14} />
             </a>
           )}
         </div>
         {order.comment && (
-          <span
-            style={{
-              display: "block",
-              fontSize: 12,
-              color: "var(--dash-muted)",
-              marginTop: 2,
-              maxWidth: 220,
-            }}
-          >
+          <span className="block text-xs text-[var(--dash-muted)] mt-0.5 max-w-[220px] truncate">
             {order.comment}
           </span>
         )}
       </td>
-      <td style={{ ...td, color: "var(--dash-muted)", maxWidth: 280 }}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top text-[var(--dash-muted)] max-w-[280px] text-xs">
         {order.items.map((i) => `${i.productName} x${i.quantity}`).join(", ")}
       </td>
-      <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top font-semibold text-[var(--dash-text)] whitespace-nowrap">
         {formatPrice(order.total)}
       </td>
-      <td style={td}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top">
         <button
           type="button"
           onClick={() =>
@@ -142,35 +101,18 @@ export function OrderDesktopRow({
                 : "Cobrado. Clic para cambiar a sin cobrar."
               : "Sin cobrar. Clic para marcar como cobrado."
           }
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            border: "none",
-            borderRadius: 999,
-            padding: "3px 9px",
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: onPaymentStatusChange ? "pointer" : "default",
-            background:
-              order.paymentStatus === "paid"
-                ? "rgba(16, 185, 129, 0.15)"
-                : "rgba(245, 158, 11, 0.15)",
-            color:
-              order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
-          }}
+          className={`inline-flex items-center gap-1 border-none rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+            onPaymentStatusChange ? "cursor-pointer" : "cursor-default"
+          } ${
+            order.paymentStatus === "paid"
+              ? "bg-[var(--dash-success-bg)] text-[var(--dash-success)] border border-[var(--dash-success-border)]"
+              : "bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] border border-[var(--dash-warning-border)]"
+          }`}
         >
-          {order.paymentStatus === "paid" ? "✓ Cobrado" : "⏳ Sin cobrar"}
+          {order.paymentStatus === "paid" ? "Cobrado" : "Sin cobrar"}
         </button>
         {order.paymentStatus === "paid" && order.paidAt && (
-          <span
-            style={{
-              display: "block",
-              fontSize: 10,
-              color: "var(--dash-muted)",
-              marginTop: 2,
-            }}
-          >
+          <span className="block text-xs text-[var(--dash-muted)] mt-1">
             {new Date(order.paidAt).toLocaleDateString("es-AR", {
               day: "2-digit",
               month: "2-digit",
@@ -180,7 +122,7 @@ export function OrderDesktopRow({
           </span>
         )}
       </td>
-      <td style={{ ...td, color: "var(--dash-muted)", whiteSpace: "nowrap" }}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top text-[var(--dash-muted)] text-xs whitespace-nowrap">
         {new Date(order.createdAt).toLocaleDateString("es-AR", {
           day: "2-digit",
           month: "2-digit",
@@ -188,7 +130,7 @@ export function OrderDesktopRow({
           minute: "2-digit",
         })}
       </td>
-      <td style={td}>
+      <td className="p-3.5 border-t border-[var(--dash-border)] align-top">
         <OrderStatusSelect
           status={order.status}
           onChange={(status) => onStatusChange(order.id!, status)}

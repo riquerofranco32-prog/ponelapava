@@ -37,7 +37,7 @@ export function ConfirmDialog({
       onClose={onCancel}
       maxWidth={400}
       footer={
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <div className="flex items-center justify-end gap-2.5">
           <AdminButton
             variant="secondary"
             onClick={onCancel}
@@ -55,17 +55,11 @@ export function ConfirmDialog({
         </div>
       }
     >
-      <p style={{ fontSize: 14, lineHeight: 1.5, color: "var(--dash-text)" }}>
+      <p className="text-sm leading-relaxed text-[var(--dash-text)]">
         {message}
       </p>
       {error && (
-        <p
-          style={{
-            marginTop: 12,
-            fontSize: 13,
-            color: "var(--dash-danger)",
-          }}
-        >
+        <p className="mt-3 text-xs text-[var(--dash-danger)] font-medium">
           {error}
         </p>
       )}

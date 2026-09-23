@@ -75,7 +75,7 @@ export default function AdminShortcutsModal({
           <div key={group.title}>
             <h4
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",

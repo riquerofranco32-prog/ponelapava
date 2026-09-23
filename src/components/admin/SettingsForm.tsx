@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, MapPin, MessageCircle, Store, Calendar, Plus, Trash2, Copy } from "lucide-react";
+import { Clock, MapPin, MessageCircle, Store, Calendar, Plus, Trash2, Copy, CreditCard, Banknote } from "lucide-react";
 import { SiteSettings } from "@/lib/settings";
 import {
   DAY_ORDER,
@@ -118,23 +118,12 @@ export default function SettingsForm() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          maxWidth: 520,
-        }}
-      >
+      <div className="flex flex-col gap-3 max-w-[520px]">
         {[56, 56, 56, 56, 56, 100].map((height, i) => (
           <div
             key={i}
-            className="admin-skeleton-row"
-            style={{
-              height,
-              borderRadius: 8,
-              background: "var(--dash-surface-2)",
-            }}
+            className="admin-skeleton-row rounded-[var(--dash-radius-md)] bg-[var(--dash-surface-2)]"
+            style={{ height }}
           />
         ))}
       </div>
@@ -143,36 +132,17 @@ export default function SettingsForm() {
 
   if (!settings) {
     return (
-      <div
-        style={{
-          background: "var(--dash-danger-bg)",
-          border: "1px solid var(--dash-danger-border)",
-          borderRadius: 8,
-          padding: "12px 16px",
-          fontSize: 14,
-          color: "var(--dash-danger)",
-        }}
-      >
+      <div className="bg-[var(--dash-danger-bg)] border border-[var(--dash-danger-border)] rounded-[var(--dash-radius-md)] p-3 text-sm text-[var(--dash-danger)]">
         {error ?? "No se pudo cargar la configuración"}
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 24 }}>
+    <div className="flex flex-wrap gap-6 items-start">
       <form
         onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: 12,
-          padding: 20,
-          flex: "1 1 420px",
-          maxWidth: 520,
-        }}
+        className="flex flex-col gap-4 bg-[var(--dash-surface)] border border-[var(--dash-border)] rounded-[var(--dash-radius-lg)] p-5 flex-[1_1_420px] max-w-[520px]"
       >
         <AdminField label="Nombre del negocio">
           <input
@@ -223,18 +193,18 @@ export default function SettingsForm() {
         </AdminField>
 
         {/* Editor de Horarios Semanales (7 días) */}
-        <div style={{ borderTop: "1px solid var(--dash-border)", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-            <Clock size={16} style={{ color: "var(--dash-accent)" }} />
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--dash-text)", margin: 0 }}>
+        <div className="border-t border-[var(--dash-border)] pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock size={16} className="text-[var(--dash-accent)]" />
+            <h3 className="text-sm font-bold text-[var(--dash-text)] m-0">
               Días y horarios de atención al público
             </h3>
           </div>
-          <p style={{ fontSize: 12, color: "var(--dash-muted)", marginBottom: 16, marginTop: -4 }}>
+          <p className="text-xs text-[var(--dash-muted)] mb-4 -mt-1">
             Configurá qué días abre el local y los turnos de atención. Si atendés en horario cortado podés agregar una 2da franja por día.
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div className="flex flex-col gap-2.5">
             {DAY_ORDER.map((day) => {
               const currentHours = settings.openingHours || DEFAULT_OPENING_HOURS;
               const sched = currentHours[day] || { closed: true, ranges: [] };
@@ -242,22 +212,16 @@ export default function SettingsForm() {
               return (
                 <div
                   key={day}
-                  style={{
-                    padding: 12,
-                    borderRadius: 8,
-                    background: sched.closed ? "var(--dash-surface)" : "var(--dash-surface-2)",
-                    border: "1px solid var(--dash-border)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                  }}
+                  className={`p-3 rounded-[var(--dash-radius-md)] border border-[var(--dash-border)] flex flex-col gap-2 ${
+                    sched.closed ? "bg-[var(--dash-surface)]" : "bg-[var(--dash-surface-2)]"
+                  }`}
                 >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, minWidth: 85, color: "var(--dash-text)" }}>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs font-bold min-w-[85px] text-[var(--dash-text)]">
                         {DAY_LABELS[day]}
                       </span>
-                      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, cursor: "pointer", color: "var(--dash-text)" }}>
+                      <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer text-[var(--dash-text)]">
                         <input
                           type="checkbox"
                           checked={!sched.closed}
@@ -280,18 +244,7 @@ export default function SettingsForm() {
                       <button
                         type="button"
                         onClick={() => copyDayToAllOpen(day)}
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 4,
-                          fontSize: 11,
-                          color: "var(--dash-accent)",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "2px 6px",
-                          borderRadius: 4,
-                        }}
+                        className="inline-flex items-center gap-1 text-xs text-[var(--dash-accent)] bg-transparent border-none cursor-pointer py-0.5 px-1.5 rounded hover:bg-[var(--dash-surface-3)] transition-colors"
                         title={`Copiar horario de ${DAY_LABELS[day]} a los demás días que estén abiertos`}
                       >
                         <Copy size={12} />
@@ -301,10 +254,10 @@ export default function SettingsForm() {
                   </div>
 
                   {!sched.closed && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                    <div className="flex flex-col gap-2 mt-1">
                       {sched.ranges.map((range, idx) => (
-                        <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 11, color: "var(--dash-muted)", minWidth: 50 }}>
+                        <div key={idx} className="flex items-center gap-2 flex-wrap text-xs">
+                          <span className="text-xs text-[var(--dash-muted)] min-w-[50px]">
                             {idx === 0 ? "Turno 1:" : "Turno 2:"}
                           </span>
                           <input
@@ -319,10 +272,9 @@ export default function SettingsForm() {
                                 return { ...prev, ranges };
                               });
                             }}
-                            className="admin-input"
-                            style={{ width: 110, padding: "4px 8px", fontSize: 12 }}
+                            className="admin-input !w-[110px] !py-1 !px-2 !text-xs"
                           />
-                          <span style={{ fontSize: 12, color: "var(--dash-muted)" }}>a</span>
+                          <span className="text-xs text-[var(--dash-muted)]">a</span>
                           <input
                             type="time"
                             value={range.close}
@@ -335,8 +287,7 @@ export default function SettingsForm() {
                                 return { ...prev, ranges };
                               });
                             }}
-                            className="admin-input"
-                            style={{ width: 110, padding: "4px 8px", fontSize: 12 }}
+                            className="admin-input !w-[110px] !py-1 !px-2 !text-xs"
                           />
 
                           {idx === 1 && (
@@ -348,17 +299,7 @@ export default function SettingsForm() {
                                   ranges: [prev.ranges[0]],
                                 }));
                               }}
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 4,
-                                color: "var(--dash-danger, #ef4444)",
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                fontSize: 11,
-                                padding: "2px 6px",
-                              }}
+                              className="inline-flex items-center gap-1 text-[var(--dash-danger)] bg-transparent border-none cursor-pointer text-xs py-0.5 px-1.5"
                               title="Quitar 2do turno"
                             >
                               <Trash2 size={12} /> Quitar
@@ -377,18 +318,7 @@ export default function SettingsForm() {
                                 ranges: [...prev.ranges, { open: "17:00", close: "21:00" }],
                               }));
                             }}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 4,
-                              fontSize: 11,
-                              color: "var(--dash-muted)",
-                              background: "none",
-                              border: "1px dashed var(--dash-border)",
-                              borderRadius: 4,
-                              padding: "3px 8px",
-                              cursor: "pointer",
-                            }}
+                            className="inline-flex items-center gap-1 text-xs text-[var(--dash-muted)] bg-transparent border border-dashed border-[var(--dash-border)] rounded-[var(--dash-radius-sm)] py-1 px-2 cursor-pointer hover:text-[var(--dash-text)] transition-colors"
                           >
                             <Plus size={12} /> Agregar 2da franja (horario cortado)
                           </button>
@@ -403,24 +333,23 @@ export default function SettingsForm() {
         </div>
 
         {/* Feriados y Fechas Excepcionales Cerradas */}
-        <div style={{ borderTop: "1px solid var(--dash-border)", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <Calendar size={16} style={{ color: "var(--dash-accent)" }} />
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--dash-text)", margin: 0 }}>
+        <div className="border-t border-[var(--dash-border)] pt-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Calendar size={16} className="text-[var(--dash-accent)]" />
+            <h3 className="text-sm font-bold text-[var(--dash-text)] m-0">
               Feriados y vacaciones (fechas cerradas)
             </h3>
           </div>
-          <p style={{ fontSize: 12, color: "var(--dash-muted)", marginBottom: 12 }}>
+          <p className="text-xs text-[var(--dash-muted)] mb-3">
             Fechas específicas en las que el local permanecerá cerrado aunque el día de la semana sea habitualmente laborable.
           </p>
 
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+          <div className="flex gap-2 items-center mb-3 flex-wrap">
             <input
               type="date"
               value={newClosedDate}
               onChange={(e) => setNewClosedDate(e.target.value)}
-              className="admin-input"
-              style={{ width: 170, fontSize: 12 }}
+              className="admin-input !w-[170px] !text-xs"
             />
             <AdminButton
               type="button"
@@ -428,41 +357,24 @@ export default function SettingsForm() {
               onClick={addClosedDate}
               disabled={!newClosedDate}
             >
-              <Plus size={13} style={{ marginRight: 4 }} />
+              <Plus size={13} className="mr-1" />
               Agregar fecha cerrada
             </AdminButton>
           </div>
 
           {(settings.closedDates && settings.closedDates.length > 0) ? (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div className="flex flex-wrap gap-2">
               {settings.closedDates.map((dateStr) => (
                 <div
                   key={dateStr}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "4px 8px",
-                    borderRadius: 6,
-                    background: "var(--dash-surface-2)",
-                    border: "1px solid var(--dash-border)",
-                    fontSize: 12,
-                    color: "var(--dash-text)",
-                  }}
+                  className="inline-flex items-center gap-1.5 py-1 px-2 rounded-[var(--dash-radius-sm)] bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs text-[var(--dash-text)]"
                 >
-                  <span>📅 {dateStr}</span>
+                  <Calendar size={12} className="text-[var(--dash-accent)] shrink-0" />
+                  <span>{dateStr}</span>
                   <button
                     type="button"
                     onClick={() => removeClosedDate(dateStr)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "var(--dash-muted)",
-                      cursor: "pointer",
-                      padding: 2,
-                      display: "flex",
-                      alignItems: "center",
-                    }}
+                    className="bg-transparent border-none text-[var(--dash-muted)] hover:text-[var(--dash-danger)] cursor-pointer p-0.5 flex items-center transition-colors"
                     title="Eliminar fecha cerrada"
                   >
                     <Trash2 size={12} />
@@ -471,15 +383,15 @@ export default function SettingsForm() {
               ))}
             </div>
           ) : (
-            <p style={{ fontSize: 12, color: "var(--dash-muted)", fontStyle: "italic", margin: 0 }}>
+            <p className="text-xs text-[var(--dash-muted)] italic m-0">
               No hay feriados ni fechas cerradas configuradas.
             </p>
           )}
         </div>
 
         <AdminField label="Medios de pago habilitados en la tienda">
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+          <div className="flex flex-col gap-2.5 mt-1">
+            <label className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer text-[var(--dash-text)]">
               <input
                 type="checkbox"
                 checked={settings.paymentMethods?.includes("transfer") ?? true}
@@ -491,9 +403,10 @@ export default function SettingsForm() {
                   update("paymentMethods", next as typeof settings.paymentMethods);
                 }}
               />
-              <span>💳 Transferencia bancaria</span>
+              <CreditCard size={14} className="text-[var(--dash-accent)]" />
+              <span>Transferencia bancaria</span>
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+            <label className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer text-[var(--dash-text)]">
               <input
                 type="checkbox"
                 checked={settings.paymentMethods?.includes("cash") ?? true}
@@ -505,9 +418,10 @@ export default function SettingsForm() {
                   update("paymentMethods", next as typeof settings.paymentMethods);
                 }}
               />
-              <span>💵 Efectivo en el local</span>
+              <Banknote size={14} className="text-[var(--dash-accent)]" />
+              <span>Efectivo en el local</span>
             </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+            <label className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer text-[var(--dash-text)]">
               <input
                 type="checkbox"
                 checked={settings.paymentMethods?.includes("card") ?? true}
@@ -519,44 +433,32 @@ export default function SettingsForm() {
                   update("paymentMethods", next as typeof settings.paymentMethods);
                 }}
               />
-              <span>💳 Mercado Pago (link de pago)</span>
+              <CreditCard size={14} className="text-[var(--dash-accent)]" />
+              <span>Mercado Pago (link de pago)</span>
             </label>
           </div>
         </AdminField>
 
         {error && (
-          <p style={{ fontSize: 13, color: "var(--dash-danger)" }}>{error}</p>
+          <p className="text-xs text-[var(--dash-danger)]">{error}</p>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="flex items-center gap-3">
           <AdminButton type="submit" disabled={saving}>
             {saving ? "Guardando..." : "Guardar cambios"}
           </AdminButton>
         </div>
-        <p style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+        <p className="text-xs text-[var(--dash-muted)]">
           Los cambios se reflejan en el sitio público en hasta 60 segundos.
         </p>
 
         {/* Database Backup Tool */}
-        <div
-          style={{
-            marginTop: 24,
-            paddingTop: 20,
-            borderTop: "1px solid var(--dash-border)",
-          }}
-        >
-          <div style={{ marginBottom: 12 }}>
-            <h3
-              style={{
-                fontSize: 14,
-                fontWeight: 700,
-                color: "var(--dash-text)",
-                marginBottom: 4,
-              }}
-            >
+        <div className="mt-6 pt-5 border-t border-[var(--dash-border)]">
+          <div className="mb-3">
+            <h3 className="text-sm font-bold text-[var(--dash-text)] mb-1">
               Copia de Seguridad (Backup)
             </h3>
-            <p style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+            <p className="text-xs text-[var(--dash-muted)]">
               Descargá una copia de respaldo completa de la configuración de la tienda.
             </p>
           </div>
@@ -592,63 +494,19 @@ export default function SettingsForm() {
         </div>
       </form>
 
-      <AdminCard
-        style={{ flex: "1 1 280px", maxWidth: 340, height: "fit-content" }}
-      >
-        <p
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.07em",
-            color: "var(--dash-muted)",
-            marginBottom: 16,
-          }}
-        >
+      <AdminCard className="flex-[1_1_280px] max-w-[340px] h-fit">
+        <p className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)] mb-4">
           Vista previa
         </p>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            marginBottom: 16,
-          }}
-        >
-          <span
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              background: "rgba(199,166,122,0.12)",
-              color: "var(--dash-accent)",
-              flexShrink: 0,
-            }}
-          >
+        <div className="flex items-center gap-2.5 mb-4">
+          <span className="flex items-center justify-center w-9 h-9 rounded-[var(--dash-radius-md)] bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)] shrink-0">
             <Store size={16} />
           </span>
-          <span
-            style={{
-              fontFamily: "var(--font-playfair), Georgia, serif",
-              fontSize: 17,
-              fontWeight: 700,
-              color: "var(--dash-text)",
-            }}
-          >
+          <span className="font-playfair text-lg font-bold text-[var(--dash-text)]">
             {settings.businessName || "—"}
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            fontSize: 13,
-          }}
-        >
+        <div className="flex flex-col gap-3 text-xs sm:text-sm">
           <PreviewRow icon={MapPin}>
             {settings.addressLine || "—"}
             {settings.addressCity && `, ${settings.addressCity}`}
@@ -660,15 +518,7 @@ export default function SettingsForm() {
             {formatScheduleSummary(settings).filter((s) => !s.endsWith("Cerrado")).join(" · ") || "Cerrado temporalmente"}
           </PreviewRow>
         </div>
-        <p
-          style={{
-            fontSize: 11,
-            color: "var(--dash-muted)",
-            marginTop: 16,
-            paddingTop: 16,
-            borderTop: "1px solid var(--dash-border)",
-          }}
-        >
+        <p className="text-xs text-[var(--dash-muted)] mt-4 pt-4 border-t border-[var(--dash-border)]">
           Así aparece este contacto en el pie de página del sitio.
         </p>
       </AdminCard>
@@ -684,13 +534,11 @@ function PreviewRow({
   children: React.ReactNode;
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-      <span
-        style={{ color: "var(--dash-accent)", flexShrink: 0, marginTop: 1 }}
-      >
+    <div className="flex items-start gap-2.5">
+      <span className="text-[var(--dash-accent)] shrink-0 mt-0.5">
         <Icon size={14} />
       </span>
-      <span style={{ color: "var(--dash-text)", lineHeight: 1.5 }}>
+      <span className="text-[var(--dash-text)] leading-relaxed text-xs sm:text-sm">
         {children}
       </span>
     </div>

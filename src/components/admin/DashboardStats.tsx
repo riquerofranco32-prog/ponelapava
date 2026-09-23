@@ -4,23 +4,26 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   DollarSign,
-  ShoppingCart,
-  Receipt,
-  PackageCheck,
+  Clock,
+  AlertCircle,
+  Calendar,
   RefreshCw,
+  ArrowRightLeft,
+  Banknote,
   CreditCard,
   Truck,
   Store,
-  Clock,
-  Sparkles,
-  AlertCircle,
+  PackageCheck,
+  AlertTriangle,
+  ChevronRight,
 } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice, LOW_STOCK_THRESHOLD } from "@/lib/utils";
 import { Product } from "@/types";
-import { AdminCard, AdminKpiCard } from "./AdminCard";
+import { AdminCard } from "./AdminCard";
+import { StatCard } from "./ui/StatCard";
 import { KpiSkeleton } from "./TableSkeleton";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "./ui/EmptyState";
 import { StockStepper } from "./products/StockStepper";
 import { SalesAreaChart } from "./SalesAreaChart";
 import { RecentOrdersWidget } from "./orders/RecentOrdersWidget";
@@ -28,13 +31,13 @@ import { SalesGoalWidget } from "./dashboard/SalesGoalWidget";
 import { assertOk } from "@/lib/admin-fetch";
 import { getPaymentMethodLabel } from "@/lib/orderPrint";
 
-// Renders as AdminKpiCard's change/trend props, or nothing when there's no
-// prior-period data to compare against (percentChange returned null).
-function kpiDelta(pct: number | null) {
-  if (pct === null) return {};
+function kpiDelta(pct: number | null | undefined, label = "vs semana pasada") {
+  if (pct === null || pct === undefined) return undefined;
   return {
-    change: `${Math.abs(Math.round(pct))}%`,
-    trend: (pct >= 0 ? "up" : "down") as "up" | "down",
+    value: `${Math.abs(Math.round(pct))}%`,
+    label,
+    positive: pct >= 0,
+    neutral: pct === 0,
   };
 }
 
@@ -73,7 +76,7 @@ export default function DashboardStats({
 
   if (error) {
     return (
-      <div className="admin-error-banner" style={{ marginBottom: 24 }}>
+      <div className="admin-error-banner mb-6">
         {error}
       </div>
     );
@@ -86,89 +89,143 @@ export default function DashboardStats({
   const pickupCount = stats?.deliveryMethods?.pickup || 0;
   const deliveryCount = stats?.deliveryMethods?.delivery || 0;
 
+  const lowStockCount = products.filter((p) => p.stock <= LOW_STOCK_THRESHOLD).length;
+
   return (
-    <div style={{ marginBottom: 32 }}>
-      {/* Quick Dashboard Header Actions */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 12,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: "var(--dash-muted)",
-          }}
-        >
-          Métricas de Negocio (14 días)
-        </span>
+    <div className="space-y-6 mb-8">
+      {/* Top Header Controls */}
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">
+            Panel de Operación · Hoy
+          </span>
+        </div>
         <button
           onClick={() => fetchStats(false)}
           disabled={refreshing}
-          className="admin-link-btn"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12,
-            color: "var(--dash-muted)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "4px 8px",
-            borderRadius: 6,
-          }}
+          className="admin-btn admin-btn--secondary admin-btn--sm"
         >
           <RefreshCw
-            size={12}
-            style={{
-              animation: refreshing ? "spin 1s linear infinite" : "none",
-            }}
+            size={13}
+            className={refreshing ? "animate-spin text-[var(--dash-accent)]" : ""}
           />
-          <span>{refreshing ? "Actualizando..." : "Refrescar métricas"}</span>
+          <span>{refreshing ? "Actualizando..." : "Refrescar"}</span>
         </button>
       </div>
 
+      {/* 4 Primary StatCards requested in FASE 2.5 Requirement 5 */}
       {!stats ? (
         <KpiSkeleton count={4} />
       ) : (
-        <div className="admin-kpi-grid">
-          <AdminKpiCard
-            icon={DollarSign}
-            label="Ingresos (14 días)"
-            value={formatPrice(stats.totalRevenue)}
-            {...kpiDelta(stats.revenueChange)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Ventas del día"
+            value={formatPrice(stats.todayRevenue ?? 0)}
+            delta={kpiDelta(stats.todayRevenueChange, "vs sem. anterior")}
+            subtitle="Hoy en el local & web"
+            icon={<DollarSign size={16} />}
           />
-          <AdminKpiCard
-            icon={ShoppingCart}
-            label="Pedidos (14 días)"
-            value={stats.orderCount}
-            {...kpiDelta(stats.orderCountChange)}
-          />
-          <AdminKpiCard
-            icon={Receipt}
-            label="Ticket promedio"
-            value={formatPrice(stats.avgTicket)}
-            {...kpiDelta(stats.avgTicketChange)}
-          />
-          <AdminKpiCard
-            icon={AlertCircle}
-            label="Total adeudado (sin cobrar)"
-            value={formatPrice(stats.totalUnpaidAmount ?? 0)}
-            onClick={() => router.push("/admin/pedidos?paymentStatus=unpaid")}
-            change={
-              (stats.unpaidOrdersCount ?? 0) > 0
-                ? `${stats.unpaidOrdersCount} pedidos`
-                : undefined
+
+          <StatCard
+            title="Pedidos pendientes"
+            value={stats.pendingOrdersCount ?? 0}
+            subtitle={
+              (stats.pendingOrdersCount ?? 0) === 0
+                ? "Al día sin pendientes"
+                : "Requieren confirmación"
             }
-            trend={(stats.unpaidOrdersCount ?? 0) > 0 ? "down" : undefined}
+            icon={<Clock size={16} />}
+            onClick={() => router.push("/admin/pedidos?status=pending")}
           />
+
+          <StatCard
+            title="Sin cobrar"
+            value={formatPrice(stats.totalUnpaidAmount ?? 0)}
+            subtitle={
+              (stats.unpaidOrdersCount ?? 0) > 0
+                ? `${stats.unpaidOrdersCount} pedidos sin cobrar`
+                : "Todos los pedidos cobrados"
+            }
+            icon={<AlertCircle size={16} />}
+            onClick={() => router.push("/admin/pedidos?paymentStatus=unpaid")}
+          />
+
+          <StatCard
+            title="Seguimientos vencidos"
+            value={stats.overdueFollowupsCount ?? 0}
+            subtitle={
+              (stats.overdueFollowupsCount ?? 0) > 0
+                ? "Clientes por contactar"
+                : "Sin seguimientos vencidos"
+            }
+            icon={<Calendar size={16} />}
+            onClick={() => router.push("/admin/clientes")}
+          />
+        </div>
+      )}
+
+      {/* Pending Actions List */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button
+            onClick={() => router.push("/admin/pedidos?status=pending")}
+            className="admin-card admin-card--interactive p-4 flex items-center justify-between text-left group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-[var(--dash-warning-bg)] border border-[var(--dash-warning-border)] text-[var(--dash-warning)] flex items-center justify-center shrink-0">
+                <Clock size={16} />
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-[var(--dash-text)]">
+                  {stats.pendingOrdersCount ?? 0} pedidos pendientes
+                </div>
+                <div className="text-xs text-[var(--dash-muted)]">
+                  Confirmar y comenzar preparación
+                </div>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--dash-muted)] group-hover:text-[var(--dash-accent)] transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push("/admin/pedidos?paymentStatus=unpaid")}
+            className="admin-card admin-card--interactive p-4 flex items-center justify-between text-left group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-[var(--dash-danger-bg)] border border-[var(--dash-danger-border)] text-[var(--dash-danger)] flex items-center justify-center shrink-0">
+                <AlertCircle size={16} />
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-[var(--dash-text)]">
+                  {stats.unpaidOrdersCount ?? 0} pedidos sin cobrar
+                </div>
+                <div className="text-xs text-[var(--dash-muted)]">
+                  Cobros pendientes ({formatPrice(stats.totalUnpaidAmount ?? 0)})
+                </div>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--dash-muted)] group-hover:text-[var(--dash-accent)] transition-colors" />
+          </button>
+
+          <button
+            onClick={() => router.push("/admin/productos")}
+            className="admin-card admin-card--interactive p-4 flex items-center justify-between text-left group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-[var(--dash-accent-bg)] border border-[var(--dash-accent-border)] text-[var(--dash-accent)] flex items-center justify-center shrink-0">
+                <AlertTriangle size={16} />
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-[var(--dash-text)]">
+                  {lowStockCount} con stock bajo
+                </div>
+                <div className="text-xs text-[var(--dash-muted)]">
+                  Revisar reposición urgente
+                </div>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--dash-muted)] group-hover:text-[var(--dash-accent)] transition-colors" />
+          </button>
         </div>
       )}
 
@@ -178,30 +235,39 @@ export default function DashboardStats({
       {/* Real-time Recent Orders Section */}
       <RecentOrdersWidget onOrderUpdated={() => fetchStats(true)} />
 
-      {/* Payment & Delivery Breakdown Insights */}
+      {/* Payment & Delivery Breakdown Insights (Strictly Lucide icons & tokens) */}
       {stats && totalOrders > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 20 }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AdminCard>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <CreditCard size={17} style={{ color: "var(--dash-accent)" }} />
-              <h2 className="admin-section-title" style={{ margin: 0 }}>Medios de Pago</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard size={16} className="text-[var(--dash-accent)]" />
+              <h2 className="admin-section-title mb-0">Medios de Pago</h2>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("transfer")}</span>
-                <span style={{ fontWeight: 700, color: "#10b981" }}>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[var(--dash-text)]">
+                  <ArrowRightLeft size={14} className="text-[var(--dash-info)]" />
+                  <span>{getPaymentMethodLabel("transfer")}</span>
+                </span>
+                <span className="font-bold text-[var(--dash-success)]">
                   {transfCount} ({Math.round((transfCount / totalOrders) * 100)}%)
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💵 {getPaymentMethodLabel("cash")}</span>
-                <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[var(--dash-text)]">
+                  <Banknote size={14} className="text-[var(--dash-success)]" />
+                  <span>{getPaymentMethodLabel("cash")}</span>
+                </span>
+                <span className="font-semibold text-[var(--dash-text)]">
                   {cashCount} ({Math.round((cashCount / totalOrders) * 100)}%)
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("card")}</span>
-                <span style={{ fontWeight: 600, color: "var(--dash-muted)" }}>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[var(--dash-text)]">
+                  <CreditCard size={14} className="text-[var(--dash-accent)]" />
+                  <span>{getPaymentMethodLabel("card")}</span>
+                </span>
+                <span className="font-semibold text-[var(--dash-muted)]">
                   {cardCount} ({Math.round((cardCount / totalOrders) * 100)}%)
                 </span>
               </div>
@@ -209,20 +275,26 @@ export default function DashboardStats({
           </AdminCard>
 
           <AdminCard>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <Truck size={17} style={{ color: "var(--dash-accent)" }} />
-              <h2 className="admin-section-title" style={{ margin: 0 }}>Modo de Entrega</h2>
+            <div className="flex items-center gap-2 mb-3">
+              <Truck size={16} className="text-[var(--dash-accent)]" />
+              <h2 className="admin-section-title mb-0">Modo de Entrega</h2>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>🏪 Retiro en Local Catriel</span>
-                <span style={{ fontWeight: 700, color: "var(--dash-accent)" }}>
+            <div className="space-y-2.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[var(--dash-text)]">
+                  <Store size={14} className="text-[var(--dash-accent)]" />
+                  <span>Retiro en Local Catriel</span>
+                </span>
+                <span className="font-bold text-[var(--dash-accent)]">
                   {pickupCount} ({Math.round((pickupCount / totalOrders) * 100)}%)
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>🛵 Envío a Domicilio</span>
-                <span style={{ fontWeight: 600, color: "#3b82f6" }}>
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-2 text-[var(--dash-text)]">
+                  <Truck size={14} className="text-[var(--dash-info)]" />
+                  <span>Envío a Domicilio</span>
+                </span>
+                <span className="font-semibold text-[var(--dash-info)]">
                   {deliveryCount} ({Math.round((deliveryCount / totalOrders) * 100)}%)
                 </span>
               </div>
@@ -231,10 +303,11 @@ export default function DashboardStats({
         </div>
       )}
 
-      <AdminCard style={{ marginBottom: 20 }}>
-        <h2 className="admin-section-title">Ventas últimos 14 días</h2>
+      {/* 30-day Sales Chart */}
+      <AdminCard>
+        <h2 className="admin-section-title">Ventas últimos 30 días</h2>
         {stats && stats.orderCount === 0 ? (
-          <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>
+          <p className="text-sm text-[var(--dash-muted)]">
             Todavía no hay pedidos registrados en este período.
           </p>
         ) : (
@@ -242,67 +315,42 @@ export default function DashboardStats({
         )}
       </AdminCard>
 
+      {/* Restock critical panel */}
       <RestockPanel
         products={products}
         fastMovers={stats?.topProducts ?? []}
         onStockChange={onStockChange}
       />
 
+      {/* Fast Movers Ranking */}
       {stats && stats.topProducts.length > 0 && (
         <AdminCard>
-          <h2 className="admin-section-title">Ranking de Más Vendidos (14 días)</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <h2 className="admin-section-title">Ranking de Más Vendidos</h2>
+          <div className="space-y-3">
             {stats.topProducts.map((p, i) => {
               const maxQty = Math.max(...stats.topProducts.map((t) => t.quantity)) || 1;
               const barPct = Math.round((p.quantity / maxQty) * 100);
 
               return (
-                <div key={p.name} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span style={{ color: "var(--dash-text)", fontWeight: 500 }}>
-                      <span
-                        style={{
-                          color: i === 0 ? "var(--dash-accent)" : "var(--dash-muted)",
-                          fontWeight: 700,
-                          marginRight: 8,
-                        }}
-                      >
+                <div key={p.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-[var(--dash-text)] font-medium">
+                      <span className={`font-bold mr-2 ${i === 0 ? "text-[var(--dash-accent)]" : "text-[var(--dash-muted)]"}`}>
                         #{i + 1}
                       </span>
                       {p.name}
                     </span>
-                    <span style={{ color: "var(--dash-accent)", fontWeight: 600 }}>
+                    <span className="font-semibold text-[var(--dash-accent)]">
                       {p.quantity} un.
                     </span>
                   </div>
 
-                  <div
-                    style={{
-                      height: 6,
-                      width: "100%",
-                      borderRadius: 4,
-                      background: "var(--dash-surface-2)",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div className="h-1.5 w-full rounded-full bg-[var(--dash-surface-2)] overflow-hidden">
                     <div
-                      style={{
-                        height: "100%",
-                        width: `${barPct}%`,
-                        background:
-                          i === 0
-                            ? "var(--dash-accent)"
-                            : "var(--dash-surface-3)",
-                        borderRadius: 4,
-                        transition: "width 0.6s ease",
-                      }}
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        i === 0 ? "bg-[var(--dash-accent)]" : "bg-[var(--dash-surface-3)]"
+                      }`}
+                      style={{ width: `${barPct}%` }}
                     />
                   </div>
                 </div>
@@ -330,90 +378,41 @@ function RestockPanel({
     .sort((a, b) => a.stock - b.stock);
 
   return (
-    <AdminCard style={{ marginBottom: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 16,
-        }}
-      >
-        <h2 className="admin-section-title" style={{ margin: 0 }}>
+    <AdminCard>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="admin-section-title mb-0">
           Necesita reposición
         </h2>
         {needsRestock.length > 0 && (
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              color: "var(--dash-danger)",
-              background: "var(--dash-danger-bg)",
-              border: "1px solid var(--dash-danger-border)",
-              borderRadius: "var(--radius-chip, 4px)",
-              padding: "2px 8px",
-            }}
-          >
+          <span className="admin-badge admin-badge--danger text-xs font-semibold">
             {needsRestock.length}{" "}
-            {needsRestock.length === 1
-              ? "producto crítico"
-              : "productos críticos"}
+            {needsRestock.length === 1 ? "producto crítico" : "productos críticos"}
           </span>
         )}
       </div>
+
       {needsRestock.length === 0 ? (
         <EmptyState
-          icon={PackageCheck}
+          icon={<PackageCheck size={28} />}
           title="Todo en orden"
           description="Ningún producto está agotado o con stock bajo."
         />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div className="space-y-2.5">
           {needsRestock.map((p) => (
             <div
               key={p.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 10,
-                fontSize: 13,
-                paddingBottom: 10,
-                borderBottom: "1px solid rgba(243,237,224,0.08)",
-              }}
+              className="flex items-center justify-between gap-3 text-sm pb-2.5 border-b border-[var(--dash-border-subtle)]"
             >
-              <span
-                style={{
-                  color: "var(--dash-text)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-              >
+              <span className="text-[var(--dash-text)] truncate flex items-center gap-2">
                 {p.name}
                 {fastMoverNames.has(p.name) && (
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.03em",
-                      color: "var(--dash-danger)",
-                      background: "var(--dash-danger-bg)",
-                      border: "1px solid var(--dash-danger-border)",
-                      borderRadius: 999,
-                      padding: "2px 8px",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <span className="admin-badge admin-badge--warning text-xs uppercase tracking-wide">
                     se vende rápido
                   </span>
                 )}
               </span>
-              <div style={{ flexShrink: 0 }}>
+              <div className="shrink-0">
                 <StockStepper
                   value={p.stock}
                   onChange={(next) => onStockChange(p, next)}

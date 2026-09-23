@@ -280,47 +280,19 @@ export default function AdminCommandPalette({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        paddingTop: "12vh",
-        background: "rgba(10, 15, 12, 0.65)",
-        backdropFilter: "blur(4px)",
-      }}
+      className="fixed inset-0 z-[100] flex justify-center px-4 pt-[12vh] bg-black/65 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Búsqueda rápida en el panel"
-        style={{
-          width: "100%",
-          maxWidth: 580,
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: "var(--radius-card)",
-          boxShadow: "0 24px 48px -12px rgba(0, 0, 0, 0.35)",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
+        className="w-full max-w-[580px] bg-[var(--dash-surface)] border border-[var(--dash-border)] rounded-[var(--dash-radius-lg)] shadow-2xl overflow-hidden flex flex-col h-fit max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "14px 18px",
-            borderBottom: "1px solid var(--dash-border)",
-          }}
-        >
-          <Search size={18} style={{ color: "var(--dash-accent)", flexShrink: 0 }} />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--dash-border)]">
+          <Search size={18} className="text-[var(--dash-accent)] shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -331,50 +303,17 @@ export default function AdminCommandPalette({
               setSelectedIndex(0);
             }}
             onKeyDown={handleInputKeyDown}
-            style={{
-              flex: 1,
-              background: "none",
-              border: "none",
-              outline: "none",
-              color: "var(--dash-text)",
-              fontSize: 14,
-              fontWeight: 500,
-              minWidth: 0,
-            }}
+            className="flex-1 bg-transparent border-0 outline-none text-[var(--dash-text)] text-sm font-medium min-w-0 placeholder:text-[var(--dash-muted)]"
           />
-          <kbd
-            style={{
-              fontSize: 10,
-              padding: "2px 6px",
-              borderRadius: 4,
-              background: "var(--dash-surface-elevated)",
-              border: "1px solid var(--dash-border)",
-              color: "var(--dash-text-muted)",
-              fontFamily: "monospace",
-              flexShrink: 0,
-            }}
-          >
+          <kbd className="text-xs px-1.5 py-0.5 rounded bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-[var(--dash-muted)] font-mono shrink-0">
             ESC
           </kbd>
         </div>
 
         {/* Results List */}
-        <div
-          style={{
-            maxHeight: 380,
-            overflowY: "auto",
-            padding: "8px",
-          }}
-        >
+        <div className="max-h-[380px] overflow-y-auto p-2">
           {allFiltered.length === 0 ? (
-            <div
-              style={{
-                padding: "32px 16px",
-                textAlign: "center",
-                color: "var(--dash-text-muted)",
-                fontSize: 14,
-              }}
-            >
+            <div className="py-8 px-4 text-center text-[var(--dash-muted)] text-sm">
               No se encontraron resultados para &ldquo;{query}&rdquo;
             </div>
           ) : (
@@ -386,91 +325,35 @@ export default function AdminCommandPalette({
                   key={item.id}
                   onClick={() => item.action()}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "10px 12px",
-                    borderRadius: "var(--radius-control)",
-                    background: isSelected
-                      ? "var(--dash-surface-elevated)"
-                      : "transparent",
-                    cursor: "pointer",
-                    transition: "background 0.15s ease",
-                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[var(--dash-radius-md)] cursor-pointer transition-colors ${
+                    isSelected ? "bg-[var(--dash-surface-2)]" : "bg-transparent"
+                  }`}
                 >
                   <div
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 6,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: isSelected
-                        ? "var(--dash-accent-subtle)"
-                        : "var(--dash-surface-elevated)",
-                      color: isSelected
-                        ? "var(--dash-accent)"
-                        : "var(--dash-text-muted)",
-                      flexShrink: 0,
-                    }}
+                    className={`w-8 h-8 rounded-[var(--dash-radius-sm)] flex items-center justify-center shrink-0 ${
+                      isSelected
+                        ? "bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)]"
+                        : "bg-[var(--dash-surface-2)] text-[var(--dash-muted)]"
+                    }`}
                   >
                     <Icon size={16} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: "var(--dash-text)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-[var(--dash-text)] truncate">
                       {item.title}
                     </div>
                     {item.subtitle && (
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "var(--dash-text-muted)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                      <div className="text-xs text-[var(--dash-muted)] truncate">
                         {item.subtitle}
                       </div>
                     )}
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 10,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        color: "var(--dash-text-muted)",
-                        background: "var(--dash-surface)",
-                        padding: "2px 6px",
-                        borderRadius: 4,
-                        border: "1px solid var(--dash-border)",
-                      }}
-                    >
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wider text-[var(--dash-muted)] bg-[var(--dash-surface)] px-1.5 py-0.5 rounded-[var(--dash-radius-sm)] border border-[var(--dash-border)] font-medium">
                       {item.category}
                     </span>
                     {isSelected && (
-                      <ArrowRight
-                        size={14}
-                        style={{ color: "var(--dash-accent)" }}
-                      />
+                      <ArrowRight size={14} className="text-[var(--dash-accent)]" />
                     )}
                   </div>
                 </div>
@@ -480,25 +363,14 @@ export default function AdminCommandPalette({
         </div>
 
         {/* Footer info */}
-        <div
-          style={{
-            padding: "8px 16px",
-            background: "var(--dash-surface-elevated)",
-            borderTop: "1px solid var(--dash-border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontSize: 11,
-            color: "var(--dash-text-muted)",
-          }}
-        >
+        <div className="px-4 py-2 bg-[var(--dash-surface-2)] border-t border-[var(--dash-border)] flex items-center justify-between text-xs text-[var(--dash-muted)]">
           <span className="hidden sm:inline">
-            Navegá con <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↑</kbd> <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↓</kbd> y seleccioná con <kbd style={{ padding: "1px 4px", border: "1px solid var(--dash-border)", borderRadius: 3 }}>↵</kbd>
+            Navegá con <kbd className="px-1 py-0.5 border border-[var(--dash-border)] rounded">↑</kbd> <kbd className="px-1 py-0.5 border border-[var(--dash-border)] rounded">↓</kbd> y seleccioná con <kbd className="px-1 py-0.5 border border-[var(--dash-border)] rounded">↵</kbd>
           </span>
           <span className="sm:hidden">
             Tocá cualquier opción para abrir
           </span>
-          <span>Poné La Pava Admin</span>
+          <span className="font-medium text-[var(--dash-text)]">Poné La Pava Admin</span>
         </div>
       </div>
     </div>

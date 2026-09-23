@@ -59,34 +59,16 @@ export default function FailedOrdersNotice() {
   return (
     <section
       aria-label="Pedidos no registrados"
-      style={{
-        marginBottom: 18,
-        border: "1px solid var(--dash-danger, #b13f2c)",
-        borderRadius: 10,
-        background: "color-mix(in srgb, var(--dash-danger, #b13f2c) 8%, transparent)",
-        overflow: "hidden",
-      }}
+      className="mb-4 border border-[var(--dash-danger)] rounded-[var(--dash-radius-md)] bg-[var(--dash-danger-bg)] overflow-hidden"
     >
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          width: "100%",
-          padding: "12px 14px",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-          color: "var(--dash-text)",
-          font: "inherit",
-        }}
+        className="flex items-center gap-2.5 w-full py-3 px-3.5 bg-transparent border-none cursor-pointer text-left text-[var(--dash-text)]"
       >
-        <AlertTriangle size={18} aria-hidden style={{ flexShrink: 0 }} />
-        <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
+        <AlertTriangle size={18} aria-hidden className="shrink-0 text-[var(--dash-danger)]" />
+        <span className="flex-1 text-sm font-semibold">
           {failed.length === 1
             ? "1 pedido salió por WhatsApp y no quedó registrado"
             : `${failed.length} pedidos salieron por WhatsApp y no quedaron registrados`}
@@ -94,54 +76,28 @@ export default function FailedOrdersNotice() {
         <ChevronDown
           size={16}
           aria-hidden
-          style={{
-            flexShrink: 0,
-            transition: "transform 200ms",
-            transform: expanded ? "rotate(180deg)" : "none",
-          }}
+          className={`shrink-0 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
         />
       </button>
 
       {expanded && (
-        <ul
-          style={{
-            listStyle: "none",
-            margin: 0,
-            padding: "0 14px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-          }}
-        >
+        <ul className="list-none m-0 px-3.5 pb-3 flex flex-col gap-2.5">
           {failed.map((f) => (
             <li
               key={f.id}
-              style={{
-                borderTop: "1px solid var(--dash-border)",
-                paddingTop: 10,
-                fontSize: 13,
-                lineHeight: 1.5,
-              }}
+              className="border-t border-[var(--dash-border)] pt-2.5 text-xs sm:text-sm leading-relaxed"
             >
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 8,
-                  color: "var(--dash-muted)",
-                  fontSize: 12,
-                }}
-              >
+              <div className="flex flex-wrap gap-2 text-[var(--dash-muted)] text-xs">
                 <span>{formatDate(f.createdAt)}</span>
                 <span>·</span>
                 <span>{STAGE_LABELS[f.stage] ?? f.stage}</span>
               </div>
-              <div style={{ color: "var(--dash-text)", fontWeight: 600 }}>
+              <div className="text-[var(--dash-text)] font-semibold">
                 {f.customerName || "Sin nombre"}
                 {f.customerPhone ? ` · ${f.customerPhone}` : ""}
               </div>
-              <div style={{ color: "var(--dash-muted)" }}>{f.reason}</div>
-              <div style={{ color: "var(--dash-muted)", fontSize: 12 }}>
+              <div className="text-[var(--dash-muted)]">{f.reason}</div>
+              <div className="text-[var(--dash-muted)] text-xs">
                 Carrito: {describeItems(f.items)}
               </div>
             </li>

@@ -10,7 +10,19 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { DollarSign, ShoppingCart, Receipt, Download } from "lucide-react";
+import {
+  DollarSign,
+  ShoppingCart,
+  Receipt,
+  Download,
+  CreditCard,
+  Zap,
+  Banknote,
+  Truck,
+  Package,
+  Store,
+  Trophy,
+} from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice } from "@/lib/utils";
 import { AdminCard, AdminKpiCard } from "@/components/admin/AdminCard";
@@ -93,24 +105,14 @@ export default function AdminReportesPage() {
     <div className="admin-page-reveal">
       {error && <AdminErrorBanner message={error} />}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 10,
-          marginBottom: 20,
-        }}
-      >
-        <div style={{ display: "flex", gap: 8 }}>
+      <div className="flex justify-between items-center flex-wrap gap-2.5 mb-5">
+        <div className="flex gap-2">
           {RANGES.map((r) => (
             <button
               key={r.days}
               onClick={() => setDays(r.days)}
-              className="admin-nav-item"
+              className="admin-nav-item text-xs px-3.5 py-1.5 w-auto"
               aria-current={days === r.days ? "page" : undefined}
-              style={{ padding: "6px 14px", width: "auto" }}
             >
               {r.label}
             </button>
@@ -154,10 +156,10 @@ export default function AdminReportesPage() {
         </div>
       )}
 
-      <AdminCard style={{ marginBottom: 20 }}>
+      <AdminCard className="mb-5">
         <h2 className="admin-section-title">Ventas ({days} días)</h2>
         {stats && stats.orderCount === 0 ? (
-          <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>
+          <p className="text-xs text-[var(--dash-muted)]">
             Todavía no hay pedidos registrados en este período.
           </p>
         ) : (
@@ -165,47 +167,40 @@ export default function AdminReportesPage() {
         )}
       </AdminCard>
 
-      <AdminCard style={{ marginBottom: 20 }}>
+      <AdminCard className="mb-5">
         <h2 className="admin-section-title">
           Pedidos por hora del día
           {peakHour && peakHour.orders > 0 && (
-            <span
-              style={{
-                marginLeft: 10,
-                fontSize: 12,
-                fontWeight: 500,
-                color: "var(--dash-muted)",
-              }}
-            >
+            <span className="ml-2.5 text-xs font-medium text-[var(--dash-muted)]">
               — pico: {peakHour.hour}:00hs
             </span>
           )}
         </h2>
         {stats && stats.orderCount === 0 ? (
-          <p style={{ fontSize: 13, color: "var(--dash-muted)" }}>
+          <p className="text-xs text-[var(--dash-muted)]">
             Todavía no hay pedidos registrados en este período.
           </p>
         ) : (
-          <div style={{ width: "100%", height: 200 }}>
+          <div className="w-full h-52">
             <ResponsiveContainer>
               <BarChart data={stats?.peakHours ?? []}>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke="#3a3324"
+                  stroke="var(--dash-border)"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="hour"
-                  stroke="#9c9280"
-                  fontSize={11}
+                  stroke="var(--dash-muted)"
+                  fontSize={12}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(h) => `${h}h`}
                   interval={2}
                 />
                 <YAxis
-                  stroke="#9c9280"
-                  fontSize={11}
+                  stroke="var(--dash-muted)"
+                  fontSize={12}
                   tickLine={false}
                   axisLine={false}
                   width={28}
@@ -213,16 +208,16 @@ export default function AdminReportesPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#1e1b15",
-                    border: "1px solid #3a3324",
+                    background: "var(--dash-surface-elevated)",
+                    border: "1px solid var(--dash-border)",
                     borderRadius: 8,
                     fontSize: 12,
                   }}
-                  labelStyle={{ color: "#f3ede0" }}
+                  labelStyle={{ color: "var(--dash-text)" }}
                   labelFormatter={(h) => `${h}:00hs`}
                   formatter={(value) => [value, "Pedidos"]}
                 />
-                <Bar dataKey="orders" fill="#c7a67a" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="orders" fill="var(--dash-accent)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -234,8 +229,9 @@ export default function AdminReportesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           {/* Payment Methods */}
           <AdminCard>
-            <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
-              💳 Métodos de Pago ({days} días)
+            <h2 className="admin-section-title flex items-center gap-2 mb-3.5">
+              <CreditCard size={16} className="text-[var(--dash-accent)]" />
+              <span>Métodos de Pago ({days} días)</span>
             </h2>
             {(() => {
               const total = stats.orderCount || 1;
@@ -244,40 +240,58 @@ export default function AdminReportesPage() {
               const card = stats.paymentMethods?.card || 0;
 
               return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div className="flex flex-col gap-3">
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>⚡ {getPaymentMethodLabel("transfer")}</span>
-                      <span style={{ color: "#10b981", fontWeight: 700 }}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-[var(--dash-text)] flex items-center gap-1.5">
+                        <Zap size={13} className="text-[var(--dash-success)]" />
+                        {getPaymentMethodLabel("transfer")}
+                      </span>
+                      <span className="text-[var(--dash-success)] font-bold">
                         {transf} ({Math.round((transf / total) * 100)}%)
                       </span>
                     </div>
-                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(transf / total) * 100}%`, background: "#10b981", borderRadius: 4 }} />
+                    <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${(transf / total) * 100}%` }}
+                        className="h-full bg-[var(--dash-success)] rounded-full"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💵 {getPaymentMethodLabel("cash")}</span>
-                      <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-[var(--dash-text)] flex items-center gap-1.5">
+                        <Banknote size={13} className="text-[var(--dash-accent)]" />
+                        {getPaymentMethodLabel("cash")}
+                      </span>
+                      <span className="text-[var(--dash-accent)] font-bold">
                         {cash} ({Math.round((cash / total) * 100)}%)
                       </span>
                     </div>
-                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(cash / total) * 100}%`, background: "var(--dash-accent)", borderRadius: 4 }} />
+                    <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${(cash / total) * 100}%` }}
+                        className="h-full bg-[var(--dash-accent)] rounded-full"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("card")}</span>
-                      <span style={{ color: "#60a5fa", fontWeight: 700 }}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-[var(--dash-text)] flex items-center gap-1.5">
+                        <CreditCard size={13} className="text-[var(--dash-info)]" />
+                        {getPaymentMethodLabel("card")}
+                      </span>
+                      <span className="text-[var(--dash-info)] font-bold">
                         {card} ({Math.round((card / total) * 100)}%)
                       </span>
                     </div>
-                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(card / total) * 100}%`, background: "#60a5fa", borderRadius: 4 }} />
+                    <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${(card / total) * 100}%` }}
+                        className="h-full bg-[var(--dash-info)] rounded-full"
+                      />
                     </div>
                   </div>
                 </div>
@@ -287,8 +301,9 @@ export default function AdminReportesPage() {
 
           {/* Delivery Methods */}
           <AdminCard>
-            <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
-              🚚 Formas de Entrega ({days} días)
+            <h2 className="admin-section-title flex items-center gap-2 mb-3.5">
+              <Truck size={16} className="text-[var(--dash-accent)]" />
+              <span>Formas de Entrega ({days} días)</span>
             </h2>
             {(() => {
               const total = stats.orderCount || 1;
@@ -296,28 +311,40 @@ export default function AdminReportesPage() {
               const delivery = stats.deliveryMethods?.delivery || 0;
 
               return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div className="flex flex-col gap-3.5">
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>📦 Envío a Domicilio / Cadetería</span>
-                      <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-[var(--dash-text)] flex items-center gap-1.5">
+                        <Package size={13} className="text-[var(--dash-accent)]" />
+                        Envío a Domicilio / Cadetería
+                      </span>
+                      <span className="text-[var(--dash-accent)] font-bold">
                         {delivery} ({Math.round((delivery / total) * 100)}%)
                       </span>
                     </div>
-                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(delivery / total) * 100}%`, background: "linear-gradient(90deg, var(--dash-accent), #e2cead)", borderRadius: 4 }} />
+                    <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${(delivery / total) * 100}%` }}
+                        className="h-full bg-[var(--dash-accent)] rounded-full"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>🏪 Retiro en Local / Tienda</span>
-                      <span style={{ color: "#34d399", fontWeight: 700 }}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-semibold text-[var(--dash-text)] flex items-center gap-1.5">
+                        <Store size={13} className="text-[var(--dash-success)]" />
+                        Retiro en Local / Tienda
+                      </span>
+                      <span className="text-[var(--dash-success)] font-bold">
                         {pickup} ({Math.round((pickup / total) * 100)}%)
                       </span>
                     </div>
-                    <div style={{ height: 6, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(pickup / total) * 100}%`, background: "#34d399", borderRadius: 4 }} />
+                    <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${(pickup / total) * 100}%` }}
+                        className="h-full bg-[var(--dash-success)] rounded-full"
+                      />
                     </div>
                   </div>
                 </div>
@@ -330,43 +357,33 @@ export default function AdminReportesPage() {
       {/* Top Products */}
       {stats && stats.topProducts.length > 0 && (
         <AdminCard>
-          <h2 className="admin-section-title" style={{ marginBottom: 14 }}>
-            🏆 Más vendidos ({days} días)
+          <h2 className="admin-section-title flex items-center gap-2 mb-3.5">
+            <Trophy size={16} className="text-[var(--dash-accent)]" />
+            <span>Más vendidos ({days} días)</span>
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="flex flex-col gap-3">
             {(() => {
               const maxQty = stats.topProducts[0]?.quantity || 1;
-              const medals = ["🥇", "🥈", "🥉"];
 
               return stats.topProducts.map((p, i) => (
                 <div key={p.name}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      fontSize: 13,
-                      marginBottom: 4,
-                    }}
-                  >
-                    <span style={{ color: "var(--dash-text)", fontWeight: 600 }}>
-                      <span style={{ marginRight: 8, fontSize: i < 3 ? 15 : 12 }}>
-                        {i < 3 ? medals[i] : `${i + 1}.`}
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-[var(--dash-text)] font-semibold flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-[var(--dash-surface-3)] border border-[var(--dash-border)] flex items-center justify-center text-xs font-bold text-[var(--dash-muted)]">
+                        {i + 1}
                       </span>
-                      {p.name}
+                      <span>{p.name}</span>
                     </span>
-                    <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
+                    <span className="text-[var(--dash-accent)] font-bold">
                       {p.quantity} vendidos
                     </span>
                   </div>
-                  <div style={{ height: 5, background: "var(--dash-surface-2)", borderRadius: 4, overflow: "hidden" }}>
+                  <div className="h-1.5 bg-[var(--dash-surface-2)] rounded-full overflow-hidden">
                     <div
-                      style={{
-                        height: "100%",
-                        width: `${(p.quantity / maxQty) * 100}%`,
-                        background: i === 0 ? "var(--dash-accent)" : "var(--dash-muted)",
-                        borderRadius: 4,
-                      }}
+                      style={{ width: `${(p.quantity / maxQty) * 100}%` }}
+                      className={`h-full rounded-full ${
+                        i === 0 ? "bg-[var(--dash-accent)]" : "bg-[var(--dash-muted)]"
+                      }`}
                     />
                   </div>
                 </div>

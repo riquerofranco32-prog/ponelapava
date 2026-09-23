@@ -1,32 +1,44 @@
 export const adminLabelStyle: React.CSSProperties = {
   display: "block",
   color: "var(--dash-muted)",
-  fontSize: 11,
-  fontWeight: 700,
+  fontSize: "var(--dash-text-xs)",
+  fontWeight: 600,
   textTransform: "uppercase",
-  letterSpacing: "0.07em",
+  letterSpacing: "0.05em",
   marginBottom: 6,
 };
 
-export function AdminLabel({ children }: { children: React.ReactNode }) {
-  return <label style={adminLabelStyle}>{children}</label>;
+export function AdminLabel({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={`block text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)] mb-1.5 ${className}`.trim()}>
+      {children}
+    </label>
+  );
 }
 
 export function AdminField({
   label,
   error,
   children,
+  className = "",
 }: {
   label: string;
   error?: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div>
+    <div className={`space-y-1.5 ${className}`.trim()}>
       <AdminLabel>{label}</AdminLabel>
       {children}
       {error && (
-        <p style={{ color: "var(--dash-danger)", fontSize: 12, marginTop: 4 }}>
+        <p className="text-xs text-[var(--dash-danger)] mt-1 font-medium">
           {error}
         </p>
       )}

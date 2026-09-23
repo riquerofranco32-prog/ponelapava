@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Plus, Search, PackageSearch, Zap } from "lucide-react";
+import { Plus, Search, PackageSearch, Zap, AlertTriangle, PackageX, CheckCircle2 } from "lucide-react";
 import { Product } from "@/types";
 import ProductForm from "@/components/admin/ProductForm";
 import { BulkPriceModal } from "@/components/admin/products/BulkPriceModal";
@@ -106,55 +106,16 @@ export default function AdminProductosPage() {
       )}
 
       {/* Quick Stock Status Filter Chips */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 16,
-          overflowX: "auto",
-          paddingBottom: 6,
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
+      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1.5">
         <button
           type="button"
           onClick={() => setStockFilter("all")}
-          style={{
-            padding: "6px 12px",
-            borderRadius: "var(--radius-chip)",
-            border:
-              stockFilter === "all"
-                ? "1px solid var(--dash-accent)"
-                : "1px solid var(--dash-border)",
-            background:
-              stockFilter === "all"
-                ? "var(--dash-accent-subtle)"
-                : "var(--dash-surface)",
-            color:
-              stockFilter === "all"
-                ? "var(--dash-accent)"
-                : "var(--dash-text-muted)",
-            fontSize: 12,
-            fontWeight: stockFilter === "all" ? 600 : 500,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
+          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+            stockFilter === "all" ? "admin-toolbar-pill--active" : ""
+          }`}
         >
           <span>Todos</span>
-          <span
-            style={{
-              fontSize: 11,
-              opacity: 0.75,
-              background: "var(--dash-surface-elevated)",
-              padding: "1px 5px",
-              borderRadius: 3,
-            }}
-          >
+          <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
             {products.length}
           </span>
         </button>
@@ -162,40 +123,16 @@ export default function AdminProductosPage() {
         <button
           type="button"
           onClick={() => setStockFilter("low")}
-          style={{
-            padding: "6px 12px",
-            borderRadius: "var(--radius-chip)",
-            border:
-              stockFilter === "low"
-                ? "1px solid #f59e0b"
-                : "1px solid var(--dash-border)",
-            background:
-              stockFilter === "low"
-                ? "rgba(245, 158, 11, 0.15)"
-                : "var(--dash-surface)",
-            color: stockFilter === "low" ? "#d97706" : "var(--dash-text-muted)",
-            fontSize: 12,
-            fontWeight: stockFilter === "low" ? 600 : 500,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
+          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+            stockFilter === "low"
+              ? "border-[var(--dash-warning)] bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] font-semibold"
+              : ""
+          }`}
         >
-          <span>⚠️ Stock Crítico (≤ 3)</span>
+          <AlertTriangle size={13} className="text-[var(--dash-warning)]" />
+          <span>Stock Crítico (≤ 3)</span>
           {lowStockCount > 0 && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                background: "#f59e0b",
-                color: "#fff",
-                padding: "1px 6px",
-                borderRadius: 999,
-              }}
-            >
+            <span className="text-xs font-bold bg-[var(--dash-warning)] text-[var(--dash-bg)] px-1.5 py-0.5 rounded-full">
               {lowStockCount}
             </span>
           )}
@@ -204,43 +141,16 @@ export default function AdminProductosPage() {
         <button
           type="button"
           onClick={() => setStockFilter("out")}
-          style={{
-            padding: "6px 12px",
-            borderRadius: "var(--radius-chip)",
-            border:
-              stockFilter === "out"
-                ? "1px solid var(--dash-danger)"
-                : "1px solid var(--dash-border)",
-            background:
-              stockFilter === "out"
-                ? "rgba(220, 38, 38, 0.15)"
-                : "var(--dash-surface)",
-            color:
-              stockFilter === "out"
-                ? "var(--dash-danger)"
-                : "var(--dash-text-muted)",
-            fontSize: 12,
-            fontWeight: stockFilter === "out" ? 600 : 500,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
+          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+            stockFilter === "out"
+              ? "border-[var(--dash-danger)] bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] font-semibold"
+              : ""
+          }`}
         >
-          <span>⛔ Sin Stock</span>
+          <PackageX size={13} className="text-[var(--dash-danger)]" />
+          <span>Sin Stock</span>
           {outOfStockCount > 0 && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                background: "var(--dash-danger)",
-                color: "#fff",
-                padding: "1px 6px",
-                borderRadius: 999,
-              }}
-            >
+            <span className="text-xs font-bold bg-[var(--dash-danger)] text-white px-1.5 py-0.5 rounded-full">
               {outOfStockCount}
             </span>
           )}
@@ -249,66 +159,25 @@ export default function AdminProductosPage() {
         <button
           type="button"
           onClick={() => setStockFilter("available")}
-          style={{
-            padding: "6px 12px",
-            borderRadius: "var(--radius-chip)",
-            border:
-              stockFilter === "available"
-                ? "1px solid #10b981"
-                : "1px solid var(--dash-border)",
-            background:
-              stockFilter === "available"
-                ? "rgba(16, 185, 129, 0.15)"
-                : "var(--dash-surface)",
-            color:
-              stockFilter === "available"
-                ? "#059669"
-                : "var(--dash-text-muted)",
-            fontSize: 12,
-            fontWeight: stockFilter === "available" ? 600 : 500,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-          }}
+          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+            stockFilter === "available"
+              ? "border-[var(--dash-success)] bg-[var(--dash-success-bg)] text-[var(--dash-success)] font-semibold"
+              : ""
+          }`}
         >
-          <span>✅ En Stock</span>
-          <span
-            style={{
-              fontSize: 11,
-              opacity: 0.75,
-              background: "var(--dash-surface-elevated)",
-              padding: "1px 5px",
-              borderRadius: 3,
-            }}
-          >
+          <CheckCircle2 size={13} className="text-[var(--dash-success)]" />
+          <span>En Stock</span>
+          <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
             {inStockCount}
           </span>
         </button>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          marginBottom: 20,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ position: "relative", flex: "1 1 200px" }}>
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
           <Search
             size={15}
-            style={{
-              position: "absolute",
-              left: 12,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "var(--dash-muted)",
-            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
           />
           <input
             ref={searchInputRef}
@@ -316,15 +185,13 @@ export default function AdminProductosPage() {
             placeholder="Buscar producto... (/)"
             value={searchProduct}
             onChange={(e) => setSearchProduct(e.target.value)}
-            className="admin-input"
-            style={{ paddingLeft: 36, width: "100%" }}
+            className="admin-input pl-9 w-full text-xs"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="admin-input"
-          style={{ flex: "1 1 160px", width: "auto" }}
+          className="admin-input flex-1 min-w-[160px] w-auto text-xs"
         >
           <option value="all">Todas las categorías</option>
           {categories.map((c) => (
@@ -336,12 +203,12 @@ export default function AdminProductosPage() {
         <AdminButton
           variant="secondary"
           onClick={() => setBulkPriceOpen(true)}
-          style={{ whiteSpace: "nowrap" }}
+          className="whitespace-nowrap"
         >
-          <Zap size={14} style={{ color: "var(--dash-accent)", marginRight: 4 }} />
+          <Zap size={14} className="text-[var(--dash-accent)] mr-1" />
           Ajuste Masivo
         </AdminButton>
-        <AdminButton onClick={() => setCreating(true)} style={{ whiteSpace: "nowrap" }}>
+        <AdminButton onClick={() => setCreating(true)} className="whitespace-nowrap">
           <Plus size={15} />
           Nuevo producto
         </AdminButton>
@@ -442,35 +309,19 @@ function ProductsTable({
   onDelete: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
-  const th: React.CSSProperties = {
-    textAlign: "left",
-    padding: "10px 14px",
-    fontSize: 11,
-    fontWeight: 700,
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--dash-muted)",
-  };
-
   return (
     <>
       {/* Desktop — full table with an inline stock stepper per row */}
-      <div
-        className="admin-desktop-only"
-        style={{ overflowX: "auto", maxHeight: "70vh" }}
-      >
-        <table
-          className="admin-table"
-          style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}
-        >
+      <div className="admin-desktop-only overflow-x-auto max-h-[70vh]">
+        <table className="admin-table w-full text-sm border-collapse">
           <thead>
             <tr>
-              <th style={th}>Producto</th>
-              <th style={th}>Categoría</th>
-              <th style={th}>Precio</th>
-              <th style={th}>Stock</th>
-              <th style={th}>Estado</th>
-              <th style={{ ...th, textAlign: "right" }}>Acciones</th>
+              <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Producto</th>
+              <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Categoría</th>
+              <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Precio</th>
+              <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Stock</th>
+              <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Estado</th>
+              <th className="text-right px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -490,10 +341,7 @@ function ProductsTable({
       </div>
 
       {/* Mobile — stacked cards, easier to tap and check stock from the counter */}
-      <div
-        className="admin-mobile-only"
-        style={{ display: "flex", flexDirection: "column", gap: 10 }}
-      >
+      <div className="admin-mobile-only flex flex-col gap-2.5">
         {data.map((product, index) => (
           <ProductMobileCard
             key={product.id}

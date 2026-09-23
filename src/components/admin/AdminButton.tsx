@@ -2,7 +2,13 @@
 
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "danger";
+import { Button, type ButtonProps } from "./ui/Button";
+
+type Variant = "primary" | "secondary" | "ghost" | "danger";
+
+export interface AdminButtonProps extends Omit<ButtonProps, "variant"> {
+  variant?: Variant;
+}
 
 export function AdminButton({
   variant = "primary",
@@ -14,32 +20,29 @@ export function AdminButton({
   form,
   title,
   style,
-}: {
-  variant?: Variant;
-  disabled?: boolean;
-  fullWidth?: boolean;
-  children: React.ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit";
-  form?: string;
-  title?: string;
-  style?: React.CSSProperties;
-}) {
+  size = "md",
+  loading = false,
+  className,
+  ...rest
+}: AdminButtonProps) {
   return (
-    <button
+    <Button
+      variant={variant}
+      size={size}
+      disabled={disabled}
+      fullWidth={fullWidth}
+      loading={loading}
+      onClick={onClick}
       type={type}
       form={form}
       title={title}
       style={style}
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        "admin-btn",
-        `admin-btn--${disabled ? "secondary" : variant}`,
-        fullWidth && "admin-btn--full",
-      )}
+      className={className}
+      {...rest}
     >
       {children}
-    </button>
+    </Button>
   );
 }
+
+export default AdminButton;

@@ -37,23 +37,11 @@ export default function PendingOrdersBadge({
 
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minWidth: collapsed ? 16 : 18,
-        height: collapsed ? 16 : 18,
-        padding: collapsed ? 0 : "0 5px",
-        borderRadius: 999,
-        background: "var(--dash-danger)",
-        color: "#fff",
-        fontSize: 10,
-        fontWeight: 700,
-        lineHeight: 1,
-        ...(collapsed ? { position: "absolute", top: 2, right: 8 } : undefined),
-      }}
+      className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[var(--dash-danger)] text-white text-xs font-bold leading-none shrink-0 ${
+        collapsed ? "absolute top-1.5 right-2" : ""
+      }`}
     >
-      {count > 9 ? "9+" : count}
+      {count > 99 ? "99+" : count}
     </span>
   );
 }

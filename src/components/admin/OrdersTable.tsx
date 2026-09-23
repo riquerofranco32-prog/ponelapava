@@ -315,20 +315,10 @@ export default function OrdersTable() {
   const readyCount = orders.filter((o) => o.status === "ready").length;
   const deliveredCount = orders.filter((o) => o.status === "delivered").length;
 
-  const th: React.CSSProperties = {
-    textAlign: "left",
-    padding: "10px 14px",
-    color: "var(--dash-muted)",
-    fontSize: 12,
-    fontWeight: 600,
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-  };
-
   return (
     <div>
       {/* KPI Cards */}
-      <div className="admin-kpi-grid" style={{ marginBottom: 20 }}>
+      <div className="admin-kpi-grid mb-5">
         <AdminKpiCard
           icon={Clock}
           label="Pendientes"
@@ -384,35 +374,11 @@ export default function OrdersTable() {
       </div>
 
       {/* Main Toolbar */}
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          flexDirection: "column",
-          marginBottom: 16,
-        }}
-      >
+      <div className="flex flex-col gap-3 mb-4">
         {/* Status and View Mode Controls */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
+        <div className="flex justify-between items-center flex-wrap gap-2.5">
           {/* Status Pills */}
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              overflowX: "auto",
-              paddingBottom: 4,
-              WebkitOverflowScrolling: "touch",
-              maxWidth: "100%",
-            }}
-          >
+          <div className="flex gap-1.5 overflow-x-auto pb-1 max-w-full">
             {(
               [
                 { value: "all", label: "Todos" },
@@ -430,16 +396,9 @@ export default function OrdersTable() {
                   setStatusFilter(f.value);
                   setPage(1);
                 }}
-                className={`admin-toolbar-pill${
+                className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                   statusFilter === f.value ? " admin-toolbar-pill--active" : ""
                 }`}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  flexShrink: 0,
-                  whiteSpace: "nowrap",
-                }}
               >
                 <span>{f.label}</span>
               </button>
@@ -447,33 +406,15 @@ export default function OrdersTable() {
           </div>
 
           {/* View Mode Toggle: Table vs Kanban */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              background: "var(--dash-surface-2)",
-              border: "1px solid var(--dash-border)",
-              borderRadius: 8,
-              padding: 2,
-            }}
-          >
+          <div className="inline-flex items-center bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setViewMode("table")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "5px 10px",
-                borderRadius: 6,
-                border: "none",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                background: viewMode === "table" ? "var(--dash-surface)" : "none",
-                color: viewMode === "table" ? "var(--dash-text)" : "var(--dash-muted)",
-                boxShadow: viewMode === "table" ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
-              }}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer border-none transition-all ${
+                viewMode === "table"
+                  ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                  : "bg-transparent text-[var(--dash-muted)]"
+              }`}
             >
               <LayoutList size={14} />
               <span>Tabla</span>
@@ -481,20 +422,11 @@ export default function OrdersTable() {
             <button
               type="button"
               onClick={() => setViewMode("kanban")}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "5px 10px",
-                borderRadius: 6,
-                border: "none",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                background: viewMode === "kanban" ? "var(--dash-surface)" : "none",
-                color: viewMode === "kanban" ? "var(--dash-text)" : "var(--dash-muted)",
-                boxShadow: viewMode === "kanban" ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
-              }}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer border-none transition-all ${
+                viewMode === "kanban"
+                  ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                  : "bg-transparent text-[var(--dash-muted)]"
+              }`}
             >
               <Kanban size={14} />
               <span>Kanban</span>
@@ -503,26 +435,12 @@ export default function OrdersTable() {
         </div>
 
         {/* Filters bar: Search, Payment Status, Date Pickers, CSV, Refresh */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            flexWrap: "wrap",
-            width: "100%",
-          }}
-        >
+        <div className="flex gap-2 items-center flex-wrap w-full">
           {/* Search */}
-          <div style={{ position: "relative", flex: "1 1 200px" }}>
+          <div className="relative flex-1 min-w-[200px]">
             <Search
               size={14}
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--dash-muted)",
-              }}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
             />
             <input
               type="text"
@@ -532,8 +450,7 @@ export default function OrdersTable() {
                 setPage(1);
               }}
               placeholder="Buscar cliente o teléfono..."
-              className="admin-toolbar-input"
-              style={{ padding: "6px 14px 6px 30px", width: "100%" }}
+              className="admin-toolbar-input pl-8 pr-3.5 py-1.5 w-full text-xs"
             />
           </div>
 
@@ -544,9 +461,8 @@ export default function OrdersTable() {
               setPaymentFilter(e.target.value as PaymentFilter);
               setPage(1);
             }}
-            className="admin-toolbar-input"
+            className="admin-toolbar-input px-2.5 py-1.5 text-xs font-medium"
             aria-label="Filtro de cobro"
-            style={{ padding: "5px 10px", fontSize: 12, fontWeight: 500 }}
           >
             <option value="all">Cobro: Todos</option>
             <option value="unpaid">Sin cobrar</option>
@@ -554,7 +470,7 @@ export default function OrdersTable() {
           </select>
 
           {/* Date presets */}
-          <div style={{ display: "flex", gap: 4 }}>
+          <div className="flex gap-1">
             <button
               type="button"
               onClick={() => {
@@ -563,8 +479,7 @@ export default function OrdersTable() {
                 setDateTo(today);
                 setPage(1);
               }}
-              className="admin-toolbar-pill"
-              style={{ fontSize: 11, padding: "4px 8px" }}
+              className="admin-toolbar-pill text-xs px-2 py-1"
             >
               Hoy
             </button>
@@ -577,8 +492,7 @@ export default function OrdersTable() {
                 setDateTo(to.toISOString().slice(0, 10));
                 setPage(1);
               }}
-              className="admin-toolbar-pill"
-              style={{ fontSize: 11, padding: "4px 8px" }}
+              className="admin-toolbar-pill text-xs px-2 py-1"
             >
               7 días
             </button>
@@ -591,15 +505,14 @@ export default function OrdersTable() {
                 setDateTo(to.toISOString().slice(0, 10));
                 setPage(1);
               }}
-              className="admin-toolbar-pill"
-              style={{ fontSize: 11, padding: "4px 8px" }}
+              className="admin-toolbar-pill text-xs px-2 py-1"
             >
               Este mes
             </button>
           </div>
 
           {/* Date Inputs */}
-          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div className="flex items-center gap-1">
             <input
               type="date"
               value={dateFrom}
@@ -608,10 +521,9 @@ export default function OrdersTable() {
                 setPage(1);
               }}
               aria-label="Desde"
-              className="admin-toolbar-input"
-              style={{ padding: "4px 8px", fontSize: 12 }}
+              className="admin-toolbar-input px-2 py-1 text-xs"
             />
-            <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
+            <span className="text-[var(--dash-muted)] text-xs">–</span>
             <input
               type="date"
               value={dateTo}
@@ -620,8 +532,7 @@ export default function OrdersTable() {
                 setPage(1);
               }}
               aria-label="Hasta"
-              className="admin-toolbar-input"
-              style={{ padding: "4px 8px", fontSize: 12 }}
+              className="admin-toolbar-input px-2 py-1 text-xs"
             />
             {(dateFrom || dateTo) && (
               <button
@@ -631,14 +542,7 @@ export default function OrdersTable() {
                   setPage(1);
                 }}
                 aria-label="Limpiar fechas"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "var(--dash-muted)",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  padding: "0 4px",
-                }}
+                className="bg-transparent border-none text-[var(--dash-muted)] cursor-pointer text-xs px-1 hover:text-[var(--dash-text)]"
               >
                 ✕
               </button>
@@ -653,11 +557,7 @@ export default function OrdersTable() {
           >
             <RefreshCw
               size={13}
-              style={{
-                marginRight: 6,
-                display: "inline",
-                animation: refreshing ? "spin 1s linear infinite" : "none",
-              }}
+              className={`mr-1.5 inline ${refreshing ? "animate-spin" : ""}`}
             />
             {refreshing ? "..." : "Refrescar"}
           </AdminButton>
@@ -673,26 +573,12 @@ export default function OrdersTable() {
 
       {/* Bulk status bar */}
       {selectedIds.size > 0 && (
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            alignItems: "center",
-            padding: "10px 14px",
-            marginBottom: 12,
-            borderRadius: 10,
-            border: "1px solid var(--dash-accent)",
-            background: "var(--dash-surface-2)",
-          }}
-        >
-          <span
-            style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)" }}
-          >
+        <div className="flex gap-2.5 flex-wrap items-center px-3.5 py-2.5 mb-3 rounded-xl border border-[var(--dash-accent)] bg-[var(--dash-surface-2)]">
+          <span className="text-xs font-semibold text-[var(--dash-text)]">
             {selectedIds.size} pedido{selectedIds.size !== 1 ? "s" : ""} seleccionado
             {selectedIds.size !== 1 ? "s" : ""}
           </span>
-          <span style={{ fontSize: 12, color: "var(--dash-muted)" }}>
+          <span className="text-xs text-[var(--dash-muted)]">
             Marcar como:
           </span>
           {(
@@ -717,15 +603,7 @@ export default function OrdersTable() {
           <button
             onClick={() => setSelectedIds(new Set())}
             disabled={bulkUpdating}
-            style={{
-              marginLeft: "auto",
-              background: "none",
-              border: "none",
-              fontSize: 12,
-              color: "var(--dash-muted)",
-              cursor: "pointer",
-              textDecoration: "underline",
-            }}
+            className="ml-auto bg-transparent border-none text-xs text-[var(--dash-muted)] cursor-pointer underline hover:text-[var(--dash-text)]"
           >
             Cancelar selección
           </button>
@@ -752,21 +630,11 @@ export default function OrdersTable() {
         />
       ) : (
         <>
-          <div
-            className="admin-desktop-only"
-            style={{ overflowX: "auto", maxHeight: "70vh" }}
-          >
-            <table
-              className="admin-table"
-              style={{
-                width: "100%",
-                fontSize: 14,
-                borderCollapse: "collapse",
-              }}
-            >
+          <div className="admin-desktop-only overflow-x-auto max-h-[70vh]">
+            <table className="admin-table w-full text-sm border-collapse">
               <thead>
                 <tr>
-                  <th style={{ ...th, width: 32 }}>
+                  <th className="w-8 text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">
                     <input
                       type="checkbox"
                       checked={allVisibleSelected}
@@ -774,21 +642,12 @@ export default function OrdersTable() {
                       aria-label="Seleccionar todos los pedidos visibles"
                     />
                   </th>
-                  <th style={th}>Cliente</th>
-                  <th style={th}>Productos</th>
-                  <th style={th}>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">Cliente</th>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">Productos</th>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">
                     <button
                       onClick={() => handleSort("total")}
-                      style={{
-                        ...th,
-                        padding: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
+                      className="p-0 flex items-center gap-1 bg-transparent border-none cursor-pointer uppercase text-xs font-semibold tracking-wider text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
                     >
                       Total
                       {sortColumn === "total" ? (
@@ -798,24 +657,15 @@ export default function OrdersTable() {
                           <ArrowDown size={12} />
                         )
                       ) : (
-                        <ArrowUpDown size={12} style={{ opacity: 0.4 }} />
+                        <ArrowUpDown size={12} className="opacity-40" />
                       )}
                     </button>
                   </th>
-                  <th style={th}>Cobro</th>
-                  <th style={th}>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">Cobro</th>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">
                     <button
                       onClick={() => handleSort("date")}
-                      style={{
-                        ...th,
-                        padding: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 4,
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                      }}
+                      className="p-0 flex items-center gap-1 bg-transparent border-none cursor-pointer uppercase text-xs font-semibold tracking-wider text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
                     >
                       Fecha
                       {sortColumn === "date" ? (
@@ -825,11 +675,11 @@ export default function OrdersTable() {
                           <ArrowDown size={12} />
                         )
                       ) : (
-                        <ArrowUpDown size={12} style={{ opacity: 0.4 }} />
+                        <ArrowUpDown size={12} className="opacity-40" />
                       )}
                     </button>
                   </th>
-                  <th style={th}>Estado</th>
+                  <th className="text-left px-3.5 py-2.5 text-[var(--dash-muted)] text-xs font-semibold uppercase tracking-wider">Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -849,10 +699,7 @@ export default function OrdersTable() {
             </table>
           </div>
 
-          <div
-            className="admin-mobile-only"
-            style={{ display: "flex", flexDirection: "column", gap: 10 }}
-          >
+          <div className="admin-mobile-only flex flex-col gap-2.5">
             {sortedOrders.map((order, index) => (
               <OrderMobileCard
                 key={order.id}
@@ -869,29 +716,18 @@ export default function OrdersTable() {
 
           {/* Pagination Controls */}
           {viewMode === "table" && totalPages > 1 && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "16px 4px",
-                borderTop: "1px solid var(--dash-border)",
-                marginTop: 14,
-                fontSize: 13,
-                color: "var(--dash-muted)",
-              }}
-            >
+            <div className="flex items-center justify-between py-4 px-1 border-t border-[var(--dash-border)] mt-3.5 text-xs text-[var(--dash-muted)]">
               <span>
                 Página <strong>{page}</strong> de <strong>{totalPages}</strong> ({totalCount} pedidos)
               </span>
 
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="flex gap-2">
                 <AdminButton
                   variant="secondary"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  <ChevronLeft size={14} style={{ marginRight: 4 }} />
+                  <ChevronLeft size={14} className="mr-1" />
                   Anterior
                 </AdminButton>
                 <AdminButton
@@ -900,7 +736,7 @@ export default function OrdersTable() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
                   Siguiente
-                  <ChevronRight size={14} style={{ marginLeft: 4 }} />
+                  <ChevronRight size={14} className="ml-1" />
                 </AdminButton>
               </div>
             </div>

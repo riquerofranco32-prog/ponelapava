@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
-  Clock,
   ArrowRight,
   RefreshCw,
   Eye,
   MessageCircle,
   AlertCircle,
+  Truck,
+  Store,
+  ArrowRightLeft,
+  Tag,
 } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
@@ -20,6 +23,7 @@ import { OrderStatusSelect } from "./OrderStatusSelect";
 import { OrderDetailModal } from "./OrderDetailModal";
 import { useAdminToast } from "../AdminToast";
 import { assertOk } from "@/lib/admin-fetch";
+import { StatusPill } from "../ui/Badge";
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -62,7 +66,7 @@ export function RecentOrdersWidget({
       if (!silent) {
         showToast(
           err instanceof Error ? err.message : "Error al actualizar pedidos",
-          "error",
+          "error"
         );
       }
     } finally {
@@ -75,15 +79,14 @@ export function RecentOrdersWidget({
     fetchRecentOrders();
     const interval = setInterval(() => {
       fetchRecentOrders(true);
-    }, 20_000); // live sync every 20s
+    }, 20_000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleStatusChange(id: string, status: Order["status"]) {
-    // Optimistic UI update
     setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status } : o)),
+      prev.map((o) => (o.id === id ? { ...o, status } : o))
     );
     try {
       const res = await fetch(`/api/admin/orders/${id}`, {
@@ -97,45 +100,32 @@ export function RecentOrdersWidget({
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : "Error al actualizar",
-        "error",
+        "error"
       );
       fetchRecentOrders(true);
     }
   }
 
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "confirmed" | "delivered">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "pending" | "confirmed" | "delivered"
+  >("all");
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const filteredOrders =
-    statusFilter === "all" ? orders : orders.filter((o) => o.status === statusFilter);
+    statusFilter === "all"
+      ? orders
+      : orders.filter((o) => o.status === statusFilter);
   const recentOrders = filteredOrders.slice(0, 6);
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div className="space-y-4 mb-6">
       {/* Pending Orders Action Banner */}
       {pendingOrders.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            padding: "12px 16px",
-            borderRadius: "var(--radius-control, 10px)",
-            backgroundColor: "rgba(245, 158, 11, 0.12)",
-            border: "1px solid rgba(245, 158, 11, 0.35)",
-            color: "var(--dash-text)",
-            marginBottom: 16,
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <AlertCircle
-              size={18}
-              style={{ color: "#f59e0b", flexShrink: 0 }}
-            />
-            <span style={{ fontSize: 13, fontWeight: 600 }}>
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[var(--dash-warning-bg)] border border-[var(--dash-warning-border)] text-[var(--dash-text)]">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle size={18} className="text-[var(--dash-warning)] shrink-0" />
+            <span className="text-xs sm:text-sm font-semibold">
               Tenés{" "}
-              <strong style={{ color: "#f59e0b" }}>
+              <strong className="text-[var(--dash-warning)]">
                 {pendingOrders.length} pedido{pendingOrders.length !== 1 ? "s" : ""}{" "}
                 pendiente{pendingOrders.length !== 1 ? "s" : ""}
               </strong>{" "}
@@ -144,101 +134,52 @@ export function RecentOrdersWidget({
           </div>
           <Link
             href="/admin/pedidos"
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#f59e0b",
-              textDecoration: "underline",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-            }}
+            className="text-xs font-bold text-[var(--dash-warning)] hover:underline inline-flex items-center gap-1"
           >
-            Gestionar pedidos <ArrowRight size={13} />
+            <span>Gestionar pedidos</span>
+            <ArrowRight size={13} />
           </Link>
         </div>
       )}
 
       {/* Recent Orders Card */}
       <AdminCard>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 14,
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <h2 className="admin-section-title" style={{ margin: 0 }}>
-              Pedidos Recientes
-            </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+          <div className="flex items-center gap-2">
+            <h2 className="admin-section-title mb-0">Pedidos Recientes</h2>
             {orders.length > 0 && (
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 700,
-                  backgroundColor: "var(--dash-surface-2)",
-                  color: "var(--dash-muted)",
-                  padding: "2px 8px",
-                  borderRadius: 999,
-                  border: "1px solid var(--dash-border)",
-                }}
-              >
+              <span className="admin-badge admin-badge--neutral text-xs">
                 {orders.length} totales
               </span>
             )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => fetchRecentOrders()}
               disabled={refreshing}
               title="Actualizar pedidos"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 12,
-                color: "var(--dash-muted)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: "4px 8px",
-                borderRadius: 6,
-              }}
-              className="admin-link-btn"
+              className="admin-link-btn text-xs py-1 px-2 rounded-md"
             >
               <RefreshCw
                 size={13}
-                style={{
-                  animation: refreshing ? "spin 1s linear infinite" : "none",
-                }}
+                className={refreshing ? "animate-spin text-[var(--dash-accent)]" : ""}
               />
               <span>{refreshing ? "Actualizando..." : "Actualizar"}</span>
             </button>
 
             <Link
               href="/admin/pedidos"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--dash-accent)",
-                textDecoration: "none",
-              }}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--dash-accent)] hover:underline"
             >
-              Ver todos <ArrowRight size={13} />
+              <span>Ver todos</span>
+              <ArrowRight size={13} />
             </Link>
           </div>
         </div>
 
         {/* Status Filter Pills */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+        <div className="flex flex-wrap gap-1.5 mb-3.5">
           {(
             [
               { key: "all", label: "Todos" },
@@ -251,96 +192,55 @@ export function RecentOrdersWidget({
               key={tab.key}
               type="button"
               onClick={() => setStatusFilter(tab.key)}
-              className={`admin-toolbar-pill${statusFilter === tab.key ? " admin-toolbar-pill--active" : ""}`}
-              style={{ fontSize: 11, padding: "3px 8px" }}
+              className={`admin-toolbar-pill text-xs py-1 px-2.5 ${
+                statusFilter === tab.key ? "admin-toolbar-pill--active" : ""
+              }`}
             >
               <span>{tab.label}</span>
               {"count" in tab && tab.count && tab.count > 0 ? (
-                <span style={{ marginLeft: 4, fontWeight: 700, opacity: 0.85 }}>({tab.count})</span>
+                <span className="ml-1 font-bold">({tab.count})</span>
               ) : null}
             </button>
           ))}
         </div>
 
         {loading ? (
-          <div style={{ padding: "24px 0", textAlign: "center", color: "var(--dash-muted)", fontSize: 13 }}>
+          <div className="py-6 text-center text-xs text-[var(--dash-muted)]">
             Cargando pedidos recientes...
           </div>
         ) : recentOrders.length === 0 ? (
-          <div
-            style={{
-              padding: "28px 16px",
-              textAlign: "center",
-              color: "var(--dash-muted)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <ShoppingBag size={32} style={{ opacity: 0.3 }} />
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>
+          <div className="py-8 px-4 text-center text-[var(--dash-muted)] flex flex-col items-center gap-2">
+            <ShoppingBag size={32} className="opacity-30" />
+            <p className="text-sm font-semibold text-[var(--dash-text)]">
               Todavía no se registraron pedidos
             </p>
-            <span style={{ fontSize: 12, opacity: 0.7 }}>
-              Aparecerán aquí en tiempo real cuando un cliente haga un pedido desde el carrito.
+            <span className="text-xs">
+              Aparecerán aquí en tiempo real cuando un cliente haga un pedido.
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="space-y-2">
             {recentOrders.map((order, idx) => {
-              const hasPhone = Boolean(order.customerPhone && order.customerPhone.trim().length > 5);
+              const hasPhone = Boolean(
+                order.customerPhone && order.customerPhone.trim().length > 5
+              );
 
               return (
                 <div
                   key={order.id ?? idx}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    padding: "10px 12px",
-                    borderRadius: 10,
-                    backgroundColor: "var(--dash-surface-2)",
-                    border: "1px solid var(--dash-border)",
-                    transition: "border-color 0.15s ease",
-                  }}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] hover:border-[var(--dash-accent)] transition-colors"
                 >
                   {/* Left: Customer info & Items preview */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
-                    <span
-                      style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: "50%",
-                        backgroundColor: "var(--dash-surface-3)",
-                        color: "var(--dash-accent)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        flexShrink: 0,
-                      }}
-                    >
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span className="w-8 h-8 rounded-full bg-[var(--dash-surface-3)] text-[var(--dash-accent)] flex items-center justify-center font-bold text-xs shrink-0">
                       {order.customerName.charAt(0).toUpperCase()}
                     </span>
 
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <button
                           onClick={() => setSelectedOrder(order)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                            cursor: "pointer",
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: "var(--dash-text)",
-                            textAlign: "left",
-                          }}
-                          className="hover:underline"
+                          className="text-xs sm:text-sm font-bold text-[var(--dash-text)] hover:underline text-left"
                         >
                           {order.customerName}
                         </button>
@@ -351,158 +251,81 @@ export function RecentOrdersWidget({
                               order.customerPhone!,
                               order.customerName,
                               order.total,
-                              order.status === "confirmed" ? "confirmed" : order.status === "delivered" ? "delivered" : "general"
+                              order.status === "confirmed"
+                                ? "confirmed"
+                                : order.status === "delivered"
+                                ? "delivered"
+                                : "general"
                             )}
                             target="_blank"
                             rel="noopener noreferrer"
                             title={`Chatear por WhatsApp con ${order.customerName}`}
-                            style={{
-                              color: "var(--color-whatsapp, #25d366)",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              opacity: 0.85,
-                            }}
+                            className="text-[#25d366] hover:opacity-80 transition-opacity"
                           >
                             <MessageCircle size={14} />
                           </a>
                         )}
                       </div>
 
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "var(--dash-muted)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          marginTop: 2,
-                        }}
-                      >
+                      <div className="text-xs text-[var(--dash-muted)] truncate">
                         {order.items.map((i) => `${i.productName} x${i.quantity}`).join(", ")}
                       </div>
 
                       {/* Delivery & Payment Badges */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4, flexWrap: "wrap" }}>
+                      <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
                         {order.comment?.includes("[Envío a Domicilio") && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              padding: "1px 5px",
-                              borderRadius: 4,
-                              backgroundColor: "rgba(59, 130, 246, 0.12)",
-                              color: "#2563eb",
-                              border: "1px solid rgba(59, 130, 246, 0.25)",
-                            }}
-                          >
-                            🛵 Domicilio
+                          <span className="admin-badge admin-badge--info text-xs">
+                            <Truck size={12} />
+                            <span>Domicilio</span>
                           </span>
                         )}
                         {order.comment?.includes("[Retiro en Local") && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              padding: "1px 5px",
-                              borderRadius: 4,
-                              backgroundColor: "rgba(16, 185, 129, 0.12)",
-                              color: "#059669",
-                              border: "1px solid rgba(16, 185, 129, 0.25)",
-                            }}
-                          >
-                            🏪 Retiro Local
+                          <span className="admin-badge admin-badge--accent text-xs">
+                            <Store size={12} />
+                            <span>Retiro Local</span>
                           </span>
                         )}
                         {order.comment?.includes("[Pago: Transferencia") && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              padding: "1px 5px",
-                              borderRadius: 4,
-                              backgroundColor: "rgba(16, 185, 129, 0.12)",
-                              color: "#059669",
-                              border: "1px solid rgba(16, 185, 129, 0.25)",
-                            }}
-                          >
-                            💳 Transferencia
+                          <span className="admin-badge admin-badge--success text-xs">
+                            <ArrowRightLeft size={12} />
+                            <span>Transferencia</span>
                           </span>
                         )}
                         {order.comment?.includes("[Cupón:") && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              padding: "1px 5px",
-                              borderRadius: 4,
-                              backgroundColor: "rgba(245, 158, 11, 0.12)",
-                              color: "#d97706",
-                              border: "1px solid rgba(245, 158, 11, 0.25)",
-                            }}
-                          >
-                            🏷️ Cupón
+                          <span className="admin-badge admin-badge--warning text-xs">
+                            <Tag size={12} />
+                            <span>Cupón</span>
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Middle / Right: Total & Relative Time */}
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-end",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: "var(--dash-accent)",
-                      }}
-                    >
-                      {formatPrice(order.total)}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: "var(--dash-muted)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 3,
-                        marginTop: 1,
-                      }}
-                    >
-                      <Clock size={10} />
-                      {formatRelativeTime(order.createdAt)}
-                    </span>
-                  </div>
+                  {/* Right: Total, Time, and Status Select */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                    <div className="text-left sm:text-right">
+                      <div className="font-serif font-bold text-sm text-[var(--dash-accent)]">
+                        {formatPrice(order.total)}
+                      </div>
+                      <div className="text-xs text-[var(--dash-muted)]">
+                        {formatRelativeTime(order.createdAt)}
+                      </div>
+                    </div>
 
-                  {/* Status Dropdown & Action */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                    <OrderStatusSelect
-                      status={order.status}
-                      onChange={(next) => handleStatusChange(order.id!, next)}
-                    />
-                    <button
-                      onClick={() => setSelectedOrder(order)}
-                      title="Ver detalle del pedido"
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "var(--dash-muted)",
-                        cursor: "pointer",
-                        padding: 6,
-                        borderRadius: 6,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Eye size={15} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <OrderStatusSelect
+                        status={order.status}
+                        onChange={(status) => handleStatusChange(order.id!, status)}
+                      />
+
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="admin-icon-btn"
+                        title="Ver detalle del pedido"
+                      >
+                        <Eye size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -511,7 +334,7 @@ export function RecentOrdersWidget({
         )}
       </AdminCard>
 
-      {/* Order Detail Modal */}
+      {/* Order Detail Modal / Drawer */}
       {selectedOrder && (
         <OrderDetailModal
           order={selectedOrder}
@@ -521,3 +344,5 @@ export function RecentOrdersWidget({
     </div>
   );
 }
+
+export default RecentOrdersWidget;

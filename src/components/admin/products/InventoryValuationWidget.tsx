@@ -28,9 +28,9 @@ export function InventoryValuationWidget({ products }: InventoryValuationWidgetP
   const outPct = Math.round((outOfStock / totalProducts) * 100);
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div className="mb-6">
       {/* KPI Cards */}
-      <div className="admin-kpi-grid" style={{ marginBottom: 16 }}>
+      <div className="admin-kpi-grid mb-4">
         <AdminKpiCard
           icon={Coins}
           label="Valor del Inventario (Venta)"
@@ -49,66 +49,40 @@ export function InventoryValuationWidget({ products }: InventoryValuationWidgetP
       </div>
 
       {/* Stock Health Progress Bar */}
-      <AdminCard style={{ padding: "14px 20px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 8,
-            fontSize: 12,
-          }}
-        >
-          <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+      <AdminCard className="px-5 py-3.5">
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <span className="font-semibold text-[var(--dash-text)]">
             Salud del Inventario
           </span>
-          <div style={{ display: "flex", gap: 16, fontSize: 11 }}>
-            <span style={{ color: "#10b981", display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
+          <div className="flex gap-4 text-xs">
+            <span className="text-[var(--dash-success)] inline-flex items-center gap-1 font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--dash-success)] inline-block" />
               Óptimo ({healthyPct}%)
             </span>
-            <span style={{ color: "#f59e0b", display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
+            <span className="text-[var(--dash-warning)] inline-flex items-center gap-1 font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--dash-warning)] inline-block" />
               Bajo ({lowPct}%)
             </span>
-            <span style={{ color: "#ef4444", display: "inline-flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
+            <span className="text-[var(--dash-danger)] inline-flex items-center gap-1 font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--dash-danger)] inline-block" />
               Agotado ({outPct}%)
             </span>
           </div>
         </div>
 
         {/* Multi-segment bar */}
-        <div
-          style={{
-            height: 8,
-            width: "100%",
-            borderRadius: 999,
-            background: "var(--dash-surface-2)",
-            overflow: "hidden",
-            display: "flex",
-          }}
-        >
+        <div className="h-2 w-full rounded-full bg-[var(--dash-surface-2)] overflow-hidden flex">
           <div
-            style={{
-              width: `${healthyPct}%`,
-              background: "#10b981",
-              transition: "width 0.5s ease",
-            }}
+            style={{ width: `${healthyPct}%` }}
+            className="bg-[var(--dash-success)] transition-[width] duration-500"
           />
           <div
-            style={{
-              width: `${lowPct}%`,
-              background: "#f59e0b",
-              transition: "width 0.5s ease",
-            }}
+            style={{ width: `${lowPct}%` }}
+            className="bg-[var(--dash-warning)] transition-[width] duration-500"
           />
           <div
-            style={{
-              width: `${outPct}%`,
-              background: "#ef4444",
-              transition: "width 0.5s ease",
-            }}
+            style={{ width: `${outPct}%` }}
+            className="bg-[var(--dash-danger)] transition-[width] duration-500"
           />
         </div>
       </AdminCard>

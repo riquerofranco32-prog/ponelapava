@@ -13,10 +13,10 @@ export const STATUS_COLORS: Record<
   Order["status"],
   { color: string; bg: string }
 > = {
-  pending: { color: "var(--dash-accent)", bg: "rgba(199,166,122,0.12)" },
-  confirmed: { color: "#3b82f6", bg: "rgba(59,130,246,0.12)" },
-  preparing: { color: "#8b5cf6", bg: "rgba(139,92,246,0.12)" },
-  ready: { color: "#10b981", bg: "rgba(16,185,129,0.12)" },
+  pending: { color: "var(--dash-accent)", bg: "var(--dash-accent-subtle, rgba(199,166,122,0.12))" },
+  confirmed: { color: "var(--dash-info)", bg: "var(--dash-info-bg)" },
+  preparing: { color: "var(--dash-info)", bg: "var(--dash-info-bg)" },
+  ready: { color: "var(--dash-success)", bg: "var(--dash-success-bg)" },
   delivered: { color: "var(--dash-muted)", bg: "var(--dash-surface-2)" },
   cancelled: { color: "var(--dash-danger)", bg: "var(--dash-danger-bg)" },
 };
@@ -45,8 +45,8 @@ export const PAYMENT_STATUS_COLORS: Record<
   PaymentStatus,
   { color: string; bg: string }
 > = {
-  unpaid: { color: "#f59e0b", bg: "rgba(245, 158, 11, 0.12)" },
-  paid: { color: "#10b981", bg: "rgba(16, 185, 129, 0.12)" },
+  unpaid: { color: "var(--dash-warning)", bg: "var(--dash-warning-bg)" },
+  paid: { color: "var(--dash-success)", bg: "var(--dash-success-bg)" },
 };
 
 export function isPaymentStatus(value: unknown): value is PaymentStatus {

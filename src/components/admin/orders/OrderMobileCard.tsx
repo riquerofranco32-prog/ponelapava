@@ -30,48 +30,24 @@ export function OrderMobileCard({
 
   return (
     <div
-      className="admin-row-in"
-      style={
-        {
-          padding: 14,
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: 10,
-          "--i": index,
-        } as React.CSSProperties
-      }
+      className="admin-row-in p-3.5 bg-[var(--dash-surface)] border border-[var(--dash-border)] rounded-xl"
+      style={{ "--i": index } as React.CSSProperties}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 8,
-        }}
-      >
+      <div className="flex justify-between items-start gap-2">
         <input
           type="checkbox"
           checked={selected}
           onChange={() => onToggleSelect(order.id!)}
           aria-label={`Seleccionar pedido de ${order.customerName}`}
-          style={{ flexShrink: 0, marginTop: 3 }}
+          className="shrink-0 mt-0.5"
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 0 }}>
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
           <button
             onClick={() => onView(order)}
-            className="admin-link-btn"
-            style={{ padding: 0, background: "none", minWidth: 0, flex: 1 }}
+            className="admin-link-btn p-0 bg-transparent min-w-0 flex-1 flex items-center gap-1.5 text-left"
           >
-            <Eye size={13} style={{ opacity: 0.6, flexShrink: 0 }} />
-            <span
-              style={{
-                fontWeight: 500,
-                color: "var(--dash-text)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <Eye size={13} className="opacity-60 shrink-0" />
+            <span className="font-semibold text-[var(--dash-text)] truncate text-xs">
               {order.customerName}
             </span>
           </button>
@@ -80,16 +56,7 @@ export function OrderMobileCard({
             type="button"
             onClick={() => printOrderRemito(order)}
             title="Imprimir remito de despacho"
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--dash-muted)",
-              padding: 2,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              flexShrink: 0,
-            }}
+            className="bg-transparent border-none text-[var(--dash-muted)] p-1 cursor-pointer inline-flex items-center shrink-0 rounded hover:text-[var(--dash-text)]"
           >
             <Printer size={14} />
           </button>
@@ -105,27 +72,13 @@ export function OrderMobileCard({
               target="_blank"
               rel="noopener noreferrer"
               title={`Chatear con ${order.customerName}`}
-              style={{
-                color: "var(--color-whatsapp, #25d366)",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                padding: 2,
-              }}
+              className="text-[#25d366] inline-flex items-center justify-center shrink-0 p-1 rounded opacity-80 hover:opacity-100"
             >
               <MessageCircle size={15} />
             </a>
           )}
         </div>
-        <span
-          style={{
-            fontSize: 12,
-            color: "var(--dash-muted)",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
+        <span className="text-xs text-[var(--dash-muted)] whitespace-nowrap shrink-0">
           {new Date(order.createdAt).toLocaleDateString("es-AR", {
             day: "2-digit",
             month: "2-digit",
@@ -133,30 +86,13 @@ export function OrderMobileCard({
         </span>
       </div>
 
-      <p
-        style={{
-          fontSize: 12,
-          color: "var(--dash-muted)",
-          marginTop: 6,
-        }}
-      >
+      <p className="text-xs text-[var(--dash-muted)] mt-1.5 line-clamp-2">
         {truncate(itemsSummary, 70)}
       </p>
 
-      <div
-        style={{
-          marginTop: 10,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderTop: "1px solid var(--dash-border)",
-          paddingTop: 10,
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+      <div className="mt-2.5 flex items-center justify-between border-t border-[var(--dash-border)] pt-2.5 gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-xs text-[var(--dash-text)]">
             {formatPrice(order.total)}
           </span>
           <button
@@ -167,25 +103,15 @@ export function OrderMobileCard({
                 order.paymentStatus === "paid" ? "unpaid" : "paid",
               )
             }
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-              border: "none",
-              borderRadius: 999,
-              padding: "2px 8px",
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: onPaymentStatusChange ? "pointer" : "default",
-              background:
-                order.paymentStatus === "paid"
-                  ? "rgba(16, 185, 129, 0.15)"
-                  : "rgba(245, 158, 11, 0.15)",
-              color:
-                order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
-            }}
+            className={`inline-flex items-center gap-1 border-none rounded-full px-2 py-0.5 text-xs font-semibold ${
+              onPaymentStatusChange ? "cursor-pointer" : "cursor-default"
+            } ${
+              order.paymentStatus === "paid"
+                ? "bg-[var(--dash-success-bg)] text-[var(--dash-success)] border border-[var(--dash-success-border)]"
+                : "bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] border border-[var(--dash-warning-border)]"
+            }`}
           >
-            {order.paymentStatus === "paid" ? "✓ Cobrado" : "⏳ Sin cobrar"}
+            {order.paymentStatus === "paid" ? "Cobrado" : "Sin cobrar"}
           </button>
         </div>
         <OrderStatusSelect

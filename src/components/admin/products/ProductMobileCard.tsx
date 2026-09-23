@@ -39,41 +39,24 @@ export function ProductMobileCard({
       }
     >
       <ProductThumb src={product.images[0]} size={52} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 8,
-            alignItems: "flex-start",
-          }}
-        >
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontWeight: 500,
-                color: "var(--dash-text)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+      <ProductThumb src={product.images[0]} size={52} />
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between gap-2 items-start">
+          <div className="min-w-0">
+            <div className="font-medium text-[var(--dash-text)] truncate">
               {product.name}
             </div>
-            <div
-              style={{ fontSize: 12, color: "var(--dash-muted)", marginTop: 2 }}
-            >
+            <div className="text-xs text-[var(--dash-muted)] mt-0.5">
               {getCategoryLabel(product.category)}
             </div>
           </div>
-          <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+          <div className="flex gap-1 shrink-0">
             <a
               href={`/producto/${product.id}`}
               target="_blank"
               rel="noopener noreferrer"
               title="Ver en la tienda"
-              className="admin-icon-btn"
-              style={{ textDecoration: "none", width: 32, height: 32 }}
+              className="admin-icon-btn !no-underline !w-8 !h-8"
             >
               <ExternalLink size={14} />
             </a>
@@ -98,41 +81,15 @@ export function ProductMobileCard({
           </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 10,
-          }}
-        >
-          <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+        <div className="mt-2.5 flex items-center justify-between flex-wrap gap-2.5">
+          <span className="font-semibold text-[var(--dash-text)]">
             {formatPrice(product.price)}
           </span>
           <StatusBadge status={product.status} />
         </div>
 
-        <div
-          style={{
-            marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderTop: "1px solid var(--dash-border)",
-            paddingTop: 10,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--dash-muted)",
-            }}
-          >
+        <div className="mt-2.5 flex items-center justify-between border-t border-[var(--dash-border)] pt-2.5">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)]">
             Stock
           </span>
           <StockStepper

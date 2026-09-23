@@ -1,13 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, MessageCircle, Printer } from "lucide-react";
-import { Order } from "@/types";
+import {
+  Copy,
+  Check,
+  MessageCircle,
+  Printer,
+  Phone,
+  MapPin,
+  Clock,
+  Package,
+  PackageCheck,
+  Truck,
+  CheckCircle2,
+  XCircle,
+  Tag,
+} from "lucide-react";
+import { Order, OrderStatus } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
 import { printOrderRemito, getPaymentMethodLabel } from "@/lib/orderPrint";
-import { AdminModal } from "@/components/admin/AdminModal";
-import { AdminButton } from "@/components/admin/AdminButton";
+import { Drawer } from "@/components/admin/ui/Drawer";
+import { Button } from "@/components/admin/ui/Button";
+import { StatusPill } from "@/components/admin/ui/Badge";
 
 function buildSummary(order: Order): string {
   const lines = [
@@ -15,7 +30,7 @@ function buildSummary(order: Order): string {
     new Date(order.createdAt).toLocaleString("es-AR"),
     "",
     ...order.items.map(
-      (i) => `${i.quantity}x ${i.productName} — ${formatPrice(i.subtotal)}`,
+      (i) => `${i.quantity}x ${i.productName} — ${formatPrice(i.subtotal)}`
     ),
     "",
     `Total: ${formatPrice(order.total)}`,
@@ -24,6 +39,14 @@ function buildSummary(order: Order): string {
   if (order.comment) lines.push("", `Comentario: ${order.comment}`);
   return lines.join("\n");
 }
+
+const WORKFLOW_STEPS: { status: OrderStatus; label: string; icon: typeof Clock }[] = [
+  { status: "pending", label: "Pendiente", icon: Clock },
+  { status: "confirmed", label: "Confirmado", icon: CheckCircle2 },
+  { status: "preparing", label: "En preparación", icon: Package },
+  { status: "ready", label: "Listo para entrega", icon: PackageCheck },
+  { status: "delivered", label: "Entregado", icon: Truck },
+];
 
 export function OrderDetailModal({
   order,
@@ -50,23 +73,24 @@ export function OrderDetailModal({
     }
   }
 
-  const hasPhone = Boolean(order.customerPhone && order.customerPhone.trim().length > 5);
+  const hasPhone = Boolean(
+    order.customerPhone && order.customerPhone.trim().length > 5
+  );
+
+  const currentStepIdx = WORKFLOW_STEPS.findIndex((s) => s.status === order.status);
+  const isCancelled = order.status === "cancelled";
 
   return (
-    <AdminModal
-      title={`Pedido de ${order.customerName}`}
+    <Drawer
+      isOpen={true}
       onClose={onClose}
-      maxWidth={480}
+      title={`Pedido #${order.id?.slice(0, 8) || ""} · ${order.customerName}`}
+      subtitle={new Date(order.createdAt).toLocaleString("es-AR", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })}
       footer={
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            gap: 10,
-          }}
-        >
+        <div className="flex flex-wrap items-center justify-between gap-3 w-full">
           <div>
             {hasPhone && (
               <a
@@ -74,249 +98,206 @@ export function OrderDetailModal({
                   order.customerPhone!,
                   order.customerName,
                   order.total,
-                  order.status === "confirmed" ? "confirmed" : order.status === "delivered" ? "delivered" : "general"
+                  order.status === "confirmed"
+                    ? "confirmed"
+                    : order.status === "delivered"
+                    ? "delivered"
+                    : "general"
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="admin-btn admin-btn-primary"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  backgroundColor: "var(--color-whatsapp, #25d366)",
-                  borderColor: "var(--color-whatsapp, #25d366)",
-                  color: "#fff",
-                  textDecoration: "none",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: "6px 12px",
-                  borderRadius: "var(--radius-control, 8px)",
-                }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-sm"
+                style={{ backgroundColor: "#25d366" }}
               >
                 <MessageCircle size={15} />
-                WhatsApp al cliente
+                <span>WhatsApp</span>
               </a>
             )}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+          <div className="flex items-center gap-2">
             {copyError && (
-              <span style={{ fontSize: 12, color: "var(--dash-danger)" }}>
-                No se pudo copiar
+              <span className="text-xs text-[var(--dash-danger)]">
+                Error al copiar
               </span>
             )}
-            <AdminButton variant="secondary" onClick={handlePrint} title="Imprimir ticket para empaque o despacho">
-              <Printer size={14} />
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handlePrint}
+              icon={<Printer size={14} />}
+            >
               Imprimir
-            </AdminButton>
-            <AdminButton variant="secondary" onClick={handleCopy}>
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-              {copied ? "Copiado" : "Copiar resumen"}
-            </AdminButton>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleCopy}
+              icon={copied ? <Check size={14} /> : <Copy size={14} />}
+            >
+              {copied ? "Copiado" : "Copiar"}
+            </Button>
           </div>
         </div>
       }
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontSize: 12,
-          color: "var(--dash-muted)",
-        }}
-      >
-        <span>
-          {new Date(order.createdAt).toLocaleString("es-AR", {
-            dateStyle: "long",
-            timeStyle: "short",
-          })}
-        </span>
-        {order.customerPhone && (
-          <span style={{ color: "var(--dash-text)", fontWeight: 500 }}>
-            📞 {order.customerPhone}
-          </span>
-        )}
-      </div>
-
-      {/* Payment & Delivery Badges */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "10px 0 6px" }}>
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            padding: "3px 8px",
-            borderRadius: "var(--radius-chip, 4px)",
-            background:
-              order.paymentStatus === "paid"
-                ? "rgba(16, 185, 129, 0.15)"
-                : "rgba(245, 158, 11, 0.15)",
-            color:
-              order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
-            border: "1px solid var(--dash-border)",
-          }}
-        >
-          {order.paymentStatus === "paid"
-            ? order.paidAt
-              ? `✓ Cobrado (${new Date(order.paidAt).toLocaleDateString("es-AR")})`
-              : "✓ Cobrado"
-            : "⏳ Sin cobrar"}
-        </span>
+      {/* Status & Key Badges */}
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusPill type="order" value={order.status} />
+        <StatusPill type="payment" value={order.paymentStatus || "unpaid"} />
         {order.paymentMethod && (
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              padding: "3px 8px",
-              borderRadius: "var(--radius-chip, 4px)",
-              background: order.paymentMethod === "transfer" ? "rgba(16, 185, 129, 0.15)" : "var(--dash-surface-2)",
-              color: order.paymentMethod === "transfer" ? "#10b981" : "var(--dash-text)",
-              border: "1px solid var(--dash-border)",
-            }}
-          >
-            {order.paymentMethod === "cash" ? "💵 " : "💳 "}
-            {getPaymentMethodLabel(order.paymentMethod)}
-          </span>
+          <StatusPill type="payment_method" value={order.paymentMethod} />
         )}
         {order.deliveryMethod && (
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              padding: "3px 8px",
-              borderRadius: "var(--radius-chip, 4px)",
-              background: order.deliveryMethod === "pickup" ? "rgba(199, 166, 122, 0.15)" : "var(--dash-surface-2)",
-              color: order.deliveryMethod === "pickup" ? "var(--dash-accent)" : "var(--dash-text)",
-              border: "1px solid var(--dash-border)",
-            }}
-          >
-            {order.deliveryMethod === "pickup" ? "🏪 Retiro en Local" : "🛵 Envío a Domicilio"}
-          </span>
-        )}
-        {order.couponCode && (
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              padding: "3px 8px",
-              borderRadius: "var(--radius-chip, 4px)",
-              background: "rgba(199, 166, 122, 0.15)",
-              color: "var(--dash-accent)",
-              border: "1px solid var(--dash-border)",
-            }}
-          >
-            🏷️ Cupón: {order.couponCode}
+          <span className="admin-badge admin-badge--neutral">
+            {order.deliveryMethod === "pickup" ? (
+              <>
+                <Truck size={12} className="text-current" />
+                <span>Retiro en Local</span>
+              </>
+            ) : (
+              <>
+                <Truck size={12} className="text-current" />
+                <span>Envío a Domicilio</span>
+              </>
+            )}
           </span>
         )}
       </div>
 
-      {order.deliveryAddress && (
-        <div
-          style={{
-            fontSize: 12,
-            padding: "8px 10px",
-            background: "var(--dash-surface-2)",
-            borderRadius: 6,
-            border: "1px solid var(--dash-border)",
-            color: "var(--dash-text)",
-            margin: "4px 0 10px",
-          }}
-        >
-          <span style={{ color: "var(--dash-muted)", fontWeight: 600 }}>📍 Dirección: </span>
-          {order.deliveryAddress}
+      {/* Order Workflow Timeline */}
+      <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-3">
+        <div className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">
+          Línea de tiempo del pedido
         </div>
-      )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 10,
-          borderTop: "1px solid var(--dash-border)",
-          borderBottom: "1px solid var(--dash-border)",
-          padding: "14px 0",
-        }}
-      >
-        {order.items.map((item) => (
-          <div
-            key={item.productId}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 10,
-            }}
-          >
-            <span style={{ fontSize: 14, color: "var(--dash-text)" }}>
-              <span style={{ color: "var(--dash-muted)" }}>
-                {item.quantity}x
-              </span>{" "}
-              {item.productName}
-            </span>
-            <span
-              style={{
-                fontSize: 14,
-                fontWeight: 500,
-                color: "var(--dash-text)",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {formatPrice(item.subtotal)}
-            </span>
+        {isCancelled ? (
+          <div className="flex items-center gap-2.5 text-sm text-[var(--dash-danger)] font-medium">
+            <XCircle size={18} />
+            <span>Este pedido fue cancelado.</span>
           </div>
-        ))}
+        ) : (
+          <div className="relative flex items-center justify-between pt-2 pb-1">
+            {/* Connecting line */}
+            <div className="absolute left-3 right-3 top-5 h-0.5 bg-[var(--dash-surface-3)] -z-0" />
+
+            {WORKFLOW_STEPS.map((step, idx) => {
+              const isPast = idx <= currentStepIdx;
+              const isCurrent = idx === currentStepIdx;
+              const Icon = step.icon;
+
+              return (
+                <div
+                  key={step.status}
+                  className="flex flex-col items-center gap-1.5 z-10"
+                >
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center border transition-all ${
+                      isCurrent
+                        ? "bg-[var(--dash-accent)] text-[var(--dash-bg)] border-[var(--dash-accent)] shadow-md"
+                        : isPast
+                        ? "bg-[var(--dash-surface-3)] text-[var(--dash-text)] border-[var(--dash-border)]"
+                        : "bg-[var(--dash-surface-2)] text-[var(--dash-muted)] border-[var(--dash-border-subtle)]"
+                    }`}
+                  >
+                    <Icon size={13} />
+                  </div>
+                  <span
+                    className={`text-xs text-center max-w-[64px] font-medium leading-tight ${
+                      isCurrent
+                        ? "text-[var(--dash-accent)] font-bold"
+                        : isPast
+                        ? "text-[var(--dash-text)]"
+                        : "text-[var(--dash-muted)] opacity-60"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Descuentos. El costo de envío no se muestra: no se cotiza en el
-          sitio, se coordina por WhatsApp — y el campo nunca tuvo escritor. */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: "var(--dash-muted)", paddingTop: 4 }}>
+      {/* Customer Info */}
+      <div className="space-y-2 p-3.5 rounded-lg bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-sm">
+        <div className="flex items-center justify-between">
+          <span className="font-semibold text-[var(--dash-text)]">
+            {order.customerName}
+          </span>
+          {order.customerPhone && (
+            <span className="flex items-center gap-1.5 text-xs text-[var(--dash-muted)]">
+              <Phone size={13} />
+              <span>{order.customerPhone}</span>
+            </span>
+          )}
+        </div>
+
+        {order.deliveryAddress && (
+          <div className="flex items-start gap-2 text-xs text-[var(--dash-muted)] pt-1 border-t border-[var(--dash-border-subtle)]">
+            <MapPin size={14} className="shrink-0 text-[var(--dash-accent)] mt-0.5" />
+            <span>{order.deliveryAddress}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Products List */}
+      <div className="space-y-3">
+        <div className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">
+          Productos incluidos
+        </div>
+
+        <div className="divide-y divide-[var(--dash-border-subtle)] border-y border-[var(--dash-border)]">
+          {order.items.map((item) => (
+            <div
+              key={item.productId}
+              className="py-2.5 flex items-center justify-between text-sm gap-3"
+            >
+              <span className="text-[var(--dash-text)]">
+                <span className="text-[var(--dash-muted)] font-medium">
+                  {item.quantity}x
+                </span>{" "}
+                {item.productName}
+              </span>
+              <span className="font-semibold text-[var(--dash-text)] shrink-0">
+                {formatPrice(item.subtotal)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Discounts & Totals */}
+      <div className="space-y-2 pt-1 text-sm">
         {order.discount && order.discount > 0 ? (
-          <div style={{ display: "flex", justifyContent: "space-between", color: "#10b981" }}>
-            <span>Descuento aplicado</span>
+          <div className="flex items-center justify-between text-[var(--dash-success)] font-medium">
+            <span className="flex items-center gap-1.5">
+              <Tag size={14} />
+              <span>Descuento aplicado {order.couponCode ? `(${order.couponCode})` : ""}</span>
+            </span>
             <span>-{formatPrice(order.discount)}</span>
           </div>
         ) : null}
-      </div>
 
-      {order.comment && (
-        <div>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--dash-muted)",
-              marginBottom: 4,
-            }}
-          >
-            Comentario
+        {order.comment && (
+          <div className="p-3 rounded-lg bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs text-[var(--dash-text)] space-y-1">
+            <span className="font-bold text-[var(--dash-muted)] block">Nota del cliente:</span>
+            <p>{order.comment}</p>
           </div>
-          <p style={{ fontSize: 14, color: "var(--dash-text)" }}>
-            {order.comment}
-          </p>
-        </div>
-      )}
+        )}
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          paddingTop: 8,
-          borderTop: "1px solid var(--dash-border)",
-        }}
-      >
-        <span style={{ fontSize: 14, color: "var(--dash-muted)" }}>Total</span>
-        <span
-          style={{
-            fontFamily: "var(--font-playfair), Georgia, serif",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "var(--dash-text)",
-          }}
-        >
-          {formatPrice(order.total)}
-        </span>
+        <div className="flex items-baseline justify-between pt-3 border-t border-[var(--dash-border)]">
+          <span className="text-sm font-semibold text-[var(--dash-muted)]">
+            Total del pedido
+          </span>
+          <span className="font-serif text-2xl font-bold text-[var(--dash-accent)]">
+            {formatPrice(order.total)}
+          </span>
+        </div>
       </div>
-    </AdminModal>
+    </Drawer>
   );
 }
+
+export default OrderDetailModal;

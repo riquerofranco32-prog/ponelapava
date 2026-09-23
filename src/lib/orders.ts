@@ -508,6 +508,10 @@ export interface DashboardStats {
   deliveryMethods?: { pickup: number; delivery: number };
   totalUnpaidAmount?: number;
   unpaidOrdersCount?: number;
+  todayRevenue?: number;
+  todayRevenueChange?: number | null;
+  pendingOrdersCount?: number;
+  overdueFollowupsCount?: number;
 }
 
 // Last 14 days of orders drive the dashboard's revenue KPIs and sales chart
@@ -645,6 +649,54 @@ export async function getDashboardStats(
     // Column missing before migration
   }
 
+  // Métricas del día de hoy en la zona horaria del local
+  const todayDateStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: STORE_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+  const lastWeekDate = new Date();
+  lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+  const lastWeekDateStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: STORE_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(lastWeekDate);
+
+  const todayRevenue = allOrders
+    .filter((o) => o.created_at.slice(0, 10) === todayDateStr)
+    .reduce((sum, o) => sum + (o.total || 0), 0);
+
+  const lastWeekTodayRevenue = allOrders
+    .filter((o) => o.created_at.slice(0, 10) === lastWeekDateStr)
+    .reduce((sum, o) => sum + (o.total || 0), 0);
+
+  const todayRevenueChange = percentChange(todayRevenue, lastWeekTodayRevenue);
+
+  let pendingOrdersCount = 0;
+  try {
+    pendingOrdersCount = await getPendingOrdersCount();
+  } catch {
+    // ignore
+  }
+
+  let overdueFollowupsCount = 0;
+  try {
+    const { data: followups } = await supabaseAdmin()
+      .from("customers")
+      .select("id")
+      .not("follow_up_date", "is", null)
+      .lt("follow_up_date", todayDateStr);
+    if (followups) {
+      overdueFollowupsCount = followups.length;
+    }
+  } catch {
+    // table might not exist before migration
+  }
+
   return {
     totalRevenue,
     orderCount,
@@ -659,5 +711,9 @@ export async function getDashboardStats(
     deliveryMethods,
     totalUnpaidAmount,
     unpaidOrdersCount,
+    todayRevenue,
+    todayRevenueChange,
+    pendingOrdersCount,
+    overdueFollowupsCount,
   };
 }

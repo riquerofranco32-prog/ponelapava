@@ -63,63 +63,31 @@ export function SalesGoalWidget({ currentRevenue }: SalesGoalWidgetProps) {
   const isGoalReached = currentRevenue >= goal;
 
   return (
-    <div
-      style={{
-        background: "linear-gradient(135deg, var(--dash-surface) 0%, var(--dash-surface-2) 100%)",
-        border: "1px solid var(--dash-border)",
-        borderRadius: 14,
-        padding: "16px 20px",
-        marginBottom: 24,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
+    <div className="bg-gradient-to-br from-[var(--dash-surface)] to-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-2xl p-4 md:p-5 mb-6 relative overflow-hidden">
       {/* Background Accent Glow */}
       <div
-        style={{
-          position: "absolute",
-          top: -20,
-          right: -20,
-          width: 140,
-          height: 140,
-          borderRadius: "50%",
-          background: isGoalReached ? "rgba(16, 185, 129, 0.08)" : "rgba(199, 166, 122, 0.08)",
-          filter: "blur(30px)",
-          pointerEvents: "none",
-        }}
+        className={`absolute -top-5 -right-5 w-36 h-36 rounded-full blur-2xl pointer-events-none ${
+          isGoalReached ? "bg-[var(--dash-success)]/10" : "bg-[var(--dash-accent)]/10"
+        }`}
       />
 
       {/* Header: Title + Goal badge + Edit button */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="flex items-center justify-between flex-wrap gap-2.5 mb-3">
+        <div className="flex items-center gap-2">
           <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: isGoalReached ? "rgba(16, 185, 129, 0.15)" : "var(--dash-accent-subtle)",
-              color: isGoalReached ? "#10b981" : "var(--dash-accent)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              isGoalReached
+                ? "bg-[var(--dash-success-bg)] text-[var(--dash-success)] border border-[var(--dash-success-border)]"
+                : "bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)] border border-[var(--dash-border)]"
+            }`}
           >
             {isGoalReached ? <Sparkles size={16} /> : <Target size={16} />}
           </div>
           <div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--dash-text)", display: "block" }}>
+            <span className="text-sm font-bold text-[var(--dash-text)] block">
               Objetivo de Ventas · {capitalizedMonth}
             </span>
-            <span style={{ fontSize: 11, color: "var(--dash-muted)" }}>
+            <span className="text-xs text-[var(--dash-muted)]">
               Quedan {remainingDays} día{remainingDays === 1 ? "" : "s"} para el cierre de mes
             </span>
           </div>
@@ -128,53 +96,46 @@ export function SalesGoalWidget({ currentRevenue }: SalesGoalWidgetProps) {
         {/* Right side: Goal progress pill or Edit Form */}
         <div>
           {isEditing ? (
-            <form onSubmit={handleSaveGoal} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <form onSubmit={handleSaveGoal} className="flex items-center gap-1.5">
               <input
                 type="number"
                 step={50000}
                 value={goalInput}
                 onChange={(e) => setGoalInput(e.target.value)}
-                className="admin-input"
-                style={{ width: 130, padding: "4px 8px", fontSize: 12 }}
+                className="admin-input w-32 px-2 py-1 text-xs"
                 autoFocus
               />
               <button
                 type="submit"
-                className="admin-btn admin-btn--primary"
-                style={{ padding: "4px 8px", fontSize: 12 }}
+                className="admin-btn admin-btn--primary px-2 py-1 text-xs"
                 title="Guardar objetivo"
               >
                 <Check size={13} />
               </button>
             </form>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div className="flex items-center gap-2">
               <span
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: isGoalReached ? "#10b981" : "var(--dash-accent)",
-                  background: isGoalReached ? "rgba(16, 185, 129, 0.12)" : "var(--dash-accent-subtle)",
-                  padding: "3px 10px",
-                  borderRadius: 20,
-                  border: isGoalReached ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid rgba(199, 166, 122, 0.3)",
-                }}
+                className={`text-xs font-bold px-2.5 py-0.5 rounded-full border inline-flex items-center gap-1 ${
+                  isGoalReached
+                    ? "text-[var(--dash-success)] bg-[var(--dash-success-bg)] border-[var(--dash-success-border)]"
+                    : "text-[var(--dash-accent)] bg-[var(--dash-accent-subtle)] border-[var(--dash-border)]"
+                }`}
               >
-                {isGoalReached ? "🎉 ¡Meta Cumplida!" : `${percent}% Alcanzado`}
+                {isGoalReached ? (
+                  <>
+                    <Sparkles size={12} />
+                    <span>¡Meta Cumplida!</span>
+                  </>
+                ) : (
+                  `${percent}% Alcanzado`
+                )}
               </span>
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
                 title="Modificar meta mensual"
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "var(--dash-muted)",
-                  cursor: "pointer",
-                  padding: 4,
-                  display: "inline-flex",
-                  alignItems: "center",
-                }}
+                className="bg-transparent border-none text-[var(--dash-muted)] hover:text-[var(--dash-text)] cursor-pointer p-1 inline-flex items-center"
               >
                 <Edit3 size={13} />
               </button>
@@ -184,55 +145,35 @@ export function SalesGoalWidget({ currentRevenue }: SalesGoalWidgetProps) {
       </div>
 
       {/* Numbers Breakdown */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: 8,
-          flexWrap: "wrap",
-          gap: 6,
-        }}
-      >
+      <div className="flex justify-between items-baseline mb-2 flex-wrap gap-1.5">
         <div>
-          <span style={{ fontSize: 20, fontWeight: 800, color: "var(--dash-text)" }}>
+          <span className="text-xl font-extrabold text-[var(--dash-text)]">
             {formatPrice(currentRevenue)}
           </span>
-          <span style={{ fontSize: 13, color: "var(--dash-muted)", marginLeft: 6 }}>
+          <span className="text-xs text-[var(--dash-muted)] ml-1.5">
             de {formatPrice(goal)}
           </span>
         </div>
 
         {!isGoalReached && remainingAmount > 0 && (
-          <div style={{ fontSize: 12, color: "var(--dash-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-            <TrendingUp size={13} style={{ color: "var(--dash-accent)" }} />
+          <div className="text-xs text-[var(--dash-muted)] flex items-center gap-1">
+            <TrendingUp size={13} className="text-[var(--dash-accent)]" />
             <span>
-              Ritmo necesario: <strong style={{ color: "var(--dash-text)" }}>{formatPrice(dailyPaceNeeded)}/día</strong>
+              Ritmo necesario: <strong className="text-[var(--dash-text)]">{formatPrice(dailyPaceNeeded)}/día</strong>
             </span>
           </div>
         )}
       </div>
 
       {/* Progress Bar */}
-      <div
-        style={{
-          width: "100%",
-          height: 8,
-          background: "var(--dash-surface-3)",
-          borderRadius: 6,
-          overflow: "hidden",
-        }}
-      >
+      <div className="w-full h-2 bg-[var(--dash-surface-3)] rounded-full overflow-hidden">
         <div
-          style={{
-            height: "100%",
-            width: `${percent}%`,
-            background: isGoalReached
-              ? "linear-gradient(90deg, #10b981 0%, #34d399 100%)"
-              : "linear-gradient(90deg, var(--dash-accent) 0%, #e2cead 100%)",
-            borderRadius: 6,
-            transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
+          style={{ width: `${percent}%` }}
+          className={`h-full rounded-full transition-all duration-700 ${
+            isGoalReached
+              ? "bg-[var(--dash-success)]"
+              : "bg-[var(--dash-accent)]"
+          }`}
         />
       </div>
     </div>

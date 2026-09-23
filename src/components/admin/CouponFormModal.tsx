@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tag, Percent, DollarSign } from "lucide-react";
+import { Tag, Percent, DollarSign, Sparkles } from "lucide-react";
 import { Coupon, CouponInput } from "@/types";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminField } from "@/components/admin/AdminField";
@@ -80,7 +80,7 @@ export default function CouponFormModal({
       onClose={onCancel}
       maxWidth={480}
       footer={
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <div className="flex justify-end gap-2.5">
           <AdminButton
             type="button"
             variant="secondary"
@@ -104,34 +104,19 @@ export default function CouponFormModal({
         </div>
       }
     >
-      <form id={FORM_ID} onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
+      <form id={FORM_ID} onSubmit={handleSubmit} className="grid gap-4">
         {error && (
-          <div
-            style={{
-              padding: "10px 14px",
-              background: "rgba(220, 38, 38, 0.1)",
-              border: "1px solid var(--dash-danger)",
-              borderRadius: "var(--radius-control)",
-              color: "var(--dash-danger)",
-              fontSize: 13,
-            }}
-          >
+          <div className="p-3 bg-[var(--dash-danger-bg)] border border-[var(--dash-danger-border)] rounded-lg text-[var(--dash-danger)] text-xs">
             {error}
           </div>
         )}
 
         <AdminField label="Código del Cupón *">
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ position: "relative" }}>
+          <div className="flex flex-col gap-1.5">
+            <div className="relative">
               <Tag
                 size={15}
-                style={{
-                  position: "absolute",
-                  left: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--dash-text-muted)",
-                }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
               />
               <input
                 type="text"
@@ -139,13 +124,12 @@ export default function CouponFormModal({
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Ej: BIENVENIDO10, MATEROVIP"
-                className="admin-input"
-                style={{ paddingLeft: 34, letterSpacing: "0.05em", fontWeight: 600 }}
+                className="admin-input pl-9 tracking-wider font-semibold uppercase text-xs"
               />
             </div>
 
             {/* Quick Generator & Presets */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+            <div className="flex gap-1.5 flex-wrap items-center">
               <button
                 type="button"
                 onClick={() => {
@@ -154,33 +138,17 @@ export default function CouponFormModal({
                   const randNum = Math.floor(10 + Math.random() * 90);
                   setCode(`${randWord}${randNum}`);
                 }}
-                style={{
-                  fontSize: 11,
-                  padding: "3px 8px",
-                  borderRadius: 4,
-                  border: "1px solid var(--dash-border)",
-                  background: "var(--dash-surface-2)",
-                  color: "var(--dash-accent)",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
+                className="text-xs px-2 py-1 rounded-md border border-[var(--dash-border)] bg-[var(--dash-surface-2)] text-[var(--dash-accent)] cursor-pointer font-semibold inline-flex items-center gap-1"
               >
-                ⚡ Generar Código
+                <Sparkles size={11} />
+                <span>Generar Código</span>
               </button>
               {["BIENVENIDO10", "MATERO15", "RONDA20"].map((preset) => (
                 <button
                   key={preset}
                   type="button"
                   onClick={() => setCode(preset)}
-                  style={{
-                    fontSize: 11,
-                    padding: "3px 8px",
-                    borderRadius: 4,
-                    border: "1px solid var(--dash-border)",
-                    background: "var(--dash-surface-2)",
-                    color: "var(--dash-text-muted)",
-                    cursor: "pointer",
-                  }}
+                  className="text-xs px-2 py-1 rounded-md border border-[var(--dash-border)] bg-[var(--dash-surface-2)] text-[var(--dash-muted)] cursor-pointer hover:text-[var(--dash-text)]"
                 >
                   {preset}
                 </button>
@@ -189,70 +157,32 @@ export default function CouponFormModal({
           </div>
         </AdminField>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid grid-cols-2 gap-3">
           <AdminField label="Tipo de Descuento *">
-            <div style={{ display: "flex", gap: 6 }}>
+            <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => setDiscountType("percent")}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  padding: "8px 10px",
-                  borderRadius: "var(--radius-control)",
-                  border:
-                    discountType === "percent"
-                      ? "2px solid var(--dash-accent)"
-                      : "1px solid var(--dash-border)",
-                  background:
-                    discountType === "percent"
-                      ? "var(--dash-accent-subtle)"
-                      : "var(--dash-surface)",
-                  color:
-                    discountType === "percent"
-                      ? "var(--dash-accent)"
-                      : "var(--dash-text)",
-                  fontWeight: discountType === "percent" ? 600 : 400,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                  discountType === "percent"
+                    ? "border-[var(--dash-accent)] bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)] font-semibold"
+                    : "border-[var(--dash-border)] bg-[var(--dash-surface)] text-[var(--dash-text)]"
+                }`}
               >
                 <Percent size={14} />
-                Porcentaje
+                <span>Porcentaje</span>
               </button>
               <button
                 type="button"
                 onClick={() => setDiscountType("fixed")}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  padding: "8px 10px",
-                  borderRadius: "var(--radius-control)",
-                  border:
-                    discountType === "fixed"
-                      ? "2px solid var(--dash-accent)"
-                      : "1px solid var(--dash-border)",
-                  background:
-                    discountType === "fixed"
-                      ? "var(--dash-accent-subtle)"
-                      : "var(--dash-surface)",
-                  color:
-                    discountType === "fixed"
-                      ? "var(--dash-accent)"
-                      : "var(--dash-text)",
-                  fontWeight: discountType === "fixed" ? 600 : 400,
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                  discountType === "fixed"
+                    ? "border-[var(--dash-accent)] bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)] font-semibold"
+                    : "border-[var(--dash-border)] bg-[var(--dash-surface)] text-[var(--dash-text)]"
+                }`}
               >
                 <DollarSign size={14} />
-                Monto Fijo
+                <span>Monto Fijo</span>
               </button>
             </div>
           </AdminField>
@@ -269,18 +199,18 @@ export default function CouponFormModal({
               value={discountValue}
               onChange={(e) => setDiscountValue(e.target.value)}
               placeholder={discountType === "percent" ? "10" : "5000"}
-              className="admin-input"
+              className="admin-input text-xs"
             />
           </AdminField>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="grid grid-cols-2 gap-3">
           <AdminField label="Válido desde (opcional)">
             <input
               type="date"
               value={validFrom}
               onChange={(e) => setValidFrom(e.target.value)}
-              className="admin-input"
+              className="admin-input text-xs"
             />
           </AdminField>
 
@@ -289,27 +219,17 @@ export default function CouponFormModal({
               type="date"
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
-              className="admin-input"
+              className="admin-input text-xs"
             />
           </AdminField>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 14px",
-            background: "var(--dash-surface-elevated)",
-            borderRadius: "var(--radius-control)",
-            border: "1px solid var(--dash-border)",
-          }}
-        >
+        <div className="flex items-center justify-between p-3.5 bg-[var(--dash-surface-elevated)] rounded-xl border border-[var(--dash-border)]">
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)" }}>
+            <div className="text-xs font-semibold text-[var(--dash-text)]">
               Cupón Habilitado
             </div>
-            <div style={{ fontSize: 12, color: "var(--dash-text-muted)" }}>
+            <div className="text-xs text-[var(--dash-muted)]">
               Permite su uso en presupuestos y ventas
             </div>
           </div>

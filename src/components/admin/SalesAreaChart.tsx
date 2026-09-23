@@ -24,24 +24,24 @@ export function SalesAreaChart({
   const chartData = data.map((d) => ({ ...d, label: formatDayLabel(d.date) }));
 
   return (
-    <div style={{ width: "100%", height: 220 }}>
+    <div className="w-full h-[220px]">
       <ResponsiveContainer>
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#c7a67a" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#c7a67a" stopOpacity={0} />
+              <stop offset="5%" stopColor="var(--dash-accent)" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="var(--dash-accent)" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#3a3324"
+            stroke="var(--dash-border)"
             vertical={false}
           />
           <XAxis
             dataKey="label"
-            stroke="#9c9280"
-            fontSize={11}
+            stroke="var(--dash-muted)"
+            fontSize={12}
             tickLine={false}
             axisLine={false}
             interval={
@@ -49,8 +49,8 @@ export function SalesAreaChart({
             }
           />
           <YAxis
-            stroke="#9c9280"
-            fontSize={11}
+            stroke="var(--dash-muted)"
+            fontSize={12}
             tickLine={false}
             axisLine={false}
             width={40}
@@ -58,18 +58,19 @@ export function SalesAreaChart({
           />
           <Tooltip
             contentStyle={{
-              background: "#1e1b15",
-              border: "1px solid #3a3324",
-              borderRadius: 8,
+              background: "var(--dash-surface-2)",
+              border: "1px solid var(--dash-border)",
+              borderRadius: "var(--dash-radius-md)",
               fontSize: 12,
+              color: "var(--dash-text)",
             }}
-            labelStyle={{ color: "#f3ede0" }}
+            labelStyle={{ color: "var(--dash-text)" }}
             formatter={(value) => [formatPrice(Number(value)), "Ventas"]}
           />
           <Area
             type="monotone"
             dataKey="total"
-            stroke="#c7a67a"
+            stroke="var(--dash-accent)"
             strokeWidth={2}
             fill="url(#salesGradient)"
           />

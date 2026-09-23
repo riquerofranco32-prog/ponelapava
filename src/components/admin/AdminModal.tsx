@@ -77,18 +77,7 @@ export function AdminModal({
   // viewport, not a transformed ancestor.
   return createPortal(
     <div
-      className="pava-admin admin-modal-backdrop"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(4px)",
-        padding: 16,
-      }}
+      className="pava-admin admin-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -98,67 +87,31 @@ export function AdminModal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="admin-modal-dialog"
-        style={{
-          width: "100%",
-          maxWidth,
-          maxHeight: "92dvh",
-          background: "var(--dash-surface)",
-          border: "1px solid var(--dash-border)",
-          borderRadius: 14,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-        }}
+        className="admin-modal-dialog w-full max-h-[92dvh] bg-[var(--dash-surface)] border border-[var(--dash-border)] rounded-[14px] overflow-hidden flex flex-col"
+        style={{ maxWidth }}
       >
         <div className="admin-modal-handle">
           <span />
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--dash-border)",
-            flexShrink: 0,
-          }}
-        >
-          <h2
-            style={{ fontSize: 16, fontWeight: 700, color: "var(--dash-text)" }}
-          >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--dash-border)] bg-[var(--dash-surface-2)] shrink-0">
+          <h2 className="text-base font-bold text-[var(--dash-text)]">
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="admin-icon-btn"
-            style={{ width: 32, height: 32, borderRadius: "50%" }}
+            className="admin-icon-btn w-8 h-8 rounded-full"
           >
             <X size={16} />
           </button>
         </div>
 
-        <div
-          style={{
-            padding: 20,
-            display: "flex",
-            flexDirection: "column",
-            gap: 16,
-            overflowY: "auto",
-          }}
-        >
+        <div className="p-5 flex flex-col gap-4 overflow-y-auto">
           {children}
         </div>
 
         {footer && (
-          <div
-            style={{
-              padding: "16px 20px",
-              borderTop: "1px solid var(--dash-border)",
-              flexShrink: 0,
-            }}
-          >
+          <div className="px-5 py-4 border-t border-[var(--dash-border)] bg-[var(--dash-surface-2)] shrink-0">
             {footer}
           </div>
         )}

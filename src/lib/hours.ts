@@ -485,3 +485,37 @@ export function validateClosedDatesInput(input: unknown): string[] {
 
   return Array.from(unique).sort();
 }
+
+// Resumen conciso para el header del panel de administración
+export function getAdminHeaderScheduleBadge(
+  source?: ScheduleSource,
+  now = new Date(),
+): { isOpen: boolean; label: string } {
+  const schedule = resolveSchedule(source);
+  const { dateStr, weekdayKey, minutesNow } = getStoreTimeParts(now);
+
+  const isClosedDate = schedule.closedDates.includes(dateStr);
+  const daySched = schedule.openingHours[weekdayKey];
+
+  if (!isClosedDate && daySched && !daySched.closed) {
+    const activeRange = daySched.ranges.find((r) => {
+      const start = toMinutes(r.open);
+      const end = toMinutes(r.close);
+      return minutesNow >= start && minutesNow < end;
+    });
+
+    if (activeRange) {
+      return {
+        isOpen: true,
+        label: `Abierto ahora · Cierra ${activeRange.close}`,
+      };
+    }
+  }
+
+  const nextText = getNextOpeningLabel(schedule, undefined, now);
+  return {
+    isOpen: false,
+    label: `Cerrado · Abre ${nextText}`,
+  };
+}
+

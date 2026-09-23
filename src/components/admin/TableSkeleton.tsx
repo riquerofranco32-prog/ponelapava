@@ -2,17 +2,12 @@
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <div className="flex flex-col gap-2.5">
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className="admin-skeleton-row"
-          style={{
-            height: 52,
-            borderRadius: 8,
-            background: "var(--dash-surface-2)",
-            opacity: 1 - i * 0.08,
-          }}
+          className="admin-skeleton-row h-[52px] rounded-[var(--dash-radius-md)] bg-[var(--dash-surface-2)]"
+          style={{ opacity: 1 - i * 0.08 }}
         />
       ))}
     </div>
@@ -25,8 +20,7 @@ export function KpiSkeleton({ count = 4 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="admin-card admin-skeleton-row"
-          style={{ height: 84 }}
+          className="admin-card admin-skeleton-row h-[84px]"
         />
       ))}
     </div>

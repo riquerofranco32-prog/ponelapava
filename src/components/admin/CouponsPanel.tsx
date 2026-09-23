@@ -122,7 +122,7 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
   return (
     <div>
       {/* KPI Cards */}
-      <div className="admin-kpi-grid" style={{ marginBottom: 24 }}>
+      <div className="admin-kpi-grid mb-6">
         <AdminKpiCard
           icon={TicketPercent}
           label="Total de Cupones"
@@ -142,61 +142,29 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
 
       {/* Main Table Card */}
       <AdminCard>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 16,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <TicketPercent size={18} style={{ color: "var(--dash-accent)" }} />
-            <span style={{ fontWeight: 600, fontSize: 16, color: "var(--dash-text)" }}>
+        <div className="flex items-center justify-between w-full flex-wrap gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <TicketPercent size={18} className="text-[var(--dash-accent)]" />
+            <span className="font-semibold text-base text-[var(--dash-text)]">
               Cupones de Descuento
             </span>
-            <span
-              style={{
-                fontSize: 12,
-                color: "var(--dash-text-muted)",
-                background: "var(--dash-surface-elevated)",
-                padding: "2px 8px",
-                borderRadius: "var(--radius-chip)",
-                border: "1px solid var(--dash-border)",
-              }}
-            >
+            <span className="text-xs text-[var(--dash-muted)] bg-[var(--dash-surface-elevated)] px-2 py-0.5 rounded-full border border-[var(--dash-border)]">
               {coupons.length}
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ position: "relative" }}>
+          <div className="flex items-center gap-2.5">
+            <div className="relative">
               <Search
                 size={14}
-                style={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--dash-text-muted)",
-                }}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
               />
               <input
                 type="text"
                 placeholder="Buscar código..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="admin-input"
-                style={{
-                  paddingLeft: 30,
-                  paddingTop: 6,
-                  paddingBottom: 6,
-                  fontSize: 13,
-                  width: 180,
-                }}
+                className="admin-input pl-8 py-1.5 text-xs w-44"
               />
             </div>
 
@@ -204,14 +172,14 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
               variant="primary"
               onClick={() => setCreating(true)}
             >
-              <Plus size={15} style={{ marginRight: 6, display: "inline" }} />
+              <Plus size={15} className="mr-1.5 inline" />
               Nuevo Cupón
             </AdminButton>
           </div>
         </div>
 
         {/* Filter Pills */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+        <div className="flex gap-1.5 flex-wrap mb-4">
           {(
             [
               { key: "all", label: "Todos", count: coupons.length },
@@ -224,11 +192,10 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
               key={tab.key}
               type="button"
               onClick={() => setStatusFilter(tab.key)}
-              className={`admin-toolbar-pill${statusFilter === tab.key ? " admin-toolbar-pill--active" : ""}`}
-              style={{ fontSize: 11, padding: "3px 9px" }}
+              className={`admin-toolbar-pill text-xs px-2.5 py-1 ${statusFilter === tab.key ? " admin-toolbar-pill--active" : ""}`}
             >
               <span>{tab.label}</span>
-              <span style={{ marginLeft: 4, opacity: 0.75, fontWeight: statusFilter === tab.key ? 700 : 500 }}>
+              <span className={`ml-1 ${statusFilter === tab.key ? "font-bold" : "opacity-75"}`}>
                 ({tab.count})
               </span>
             </button>
@@ -236,7 +203,7 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
         </div>
 
         {filteredCoupons.length === 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "20px 0" }}>
+          <div className="flex flex-col items-center gap-4 py-5">
             <EmptyState
               icon={TicketPercent}
               title={
@@ -255,7 +222,7 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
                 variant="primary"
                 onClick={() => setCreating(true)}
               >
-                <Plus size={15} style={{ marginRight: 6, display: "inline" }} />
+                <Plus size={15} className="mr-1.5 inline" />
                 Crear Cupón
               </AdminButton>
             )}
@@ -263,15 +230,15 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="admin-desktop-only" style={{ overflowX: "auto" }}>
-              <table className="admin-table">
+            <div className="admin-desktop-only overflow-x-auto">
+              <table className="admin-table w-full text-sm border-collapse">
                 <thead>
                   <tr>
-                    <th>Código</th>
-                    <th>Descuento</th>
-                    <th>Período de Validez</th>
-                    <th>Estado</th>
-                    <th style={{ textAlign: "right" }}>Acciones</th>
+                    <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Código</th>
+                    <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Descuento</th>
+                    <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Período de Validez</th>
+                    <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Estado</th>
+                    <th className="text-right px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -279,66 +246,33 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
                     const expired = isExpired(coupon);
                     const isCopied = copiedCode === coupon.code;
                     return (
-                      <tr key={coupon.id}>
-                        <td>
-                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span
-                              style={{
-                                fontFamily: "monospace",
-                                fontWeight: 700,
-                                fontSize: 13,
-                                background: "var(--dash-surface-elevated)",
-                                color: "var(--dash-text)",
-                                padding: "3px 8px",
-                                borderRadius: "var(--radius-chip)",
-                                border: "1px solid var(--dash-border)",
-                                letterSpacing: "0.06em",
-                              }}
-                            >
+                      <tr key={coupon.id} className="border-t border-[var(--dash-border)]">
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-xs bg-[var(--dash-surface-elevated)] text-[var(--dash-text)] px-2 py-1 rounded-md border border-[var(--dash-border)] tracking-wider">
                               {coupon.code}
                             </span>
                             <button
                               type="button"
                               onClick={() => handleCopy(coupon.code)}
                               title="Copiar código del cupón"
-                              style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                padding: 4,
-                                color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                borderRadius: 4,
-                              }}
+                              className={`bg-transparent border-none cursor-pointer p-1 inline-flex items-center rounded transition-colors ${
+                                isCopied ? "text-[var(--dash-success)]" : "text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+                              }`}
                             >
                               {isCopied ? <Check size={13} /> : <Copy size={13} />}
                             </button>
                           </div>
                         </td>
-                        <td>
-                          <span
-                            style={{
-                              fontWeight: 600,
-                              color: "var(--dash-accent)",
-                              fontSize: 14,
-                            }}
-                          >
+                        <td className="p-3.5">
+                          <span className="font-semibold text-[var(--dash-accent)] text-sm">
                             {coupon.discountType === "percent"
                               ? `${coupon.discountValue}% OFF`
                               : `${formatPrice(coupon.discountValue)} OFF`}
                           </span>
                         </td>
-                        <td>
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: "var(--dash-text-muted)",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 4,
-                            }}
-                          >
+                        <td className="p-3.5">
+                          <div className="text-xs text-[var(--dash-muted)] flex items-center gap-1">
                             <Calendar size={13} />
                             {coupon.validFrom || coupon.validUntil ? (
                               <span>
@@ -355,57 +289,29 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
                             )}
                           </div>
                         </td>
-                        <td>
+                        <td className="p-3.5">
                           {expired ? (
-                            <span
-                              className="admin-badge"
-                              style={{
-                                background: "rgba(220, 38, 38, 0.12)",
-                                color: "var(--dash-danger)",
-                                border: "1px solid rgba(220, 38, 38, 0.25)",
-                              }}
-                            >
-                              <XCircle size={12} style={{ marginRight: 4 }} />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] border border-[var(--dash-danger-border)]">
+                              <XCircle size={12} />
                               Expirado
                             </span>
                           ) : coupon.active ? (
-                            <span
-                              className="admin-badge"
-                              style={{
-                                background: "rgba(34, 197, 94, 0.12)",
-                                color: "var(--dash-success, #16a34a)",
-                                border: "1px solid rgba(34, 197, 94, 0.25)",
-                              }}
-                            >
-                              <CheckCircle2 size={12} style={{ marginRight: 4 }} />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-success-bg)] text-[var(--dash-success)] border border-[var(--dash-success-border)]">
+                              <CheckCircle2 size={12} />
                               Activo
                             </span>
                           ) : (
-                            <span
-                              className="admin-badge"
-                              style={{
-                                background: "var(--dash-surface-elevated)",
-                                color: "var(--dash-text-muted)",
-                                border: "1px solid var(--dash-border)",
-                              }}
-                            >
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-surface-elevated)] text-[var(--dash-muted)] border border-[var(--dash-border)]">
                               Pausado
                             </span>
                           )}
                         </td>
-                        <td style={{ textAlign: "right" }}>
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              gap: 6,
-                              alignItems: "center",
-                            }}
-                          >
+                        <td className="p-3.5 text-right">
+                          <div className="inline-flex gap-1.5 items-center">
                             <button
                               type="button"
                               onClick={() => handleToggleActive(coupon)}
-                              className="admin-btn admin-btn--secondary"
-                              style={{ fontSize: 12, padding: "4px 8px" }}
+                              className="admin-btn admin-btn--secondary text-xs px-2 py-1"
                             >
                               {coupon.active ? "Pausar" : "Activar"}
                             </button>
@@ -430,125 +336,60 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
             </div>
 
             {/* Mobile Card List View */}
-            <div className="admin-mobile-only" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="admin-mobile-only flex flex-col gap-3">
               {filteredCoupons.map((coupon, index) => {
                 const expired = isExpired(coupon);
                 const isCopied = copiedCode === coupon.code;
                 return (
                   <div
                     key={coupon.id}
-                    className="admin-row-in"
-                    style={
-                      {
-                        padding: 14,
-                        background: "var(--dash-surface)",
-                        border: "1px solid var(--dash-border)",
-                        borderRadius: 10,
-                        "--i": index,
-                      } as React.CSSProperties
-                    }
+                    className="admin-row-in p-3.5 bg-[var(--dash-surface)] border border-[var(--dash-border)] rounded-xl"
+                    style={{ "--i": index } as React.CSSProperties}
                   >
                     {/* Header: Code + Copy + Status */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span
-                          style={{
-                            fontFamily: "monospace",
-                            fontWeight: 700,
-                            fontSize: 14,
-                            background: "var(--dash-surface-elevated)",
-                            color: "var(--dash-text)",
-                            padding: "3px 8px",
-                            borderRadius: "var(--radius-chip)",
-                            border: "1px solid var(--dash-border)",
-                            letterSpacing: "0.06em",
-                          }}
-                        >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-xs bg-[var(--dash-surface-elevated)] text-[var(--dash-text)] px-2 py-0.5 rounded border border-[var(--dash-border)] tracking-wider">
                           {coupon.code}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleCopy(coupon.code)}
                           title="Copiar código del cupón"
-                          style={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: 6,
-                            color: isCopied ? "var(--dash-success, #16a34a)" : "var(--dash-text-muted)",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            borderRadius: 4,
-                          }}
+                          className={`bg-transparent border-none cursor-pointer p-1.5 inline-flex items-center rounded transition-colors ${
+                            isCopied ? "text-[var(--dash-success)]" : "text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+                          }`}
                         >
-                          {isCopied ? <Check size={15} /> : <Copy size={15} />}
+                          {isCopied ? <Check size={14} /> : <Copy size={14} />}
                         </button>
                       </div>
 
                       {expired ? (
-                        <span
-                          className="admin-badge"
-                          style={{
-                            background: "rgba(220, 38, 38, 0.12)",
-                            color: "var(--dash-danger)",
-                            border: "1px solid rgba(220, 38, 38, 0.25)",
-                            fontSize: 11,
-                          }}
-                        >
-                          <XCircle size={11} style={{ marginRight: 3 }} />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] border border-[var(--dash-danger-border)]">
+                          <XCircle size={11} />
                           Expirado
                         </span>
                       ) : coupon.active ? (
-                        <span
-                          className="admin-badge"
-                          style={{
-                            background: "rgba(34, 197, 94, 0.12)",
-                            color: "var(--dash-success, #16a34a)",
-                            border: "1px solid rgba(34, 197, 94, 0.25)",
-                            fontSize: 11,
-                          }}
-                        >
-                          <CheckCircle2 size={11} style={{ marginRight: 3 }} />
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-success-bg)] text-[var(--dash-success)] border border-[var(--dash-success-border)]">
+                          <CheckCircle2 size={11} />
                           Activo
                         </span>
                       ) : (
-                        <span
-                          className="admin-badge"
-                          style={{
-                            background: "var(--dash-surface-elevated)",
-                            color: "var(--dash-text-muted)",
-                            border: "1px solid var(--dash-border)",
-                            fontSize: 11,
-                          }}
-                        >
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--dash-surface-elevated)] text-[var(--dash-muted)] border border-[var(--dash-border)]">
                           Pausado
                         </span>
                       )}
                     </div>
 
                     {/* Discount & Validity */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, margin: "10px 0" }}>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          color: "var(--dash-accent)",
-                          fontSize: 16,
-                        }}
-                      >
+                    <div className="flex items-center justify-between gap-2.5 my-2.5">
+                      <span className="font-bold text-[var(--dash-accent)] text-base">
                         {coupon.discountType === "percent"
                           ? `${coupon.discountValue}% OFF`
                           : `${formatPrice(coupon.discountValue)} OFF`}
                       </span>
 
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: "var(--dash-text-muted)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
+                      <div className="text-xs text-[var(--dash-muted)] flex items-center gap-1">
                         <Calendar size={12} />
                         {coupon.validFrom || coupon.validUntil ? (
                           <span>
@@ -567,26 +408,16 @@ export default function CouponsPanel({ coupons, onChange }: CouponsPanelProps) {
                     </div>
 
                     {/* Actions Bar */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        borderTop: "1px solid var(--dash-border)",
-                        paddingTop: 10,
-                        marginTop: 10,
-                      }}
-                    >
+                    <div className="flex items-center justify-between border-t border-[var(--dash-border)] pt-2.5 mt-2.5">
                       <button
                         type="button"
                         onClick={() => handleToggleActive(coupon)}
-                        className="admin-btn admin-btn--secondary"
-                        style={{ fontSize: 12, padding: "6px 12px" }}
+                        className="admin-btn admin-btn--secondary text-xs px-3 py-1.5"
                       >
                         {coupon.active ? "Pausar Cupón" : "Activar Cupón"}
                       </button>
 
-                      <div style={{ display: "flex", gap: 6 }}>
+                      <div className="flex gap-1.5">
                         <IconButton
                           icon={Pencil}
                           title="Editar cupón"

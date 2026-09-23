@@ -129,13 +129,12 @@ export function BulkPriceModal({
       onClose={saving ? () => {} : onClose}
       maxWidth={600}
       footer={
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", gap: 12 }}>
+        <div className="flex justify-between items-center w-full gap-3">
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="admin-btn admin-btn--secondary"
-            style={{ fontSize: 13 }}
+            className="admin-btn admin-btn--secondary text-xs"
           >
             Cancelar
           </button>
@@ -147,12 +146,12 @@ export function BulkPriceModal({
           >
             {saving ? (
               <>
-                <Loader2 size={15} className="animate-spin" style={{ marginRight: 6 }} />
+                <Loader2 size={15} className="animate-spin mr-1.5" />
                 {progress ? `Actualizando (${progress.current}/${progress.total})...` : "Aplicando..."}
               </>
             ) : (
               <>
-                <Zap size={15} style={{ marginRight: 6 }} />
+                <Zap size={15} className="mr-1.5" />
                 Aplicar a {targetProducts.length} producto{targetProducts.length === 1 ? "" : "s"}
               </>
             )}
@@ -160,10 +159,10 @@ export function BulkPriceModal({
         </div>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div className="flex flex-col gap-4">
         {/* Scope Selector */}
         <div>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)", display: "block", marginBottom: 6 }}>
+          <label className="text-xs font-semibold text-[var(--dash-text)] block mb-1.5">
             1. Alcance del ajuste:
           </label>
           <select
@@ -186,23 +185,21 @@ export function BulkPriceModal({
 
         {/* Method & Preset Percentages */}
         <div>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)", display: "block", marginBottom: 6 }}>
+          <label className="text-xs font-semibold text-[var(--dash-text)] block mb-1.5">
             2. Tipo de cambio:
           </label>
-          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+          <div className="flex gap-2 mb-2.5">
             <button
               type="button"
               onClick={() => setMode("percent")}
-              className={`admin-toolbar-pill${mode === "percent" ? " admin-toolbar-pill--active" : ""}`}
-              style={{ fontSize: 12, padding: "6px 12px" }}
+              className={`admin-toolbar-pill text-xs px-3 py-1.5 ${mode === "percent" ? " admin-toolbar-pill--active" : ""}`}
             >
               Porcentaje (%)
             </button>
             <button
               type="button"
               onClick={() => setMode("fixed")}
-              className={`admin-toolbar-pill${mode === "fixed" ? " admin-toolbar-pill--active" : ""}`}
-              style={{ fontSize: 12, padding: "6px 12px" }}
+              className={`admin-toolbar-pill text-xs px-3 py-1.5 ${mode === "fixed" ? " admin-toolbar-pill--active" : ""}`}
             >
               Monto Fijo ($ ARS)
             </button>
@@ -211,64 +208,57 @@ export function BulkPriceModal({
           {mode === "percent" ? (
             <div>
               {/* Quick Percent Presets */}
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+              <div className="flex gap-1.5 flex-wrap mb-2.5">
                 {[5, 10, 15, 20, 25, 30, -10].map((pct) => (
                   <button
                     key={pct}
                     type="button"
                     onClick={() => setPercentValue(pct)}
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      padding: "4px 10px",
-                      borderRadius: 6,
-                      border: percentValue === pct ? "1px solid var(--dash-accent)" : "1px solid var(--dash-border)",
-                      background: percentValue === pct ? "var(--dash-accent-subtle)" : "var(--dash-surface-2)",
-                      color: percentValue === pct ? "var(--dash-accent)" : "var(--dash-text)",
-                      cursor: "pointer",
-                    }}
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-md border cursor-pointer transition-colors ${
+                      percentValue === pct
+                        ? "border-[var(--dash-accent)] bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)]"
+                        : "border-[var(--dash-border)] bg-[var(--dash-surface-2)] text-[var(--dash-text)]"
+                    }`}
                   >
                     {pct > 0 ? `+${pct}%` : `${pct}%`}
                   </button>
                 ))}
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div className="flex items-center gap-2">
                 <input
                   type="number"
                   step={1}
                   value={percentValue}
                   onChange={(e) => setPercentValue(Number(e.target.value))}
-                  className="admin-input"
-                  style={{ width: 140 }}
+                  className="admin-input w-36"
                 />
-                <span style={{ fontSize: 13, color: "var(--dash-muted)" }}>
+                <span className="text-xs text-[var(--dash-muted)]">
                   % {percentValue >= 0 ? "de aumento" : "de descuento"}
                 </span>
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "var(--dash-accent)" }}>$</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-[var(--dash-accent)]">$</span>
               <input
                 type="number"
                 step={100}
                 value={fixedValue}
                 onChange={(e) => setFixedValue(Number(e.target.value))}
-                className="admin-input"
-                style={{ width: 160 }}
+                className="admin-input w-40"
               />
-              <span style={{ fontSize: 13, color: "var(--dash-muted)" }}>ARS por producto</span>
+              <span className="text-xs text-[var(--dash-muted)]">ARS por producto</span>
             </div>
           )}
         </div>
 
         {/* Rounding Mode */}
         <div>
-          <label style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)", display: "block", marginBottom: 6 }}>
+          <label className="text-xs font-semibold text-[var(--dash-text)] block mb-1.5">
             3. Redondeo inteligente:
           </label>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="flex gap-2 flex-wrap">
             {[
               { key: "100", label: "Redondear a $100 (Recomendado)" },
               { key: "500", label: "Redondear a $500" },
@@ -279,15 +269,11 @@ export function BulkPriceModal({
                 key={opt.key}
                 type="button"
                 onClick={() => setRounding(opt.key as RoundingMode)}
-                style={{
-                  fontSize: 12,
-                  padding: "5px 10px",
-                  borderRadius: 6,
-                  border: rounding === opt.key ? "1px solid var(--dash-accent)" : "1px solid var(--dash-border)",
-                  background: rounding === opt.key ? "var(--dash-accent-subtle)" : "var(--dash-surface-2)",
-                  color: rounding === opt.key ? "var(--dash-accent)" : "var(--dash-muted)",
-                  cursor: "pointer",
-                }}
+                className={`text-xs px-2.5 py-1 rounded-md border cursor-pointer transition-colors ${
+                  rounding === opt.key
+                    ? "border-[var(--dash-accent)] bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)]"
+                    : "border-[var(--dash-border)] bg-[var(--dash-surface-2)] text-[var(--dash-muted)]"
+                }`}
               >
                 {opt.label}
               </button>
@@ -296,56 +282,40 @@ export function BulkPriceModal({
         </div>
 
         {/* Live Preview Card */}
-        <div
-          style={{
-            background: "var(--dash-surface-2)",
-            border: "1px solid var(--dash-border)",
-            borderRadius: 10,
-            padding: 14,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--dash-accent)" }}>
+        <div className="bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-xl p-3.5">
+          <div className="flex items-center justify-between mb-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)]">
               Vista Previa en Vivo ({targetProducts.length} productos afectados)
             </span>
-            <span style={{ fontSize: 11, color: "var(--dash-muted)" }}>
+            <span className="text-xs text-[var(--dash-muted)]">
               Muestra primeros 6
             </span>
           </div>
 
           {previewProducts.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--dash-muted)", textAlign: "center", padding: "10px 0" }}>
+            <p className="text-xs text-[var(--dash-muted)] text-center py-2.5">
               No hay productos en la categoría seleccionada.
             </p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div className="flex flex-col gap-2">
               {previewProducts.map((p) => (
                 <div
                   key={p.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    fontSize: 13,
-                    padding: "6px 8px",
-                    background: "var(--dash-surface)",
-                    borderRadius: 6,
-                    border: "1px solid var(--dash-border)",
-                  }}
+                  className="flex items-center justify-between text-xs px-2 py-1.5 bg-[var(--dash-surface)] rounded-md border border-[var(--dash-border)]"
                 >
-                  <span style={{ fontWeight: 600, color: "var(--dash-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
+                  <span className="font-semibold text-[var(--dash-text)] truncate max-w-[50%]">
                     {p.name}
                   </span>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "var(--dash-muted)", textDecoration: "line-through", fontSize: 12 }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[var(--dash-muted)] line-through text-xs">
                       {formatPrice(p.price)}
                     </span>
-                    <ArrowRight size={12} style={{ color: "var(--dash-muted)" }} />
-                    <span style={{ fontWeight: 700, color: "var(--dash-accent)" }}>
+                    <ArrowRight size={12} className="text-[var(--dash-muted)]" />
+                    <span className="font-bold text-[var(--dash-accent)]">
                       {formatPrice(p.newPrice)}
                     </span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: p.diff >= 0 ? "#10b981" : "#ef4444" }}>
+                    <span className={`text-xs font-semibold ${p.diff >= 0 ? "text-[var(--dash-success)]" : "text-[var(--dash-danger)]"}`}>
                       ({p.diff >= 0 ? `+${formatPrice(p.diff)}` : formatPrice(p.diff)})
                     </span>
                   </div>

@@ -90,7 +90,7 @@ export default function AuditLogTable() {
   const th: React.CSSProperties = {
     textAlign: "left",
     padding: "10px 14px",
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: "0.05em",

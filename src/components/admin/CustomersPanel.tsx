@@ -11,15 +11,22 @@ import {
   Crown,
   Calendar,
   RefreshCw,
+  Sparkles,
+  AlertTriangle,
+  UserCheck,
+  Clock,
+  Phone,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
 import { TableSkeleton } from "./TableSkeleton";
-import { EmptyState } from "./EmptyState";
+import { EmptyState } from "./ui/EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
 import { useAdminToast } from "./AdminToast";
 import { CustomerWithStats, CustomersKpis, CustomerSegment } from "@/lib/customers";
 import { CustomerDetailModal } from "./CustomerDetailModal";
+import { StatusPill } from "./ui/Badge";
+import { Button } from "./ui/Button";
 
 function exportCustomersCsv(customers: CustomerWithStats[]) {
   const header = [
@@ -102,44 +109,59 @@ export default function CustomersPanel() {
   }, [search, segment, riskDays]);
 
   useEffect(() => {
-    loadCustomers();
+    const timer = setTimeout(() => {
+      loadCustomers();
+    }, 250);
+    return () => clearTimeout(timer);
   }, [loadCustomers]);
 
   async function handleBackfill() {
+    if (
+      !confirm(
+        "¿Deseás sincronizar todos los pedidos históricos hacia la tabla de clientes?\n\nEsto asociará pedidos huérfanos a cada cliente por teléfono normalizado (+54 9) y recalculará estadísticas."
+      )
+    ) {
+      return;
+    }
+
     setBackfilling(true);
     try {
       const res = await fetch("/api/admin/customers/backfill", { method: "POST" });
-      assertOk(res, "Error al sincronizar clientes históricos");
-      const result = await res.json();
+      assertOk(res, "Falló la sincronización de clientes");
+      const data = await res.json();
       showToast(
-        `Sincronización completa: ${result.linkedOrders} pedidos vinculados en ${result.mergedCustomers} clientes`,
+        `¡Sincronización completa! ${data.linkedOrders} pedidos vinculados a ${data.customersCount} clientes.`
       );
       loadCustomers();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : "Error en sincronización", "error");
+      showToast(err instanceof Error ? err.message : "Error al sincronizar", "error");
     } finally {
       setBackfilling(false);
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-12">
       {/* CRM KPI Cards */}
       <div className="admin-kpi-grid">
         <AdminKpiCard
-          label="Total de Clientes"
+          label="Base Total de Clientes"
           value={kpis.totalCustomers}
           icon={Users}
         />
         <AdminKpiCard
-          label="Seguimientos Pendientes (Hoy)"
+          label="Por Contactar Hoy"
           value={kpis.todayPendingCount}
           icon={Calendar}
+          active={segment === "today"}
+          onClick={() => setSegment("today")}
         />
         <AdminKpiCard
           label="Clientes VIP / Clave"
           value={kpis.vipCount}
           icon={Crown}
+          active={segment === "vip"}
+          onClick={() => setSegment("vip")}
         />
         <AdminKpiCard
           label="Facturación Total Clientes"
@@ -151,83 +173,80 @@ export default function CustomersPanel() {
       {/* Filter and Action Bar */}
       <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
         {/* Segment Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-none w-full lg:w-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 w-full lg:w-auto">
           <button
             type="button"
             onClick={() => setSegment("today")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              segment === "today"
-                ? "bg-amber-500 text-stone-900 shadow-sm"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill flex items-center gap-1.5 ${
+              segment === "today" ? "admin-toolbar-pill--active" : ""
             }`}
           >
-            <span>⭐ Hoy</span>
+            <Calendar size={13} />
+            <span>Hoy</span>
             {kpis.todayPendingCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-stone-900 text-amber-400">
+              <span className="px-1.5 py-0.5 rounded-full text-xs font-bold bg-[var(--dash-surface-3)] text-[var(--dash-accent)]">
                 {kpis.todayPendingCount}
               </span>
             )}
           </button>
+
           <button
             type="button"
             onClick={() => setSegment("all")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-              segment === "all"
-                ? "bg-[var(--dash-accent)] text-[#182b1d]"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill ${
+              segment === "all" ? "admin-toolbar-pill--active" : ""
             }`}
           >
             Todos ({kpis.totalCustomers})
           </button>
+
           <button
             type="button"
             onClick={() => setSegment("vip")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-              segment === "vip"
-                ? "bg-amber-400 text-[#182b1d] shadow-sm"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill flex items-center gap-1.5 ${
+              segment === "vip" ? "admin-toolbar-pill--active" : ""
             }`}
           >
-            👑 VIPs ({kpis.vipCount})
+            <Crown size={13} />
+            <span>VIPs ({kpis.vipCount})</span>
           </button>
+
           <button
             type="button"
             onClick={() => setSegment("recurring")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-              segment === "recurring"
-                ? "bg-emerald-500 text-white shadow-sm"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill flex items-center gap-1.5 ${
+              segment === "recurring" ? "admin-toolbar-pill--active" : ""
             }`}
           >
-            🔄 Recurrentes ({kpis.recurringCount})
+            <UserCheck size={13} />
+            <span>Recurrentes ({kpis.recurringCount})</span>
           </button>
+
           <button
             type="button"
             onClick={() => setSegment("risk")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-              segment === "risk"
-                ? "bg-orange-500 text-white shadow-sm"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill flex items-center gap-1.5 ${
+              segment === "risk" ? "admin-toolbar-pill--active" : ""
             }`}
           >
-            ⚠️ En Riesgo ({kpis.riskCount})
+            <AlertTriangle size={13} />
+            <span>En Riesgo ({kpis.riskCount})</span>
           </button>
+
           <button
             type="button"
             onClick={() => setSegment("new")}
-            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-              segment === "new"
-                ? "bg-blue-500 text-white shadow-sm"
-                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            className={`admin-toolbar-pill flex items-center gap-1.5 ${
+              segment === "new" ? "admin-toolbar-pill--active" : ""
             }`}
           >
-            ✨ Nuevos ({kpis.newCount})
+            <Sparkles size={13} />
+            <span>Nuevos ({kpis.newCount})</span>
           </button>
         </div>
 
         {/* Secondary controls: Search, Risk threshold, Backfill, CSV */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Risk Days Configurator */}
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs text-[var(--dash-muted)]">
             <span>Riesgo:</span>
             <select
@@ -245,52 +264,52 @@ export default function CustomersPanel() {
           <div className="relative flex-1 sm:w-60 min-w-[180px]">
             <Search
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-text)]/40 pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)] pointer-events-none"
             />
             <input
               type="text"
               placeholder="Buscar cliente, tel, tag..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="admin-input pl-9 py-2 text-xs w-full"
+              className="admin-input pl-9 py-1.5 text-xs w-full"
             />
           </div>
 
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handleBackfill}
             disabled={backfilling}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-control bg-[var(--dash-surface-2)] hover:bg-[var(--dash-surface-3)] text-xs font-semibold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer disabled:opacity-50"
-            title="Asociar pedidos históricos huérfanos a clientes por número de teléfono"
+            loading={backfilling}
+            icon={<RefreshCw size={13} />}
           >
-            <RefreshCw size={13} className={backfilling ? "animate-spin" : ""} />
-            <span className="hidden sm:inline">Sincronizar Histórico</span>
-          </button>
+            <span className="hidden sm:inline">Sincronizar</span>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => exportCustomersCsv(customers)}
             disabled={customers.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-control bg-[var(--dash-surface-2)] hover:bg-[var(--dash-surface-3)] text-xs font-semibold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+            icon={<Download size={13} />}
           >
-            <Download size={13} />
-            <span className="hidden sm:inline">Exportar CSV</span>
-          </button>
+            <span className="hidden sm:inline">CSV</span>
+          </Button>
         </div>
       </div>
 
-      {/* Main Customers Table */}
+      {/* Main Customers DataTable */}
       {loading ? (
         <TableSkeleton rows={6} />
       ) : error ? (
         <EmptyState
-          icon={Users}
+          icon={<Users size={28} />}
           title="Error al cargar clientes"
           description={error}
         />
       ) : customers.length === 0 ? (
         <EmptyState
-          icon={Users}
+          icon={<Users size={28} />}
           title={segment === "today" ? "¡Todo al día!" : "No se encontraron clientes"}
           description={
             segment === "today"
@@ -301,8 +320,8 @@ export default function CustomersPanel() {
           }
         />
       ) : (
-        <div className="admin-table-container">
-          <table className="admin-table">
+        <div className="admin-datatable-wrapper">
+          <table className="admin-datatable">
             <thead>
               <tr>
                 <th>Cliente</th>
@@ -320,45 +339,33 @@ export default function CustomersPanel() {
                 const cleanPhone = customer.phoneNormalized.replace(/\D/g, "");
                 const waUrl = cleanPhone
                   ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-                      `¡Hola ${customer.name}! Te escribimos de Poné La Pava en Catriel para saludarte 🧉`,
+                      `¡Hola ${customer.name}! Te escribimos de Poné La Pava en Catriel para saludarte 🧉`
                     )}`
                   : null;
 
                 return (
                   <tr
                     key={customer.id}
-                    className="hover:bg-[var(--dash-surface-2)]/50 transition-colors"
+                    onClick={() => setSelectedCustomer(customer)}
+                    className="admin-row-hover cursor-pointer"
                   >
                     {/* Cliente / Nombre */}
                     <td>
                       <div className="flex items-center gap-2.5">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dash-accent)]/20 text-[var(--dash-accent)] font-bold text-xs">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dash-accent-bg)] text-[var(--dash-accent)] font-bold text-xs border border-[var(--dash-accent-border)]">
                           {customer.name.charAt(0).toUpperCase()}
                         </span>
                         <div>
                           <span className="font-bold text-[var(--dash-text)] text-xs block">
                             {customer.name}
                           </span>
-                          <span className="text-[10px]">
-                            {customer.segment === "vip" && (
-                              <span className="text-amber-400 font-bold">👑 VIP</span>
-                            )}
-                            {customer.segment === "recurring" && (
-                              <span className="text-emerald-400 font-bold">🔄 Recurrente</span>
-                            )}
-                            {customer.segment === "risk" && (
-                              <span className="text-orange-400 font-bold">⚠️ En Riesgo</span>
-                            )}
-                            {customer.segment === "new" && (
-                              <span className="text-blue-400 font-bold">✨ Nuevo</span>
-                            )}
-                          </span>
+                          <StatusPill type="segment" value={customer.segment} />
                         </div>
                       </div>
                     </td>
 
                     {/* Teléfono */}
-                    <td className="text-xs font-mono text-[var(--dash-text)]/85">
+                    <td className="text-xs font-mono text-[var(--dash-muted)]">
                       {customer.displayPhone || customer.phoneNormalized || "—"}
                     </td>
 
@@ -367,14 +374,14 @@ export default function CustomersPanel() {
                       <span className="text-xs font-bold text-[var(--dash-text)] block">
                         {customer.ordersCount} pedidos
                       </span>
-                      <span className="text-[11px] text-[var(--dash-muted)]">
+                      <span className="text-xs text-[var(--dash-muted)]">
                         Prom: {formatPrice(customer.averageTicket)}
                       </span>
                     </td>
 
                     {/* Total Gastado */}
                     <td>
-                      <span className="font-display font-bold text-sm text-[var(--dash-text)]">
+                      <span className="font-serif font-bold text-sm text-[var(--dash-accent)]">
                         {formatPrice(customer.totalSpent)}
                       </span>
                     </td>
@@ -386,13 +393,13 @@ export default function CustomersPanel() {
                           <span
                             className={
                               customer.daysSinceLastOrder >= riskDays
-                                ? "text-orange-400 font-bold"
+                                ? "text-[var(--dash-warning)] font-bold"
                                 : "text-[var(--dash-text)]"
                             }
                           >
                             Hace {customer.daysSinceLastOrder} días
                           </span>
-                          <span className="text-[10px] block opacity-70">
+                          <span className="text-xs block opacity-70">
                             {new Date(customer.lastOrderDate!).toLocaleDateString("es-AR", {
                               day: "numeric",
                               month: "short",
@@ -407,11 +414,11 @@ export default function CustomersPanel() {
                     {/* Próximo Seguimiento */}
                     <td className="text-xs">
                       {customer.followUpAt ? (
-                        <div
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                        <span
+                          className={`admin-badge ${
                             customer.isFollowUpOverdue
-                              ? "bg-red-500/20 text-red-300 border border-red-500/30"
-                              : "bg-[var(--dash-surface-2)] text-[var(--dash-text)] border border-[var(--dash-border)]"
+                              ? "admin-badge--danger"
+                              : "admin-badge--neutral"
                           }`}
                         >
                           <Calendar size={11} />
@@ -421,34 +428,29 @@ export default function CustomersPanel() {
                               month: "short",
                             })}
                           </span>
-                          {customer.isFollowUpOverdue && (
-                            <span className="text-[9px] uppercase tracking-wider text-red-400">
-                              (Vencido)
-                            </span>
-                          )}
-                        </div>
+                        </span>
                       ) : (
-                        <span className="text-[var(--dash-muted)] text-[11px]">—</span>
+                        <span className="text-[var(--dash-muted)] text-xs">—</span>
                       )}
                     </td>
 
                     {/* Etiquetas */}
                     <td>
-                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                      <div className="flex flex-wrap gap-1 max-w-[160px]">
                         {customer.tags && customer.tags.length > 0 ? (
                           customer.tags.slice(0, 2).map((t) => (
                             <span
                               key={t}
-                              className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-[var(--dash-text)]"
+                              className="admin-badge admin-badge--neutral text-xs"
                             >
                               {t}
                             </span>
                           ))
                         ) : (
-                          <span className="text-[var(--dash-muted)] text-[11px]">—</span>
+                          <span className="text-[var(--dash-muted)] text-xs">—</span>
                         )}
                         {customer.tags && customer.tags.length > 2 && (
-                          <span className="text-[10px] text-[var(--dash-muted)]">
+                          <span className="text-xs text-[var(--dash-muted)]">
                             +{customer.tags.length - 2}
                           </span>
                         )}
@@ -457,26 +459,30 @@ export default function CustomersPanel() {
 
                     {/* Acciones */}
                     <td className="text-right">
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCustomer(customer)}
-                          className="p-1.5 rounded-lg hover:bg-[var(--dash-surface-3)] text-[var(--dash-muted)] hover:text-[var(--dash-accent)] transition-colors cursor-pointer"
-                          title="Ver ficha completa de cliente"
-                        >
-                          <Eye size={15} />
-                        </button>
+                      <div
+                        className="flex items-center justify-end gap-1.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {waUrl && (
                           <a
                             href={waUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-[var(--dash-muted)] hover:text-emerald-400 transition-colors cursor-pointer"
-                            title="Escribir por WhatsApp"
+                            className="admin-icon-btn text-white transition-opacity hover:opacity-90"
+                            style={{ backgroundColor: "#25d366", borderColor: "#25d366" }}
+                            title="Abrir WhatsApp"
                           >
-                            <MessageCircle size={15} />
+                            <MessageCircle size={14} />
                           </a>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCustomer(customer)}
+                          className="admin-icon-btn"
+                          title="Ver Ficha CRM"
+                        >
+                          <Eye size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -487,7 +493,7 @@ export default function CustomersPanel() {
         </div>
       )}
 
-      {/* Customer Detail & CRM Follow-up Modal */}
+      {/* Customer Detail Drawer with Tabs (Resumen, Pedidos, Notas) */}
       {selectedCustomer && (
         <CustomerDetailModal
           customer={selectedCustomer}

@@ -8,12 +8,6 @@ import { StockStepper } from "./StockStepper";
 import { StatusBadge } from "./StatusBadge";
 import { IconButton } from "./IconButton";
 
-const td: React.CSSProperties = {
-  padding: "10px 14px",
-  borderTop: "1px solid var(--dash-border)",
-  verticalAlign: "middle",
-};
-
 export function ProductDesktopRow({
   product,
   index = 0,
@@ -36,22 +30,15 @@ export function ProductDesktopRow({
       className="admin-row-in admin-row-hover"
       style={{ "--i": index } as React.CSSProperties}
     >
-      <td style={td}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
+        <div className="flex items-center gap-2.5">
           <ProductThumb src={product.images[0]} />
           <div>
-            <span style={{ fontWeight: 500, color: "var(--dash-text)" }}>
+            <span className="font-medium text-[var(--dash-text)]">
               {product.name}
             </span>
             {!compact && product.brand && (
-              <span
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: "var(--dash-muted)",
-                  marginTop: 2,
-                }}
-              >
+              <span className="block text-xs text-[var(--dash-muted)] mt-0.5">
                 {product.brand}
               </span>
             )}
@@ -59,33 +46,32 @@ export function ProductDesktopRow({
         </div>
       </td>
       {!compact && (
-        <td style={{ ...td, color: "var(--dash-muted)" }}>
+        <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle text-[var(--dash-muted)]">
           {getCategoryLabel(product.category)}
         </td>
       )}
-      <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
+      <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle font-medium text-[var(--dash-text)]">
         {formatPrice(product.price)}
       </td>
       {!compact && (
-        <td style={td}>
+        <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
           <StockStepper
             value={product.stock}
             onChange={(next) => onStockChange(product, next)}
           />
         </td>
       )}
-      <td style={td}>
+      <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
         <StatusBadge status={product.status} />
       </td>
-      <td style={{ ...td, textAlign: "right" }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+      <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle text-right">
+        <div className="flex justify-end gap-1.5">
           <a
             href={`/producto/${product.id}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Ver en la tienda"
-            className="admin-icon-btn"
-            style={{ textDecoration: "none" }}
+            className="admin-icon-btn !no-underline"
           >
             <ExternalLink size={14} />
           </a>

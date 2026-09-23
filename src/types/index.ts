@@ -98,6 +98,9 @@ export interface Order {
   createdAt: string;
 }
 
+export type OrderStatus = Order["status"];
+export type PaymentStatus = NonNullable<Order["paymentStatus"]>;
+
 // ── WhatsApp ────────────────────────────────────────────
 export interface WhatsAppOrderData {
   customerName: string;

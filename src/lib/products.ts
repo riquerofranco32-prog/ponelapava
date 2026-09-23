@@ -8,6 +8,9 @@ interface ProductRow {
   description: string;
   long_description: string | null;
   price: number;
+  cost_price?: number | null;
+  min_stock?: number | null;
+  supplier_id?: string | null;
   category: string;
   status: string;
   stock: number;
@@ -27,6 +30,9 @@ function fromRow(row: ProductRow): Product {
     description: row.description,
     longDescription: row.long_description ?? undefined,
     price: row.price,
+    costPrice: row.cost_price != null ? Number(row.cost_price) : undefined,
+    minStock: row.min_stock != null ? Number(row.min_stock) : 5,
+    supplierId: row.supplier_id ?? undefined,
     category: row.category as ProductCategory,
     status: row.status as ProductStatus,
     stock: row.stock,
@@ -120,6 +126,9 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       description: input.description,
       long_description: input.longDescription ?? null,
       price: input.price,
+      cost_price: input.costPrice ?? null,
+      min_stock: input.minStock ?? 5,
+      supplier_id: input.supplierId ?? null,
       category: input.category,
       status: syncStatus(stock, input.status),
       stock,
@@ -148,6 +157,9 @@ export async function updateProduct(
       description: input.description,
       long_description: input.longDescription ?? null,
       price: input.price,
+      cost_price: input.costPrice ?? null,
+      min_stock: input.minStock ?? 5,
+      supplier_id: input.supplierId ?? null,
       category: input.category,
       status: syncStatus(stock, input.status),
       stock,

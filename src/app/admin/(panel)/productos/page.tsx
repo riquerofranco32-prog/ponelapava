@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Plus, Search, PackageSearch, Zap, AlertTriangle, PackageX, CheckCircle2 } from "lucide-react";
-import { Product } from "@/types";
+import { Plus, Search, PackageSearch, Zap, AlertTriangle, PackageX, CheckCircle2, Truck, LayoutGrid } from "lucide-react";
+import { Product, Supplier } from "@/types";
 import ProductForm from "@/components/admin/ProductForm";
 import { BulkPriceModal } from "@/components/admin/products/BulkPriceModal";
 import { AdminButton } from "@/components/admin/AdminButton";
@@ -13,6 +13,10 @@ import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow";
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import { InventoryValuationWidget } from "@/components/admin/products/InventoryValuationWidget";
+import { StockAdjustModal } from "@/components/admin/stock/StockAdjustModal";
+import { StockHistoryModal } from "@/components/admin/stock/StockHistoryModal";
+import { ReplenishmentSection } from "@/components/admin/stock/ReplenishmentSection";
+import { SuppliersManagerModal } from "@/components/admin/stock/SuppliersManagerModal";
 import { useAdminProducts } from "@/lib/useAdminProducts";
 import { useAdminUser } from "@/context/AdminUserContext";
 
@@ -29,6 +33,8 @@ export default function AdminProductosPage() {
     handleStockChange,
     handleDelete,
   } = useAdminProducts();
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [activeView, setActiveView] = useState<"catalog" | "replenish">("catalog");
   const [searchProduct, setSearchProduct] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState<"all" | "low" | "out" | "available">("all");
@@ -37,7 +43,26 @@ export default function AdminProductosPage() {
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [cloningProduct, setCloningProduct] = useState<Product | null>(null);
   const [bulkPriceOpen, setBulkPriceOpen] = useState(false);
+  const [adjustingProduct, setAdjustingProduct] = useState<Product | null>(null);
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
+  const [suppliersModalOpen, setSuppliersModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  async function loadSuppliersList() {
+    try {
+      const res = await fetch("/api/admin/suppliers");
+      if (res.ok) {
+        const data = await res.json();
+        setSuppliers(data);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    loadSuppliersList();
+  }, []);
 
   function handleDuplicate(product: Product) {
     const cloned: Product = {
@@ -76,10 +101,13 @@ export default function AdminProductosPage() {
   }, []);
 
   const lowStockCount = products.filter(
-    (p) => p.stock > 0 && p.stock <= 3,
+    (p) => p.stock > 0 && p.stock <= (p.minStock ?? 5),
   ).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
   const inStockCount = products.filter((p) => p.stock > 0).length;
+  const criticalReplenishmentCount = products.filter(
+    (p) => p.stock <= (p.minStock ?? 5)
+  ).length;
 
   const filteredProducts = products.filter((p) => {
     const matchCategory =
@@ -89,7 +117,7 @@ export default function AdminProductosPage() {
       p.brand?.toLowerCase().includes(searchProduct.toLowerCase());
     let matchStock = true;
     if (stockFilter === "low") {
-      matchStock = p.stock > 0 && p.stock <= 3;
+      matchStock = p.stock <= (p.minStock ?? 5) && p.stock > 0;
     } else if (stockFilter === "out") {
       matchStock = p.stock === 0;
     } else if (stockFilter === "available") {
@@ -99,7 +127,7 @@ export default function AdminProductosPage() {
   });
 
   return (
-    <div className="admin-page-reveal">
+    <div className="admin-page-reveal space-y-5">
       {loadError && <AdminErrorBanner message={loadError} />}
 
       {/* Valuation & Stock Health Stats */}
@@ -107,141 +135,203 @@ export default function AdminProductosPage() {
         <InventoryValuationWidget products={products} />
       )}
 
-      {/* Quick Stock Status Filter Chips */}
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1.5">
-        <button
-          type="button"
-          onClick={() => setStockFilter("all")}
-          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
-            stockFilter === "all" ? "admin-toolbar-pill--active" : ""
-          }`}
-        >
-          <span>Todos</span>
-          <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
-            {products.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setStockFilter("low")}
-          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
-            stockFilter === "low"
-              ? "border-[var(--dash-warning)] bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] font-semibold"
-              : ""
-          }`}
-        >
-          <AlertTriangle size={13} className="text-[var(--dash-warning)]" />
-          <span>Stock Crítico (≤ 3)</span>
-          {lowStockCount > 0 && (
-            <span className="text-xs font-bold bg-[var(--dash-warning)] text-[var(--dash-bg)] px-1.5 py-0.5 rounded-full">
-              {lowStockCount}
+      {/* Main Top Navigation / View Switcher */}
+      <div className="flex items-center justify-between border-b border-[var(--dash-border)] pb-3 flex-wrap gap-2.5">
+        <div className="inline-flex items-center bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-[var(--dash-radius-md)] p-1 gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveView("catalog")}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--dash-radius-sm)] text-xs font-semibold cursor-pointer border-none transition-all ${
+              activeView === "catalog"
+                ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                : "bg-transparent text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+            }`}
+          >
+            <LayoutGrid size={15} />
+            <span>Catálogo</span>
+            <span className="text-xs bg-[var(--dash-surface-3)] px-1.5 py-0.5 rounded-full font-bold">
+              {products.length}
             </span>
-          )}
-        </button>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setStockFilter("out")}
-          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
-            stockFilter === "out"
-              ? "border-[var(--dash-danger)] bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] font-semibold"
-              : ""
-          }`}
-        >
-          <PackageX size={13} className="text-[var(--dash-danger)]" />
-          <span>Sin Stock</span>
-          {outOfStockCount > 0 && (
-            <span className="text-xs font-bold bg-[var(--dash-danger)] text-white px-1.5 py-0.5 rounded-full">
-              {outOfStockCount}
-            </span>
-          )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setStockFilter("available")}
-          className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
-            stockFilter === "available"
-              ? "border-[var(--dash-success)] bg-[var(--dash-success-bg)] text-[var(--dash-success)] font-semibold"
-              : ""
-          }`}
-        >
-          <CheckCircle2 size={13} className="text-[var(--dash-success)]" />
-          <span>En Stock</span>
-          <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
-            {inStockCount}
-          </span>
-        </button>
-      </div>
-
-      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search
-            size={15}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
-          />
-          <input
-            ref={searchInputRef}
-            type="search"
-            placeholder="Buscar producto... (/)"
-            value={searchProduct}
-            onChange={(e) => setSearchProduct(e.target.value)}
-            className="admin-input pl-9 w-full text-xs"
-          />
+          <button
+            type="button"
+            onClick={() => setActiveView("replenish")}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--dash-radius-sm)] text-xs font-semibold cursor-pointer border-none transition-all ${
+              activeView === "replenish"
+                ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                : "bg-transparent text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+            }`}
+          >
+            <Truck size={15} className="text-[var(--dash-warning)]" />
+            <span>Reponer</span>
+            {criticalReplenishmentCount > 0 && (
+              <span className="text-xs bg-[var(--dash-warning)] text-[var(--dash-bg)] px-1.5 py-0.5 rounded-full font-bold">
+                {criticalReplenishmentCount}
+              </span>
+            )}
+          </button>
         </div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="admin-input flex-1 min-w-[160px] w-auto text-xs"
-        >
-          <option value="all">Todas las categorías</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.slug}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        {isOwner && (
+
+        <div className="flex items-center gap-2">
           <AdminButton
             variant="secondary"
-            onClick={() => setBulkPriceOpen(true)}
-            className="whitespace-nowrap"
+            onClick={() => setSuppliersModalOpen(true)}
+            className="!text-xs !py-1.5"
           >
-            <Zap size={14} className="text-[var(--dash-accent)] mr-1" />
-            Ajuste Masivo
+            <Truck size={14} className="mr-1 text-[var(--dash-accent)]" />
+            <span>Proveedores ({suppliers.length})</span>
           </AdminButton>
-        )}
-        <AdminButton onClick={() => setCreating(true)} className="whitespace-nowrap">
-          <Plus size={15} />
-          Nuevo producto
-        </AdminButton>
+        </div>
       </div>
 
-      {loading ? (
-        <TableSkeleton rows={6} />
-      ) : filteredProducts.length === 0 ? (
-        <EmptyState
-          icon={PackageSearch}
-          title={
-            products.length === 0
-              ? "Todavía no hay productos"
-              : "Ningún producto coincide"
-          }
-          description={
-            products.length === 0
-              ? "Creá el primero con el botón de arriba."
-              : "Probá con otra búsqueda o categoría."
-          }
+      {activeView === "replenish" ? (
+        <ReplenishmentSection
+          products={products}
+          suppliers={suppliers}
+          onAdjustStock={(p) => setAdjustingProduct(p)}
         />
       ) : (
-        <ProductsTable
-          data={filteredProducts}
-          onEdit={setEditingProduct}
-          onDuplicate={handleDuplicate}
-          onDelete={isOwner ? setDeletingProduct : undefined}
-          onStockChange={handleStockChange}
-        />
+        <>
+          {/* Quick Stock Status Filter Chips */}
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1.5">
+            <button
+              type="button"
+              onClick={() => setStockFilter("all")}
+              className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                stockFilter === "all" ? "admin-toolbar-pill--active" : ""
+              }`}
+            >
+              <span>Todos</span>
+              <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
+                {products.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter("low")}
+              className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                stockFilter === "low"
+                  ? "border-[var(--dash-warning)] bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] font-semibold"
+                  : ""
+              }`}
+            >
+              <AlertTriangle size={13} className="text-[var(--dash-warning)]" />
+              <span>Bajo Stock (≤ Mínimo)</span>
+              {lowStockCount > 0 && (
+                <span className="text-xs font-bold bg-[var(--dash-warning)] text-[var(--dash-bg)] px-1.5 py-0.5 rounded-full">
+                  {lowStockCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter("out")}
+              className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                stockFilter === "out"
+                  ? "border-[var(--dash-danger)] bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] font-semibold"
+                  : ""
+              }`}
+            >
+              <PackageX size={13} className="text-[var(--dash-danger)]" />
+              <span>Sin Stock</span>
+              {outOfStockCount > 0 && (
+                <span className="text-xs font-bold bg-[var(--dash-danger)] text-white px-1.5 py-0.5 rounded-full">
+                  {outOfStockCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStockFilter("available")}
+              className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                stockFilter === "available"
+                  ? "border-[var(--dash-success)] bg-[var(--dash-success-bg)] text-[var(--dash-success)] font-semibold"
+                  : ""
+              }`}
+            >
+              <CheckCircle2 size={13} className="text-[var(--dash-success)]" />
+              <span>En Stock</span>
+              <span className="text-xs bg-[var(--dash-surface-elevated)] px-1.5 py-0.5 rounded">
+                {inStockCount}
+              </span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
+              />
+              <input
+                ref={searchInputRef}
+                type="search"
+                placeholder="Buscar producto... (/)"
+                value={searchProduct}
+                onChange={(e) => setSearchProduct(e.target.value)}
+                className="admin-input pl-9 w-full text-xs"
+              />
+            </div>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="admin-input flex-1 min-w-[160px] w-auto text-xs"
+            >
+              <option value="all">Todas las categorías</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {isOwner && (
+              <AdminButton
+                variant="secondary"
+                onClick={() => setBulkPriceOpen(true)}
+                className="whitespace-nowrap"
+              >
+                <Zap size={14} className="text-[var(--dash-accent)] mr-1" />
+                Ajuste Masivo
+              </AdminButton>
+            )}
+            <AdminButton onClick={() => setCreating(true)} className="whitespace-nowrap">
+              <Plus size={15} />
+              Nuevo producto
+            </AdminButton>
+          </div>
+
+          {loading ? (
+            <TableSkeleton rows={6} />
+          ) : filteredProducts.length === 0 ? (
+            <EmptyState
+              icon={PackageSearch}
+              title={
+                products.length === 0
+                  ? "Todavía no hay productos"
+                  : "Ningún producto coincide"
+              }
+              description={
+                products.length === 0
+                  ? "Creá el primero con el botón de arriba."
+                  : "Probá con otra búsqueda o categoría."
+              }
+            />
+          ) : (
+            <ProductsTable
+              data={filteredProducts}
+              onEdit={setEditingProduct}
+              onDuplicate={handleDuplicate}
+              onDelete={isOwner ? setDeletingProduct : undefined}
+              onStockChange={handleStockChange}
+              onAdjustStock={(p) => setAdjustingProduct(p)}
+              onViewHistory={(p) => setHistoryProduct(p)}
+            />
+          )}
+        </>
       )}
 
       {bulkPriceOpen && (
@@ -274,6 +364,7 @@ export default function AdminProductosPage() {
           onCancel={() => setCloningProduct(null)}
         />
       )}
+
       {editingProduct && (
         <ProductForm
           categories={categories}
@@ -285,6 +376,33 @@ export default function AdminProductosPage() {
           onCancel={() => setEditingProduct(null)}
         />
       )}
+
+      {adjustingProduct && (
+        <StockAdjustModal
+          product={adjustingProduct}
+          onClose={() => setAdjustingProduct(null)}
+          onAdjusted={async () => {
+            await loadProducts(true);
+          }}
+        />
+      )}
+
+      {historyProduct && (
+        <StockHistoryModal
+          product={historyProduct}
+          onClose={() => setHistoryProduct(null)}
+        />
+      )}
+
+      {suppliersModalOpen && (
+        <SuppliersManagerModal
+          onClose={() => setSuppliersModalOpen(false)}
+          onSuppliersChanged={() => {
+            loadSuppliersList();
+          }}
+        />
+      )}
+
       {deletingProduct && (
         <ConfirmDialog
           title="Eliminar producto"
@@ -306,12 +424,16 @@ function ProductsTable({
   onDuplicate,
   onDelete,
   onStockChange,
+  onAdjustStock,
+  onViewHistory,
 }: {
   data: Product[];
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onAdjustStock?: (product: Product) => void;
+  onViewHistory?: (product: Product) => void;
 }) {
   return (
     <>
@@ -338,6 +460,8 @@ function ProductsTable({
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
                 onStockChange={onStockChange}
+                onAdjustStock={onAdjustStock}
+                onViewHistory={onViewHistory}
               />
             ))}
           </tbody>
@@ -355,6 +479,8 @@ function ProductsTable({
             onDuplicate={onDuplicate}
             onDelete={onDelete}
             onStockChange={onStockChange}
+            onAdjustStock={onAdjustStock}
+            onViewHistory={onViewHistory}
           />
         ))}
       </div>

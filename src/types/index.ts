@@ -12,6 +12,10 @@ export interface Product {
   description: string;
   longDescription?: string;
   price: number;
+  costPrice?: number;
+  minStock?: number;
+  supplierId?: string;
+  supplier?: Supplier;
   category: ProductCategory;
   status: ProductStatus;
   stock: number;
@@ -22,6 +26,39 @@ export interface Product {
   featured?: boolean;
   createdAt?: string;
 }
+
+// ── Supplier (Proveedores) ──────────────────────────────
+export interface Supplier {
+  id: string;
+  name: string;
+  contactName?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type SupplierInput = Omit<Supplier, "id" | "createdAt" | "updatedAt">;
+
+// ── Stock Movement (Movimientos de inventario) ──────────
+export type StockMovementReason =
+  | "sale"
+  | "adjustment"
+  | "purchase"
+  | "return"
+  | "loss";
+
+export interface StockMovement {
+  id: string;
+  productId: string;
+  delta: number;
+  reason: StockMovementReason;
+  note?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
 
 // ── Category ────────────────────────────────────────────
 export interface Category {

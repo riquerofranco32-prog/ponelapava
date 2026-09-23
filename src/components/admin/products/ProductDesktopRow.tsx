@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2, Copy, ExternalLink } from "lucide-react";
+import { Edit2, Trash2, Copy, ExternalLink, SlidersHorizontal, History, AlertTriangle } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
@@ -16,6 +16,8 @@ export function ProductDesktopRow({
   onDuplicate,
   onDelete,
   onStockChange,
+  onAdjustStock,
+  onViewHistory,
 }: {
   product: Product;
   index?: number;
@@ -24,7 +26,12 @@ export function ProductDesktopRow({
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onAdjustStock?: (product: Product) => void;
+  onViewHistory?: (product: Product) => void;
 }) {
+  const minStock = product.minStock ?? 5;
+  const isLowStock = product.stock <= minStock;
+
   return (
     <tr
       className="admin-row-in admin-row-hover"
@@ -51,14 +58,32 @@ export function ProductDesktopRow({
         </td>
       )}
       <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle font-medium text-[var(--dash-text)]">
-        {formatPrice(product.price)}
+        <div>
+          <span>{formatPrice(product.price)}</span>
+          {product.costPrice && (
+            <span className="block text-[11px] text-[var(--dash-muted)]">
+              Costo: {formatPrice(product.costPrice)}
+            </span>
+          )}
+        </div>
       </td>
       {!compact && (
         <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
-          <StockStepper
-            value={product.stock}
-            onChange={(next) => onStockChange(product, next)}
-          />
+          <div className="flex flex-col gap-1 items-start">
+            <StockStepper
+              value={product.stock}
+              onChange={(next) => onStockChange(product, next)}
+            />
+            {isLowStock && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded text-[var(--dash-warning)] bg-[var(--dash-warning-bg)] border border-[var(--dash-warning-border)]"
+                title={`Stock actual (${product.stock}) igual o inferior al mínimo configurado (${minStock})`}
+              >
+                <AlertTriangle size={11} />
+                <span>Bajo ({product.stock}/{minStock})</span>
+              </span>
+            )}
+          </div>
         </td>
       )}
       <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
@@ -66,6 +91,20 @@ export function ProductDesktopRow({
       </td>
       <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle text-right">
         <div className="flex justify-end gap-1.5">
+          {onAdjustStock && (
+            <IconButton
+              onClick={() => onAdjustStock(product)}
+              title="Ajustar stock con motivo (auditoría)"
+              icon={SlidersHorizontal}
+            />
+          )}
+          {onViewHistory && (
+            <IconButton
+              onClick={() => onViewHistory(product)}
+              title="Ver movimientos e historial"
+              icon={History}
+            />
+          )}
           <a
             href={`/producto/${product.id}`}
             target="_blank"

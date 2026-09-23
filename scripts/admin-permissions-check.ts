@@ -11,7 +11,7 @@
  * Run: npx tsx scripts/admin-permissions-check.ts
  */
 import assert from "node:assert/strict";
-import { getVisibleNavGroups, ADMIN_NAV_GROUPS } from "../src/lib/admin-nav";
+import { getVisibleNavGroups } from "../src/lib/admin-nav";
 import { AdminRole, AdminUser } from "../src/lib/adminUsers";
 
 console.log("▶ Iniciando verificación de seguridad: Usuarios y Permisos (Fase 6)...");

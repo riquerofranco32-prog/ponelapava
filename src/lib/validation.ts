@@ -54,6 +54,9 @@ export interface ValidatedProduct {
   description: string;
   longDescription?: string;
   price: number;
+  costPrice?: number;
+  minStock?: number;
+  supplierId?: string;
   category: string;
   status: (typeof PRODUCT_STATUSES)[number];
   stock: number;
@@ -74,6 +77,27 @@ export function validateProduct(input: unknown): ValidatedProduct {
   if (!Number.isFinite(price) || price <= 0 || price > MAX_PRICE) {
     throw new ValidationError("El precio debe ser un número mayor a 0");
   }
+
+  let costPrice: number | undefined = undefined;
+  if (raw.costPrice !== undefined && raw.costPrice !== null && raw.costPrice !== "") {
+    const cost = Number(raw.costPrice);
+    if (!Number.isFinite(cost) || cost < 0 || cost > MAX_PRICE) {
+      throw new ValidationError("El costo debe ser un número mayor o igual a 0");
+    }
+    costPrice = cost;
+  }
+
+  let minStock = 5;
+  if (raw.minStock !== undefined && raw.minStock !== null && raw.minStock !== "") {
+    const ms = Number(raw.minStock);
+    if (!Number.isInteger(ms) || ms < 0 || ms > MAX_STOCK) {
+      throw new ValidationError("El stock mínimo debe ser un número entero de 0 o más");
+    }
+    minStock = ms;
+  }
+
+  const supplierId = optionalText(raw.supplierId, "El proveedor", 100) || undefined;
+
   const stock = Number(raw.stock ?? 0);
   if (!Number.isInteger(stock) || stock < 0 || stock > MAX_STOCK) {
     throw new ValidationError("El stock debe ser un entero de 0 o más");
@@ -96,6 +120,9 @@ export function validateProduct(input: unknown): ValidatedProduct {
       optionalText(raw.longDescription, "La descripción larga", 5000) ||
       undefined,
     price,
+    costPrice,
+    minStock,
+    supplierId,
     category: requireText(raw.category, "La categoría", 100),
     status,
     stock,
@@ -106,6 +133,68 @@ export function validateProduct(input: unknown): ValidatedProduct {
     weight: optionalText(raw.weight, "El peso", 50) || undefined,
     brand: optionalText(raw.brand, "La marca", 100) || undefined,
     featured: Boolean(raw.featured),
+  };
+}
+
+export interface ValidatedSupplier {
+  name: string;
+  contactName?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+}
+
+export function validateSupplier(input: unknown): ValidatedSupplier {
+  const raw = (input ?? {}) as Record<string, unknown>;
+  const name = requireText(raw.name, "El nombre del proveedor", 150);
+  return {
+    name,
+    contactName: optionalText(raw.contactName, "El contacto", 100) || undefined,
+    phone: optionalText(raw.phone, "El teléfono", 50) || undefined,
+    email: optionalText(raw.email, "El correo electrónico", 150) || undefined,
+    notes: optionalText(raw.notes, "Las notas", 1000) || undefined,
+  };
+}
+
+export const STOCK_REASONS = [
+  "sale",
+  "adjustment",
+  "purchase",
+  "return",
+  "loss",
+] as const;
+export type StockReason = (typeof STOCK_REASONS)[number];
+
+export interface ValidatedStockAdjustment {
+  productId: string;
+  delta: number;
+  reason: StockReason;
+  note?: string;
+}
+
+export function validateStockAdjustment(input: unknown): ValidatedStockAdjustment {
+  const raw = (input ?? {}) as Record<string, unknown>;
+  const productId = requireText(raw.productId, "El ID de producto", 100);
+  const delta = Number(raw.delta);
+  if (!Number.isInteger(delta) || delta === 0 || delta < -MAX_STOCK || delta > MAX_STOCK) {
+    throw new ValidationError("La cantidad a ajustar debe ser un número entero distinto de cero");
+  }
+  const reason = raw.reason as StockReason;
+  if (!STOCK_REASONS.includes(reason)) {
+    throw new ValidationError(
+      "El motivo de ajuste debe ser uno de: ajuste manual, compra, pérdida, venta o devolución"
+    );
+  }
+  const note = optionalText(raw.note, "La nota o motivo", 500) || undefined;
+  if (reason === "loss" && (!note || note.trim().length === 0)) {
+    throw new ValidationError("La nota explicativa es obligatoria cuando se registra una pérdida o rotura");
+  }
+
+  return {
+    productId,
+    delta,
+    reason,
+    note,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Trash2, Copy, ExternalLink } from "lucide-react";
+import { Edit2, Trash2, Copy, ExternalLink, SlidersHorizontal, History, AlertTriangle } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
@@ -15,6 +15,8 @@ export function ProductMobileCard({
   onDuplicate,
   onDelete,
   onStockChange,
+  onAdjustStock,
+  onViewHistory,
 }: {
   product: Product;
   index?: number;
@@ -22,7 +24,12 @@ export function ProductMobileCard({
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onAdjustStock?: (product: Product) => void;
+  onViewHistory?: (product: Product) => void;
 }) {
+  const minStock = product.minStock ?? 5;
+  const isLowStock = product.stock <= minStock;
+
   return (
     <div
       className="admin-row-in"
@@ -39,7 +46,6 @@ export function ProductMobileCard({
       }
     >
       <ProductThumb src={product.images[0]} size={52} />
-      <ProductThumb src={product.images[0]} size={52} />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-2 items-start">
           <div className="min-w-0">
@@ -51,6 +57,20 @@ export function ProductMobileCard({
             </div>
           </div>
           <div className="flex gap-1 shrink-0">
+            {onAdjustStock && (
+              <IconButton
+                onClick={() => onAdjustStock(product)}
+                title="Ajustar stock"
+                icon={SlidersHorizontal}
+              />
+            )}
+            {onViewHistory && (
+              <IconButton
+                onClick={() => onViewHistory(product)}
+                title="Historial de movimientos"
+                icon={History}
+              />
+            )}
             <a
               href={`/producto/${product.id}`}
               target="_blank"
@@ -84,16 +104,34 @@ export function ProductMobileCard({
         </div>
 
         <div className="mt-2.5 flex items-center justify-between flex-wrap gap-2.5">
-          <span className="font-semibold text-[var(--dash-text)]">
-            {formatPrice(product.price)}
-          </span>
+          <div>
+            <span className="font-semibold text-[var(--dash-text)]">
+              {formatPrice(product.price)}
+            </span>
+            {product.costPrice && (
+              <span className="block text-[11px] text-[var(--dash-muted)]">
+                Costo: {formatPrice(product.costPrice)}
+              </span>
+            )}
+          </div>
           <StatusBadge status={product.status} />
         </div>
 
-        <div className="mt-2.5 flex items-center justify-between border-t border-[var(--dash-border)] pt-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)]">
-            Stock
-          </span>
+        <div className="mt-2.5 flex items-center justify-between border-t border-[var(--dash-border)] pt-2.5 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)]">
+              Stock
+            </span>
+            {isLowStock && (
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded text-[var(--dash-warning)] bg-[var(--dash-warning-bg)] border border-[var(--dash-warning-border)]"
+                title={`Stock actual (${product.stock}) igual o inferior al mínimo configurado (${minStock})`}
+              >
+                <AlertTriangle size={10} />
+                <span>Bajo ({product.stock}/{minStock})</span>
+              </span>
+            )}
+          </div>
           <StockStepper
             value={product.stock}
             onChange={(next) => onStockChange(product, next)}

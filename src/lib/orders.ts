@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase";
-import { Order, OrderItem, ProductStatus } from "@/types";
+import { Order, OrderItem } from "@/types";
 import { STORE_TIMEZONE } from "@/lib/hours";
 import { isOrderStatus } from "@/lib/orderStatus";
 import { checkCoupon } from "@/lib/coupons";
@@ -367,29 +367,35 @@ export async function updateOrderPaymentStatus(
 // Mirrors admin/page.tsx's handleStockChange rule: 0 stock auto-marks a
 // product out_of_stock, restocking from 0 auto-clears it back to available.
 // sign is -1 when an order is confirmed (stock leaves), +1 when a confirmed
-// order is cancelled (stock comes back).
-async function adjustStock(items: OrderItem[], sign: -1 | 1): Promise<void> {
-  const admin = supabaseAdmin();
+import { adjustProductStockAtomic } from "@/lib/stockMovements";
+
+// Stock adjustment upon confirmation (decrement) or cancellation (increment),
+// executed atomically via Postgres RPC or transactional fallback.
+async function adjustStock(
+  items: OrderItem[],
+  sign: -1 | 1,
+  orderId?: string
+): Promise<void> {
+  const reason = sign === -1 ? "sale" : "return";
+  const note = orderId
+    ? sign === -1
+      ? `Venta en pedido #${orderId}`
+      : `Devolución por cancelación de pedido #${orderId}`
+    : undefined;
+
   for (const item of items) {
-    const { data, error: fetchError } = await admin
-      .from("products")
-      .select("stock, status")
-      .eq("id", item.productId)
-      .maybeSingle();
-    if (fetchError) throw fetchError;
-    // Product deleted since the order was placed — nothing left to adjust.
-    if (!data) continue;
-
-    const stock = Math.max(0, data.stock + sign * item.quantity);
-    let status = data.status as ProductStatus;
-    if (stock <= 0 && status !== "out_of_stock") status = "out_of_stock";
-    else if (stock > 0 && status === "out_of_stock") status = "available";
-
-    const { error: updateError } = await admin
-      .from("products")
-      .update({ stock, status })
-      .eq("id", item.productId);
-    if (updateError) throw updateError;
+    if (!item.productId) continue;
+    try {
+      await adjustProductStockAtomic({
+        productId: item.productId,
+        delta: sign * item.quantity,
+        reason,
+        note,
+        createdBy: "sistema",
+      });
+    } catch (err) {
+      console.error(`[orders] Error al ajustar stock para producto ${item.productId}:`, err);
+    }
   }
 }
 
@@ -464,7 +470,7 @@ export async function updateOrderStatus(
   if (claim && !claim.error) {
     // Won the race (rows came back) → move stock. Lost it (empty) → the other
     // request already did, and it also already wrote the status.
-    if (claim.rows?.length && sign) await adjustStock(items, sign);
+    if (claim.rows?.length && sign) await adjustStock(items, sign, id);
     if (claim.rows?.length) return;
   }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { Category, Product, ProductCategory, ProductStatus } from "@/types";
+import { Category, Product, ProductCategory, ProductStatus, Supplier } from "@/types";
 import { ProductInput } from "@/lib/products";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminField } from "@/components/admin/AdminField";
@@ -51,6 +51,9 @@ export function ProductForm({
     product?.longDescription ?? ""
   );
   const [price, setPrice] = useState(product ? String(product.price) : "");
+  const [costPrice, setCostPrice] = useState(
+    product?.costPrice !== undefined ? String(product.costPrice) : ""
+  );
   const [weight, setWeight] = useState(product?.weight ?? "");
   const [category, setCategory] = useState<ProductCategory>(
     product?.category ?? categories[0]?.slug ?? "mates"
@@ -59,6 +62,11 @@ export function ProductForm({
     product?.status ?? "available"
   );
   const [stock, setStock] = useState(product ? String(product.stock) : "10");
+  const [minStock, setMinStock] = useState(
+    product?.minStock !== undefined ? String(product.minStock) : "5"
+  );
+  const [supplierId, setSupplierId] = useState(product?.supplierId ?? "");
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [images, setImages] = useState<string[]>(
     product?.images && product.images.length > 0 ? product.images : []
   );
@@ -69,13 +77,32 @@ export function ProductForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetch("/api/admin/suppliers")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setSuppliers)
+      .catch(() => {});
+  }, []);
+
   const parsedTags = tagsInput
     .split(",")
     .map((t) => t.trim())
     .filter(Boolean);
 
   const numericPrice = parseFloat(price);
+  const numericCost = parseFloat(costPrice);
   const numericStock = parseInt(stock, 10);
+  const numericMinStock = parseInt(minStock, 10);
+
+  const hasValidMargin =
+    !isNaN(numericPrice) &&
+    !isNaN(numericCost) &&
+    numericPrice > 0 &&
+    numericCost > 0;
+  const marginPct = hasValidMargin
+    ? (((numericPrice - numericCost) / numericPrice) * 100).toFixed(0)
+    : null;
+  const grossProfit = hasValidMargin ? numericPrice - numericCost : null;
 
   function handleApplyPreset(p: PresetItem) {
     setName(p.name);
@@ -142,6 +169,9 @@ export function ProductForm({
         description: description.trim(),
         longDescription: longDescription.trim() || undefined,
         price: numericPrice,
+        costPrice: !isNaN(numericCost) && numericCost >= 0 ? numericCost : undefined,
+        minStock: !isNaN(numericMinStock) && numericMinStock >= 0 ? numericMinStock : 5,
+        supplierId: supplierId.trim() || undefined,
         weight: weight.trim() || undefined,
         category,
         images,
@@ -256,12 +286,12 @@ export function ProductForm({
             </AdminField>
           </div>
 
-          {/* Price & Weight Row */}
+          {/* Price, Cost & Margin Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)]">
-                  Precio (ARS) *
+                  Precio de venta (ARS) *
                 </span>
                 {!isNaN(numericPrice) && numericPrice > 0 && (
                   <span className="text-xs font-bold text-[var(--dash-accent)] font-serif">
@@ -299,14 +329,30 @@ export function ProductForm({
               )}
             </div>
 
-            <AdminField label="Peso / Medida (opcional)">
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--dash-muted)]">
+                  Costo unitario (ARS)
+                </span>
+                {hasValidMargin && marginPct && (
+                  <span className="text-xs font-bold text-[var(--dash-success)]">
+                    Margen: +{marginPct}% (+{formatPrice(grossProfit!)})
+                  </span>
+                )}
+              </div>
               <input
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                placeholder="Ej: 350g, 1L, 500g"
+                type="number"
+                min={0}
+                step={100}
+                placeholder="Ej: 22000"
+                value={costPrice}
+                onChange={(e) => setCostPrice(e.target.value)}
                 className="admin-input"
               />
-            </AdminField>
+              <span className="block text-[11px] text-[var(--dash-muted)] mt-1">
+                Utilizado para calcular márgenes brutos y reposición.
+              </span>
+            </div>
           </div>
 
           {/* Category & Status */}
@@ -340,9 +386,9 @@ export function ProductForm({
             </AdminField>
           </div>
 
-          {/* Stock & Brand */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AdminField label="Stock disponible *">
+          {/* Stock, Min Stock & Supplier */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <AdminField label="Stock actual *">
               <input
                 required
                 type="number"
@@ -350,6 +396,45 @@ export function ProductForm({
                 step={1}
                 value={stock}
                 onChange={(e) => handleStockChange(e.target.value)}
+                className="admin-input"
+              />
+            </AdminField>
+
+            <AdminField label="Stock mín. (alerta)">
+              <input
+                type="number"
+                min={0}
+                step={1}
+                placeholder="5"
+                value={minStock}
+                onChange={(e) => setMinStock(e.target.value)}
+                className="admin-input"
+              />
+            </AdminField>
+
+            <AdminField label="Proveedor">
+              <select
+                value={supplierId}
+                onChange={(e) => setSupplierId(e.target.value)}
+                className="admin-input text-xs"
+              >
+                <option value="">Sin proveedor asignado</option>
+                {suppliers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </AdminField>
+          </div>
+
+          {/* Weight & Brand */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <AdminField label="Peso / Medida (opcional)">
+              <input
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="Ej: 350g, 1L, 500g"
                 className="admin-input"
               />
             </AdminField>

@@ -17,6 +17,7 @@ export function OrderDesktopRow({
   order,
   index,
   onStatusChange,
+  onPaymentStatusChange,
   onView,
   selected,
   onToggleSelect,
@@ -24,6 +25,7 @@ export function OrderDesktopRow({
   order: Order;
   index: number;
   onStatusChange: (id: string, status: Order["status"]) => void;
+  onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
   onView: (order: Order) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
@@ -123,6 +125,60 @@ export function OrderDesktopRow({
       </td>
       <td style={{ ...td, fontWeight: 500, color: "var(--dash-text)" }}>
         {formatPrice(order.total)}
+      </td>
+      <td style={td}>
+        <button
+          type="button"
+          onClick={() =>
+            onPaymentStatusChange?.(
+              order.id!,
+              order.paymentStatus === "paid" ? "unpaid" : "paid",
+            )
+          }
+          title={
+            order.paymentStatus === "paid"
+              ? order.paidAt
+                ? `Cobrado el ${new Date(order.paidAt).toLocaleString("es-AR")}. Clic para cambiar a sin cobrar.`
+                : "Cobrado. Clic para cambiar a sin cobrar."
+              : "Sin cobrar. Clic para marcar como cobrado."
+          }
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            border: "none",
+            borderRadius: 999,
+            padding: "3px 9px",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: onPaymentStatusChange ? "pointer" : "default",
+            background:
+              order.paymentStatus === "paid"
+                ? "rgba(16, 185, 129, 0.15)"
+                : "rgba(245, 158, 11, 0.15)",
+            color:
+              order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
+          }}
+        >
+          {order.paymentStatus === "paid" ? "✓ Cobrado" : "⏳ Sin cobrar"}
+        </button>
+        {order.paymentStatus === "paid" && order.paidAt && (
+          <span
+            style={{
+              display: "block",
+              fontSize: 10,
+              color: "var(--dash-muted)",
+              marginTop: 2,
+            }}
+          >
+            {new Date(order.paidAt).toLocaleDateString("es-AR", {
+              day: "2-digit",
+              month: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        )}
       </td>
       <td style={{ ...td, color: "var(--dash-muted)", whiteSpace: "nowrap" }}>
         {new Date(order.createdAt).toLocaleDateString("es-AR", {

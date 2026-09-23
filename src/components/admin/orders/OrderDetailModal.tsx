@@ -140,6 +140,27 @@ export function OrderDetailModal({
 
       {/* Payment & Delivery Badges */}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "10px 0 6px" }}>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "3px 8px",
+            borderRadius: "var(--radius-chip, 4px)",
+            background:
+              order.paymentStatus === "paid"
+                ? "rgba(16, 185, 129, 0.15)"
+                : "rgba(245, 158, 11, 0.15)",
+            color:
+              order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
+            border: "1px solid var(--dash-border)",
+          }}
+        >
+          {order.paymentStatus === "paid"
+            ? order.paidAt
+              ? `✓ Cobrado (${new Date(order.paidAt).toLocaleDateString("es-AR")})`
+              : "✓ Cobrado"
+            : "⏳ Sin cobrar"}
+        </span>
         {order.paymentMethod && (
           <span
             style={{

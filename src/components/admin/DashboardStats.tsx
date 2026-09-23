@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   DollarSign,
   ShoppingCart,
@@ -12,6 +13,7 @@ import {
   Store,
   Clock,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { DashboardStats as Stats } from "@/lib/orders";
 import { formatPrice, LOW_STOCK_THRESHOLD } from "@/lib/utils";
@@ -43,6 +45,7 @@ export default function DashboardStats({
   products: Product[];
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -133,7 +136,7 @@ export default function DashboardStats({
       </div>
 
       {!stats ? (
-        <KpiSkeleton count={3} />
+        <KpiSkeleton count={4} />
       ) : (
         <div className="admin-kpi-grid">
           <AdminKpiCard
@@ -153,6 +156,18 @@ export default function DashboardStats({
             label="Ticket promedio"
             value={formatPrice(stats.avgTicket)}
             {...kpiDelta(stats.avgTicketChange)}
+          />
+          <AdminKpiCard
+            icon={AlertCircle}
+            label="Total adeudado (sin cobrar)"
+            value={formatPrice(stats.totalUnpaidAmount ?? 0)}
+            onClick={() => router.push("/admin/pedidos?paymentStatus=unpaid")}
+            change={
+              (stats.unpaidOrdersCount ?? 0) > 0
+                ? `${stats.unpaidOrdersCount} pedidos`
+                : undefined
+            }
+            trend={(stats.unpaidOrdersCount ?? 0) > 0 ? "down" : undefined}
           />
         </div>
       )}

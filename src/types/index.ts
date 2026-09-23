@@ -92,7 +92,9 @@ export interface Order {
   paymentMethod?: PaymentMethod;
   total: number;
   comment?: string;
-  status: "pending" | "confirmed" | "delivered" | "cancelled";
+  status: "pending" | "confirmed" | "preparing" | "ready" | "delivered" | "cancelled";
+  paymentStatus?: "unpaid" | "paid";
+  paidAt?: string | null;
   createdAt: string;
 }
 

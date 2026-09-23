@@ -11,6 +11,7 @@ export function OrderMobileCard({
   order,
   index,
   onStatusChange,
+  onPaymentStatusChange,
   onView,
   selected,
   onToggleSelect,
@@ -18,6 +19,7 @@ export function OrderMobileCard({
   order: Order;
   index: number;
   onStatusChange: (id: string, status: Order["status"]) => void;
+  onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
   onView: (order: Order) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
@@ -149,11 +151,43 @@ export function OrderMobileCard({
           justifyContent: "space-between",
           borderTop: "1px solid var(--dash-border)",
           paddingTop: 10,
+          gap: 8,
+          flexWrap: "wrap",
         }}
       >
-        <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
-          {formatPrice(order.total)}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
+            {formatPrice(order.total)}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              onPaymentStatusChange?.(
+                order.id!,
+                order.paymentStatus === "paid" ? "unpaid" : "paid",
+              )
+            }
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              border: "none",
+              borderRadius: 999,
+              padding: "2px 8px",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: onPaymentStatusChange ? "pointer" : "default",
+              background:
+                order.paymentStatus === "paid"
+                  ? "rgba(16, 185, 129, 0.15)"
+                  : "rgba(245, 158, 11, 0.15)",
+              color:
+                order.paymentStatus === "paid" ? "#10b981" : "#f59e0b",
+            }}
+          >
+            {order.paymentStatus === "paid" ? "✓ Cobrado" : "⏳ Sin cobrar"}
+          </button>
+        </div>
         <OrderStatusSelect
           status={order.status}
           onChange={(status) => onStatusChange(order.id!, status)}

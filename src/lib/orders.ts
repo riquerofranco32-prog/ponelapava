@@ -23,6 +23,8 @@ interface OrderRow {
   total: number;
   comment: string | null;
   status: Order["status"];
+  payment_status?: "unpaid" | "paid" | null;
+  paid_at?: string | null;
   created_at: string;
 }
 
@@ -37,6 +39,8 @@ function fromRow(row: OrderRow): Order {
     total: row.total,
     comment: row.comment ?? undefined,
     status: row.status,
+    paymentStatus: (row.payment_status as "unpaid" | "paid") || "unpaid",
+    paidAt: row.paid_at ?? null,
     createdAt: row.created_at,
   };
 }
@@ -182,6 +186,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     total: totals.total,
     comment: buildComment(input, totals, coupon?.code ?? null),
     status: "pending",
+    payment_status: "unpaid",
   };
 
   if (input.customerPhone?.trim()) {
@@ -213,6 +218,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     if (MISSING_COLUMN_CODES.includes(error.code)) {
       if (payload.customer_id) delete payload.customer_id;
       if (payload.customer_phone) delete payload.customer_phone;
+      if (payload.payment_status) delete payload.payment_status;
       const retry = await admin
         .from("orders")
         .insert(payload)
@@ -227,13 +233,135 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   return fromRow(data as OrderRow);
 }
 
-export async function getOrders(): Promise<Order[]> {
-  const { data, error } = await supabaseAdmin()
+export interface GetOrdersParams {
+  page?: number;
+  limit?: number;
+  status?: Order["status"] | "all";
+  paymentStatus?: "unpaid" | "paid" | "all";
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface GetOrdersResult {
+  orders: Order[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  unpaidCount: number;
+  totalUnpaidAmount: number;
+}
+
+export async function getOrders(params?: GetOrdersParams): Promise<GetOrdersResult> {
+  const admin = supabaseAdmin();
+  let query = admin
     .from("orders")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data as OrderRow[]).map(fromRow);
+
+  if (params?.status && params.status !== "all" && isOrderStatus(params.status)) {
+    query = query.eq("status", params.status);
+  }
+
+  if (params?.paymentStatus && params.paymentStatus !== "all") {
+    query = query.eq("payment_status", params.paymentStatus);
+  }
+
+  if (params?.startDate) {
+    query = query.gte("created_at", `${params.startDate}T00:00:00.000Z`);
+  }
+
+  if (params?.endDate) {
+    query = query.lte("created_at", `${params.endDate}T23:59:59.999Z`);
+  }
+
+  if (params?.search && params.search.trim()) {
+    const term = params.search.trim().replace(/[%_]/g, "");
+    if (term) {
+      query = query.or(`customer_name.ilike.%${term}%,customer_phone.ilike.%${term}%`);
+    }
+  }
+
+  const page = Math.max(1, params?.page ?? 1);
+  const limit = Math.max(1, Math.min(100, params?.limit ?? 50));
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  query = query.range(from, to);
+
+  const { data, count, error } = await query;
+  if (error) {
+    if (MISSING_COLUMN_CODES.includes(error.code ?? "")) {
+      const fallbackQuery = admin
+        .from("orders")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+      const fb = await fallbackQuery;
+      if (fb.error) throw fb.error;
+      const total = fb.count ?? (fb.data?.length ?? 0);
+      return {
+        orders: ((fb.data as OrderRow[]) ?? []).map(fromRow),
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+        unpaidCount: 0,
+        totalUnpaidAmount: 0,
+      };
+    }
+    throw error;
+  }
+
+  const total = count ?? (data?.length ?? 0);
+  const orders = ((data as OrderRow[]) ?? []).map(fromRow);
+
+  let unpaidCount = 0;
+  let totalUnpaidAmount = 0;
+  try {
+    const { data: unpaidRows } = await admin
+      .from("orders")
+      .select("total")
+      .neq("status", "cancelled")
+      .eq("payment_status", "unpaid");
+    if (unpaidRows) {
+      unpaidCount = unpaidRows.length;
+      totalUnpaidAmount = unpaidRows.reduce((sum, r) => sum + (r.total || 0), 0);
+    }
+  } catch {
+    // Column missing before migration
+  }
+
+  return {
+    orders,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit) || 1,
+    unpaidCount,
+    totalUnpaidAmount,
+  };
+}
+
+export async function updateOrderPaymentStatus(
+  id: string,
+  paymentStatus: "unpaid" | "paid",
+): Promise<void> {
+  const admin = supabaseAdmin();
+  const updates: Record<string, unknown> = {
+    payment_status: paymentStatus,
+    paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
+  };
+
+  const { error } = await admin.from("orders").update(updates).eq("id", id);
+  if (error) {
+    if (MISSING_COLUMN_CODES.includes(error.code ?? "")) {
+      console.warn("orders.payment_status column missing — skipping payment status update.");
+      return;
+    }
+    throw error;
+  }
 }
 
 // Mirrors admin/page.tsx's handleStockChange rule: 0 stock auto-marks a
@@ -277,6 +405,13 @@ const MISSING_COLUMN_CODES = [UNDEFINED_COLUMN, "PGRST204"];
 // previous value, so of two concurrent "Confirmado" clicks only one gets rows
 // back and only that one adjusts stock. Reading the flag and then writing it
 // (the previous shape) let both requests read `false` and decrement twice.
+const FULFILLMENT_STATUSES: Order["status"][] = [
+  "confirmed",
+  "preparing",
+  "ready",
+  "delivered",
+];
+
 export async function updateOrderStatus(
   id: string,
   status: Order["status"],
@@ -298,12 +433,15 @@ export async function updateOrderStatus(
   const currentStatus = current.data.status as Order["status"];
   const items = current.data.items as OrderItem[];
 
+  const isFulfillment = FULFILLMENT_STATUSES.includes(status);
+  const wasFulfillment = FULFILLMENT_STATUSES.includes(currentStatus);
+
   // Claim the stock transition, if this change is one.
   let claim: { rows: unknown[] | null; error: { code?: string } | null } | null =
     null;
   let sign: -1 | 1 | null = null;
 
-  if (status === "confirmed" && currentStatus !== "confirmed") {
+  if (isFulfillment && !wasFulfillment) {
     sign = -1;
     const res = await admin
       .from("orders")
@@ -312,7 +450,7 @@ export async function updateOrderStatus(
       .eq("stock_applied", false)
       .select("id");
     claim = { rows: res.data, error: res.error };
-  } else if (currentStatus === "confirmed" && status === "cancelled") {
+  } else if (status === "cancelled" && wasFulfillment) {
     sign = 1;
     const res = await admin
       .from("orders")
@@ -368,6 +506,8 @@ export interface DashboardStats {
   peakHours: { hour: number; orders: number }[];
   paymentMethods?: { transfer: number; cash: number; card: number };
   deliveryMethods?: { pickup: number; delivery: number };
+  totalUnpaidAmount?: number;
+  unpaidOrdersCount?: number;
 }
 
 // Last 14 days of orders drive the dashboard's revenue KPIs and sales chart
@@ -489,6 +629,22 @@ export async function getDashboardStats(
     orders: ordersByHour.get(hour) ?? 0,
   }));
 
+  let totalUnpaidAmount = 0;
+  let unpaidOrdersCount = 0;
+  try {
+    const { data: unpaidData } = await supabaseAdmin()
+      .from("orders")
+      .select("total")
+      .neq("status", "cancelled")
+      .eq("payment_status", "unpaid");
+    if (unpaidData) {
+      unpaidOrdersCount = unpaidData.length;
+      totalUnpaidAmount = unpaidData.reduce((sum, o) => sum + (o.total || 0), 0);
+    }
+  } catch {
+    // Column missing before migration
+  }
+
   return {
     totalRevenue,
     orderCount,
@@ -501,5 +657,7 @@ export async function getDashboardStats(
     topProducts,
     paymentMethods,
     deliveryMethods,
+    totalUnpaidAmount,
+    unpaidOrdersCount,
   };
 }

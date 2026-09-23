@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Clock,
   CheckCircle2,
@@ -11,13 +12,18 @@ import {
   ArrowDown,
   ArrowUpDown,
   RefreshCw,
+  AlertCircle,
+  Kanban,
+  LayoutList,
+  ChevronLeft,
+  ChevronRight,
+  Truck,
 } from "lucide-react";
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
 import { AdminButton } from "./AdminButton";
-import FailedOrdersNotice from "./orders/FailedOrdersNotice";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
@@ -25,12 +31,13 @@ import { useAdminToast } from "./AdminToast";
 import { OrderDesktopRow } from "./orders/OrderDesktopRow";
 import { OrderMobileCard } from "./orders/OrderMobileCard";
 import { OrderDetailModal } from "./orders/OrderDetailModal";
+import { OrdersKanbanView } from "./orders/OrdersKanbanView";
 
 type StatusFilter = "all" | Order["status"];
+type PaymentFilter = "all" | "unpaid" | "paid";
 type SortColumn = "date" | "total";
 type SortDir = "asc" | "desc";
 
-// naive CSV field escaping (wrap+double quotes) — covers Excel/Sheets fine
 function csvField(value: string | number | undefined | null): string {
   if (value === undefined || value === null) return '""';
   return `"${String(value).replace(/"/g, '""')}"`;
@@ -47,6 +54,8 @@ function exportOrdersToCsv(orders: Order[]) {
     "Subtotal",
     "Total",
     "Estado",
+    "Cobro",
+    "Fecha Cobro",
     "Observacion",
   ];
   const rows = orders.map((o) => {
@@ -65,6 +74,8 @@ function exportOrdersToCsv(orders: Order[]) {
       csvField(o.subtotal || o.total),
       csvField(o.total),
       csvField(STATUS_LABELS[o.status] || o.status),
+      csvField(o.paymentStatus === "paid" ? "Cobrado" : "Sin cobrar"),
+      csvField(o.paidAt ? new Date(o.paidAt).toLocaleString("es-AR") : ""),
       csvField(o.comment || ""),
     ];
   });
@@ -80,20 +91,39 @@ function exportOrdersToCsv(orders: Order[]) {
 }
 
 export default function OrdersTable() {
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
   const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [unpaidCount, setUnpaidCount] = useState(0);
+  const [totalUnpaidAmount, setTotalUnpaidAmount] = useState(0);
+
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkUpdating, setBulkUpdating] = useState(false);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+
   const [sortColumn, setSortColumn] = useState<SortColumn>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const showToast = useAdminToast();
+
+  useEffect(() => {
+    const p = searchParams.get("paymentStatus");
+    if (p === "unpaid" || p === "paid") {
+      setPaymentFilter(p);
+    }
+  }, [searchParams]);
 
   function handleSort(column: SortColumn) {
     if (sortColumn === column) {
@@ -109,20 +139,47 @@ export default function OrdersTable() {
     else setRefreshing(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/orders");
+      const params = new URLSearchParams();
+      if (viewMode === "kanban") {
+        params.set("limit", "100");
+        params.set("page", "1");
+        if (statusFilter !== "all") params.set("status", statusFilter);
+      } else {
+        params.set("page", String(page));
+        params.set("limit", "50");
+        if (statusFilter !== "all") params.set("status", statusFilter);
+      }
+
+      if (paymentFilter !== "all") params.set("paymentStatus", paymentFilter);
+      if (search.trim()) params.set("search", search.trim());
+      if (dateFrom) params.set("startDate", dateFrom);
+      if (dateTo) params.set("endDate", dateTo);
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`);
       assertOk(res, "No se pudieron cargar los pedidos");
-      setOrders(await res.json());
+      const json = await res.json();
+      if (Array.isArray(json)) {
+        setOrders(json);
+        setTotalCount(json.length);
+        setTotalPages(1);
+      } else {
+        setOrders(json.orders || []);
+        setTotalCount(json.total || 0);
+        setTotalPages(json.totalPages || 1);
+        setUnpaidCount(json.unpaidCount || 0);
+        setTotalUnpaidAmount(json.totalUnpaidAmount || 0);
+      }
     } catch (err) {
       if (!silent) setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       if (!silent) setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [page, statusFilter, paymentFilter, search, dateFrom, dateTo, viewMode]);
 
   useEffect(() => {
     loadOrders();
-    const interval = setInterval(() => loadOrders(true), 20_000);
+    const interval = setInterval(() => loadOrders(true), 25_000);
     return () => clearInterval(interval);
   }, [loadOrders]);
 
@@ -141,7 +198,44 @@ export default function OrdersTable() {
         err instanceof Error ? err.message : "No se pudo actualizar el estado",
         "error",
       );
-      loadOrders(); // revert the optimistic update
+      loadOrders(true);
+    }
+  }
+
+  async function handlePaymentStatusChange(
+    id: string,
+    paymentStatus: "unpaid" | "paid",
+  ) {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              paymentStatus,
+              paidAt: paymentStatus === "paid" ? new Date().toISOString() : null,
+            }
+          : o,
+      ),
+    );
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus }),
+      });
+      assertOk(res, "No se pudo actualizar el estado de cobro");
+      showToast(
+        paymentStatus === "paid"
+          ? "Pedido marcado como cobrado"
+          : "Pedido marcado como sin cobrar",
+      );
+      loadOrders(true);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Error al actualizar cobro",
+        "error",
+      );
+      loadOrders(true);
     }
   }
 
@@ -185,192 +279,240 @@ export default function OrdersTable() {
         err instanceof Error ? err.message : "No se pudo actualizar en lote",
         "error",
       );
-      loadOrders(); // revert the optimistic update
+      loadOrders(true);
     } finally {
       setBulkUpdating(false);
     }
   }
 
-  if (loading) {
-    return <TableSkeleton rows={5} />;
-  }
-
-  if (error) {
-    return <div className="admin-error-banner">{error}</div>;
-  }
-
-  if (orders.length === 0) {
-    return (
-      <EmptyState
-        icon={ShoppingBag}
-        title="Todavía no hay pedidos"
-        description="Se registran automáticamente cuando un cliente completa el checkout en /carrito."
-      />
-    );
-  }
-
-  const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const confirmedCount = orders.filter((o) => o.status === "confirmed").length;
-  const deliveredCount = orders.filter((o) => o.status === "delivered").length;
-  const statusFiltered =
-    statusFilter === "all"
-      ? orders
-      : orders.filter((o) => o.status === statusFilter);
-  const searchTerm = search.trim().toLowerCase();
-  const searchFiltered = !searchTerm
-    ? statusFiltered
-    : statusFiltered.filter(
-        (o) =>
-          o.customerName.toLowerCase().includes(searchTerm) ||
-          o.items.some((i) => i.productName.toLowerCase().includes(searchTerm)),
-      );
-  const fromMs = dateFrom ? new Date(dateFrom).getTime() : null;
-  // end of day so "hasta" incluye todo el día seleccionado
-  const toMs = dateTo
-    ? new Date(dateTo).getTime() + 24 * 60 * 60 * 1000 - 1
-    : null;
-  const dateFiltered = searchFiltered.filter((o) => {
-    const t = new Date(o.createdAt).getTime();
-    if (fromMs !== null && t < fromMs) return false;
-    if (toMs !== null && t > toMs) return false;
-    return true;
-  });
-  const filteredOrders = [...dateFiltered].sort((a, b) => {
+  const sortedOrders = [...orders].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
     if (sortColumn === "total") return (a.total - b.total) * dir;
     return (
       (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir
     );
   });
+
   const allVisibleSelected =
-    filteredOrders.length > 0 &&
-    filteredOrders.every((o) => selectedIds.has(o.id!));
+    sortedOrders.length > 0 &&
+    sortedOrders.every((o) => selectedIds.has(o.id!));
 
   function toggleSelectAllVisible() {
     setSelectedIds((prev) => {
       if (allVisibleSelected) {
         const next = new Set(prev);
-        filteredOrders.forEach((o) => next.delete(o.id!));
+        sortedOrders.forEach((o) => next.delete(o.id!));
         return next;
       }
       const next = new Set(prev);
-      filteredOrders.forEach((o) => next.add(o.id!));
+      sortedOrders.forEach((o) => next.add(o.id!));
       return next;
     });
   }
 
+  const pendingCount = orders.filter((o) => o.status === "pending").length;
+  const preparingCount = orders.filter((o) => o.status === "confirmed" || o.status === "preparing").length;
+  const readyCount = orders.filter((o) => o.status === "ready").length;
+  const deliveredCount = orders.filter((o) => o.status === "delivered").length;
+
   const th: React.CSSProperties = {
     textAlign: "left",
     padding: "10px 14px",
-    fontSize: 11,
-    fontWeight: 700,
+    color: "var(--dash-muted)",
+    fontSize: 12,
+    fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    color: "var(--dash-muted)",
-  };
-
-  const cancelledCount = orders.filter((o) => o.status === "cancelled").length;
-
-  const counts: Record<StatusFilter, number> = {
-    all: orders.length,
-    pending: pendingCount,
-    confirmed: confirmedCount,
-    delivered: deliveredCount,
-    cancelled: cancelledCount,
   };
 
   return (
     <div>
-      <FailedOrdersNotice />
-      <div className="admin-kpi-grid">
-        <AdminKpiCard
-          icon={ShoppingBag}
-          label="Total"
-          value={orders.length}
-          active={statusFilter === "all"}
-          onClick={() => setStatusFilter("all")}
-        />
+      {/* KPI Cards */}
+      <div className="admin-kpi-grid" style={{ marginBottom: 20 }}>
         <AdminKpiCard
           icon={Clock}
           label="Pendientes"
           value={pendingCount}
           active={statusFilter === "pending"}
-          onClick={() => setStatusFilter("pending")}
+          onClick={() => {
+            setStatusFilter((prev) => (prev === "pending" ? "all" : "pending"));
+            setPage(1);
+          }}
         />
         <AdminKpiCard
           icon={CheckCircle2}
-          label="Confirmados"
-          value={confirmedCount}
-          active={statusFilter === "confirmed"}
-          onClick={() => setStatusFilter("confirmed")}
+          label="En preparación"
+          value={preparingCount}
+          active={statusFilter === "preparing" || statusFilter === "confirmed"}
+          onClick={() => {
+            setStatusFilter((prev) => (prev === "preparing" ? "all" : "preparing"));
+            setPage(1);
+          }}
+        />
+        <AdminKpiCard
+          icon={Truck}
+          label="Listos"
+          value={readyCount}
+          active={statusFilter === "ready"}
+          onClick={() => {
+            setStatusFilter((prev) => (prev === "ready" ? "all" : "ready"));
+            setPage(1);
+          }}
         />
         <AdminKpiCard
           icon={PackageCheck}
           label="Entregados"
           value={deliveredCount}
           active={statusFilter === "delivered"}
-          onClick={() => setStatusFilter("delivered")}
+          onClick={() => {
+            setStatusFilter((prev) => (prev === "delivered" ? "all" : "delivered"));
+            setPage(1);
+          }}
+        />
+        <AdminKpiCard
+          icon={AlertCircle}
+          label="Total Adeudado"
+          value={formatPrice(totalUnpaidAmount)}
+          active={paymentFilter === "unpaid"}
+          change={unpaidCount > 0 ? `${unpaidCount} sin cobrar` : undefined}
+          trend={unpaidCount > 0 ? "down" : undefined}
+          onClick={() => {
+            setPaymentFilter((prev) => (prev === "unpaid" ? "all" : "unpaid"));
+            setPage(1);
+          }}
         />
       </div>
 
+      {/* Main Toolbar */}
       <div
         style={{
           display: "flex",
-          gap: 8,
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
+          gap: 12,
+          flexDirection: "column",
           marginBottom: 16,
         }}
       >
+        {/* Status and View Mode Controls */}
         <div
           style={{
             display: "flex",
-            gap: 8,
-            overflowX: "auto",
-            paddingBottom: 4,
-            WebkitOverflowScrolling: "touch",
-            maxWidth: "100%",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 10,
           }}
         >
-          {(
-            [
-              { value: "all", label: "Todos" },
-              { value: "pending", label: STATUS_LABELS.pending },
-              { value: "confirmed", label: STATUS_LABELS.confirmed },
-              { value: "delivered", label: STATUS_LABELS.delivered },
-              { value: "cancelled", label: STATUS_LABELS.cancelled },
-            ] as { value: StatusFilter; label: string }[]
-          ).map((f) => (
+          {/* Status Pills */}
+          <div
+            style={{
+              display: "flex",
+              gap: 6,
+              overflowX: "auto",
+              paddingBottom: 4,
+              WebkitOverflowScrolling: "touch",
+              maxWidth: "100%",
+            }}
+          >
+            {(
+              [
+                { value: "all", label: "Todos" },
+                { value: "pending", label: "Pendientes" },
+                { value: "confirmed", label: "Confirmados" },
+                { value: "preparing", label: "En prep." },
+                { value: "ready", label: "Listos" },
+                { value: "delivered", label: "Entregados" },
+                { value: "cancelled", label: "Cancelados" },
+              ] as { value: StatusFilter; label: string }[]
+            ).map((f) => (
+              <button
+                key={f.value}
+                onClick={() => {
+                  setStatusFilter(f.value);
+                  setPage(1);
+                }}
+                className={`admin-toolbar-pill${
+                  statusFilter === f.value ? " admin-toolbar-pill--active" : ""
+                }`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>{f.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* View Mode Toggle: Table vs Kanban */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              background: "var(--dash-surface-2)",
+              border: "1px solid var(--dash-border)",
+              borderRadius: 8,
+              padding: 2,
+            }}
+          >
             <button
-              key={f.value}
-              onClick={() => setStatusFilter(f.value)}
-              className={`admin-toolbar-pill${
-                statusFilter === f.value ? " admin-toolbar-pill--active" : ""
-              }`}
+              type="button"
+              onClick={() => setViewMode("table")}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                flexShrink: 0,
-                whiteSpace: "nowrap",
+                padding: "5px 10px",
+                borderRadius: 6,
+                border: "none",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                background: viewMode === "table" ? "var(--dash-surface)" : "none",
+                color: viewMode === "table" ? "var(--dash-text)" : "var(--dash-muted)",
+                boxShadow: viewMode === "table" ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
               }}
             >
-              <span>{f.label}</span>
-              <span
-                style={{
-                  fontSize: 11,
-                  opacity: 0.7,
-                  fontWeight: statusFilter === f.value ? 700 : 500,
-                }}
-              >
-                ({counts[f.value]})
-              </span>
+              <LayoutList size={14} />
+              <span>Tabla</span>
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setViewMode("kanban")}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "5px 10px",
+                borderRadius: 6,
+                border: "none",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                background: viewMode === "kanban" ? "var(--dash-surface)" : "none",
+                color: viewMode === "kanban" ? "var(--dash-text)" : "var(--dash-muted)",
+                boxShadow: viewMode === "kanban" ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+              }}
+            >
+              <Kanban size={14} />
+              <span>Kanban</span>
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", width: "100%", marginTop: 8 }}>
+        {/* Filters bar: Search, Payment Status, Date Pickers, CSV, Refresh */}
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            alignItems: "center",
+            flexWrap: "wrap",
+            width: "100%",
+          }}
+        >
+          {/* Search */}
           <div style={{ position: "relative", flex: "1 1 200px" }}>
             <Search
               size={14}
@@ -385,80 +527,110 @@ export default function OrdersTable() {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar cliente o producto..."
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Buscar cliente o teléfono..."
               className="admin-toolbar-input"
               style={{ padding: "6px 14px 6px 30px", width: "100%" }}
             />
           </div>
-          <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
-            {/* Quick date presets */}
-            <div style={{ display: "flex", gap: 4, marginRight: 4 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  const today = new Date().toISOString().slice(0, 10);
-                  setDateFrom(today);
-                  setDateTo(today);
-                }}
-                className="admin-toolbar-pill"
-                style={{ fontSize: 11, padding: "4px 8px" }}
-              >
-                Hoy
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const to = new Date();
-                  const from = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
-                  setDateFrom(from.toISOString().slice(0, 10));
-                  setDateTo(to.toISOString().slice(0, 10));
-                }}
-                className="admin-toolbar-pill"
-                style={{ fontSize: 11, padding: "4px 8px" }}
-              >
-                7 días
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const to = new Date();
-                  const from = new Date(to.getFullYear(), to.getMonth(), 1);
-                  setDateFrom(from.toISOString().slice(0, 10));
-                  setDateTo(to.toISOString().slice(0, 10));
-                }}
-                className="admin-toolbar-pill"
-                style={{ fontSize: 11, padding: "4px 8px" }}
-              >
-                Este mes
-              </button>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                aria-label="Desde"
-                className="admin-toolbar-input"
-                style={{ padding: "4px 8px", fontSize: 12 }}
-              />
-              <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                aria-label="Hasta"
-                className="admin-toolbar-input"
-                style={{ padding: "4px 8px", fontSize: 12 }}
-              />
-            </div>
+
+          {/* Payment Status Filter */}
+          <select
+            value={paymentFilter}
+            onChange={(e) => {
+              setPaymentFilter(e.target.value as PaymentFilter);
+              setPage(1);
+            }}
+            className="admin-toolbar-input"
+            aria-label="Filtro de cobro"
+            style={{ padding: "5px 10px", fontSize: 12, fontWeight: 500 }}
+          >
+            <option value="all">Cobro: Todos</option>
+            <option value="unpaid">Sin cobrar</option>
+            <option value="paid">Cobrado</option>
+          </select>
+
+          {/* Date presets */}
+          <div style={{ display: "flex", gap: 4 }}>
+            <button
+              type="button"
+              onClick={() => {
+                const today = new Date().toISOString().slice(0, 10);
+                setDateFrom(today);
+                setDateTo(today);
+                setPage(1);
+              }}
+              className="admin-toolbar-pill"
+              style={{ fontSize: 11, padding: "4px 8px" }}
+            >
+              Hoy
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const to = new Date();
+                const from = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
+                setDateFrom(from.toISOString().slice(0, 10));
+                setDateTo(to.toISOString().slice(0, 10));
+                setPage(1);
+              }}
+              className="admin-toolbar-pill"
+              style={{ fontSize: 11, padding: "4px 8px" }}
+            >
+              7 días
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const to = new Date();
+                const from = new Date(to.getFullYear(), to.getMonth(), 1);
+                setDateFrom(from.toISOString().slice(0, 10));
+                setDateTo(to.toISOString().slice(0, 10));
+                setPage(1);
+              }}
+              className="admin-toolbar-pill"
+              style={{ fontSize: 11, padding: "4px 8px" }}
+            >
+              Este mes
+            </button>
+          </div>
+
+          {/* Date Inputs */}
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => {
+                setDateFrom(e.target.value);
+                setPage(1);
+              }}
+              aria-label="Desde"
+              className="admin-toolbar-input"
+              style={{ padding: "4px 8px", fontSize: 12 }}
+            />
+            <span style={{ color: "var(--dash-muted)", fontSize: 12 }}>–</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => {
+                setDateTo(e.target.value);
+                setPage(1);
+              }}
+              aria-label="Hasta"
+              className="admin-toolbar-input"
+              style={{ padding: "4px 8px", fontSize: 12 }}
+            />
             {(dateFrom || dateTo) && (
               <button
                 onClick={() => {
                   setDateFrom("");
                   setDateTo("");
+                  setPage(1);
                 }}
-                aria-label="Limpiar rango de fechas"
+                aria-label="Limpiar fechas"
                 style={{
                   background: "none",
                   border: "none",
@@ -472,6 +644,8 @@ export default function OrdersTable() {
               </button>
             )}
           </div>
+
+          {/* Action buttons */}
           <AdminButton
             variant="secondary"
             onClick={() => loadOrders(false)}
@@ -485,17 +659,19 @@ export default function OrdersTable() {
                 animation: refreshing ? "spin 1s linear infinite" : "none",
               }}
             />
-            {refreshing ? "Actualizando..." : "Refrescar"}
+            {refreshing ? "..." : "Refrescar"}
           </AdminButton>
+
           <AdminButton
             variant="secondary"
-            onClick={() => exportOrdersToCsv(filteredOrders)}
+            onClick={() => exportOrdersToCsv(sortedOrders)}
           >
-            Exportar CSV
+            CSV
           </AdminButton>
         </div>
       </div>
 
+      {/* Bulk status bar */}
       {selectedIds.size > 0 && (
         <div
           style={{
@@ -513,8 +689,7 @@ export default function OrdersTable() {
           <span
             style={{ fontSize: 13, fontWeight: 600, color: "var(--dash-text)" }}
           >
-            {selectedIds.size} pedido{selectedIds.size !== 1 ? "s" : ""}{" "}
-            seleccionado
+            {selectedIds.size} pedido{selectedIds.size !== 1 ? "s" : ""} seleccionado
             {selectedIds.size !== 1 ? "s" : ""}
           </span>
           <span style={{ fontSize: 12, color: "var(--dash-muted)" }}>
@@ -524,6 +699,8 @@ export default function OrdersTable() {
             [
               "pending",
               "confirmed",
+              "preparing",
+              "ready",
               "delivered",
               "cancelled",
             ] as Order["status"][]
@@ -555,11 +732,23 @@ export default function OrdersTable() {
         </div>
       )}
 
-      {filteredOrders.length === 0 ? (
+      {/* Content Area: Table vs Kanban */}
+      {loading ? (
+        <TableSkeleton rows={8} />
+      ) : error ? (
+        <div className="admin-error-banner">{error}</div>
+      ) : sortedOrders.length === 0 ? (
         <EmptyState
           icon={ShoppingBag}
-          title="Sin pedidos en este estado"
-          description="Probá con otro filtro."
+          title="Sin pedidos encontrados"
+          description="Probá ajustando los filtros de búsqueda o fecha."
+        />
+      ) : viewMode === "kanban" ? (
+        <OrdersKanbanView
+          orders={sortedOrders}
+          onStatusChange={handleStatusChange}
+          onPaymentStatusChange={handlePaymentStatusChange}
+          onViewOrder={setViewingOrder}
         />
       ) : (
         <>
@@ -613,6 +802,7 @@ export default function OrdersTable() {
                       )}
                     </button>
                   </th>
+                  <th style={th}>Cobro</th>
                   <th style={th}>
                     <button
                       onClick={() => handleSort("date")}
@@ -643,7 +833,7 @@ export default function OrdersTable() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order, index) => (
+                {sortedOrders.map((order, index) => (
                   <OrderDesktopRow
                     key={order.id}
                     order={order}
@@ -651,6 +841,7 @@ export default function OrdersTable() {
                     selected={selectedIds.has(order.id!)}
                     onToggleSelect={toggleSelect}
                     onStatusChange={handleStatusChange}
+                    onPaymentStatusChange={handlePaymentStatusChange}
                     onView={setViewingOrder}
                   />
                 ))}
@@ -662,7 +853,7 @@ export default function OrdersTable() {
             className="admin-mobile-only"
             style={{ display: "flex", flexDirection: "column", gap: 10 }}
           >
-            {filteredOrders.map((order, index) => (
+            {sortedOrders.map((order, index) => (
               <OrderMobileCard
                 key={order.id}
                 order={order}
@@ -670,10 +861,50 @@ export default function OrdersTable() {
                 selected={selectedIds.has(order.id!)}
                 onToggleSelect={toggleSelect}
                 onStatusChange={handleStatusChange}
+                onPaymentStatusChange={handlePaymentStatusChange}
                 onView={setViewingOrder}
               />
             ))}
           </div>
+
+          {/* Pagination Controls */}
+          {viewMode === "table" && totalPages > 1 && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px 4px",
+                borderTop: "1px solid var(--dash-border)",
+                marginTop: 14,
+                fontSize: 13,
+                color: "var(--dash-muted)",
+              }}
+            >
+              <span>
+                Página <strong>{page}</strong> de <strong>{totalPages}</strong> ({totalCount} pedidos)
+              </span>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <AdminButton
+                  variant="secondary"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft size={14} style={{ marginRight: 4 }} />
+                  Anterior
+                </AdminButton>
+                <AdminButton
+                  variant="secondary"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Siguiente
+                  <ChevronRight size={14} style={{ marginLeft: 4 }} />
+                </AdminButton>
+              </div>
+            </div>
+          )}
         </>
       )}
 

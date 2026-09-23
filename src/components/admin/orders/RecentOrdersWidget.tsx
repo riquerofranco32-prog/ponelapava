@@ -55,7 +55,8 @@ export function RecentOrdersWidget({
     try {
       const res = await fetch("/api/admin/orders");
       assertOk(res, "No se pudieron cargar los pedidos");
-      const data: Order[] = await res.json();
+      const json = await res.json();
+      const data: Order[] = Array.isArray(json) ? json : (json?.orders ?? []);
       setOrders(data);
     } catch (err) {
       if (!silent) {

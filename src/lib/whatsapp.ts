@@ -1,5 +1,6 @@
 import { WhatsAppOrderData } from "@/types";
 import { formatPrice } from "./utils";
+import { normalizeArPhone } from "./phone";
 
 export const WHATSAPP_BASE_URL = "https://wa.me";
 
@@ -96,16 +97,8 @@ export function buildAdminCustomerWhatsAppUrl(
   total: number,
   status: "pending" | "confirmed" | "delivered" | "cancelled" | "ready" | "general" = "general",
 ): string {
-  let cleanPhone = phone.replace(/\D/g, "");
-  if (cleanPhone.startsWith("0")) cleanPhone = cleanPhone.slice(1);
-  if (cleanPhone.length === 10) cleanPhone = `549${cleanPhone}`;
-  else if (
-    cleanPhone.startsWith("54") &&
-    !cleanPhone.startsWith("549") &&
-    cleanPhone.length === 12
-  ) {
-    cleanPhone = `549${cleanPhone.slice(2)}`;
-  }
+  const normalized = normalizeArPhone(phone);
+  const cleanPhone = normalized ? normalized.replace(/^\+/, "") : phone.replace(/\D/g, "");
 
   let text = "";
   if (status === "confirmed") {

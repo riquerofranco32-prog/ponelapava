@@ -9,6 +9,7 @@ import { assertOk } from "@/lib/admin-fetch";
 
 const ACTION_LABELS: Record<AuditAction, string> = {
   order_status_change: "Cambio de estado de pedido",
+  order_payment_status_change: "Cambio de estado de cobro",
   product_update: "Producto actualizado",
   product_delete: "Producto eliminado",
   settings_update: "Configuración actualizada",
@@ -28,6 +29,8 @@ function describeDetails(entry: AuditLogEntry): string {
       return d.followUpAt ? `Fecha: ${d.followUpAt}` : "Seguimiento limpiado";
     case "order_status_change":
       return `Nuevo estado: ${d.status}`;
+    case "order_payment_status_change":
+      return `Cobro: ${d.paymentStatus === "paid" ? "Cobrado" : "Sin cobrar"}`;
     case "product_update": {
       const stock = d.stock as { before?: number; after?: number } | undefined;
       const status = d.status as

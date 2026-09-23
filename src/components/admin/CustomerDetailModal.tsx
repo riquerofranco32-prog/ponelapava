@@ -4,105 +4,167 @@ import { useState, useEffect } from "react";
 import {
   X,
   MessageCircle,
-  ShoppingBag,
   Calendar,
   Phone,
-  DollarSign,
   Package,
   StickyNote,
   Crown,
   Sparkles,
-  Gift,
   Send,
   Save,
   Printer,
   Check,
+  AlertCircle,
+  Tag,
+  Copy,
 } from "lucide-react";
+import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { STATUS_LABELS } from "@/lib/orderStatus";
 import { printOrderRemito } from "@/lib/orderPrint";
-import { AdminButton } from "./AdminButton";
-
-export interface CustomerData {
-  id: string;
-  name: string;
-  phone?: string;
-  ordersCount: number;
-  totalSpent: number;
-  lastOrderDate: string;
-  segment?: "vip" | "recurring" | "risk" | "new";
-  orders: {
-    id?: string;
-    total: number;
-    status: string;
-    createdAt: string;
-    items: { productName: string; quantity: number; price: number }[];
-    comment?: string;
-  }[];
-  favoriteProducts: { name: string; quantity: number }[];
-}
+import { CustomerWithStats, CustomerDetail } from "@/lib/customers";
 
 interface CustomerDetailModalProps {
-  customer: CustomerData | null;
+  customer: CustomerWithStats | null;
   onClose: () => void;
+  onCustomerUpdated?: () => void;
 }
 
 export function CustomerDetailModal({
   customer,
   onClose,
+  onCustomerUpdated,
 }: CustomerDetailModalProps) {
+  const [detail, setDetail] = useState<CustomerDetail | null>(null);
+  const [loading, setLoading] = useState(false);
   const [note, setNote] = useState("");
   const [noteSaved, setNoteSaved] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState<string>("gift");
+  const [savingNote, setSavingNote] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState("");
+  const [followUpDate, setFollowUpDate] = useState("");
+  const [savingFollowUp, setSavingFollowUp] = useState(false);
+  const [followUpSaved, setFollowUpSaved] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<string>("gratitude");
   const [copiedMsg, setCopiedMsg] = useState(false);
 
   useEffect(() => {
-    if (customer) {
-      const savedNote = localStorage.getItem(`pava-crm-note-${customer.id}`) || "";
-      setNote(savedNote);
-      setNoteSaved(false);
-
-      try {
-        const savedTags = localStorage.getItem(`pava-crm-tags-${customer.id}`);
-        if (savedTags) {
-          setTags(JSON.parse(savedTags));
-        } else {
-          // Defaults based on segment
-          const initial = customer.segment === "vip" ? ["VIP"] : customer.segment === "recurring" ? ["Recurrente"] : [];
-          setTags(initial);
-        }
-      } catch {
-        setTags([]);
-      }
+    if (!customer) {
+      setDetail(null);
+      return;
     }
+
+    setNote(customer.notes || "");
+    setTags(customer.tags || []);
+    setFollowUpDate(customer.followUpAt ? customer.followUpAt.slice(0, 10) : "");
+
+    // Cargar detalle completo desde la API
+    setLoading(true);
+    fetch(`/api/admin/customers/${customer.id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al obtener detalle");
+        return res.json();
+      })
+      .then((data: CustomerDetail) => {
+        setDetail(data);
+        setNote(data.notes || "");
+        setTags(data.tags || []);
+        if (data.followUpAt) {
+          setFollowUpDate(data.followUpAt.slice(0, 10));
+        }
+      })
+      .catch(() => {
+        // Fallback al cliente recibido
+      })
+      .finally(() => setLoading(false));
   }, [customer]);
 
   if (!customer) return null;
 
-  function handleSaveNote() {
+  const current = detail || customer;
+  const daysSinceLast = current.daysSinceLastOrder;
+
+  async function handleSaveNote() {
     if (!customer) return;
-    localStorage.setItem(`pava-crm-note-${customer.id}`, note);
-    setNoteSaved(true);
-    setTimeout(() => setNoteSaved(false), 2000);
+    setSavingNote(true);
+    try {
+      const res = await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: note }),
+      });
+      if (res.ok) {
+        setNoteSaved(true);
+        setTimeout(() => setNoteSaved(false), 2500);
+        onCustomerUpdated?.();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSavingNote(false);
+    }
   }
 
-  function handleAddTag(tagText: string) {
+  async function handleAddTag(tagText: string) {
     if (!customer) return;
     const clean = tagText.trim();
     if (!clean || tags.includes(clean)) return;
-    const next = [...tags, clean];
-    setTags(next);
-    localStorage.setItem(`pava-crm-tags-${customer.id}`, JSON.stringify(next));
+    const nextTags = [...tags, clean];
+    setTags(nextTags);
     setNewTagInput("");
+
+    try {
+      await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags: nextTags }),
+      });
+      onCustomerUpdated?.();
+    } catch {
+      // ignore
+    }
   }
 
-  function handleRemoveTag(tagToRemove: string) {
+  async function handleRemoveTag(tagToRemove: string) {
     if (!customer) return;
-    const next = tags.filter((t) => t !== tagToRemove);
-    setTags(next);
-    localStorage.setItem(`pava-crm-tags-${customer.id}`, JSON.stringify(next));
+    const nextTags = tags.filter((t) => t !== tagToRemove);
+    setTags(nextTags);
+
+    try {
+      await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tags: nextTags }),
+      });
+      onCustomerUpdated?.();
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleSaveFollowUp(newDate: string) {
+    if (!customer) return;
+    setSavingFollowUp(true);
+    setFollowUpDate(newDate);
+
+    try {
+      const res = await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          follow_up_at: newDate ? new Date(`${newDate}T12:00:00Z`).toISOString() : null,
+        }),
+      });
+      if (res.ok) {
+        setFollowUpSaved(true);
+        setTimeout(() => setFollowUpSaved(false), 2500);
+        onCustomerUpdated?.();
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSavingFollowUp(false);
+    }
   }
 
   async function handleCopyTemplate(text: string) {
@@ -115,37 +177,36 @@ export function CustomerDetailModal({
     }
   }
 
-  const cleanPhone = customer.phone?.replace(/\D/g, "");
-  let formattedPhone = cleanPhone || "";
-  if (formattedPhone.startsWith("0")) formattedPhone = formattedPhone.slice(1);
-  if (formattedPhone.length === 10) formattedPhone = `549${formattedPhone}`;
-  else if (formattedPhone.startsWith("54") && !formattedPhone.startsWith("549") && formattedPhone.length === 12) {
-    formattedPhone = `549${formattedPhone.slice(2)}`;
-  }
+  const cleanPhone = customer.phoneNormalized.replace(/\D/g, "");
+  const topProduct = detail?.favoriteProducts[0]?.name || "yerba o mate";
 
-  const topProduct = customer.favoriteProducts[0]?.name || "yerba o mate";
-
+  // Plantillas directas sin cupones ni promesas inexistentes
   const templates = [
     {
-      id: "gift",
-      title: "🎁 Mensaje de agradecimiento",
+      id: "gratitude",
+      title: "🎁 Agradecimiento y Atención",
       text: `¡Hola ${customer.name}! 👋 Gracias por elegir a Poné La Pava. Te escribimos para agradecerte por tu compra y recordarte que estamos a tu disposición en Catriel para lo que necesites. ¡Que disfrutes cada mate! 🧉✨`,
     },
     {
-      id: "restock",
-      title: "🧉 Aviso de Stock de su producto",
-      text: `¡Hola ${customer.name}! 🧉 Te avisamos que ingresó stock fresco de *${topProduct}* en nuestro local de Catriel. ¿Te gustaría que te reservemos uno antes de que se agote?`,
+      id: "followup",
+      title: "🧉 Seguimiento Post-Compra",
+      text: `¡Hola ${customer.name}! 👋 ¿Cómo estás? Te escribimos desde el local de Poné La Pava para saber cómo te resultó tu último pedido. ¿Todo en orden con tu mate y yerba? Cualquier consulta estamos a un mensaje.`,
     },
     {
-      id: "feedback",
-      title: "💬 Consulta de satisfacción",
-      text: `¡Hola ${customer.name}! 👋 ¿Cómo estás? Te escribimos de Poné La Pava para ver cómo te fue con tu pedido. ¿Todo en orden con tu mate? ¡Cualquier duda estamos para ayudarte! ✨`,
+      id: "restock",
+      title: "🌿 Novedades de Yerbas / Stock",
+      text: `¡Hola ${customer.name}! 🧉 Te avisamos que ingresó stock fresco en nuestro local de Catriel (incluyendo variedades seleccionadas como *${topProduct}*). Si querés que te reservemos algo antes de pasar a retirar, avisanos por acá.`,
+    },
+    {
+      id: "ready",
+      title: "📦 Pedido Listo para Retiro",
+      text: `¡Hola ${customer.name}! 🧉 Tu pedido ya está preparado en nuestro local de Poné La Pava para que pases a retirarlo cuando gustes. ¡Te esperamos!`,
     },
   ];
 
   const currentTemplate = templates.find((t) => t.id === activeTemplate) || templates[0];
-  const whatsappUrl = formattedPhone
-    ? `https://wa.me/${formattedPhone}?text=${encodeURIComponent(currentTemplate.text)}`
+  const whatsappUrl = cleanPhone
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(currentTemplate.text)}`
     : null;
 
   return (
@@ -180,13 +241,18 @@ export function CustomerDetailModal({
                 )}
                 {customer.segment === "risk" && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2.5 py-0.5 text-[11px] font-bold">
-                    ⚠️ Inactivo (&gt;45d)
+                    ⚠️ En riesgo ({daysSinceLast !== null ? `${daysSinceLast}d` : ""})
+                  </span>
+                )}
+                {customer.segment === "new" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 text-[11px] font-bold">
+                    ✨ Nuevo
                   </span>
                 )}
               </div>
-              {customer.phone && (
+              {customer.phoneNormalized && (
                 <p className="text-xs text-[var(--dash-muted)] mt-1 flex items-center gap-1">
-                  <Phone size={12} /> {customer.phone}
+                  <Phone size={12} /> {customer.displayPhone || customer.phoneNormalized}
                 </p>
               )}
             </div>
@@ -201,20 +267,20 @@ export function CustomerDetailModal({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)]">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--dash-accent)] block">
-              Total Gastado (LTV)
+              Total Gastado
             </span>
-            <span className="text-lg font-bold text-[var(--dash-text)]">
+            <span className="text-base sm:text-lg font-bold text-[var(--dash-text)]">
               {formatPrice(customer.totalSpent)}
             </span>
           </div>
           <div className="p-3.5 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)]">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--dash-accent)] block">
-              Pedidos Realizados
+              Pedidos
             </span>
-            <span className="text-lg font-bold text-[var(--dash-text)]">
+            <span className="text-base sm:text-lg font-bold text-[var(--dash-text)]">
               {customer.ordersCount}
             </span>
           </div>
@@ -222,8 +288,57 @@ export function CustomerDetailModal({
             <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--dash-accent)] block">
               Ticket Promedio
             </span>
-            <span className="text-lg font-bold text-[var(--dash-text)]">
-              {formatPrice(Math.round(customer.totalSpent / (customer.ordersCount || 1)))}
+            <span className="text-base sm:text-lg font-bold text-[var(--dash-text)]">
+              {formatPrice(customer.averageTicket)}
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)]">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-[var(--dash-accent)] block">
+              Última Compra
+            </span>
+            <span className="text-sm sm:text-base font-bold text-[var(--dash-text)]">
+              {daysSinceLast !== null ? `Hace ${daysSinceLast} d` : "Sin compras"}
+            </span>
+          </div>
+        </div>
+
+        {/* Próximo Seguimiento (Follow-up) */}
+        <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
+              <Calendar size={14} /> Próximo Seguimiento (CRM)
+            </label>
+            {followUpSaved && (
+              <span className="text-[11px] font-bold text-emerald-400">
+                ¡Seguimiento actualizado!
+              </span>
+            )}
+            {customer.isFollowUpOverdue && (
+              <span className="text-[11px] font-bold text-red-400 flex items-center gap-1">
+                <AlertCircle size={12} /> Seguimiento vencido
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <input
+              type="date"
+              value={followUpDate}
+              onChange={(e) => handleSaveFollowUp(e.target.value)}
+              className="admin-input py-1.5 px-3 text-xs"
+              style={{ width: 170 }}
+            />
+            {followUpDate && (
+              <button
+                type="button"
+                onClick={() => handleSaveFollowUp("")}
+                disabled={savingFollowUp}
+                className="text-xs text-[var(--dash-muted)] hover:text-red-400 underline transition-colors cursor-pointer"
+              >
+                Limpiar fecha
+              </button>
+            )}
+            <span className="text-[11px] text-[var(--dash-muted)]">
+              Aparece en la vista &quot;Hoy&quot; para contactar al cliente en la fecha asignada.
             </span>
           </div>
         </div>
@@ -232,7 +347,7 @@ export function CustomerDetailModal({
         <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
-              <Crown size={14} /> Etiquetas & Preferencias del Cliente
+              <Tag size={14} /> Etiquetas & Preferencias del Cliente
             </label>
             <span className="text-[10px] text-[var(--dash-muted)] font-mono">
               {tags.length} activas
@@ -258,7 +373,6 @@ export function CustomerDetailModal({
             ))}
           </div>
 
-          {/* Add tag form & quick suggestions */}
           <div className="flex items-center gap-2 pt-1">
             <form
               onSubmit={(e) => {
@@ -286,7 +400,7 @@ export function CustomerDetailModal({
 
           <div className="flex flex-wrap items-center gap-1 pt-1 text-[10px] text-[var(--dash-muted)]">
             <span>Sugerencias rápidas:</span>
-            {["Yerba Intensa", "Yerba Suave", "Mate Imperial", "Retira en Tienda", "Envío a Domicilio", "Regalo Empresarial"].map((suggestion) => (
+            {["Yerba Despalada", "Yerba Suave", "Mate Imperial", "Camionero", "Retiro Local", "Envío", "Corporativo"].map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"
@@ -303,7 +417,7 @@ export function CustomerDetailModal({
         <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
-              <StickyNote size={14} /> Notas Internas del Cliente (Privadas)
+              <StickyNote size={14} /> Notas Internas del Cliente (Guardadas en Servidor)
             </label>
             {noteSaved && (
               <span className="text-[11px] font-bold text-emerald-400">
@@ -314,7 +428,7 @@ export function CustomerDetailModal({
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Ej: Toma mate amargo, prefiere molienda fina uruguaya, retira siempre por el local de Catriel..."
+            placeholder="Ej: Toma mate amargo, prefiere molienda uruguaya, retira siempre por el local de Catriel..."
             className="admin-input"
             rows={2}
             style={{ fontSize: 13, resize: "vertical" }}
@@ -323,10 +437,11 @@ export function CustomerDetailModal({
             <button
               type="button"
               onClick={handleSaveNote}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--dash-surface-3)] hover:bg-[var(--dash-accent)] hover:text-[#182b1d] text-xs font-bold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer"
+              disabled={savingNote}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--dash-surface-3)] hover:bg-[var(--dash-accent)] hover:text-[#182b1d] text-xs font-bold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer disabled:opacity-50"
             >
               <Save size={13} />
-              Guardar Nota
+              {savingNote ? "Guardando..." : "Guardar Nota"}
             </button>
           </div>
         </div>
@@ -335,7 +450,7 @@ export function CustomerDetailModal({
         <div className="p-4 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              <MessageCircle size={14} /> Mensaje Rápido por WhatsApp
+              <MessageCircle size={14} /> Mensaje Directo por WhatsApp
             </h3>
             <span className="text-[11px] text-[var(--dash-muted)]">
               Elegí plantilla
@@ -348,10 +463,10 @@ export function CustomerDetailModal({
                 key={tpl.id}
                 type="button"
                 onClick={() => setActiveTemplate(tpl.id)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                   activeTemplate === tpl.id
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-[var(--dash-surface)] text-[var(--dash-text)]/80 hover:text-[var(--dash-text)] border border-[var(--dash-border)]"
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-xs"
+                    : "bg-[var(--dash-surface)] text-[var(--dash-text)]/70 border-[var(--dash-border)] hover:bg-[var(--dash-surface-3)]"
                 }`}
               >
                 {tpl.title}
@@ -359,18 +474,26 @@ export function CustomerDetailModal({
             ))}
           </div>
 
-          <p className="text-xs text-[var(--dash-text)]/90 bg-[var(--dash-surface)] p-3 rounded-lg border border-[var(--dash-border)] italic font-mono leading-relaxed">
-            &ldquo;{currentTemplate.text}&rdquo;
-          </p>
+          {/* Template preview */}
+          <div className="p-3 rounded-lg bg-[var(--dash-surface-3)] border border-[var(--dash-border)] text-xs text-[var(--dash-text)]/90 leading-relaxed font-sans relative">
+            <p className="whitespace-pre-line">{currentTemplate.text}</p>
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
             <button
               type="button"
               onClick={() => handleCopyTemplate(currentTemplate.text)}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[var(--dash-surface-3)] hover:bg-[var(--dash-border)] text-[var(--dash-text)] font-bold text-xs border border-[var(--dash-border)] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--dash-surface)] hover:bg-[var(--dash-surface-3)] text-xs font-semibold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer"
             >
-              {copiedMsg ? <Check size={14} className="text-emerald-400" /> : <Gift size={14} />}
-              {copiedMsg ? "¡Texto Copiado!" : "Copiar Texto"}
+              {copiedMsg ? (
+                <>
+                  <Check size={13} className="text-emerald-400" /> ¡Texto Copiado!
+                </>
+              ) : (
+                <>
+                  <Copy size={13} /> Copiar Mensaje
+                </>
+              )}
             </button>
 
             {whatsappUrl ? (
@@ -378,35 +501,32 @@ export function CustomerDetailModal({
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-transform active:scale-98"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md hover:shadow-emerald-900/30 transition-all cursor-pointer"
               >
-                <Send size={14} />
-                Abrir en WhatsApp
+                <Send size={13} />
+                Abrir WhatsApp con este mensaje
               </a>
             ) : (
-              <p className="text-xs text-[var(--dash-muted)] text-center flex-1">
-                Sin número registrado
-              </p>
+              <span className="text-xs text-[var(--dash-muted)]">
+                Teléfono no disponible
+              </span>
             )}
           </div>
         </div>
 
-        {/* Top products purchased */}
-        {customer.favoriteProducts.length > 0 && (
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] mb-3 flex items-center gap-1.5">
-              <Package size={14} /> Productos Favoritos / Más Comprados
+        {/* Favorite Products */}
+        {detail && detail.favoriteProducts && detail.favoriteProducts.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
+              <Sparkles size={14} /> Productos Más Comprados
             </h3>
             <div className="flex flex-wrap gap-2">
-              {customer.favoriteProducts.map((p) => (
+              {detail.favoriteProducts.map((p) => (
                 <span
                   key={p.name}
-                  className="rounded-chip bg-[var(--dash-surface-2)] border border-[var(--dash-border)] px-3 py-1.5 text-xs text-[var(--dash-text)] font-medium flex items-center gap-1.5"
+                  className="px-2.5 py-1 rounded-md text-xs bg-[var(--dash-surface-2)] text-[var(--dash-text)] border border-[var(--dash-border)]"
                 >
-                  <span>{p.name}</span>
-                  <span className="text-[10px] font-bold text-[var(--dash-accent)] bg-[var(--dash-surface-3)] px-1.5 py-0.5 rounded-full">
-                    x{p.quantity}
-                  </span>
+                  {p.name} <strong className="text-[var(--dash-accent)] font-bold">x{p.quantity}</strong>
                 </span>
               ))}
             </div>
@@ -414,80 +534,77 @@ export function CustomerDetailModal({
         )}
 
         {/* Orders History */}
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] mb-3 flex items-center gap-1.5">
-            <ShoppingBag size={14} /> Historial de Pedidos ({customer.orders.length})
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-accent)] flex items-center gap-1.5">
+            <Package size={14} /> Historial de Pedidos ({detail?.orders?.length || customer.ordersCount})
           </h3>
-          <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
-            {customer.orders.map((o, idx) => (
-              <div
-                key={o.id || idx}
-                className="p-3.5 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[var(--dash-text)]/60 flex items-center gap-1">
-                    <Calendar size={12} />
-                    {new Date(o.createdAt).toLocaleDateString("es-AR", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                  <div className="flex items-center gap-2">
+
+          {loading ? (
+            <p className="text-xs text-[var(--dash-muted)]">Cargando pedidos del cliente...</p>
+          ) : detail && detail.orders && detail.orders.length > 0 ? (
+            <div className="space-y-2">
+              {detail.orders.map((o) => (
+                <div
+                  key={o.id}
+                  className="p-3 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs flex items-center justify-between gap-3 flex-wrap"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-[var(--dash-text)]">
+                        #{o.id.slice(0, 8)}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--dash-surface-3)] text-[var(--dash-text)]">
+                        {STATUS_LABELS[o.status as keyof typeof STATUS_LABELS] || o.status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--dash-muted)] mt-1">
+                      {new Date(o.createdAt).toLocaleDateString("es-AR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                      {o.items && o.items.length > 0 && (
+                        <span> · {o.items.map((i) => `${i.productName} (x${i.quantity})`).join(", ")}</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-sm text-[var(--dash-text)] font-display">
+                      {formatPrice(o.total)}
+                    </span>
                     <button
                       type="button"
                       onClick={() =>
                         printOrderRemito({
                           id: o.id,
                           customerName: customer.name,
-                          customerPhone: customer.phone,
-                          items: o.items.map((item) => ({
-                            productId: "",
-                            productName: item.productName,
-                            quantity: item.quantity,
-                            price: item.price,
-                            subtotal: item.price * item.quantity,
-                          })),
-                          subtotal: o.total,
+                          customerPhone: customer.phoneNormalized,
                           total: o.total,
-                          comment: o.comment,
-                          status: (o.status as "pending" | "confirmed" | "delivered" | "cancelled") || "delivered",
+                          subtotal: o.subtotal,
+                          status: o.status as Order["status"],
                           createdAt: o.createdAt,
+                          items: (o.items || []).map((it) => ({
+                            productId: it.productId || "",
+                            productName: it.productName,
+                            quantity: it.quantity,
+                            price: it.price,
+                            subtotal: it.subtotal,
+                          })),
+                          comment: o.comment ?? undefined,
                         })
                       }
-                      title="Imprimir remito de despacho"
-                      className="p-1 rounded text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-3)] transition-colors cursor-pointer"
+                      className="p-1.5 rounded-md hover:bg-[var(--dash-surface-3)] text-[var(--dash-muted)] hover:text-[var(--dash-text)] transition-colors cursor-pointer"
+                      title="Imprimir remito"
                     >
-                      <Printer size={13} />
+                      <Printer size={14} />
                     </button>
-                    <span className="font-bold text-[var(--dash-text)]">
-                      {formatPrice(o.total)}
-                    </span>
-                    <span className="rounded-chip px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[var(--dash-surface-3)] border border-[var(--dash-border)]">
-                      {STATUS_LABELS[o.status as keyof typeof STATUS_LABELS] || o.status}
-                    </span>
                   </div>
                 </div>
-                <div className="text-[var(--dash-text)]/80 text-[11px] pl-2 border-l border-[var(--dash-border)] space-y-0.5">
-                  {o.items.map((item, i) => (
-                    <div key={i} className="flex justify-between">
-                      <span>• {item.productName} x{item.quantity}</span>
-                      <span>{formatPrice(item.price * item.quantity)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--dash-border)]">
-          <AdminButton variant="secondary" onClick={onClose}>
-            Cerrar
-          </AdminButton>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-[var(--dash-muted)]">No hay pedidos registrados.</p>
+          )}
         </div>
       </div>
     </div>

@@ -1,47 +1,54 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Users,
-  Award,
-  DollarSign,
   Search,
   MessageCircle,
   Eye,
   Download,
-  Phone,
   TrendingUp,
   Crown,
-  Sparkles,
-  AlertTriangle,
+  Calendar,
+  RefreshCw,
 } from "lucide-react";
-import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
-import { AdminButton } from "./AdminButton";
 import { TableSkeleton } from "./TableSkeleton";
 import { EmptyState } from "./EmptyState";
 import { assertOk } from "@/lib/admin-fetch";
-import { CustomerData, CustomerDetailModal } from "./CustomerDetailModal";
+import { useAdminToast } from "./AdminToast";
+import { CustomerWithStats, CustomersKpis, CustomerSegment } from "@/lib/customers";
+import { CustomerDetailModal } from "./CustomerDetailModal";
 
-function exportCustomersCsv(customers: CustomerData[]) {
+function exportCustomersCsv(customers: CustomerWithStats[]) {
   const header = [
     "Nombre",
-    "Telefono",
+    "Telefono Normalizado",
+    "Telefono Visible",
     "Segmento",
     "Pedidos",
     "Total Gastado",
+    "Ticket Promedio",
     "Ultimo Pedido",
-    "Productos Favoritos",
+    "Dias Sin Comprar",
+    "Proximo Seguimiento",
+    "Etiquetas",
+    "Notas",
   ];
   const rows = customers.map((c) => [
     `"${c.name.replace(/"/g, '""')}"`,
-    `"${(c.phone || "").replace(/"/g, '""')}"`,
-    `"${c.segment || "new"}"`,
+    `"${c.phoneNormalized.replace(/"/g, '""')}"`,
+    `"${(c.displayPhone || "").replace(/"/g, '""')}"`,
+    `"${c.segment}"`,
     c.ordersCount,
     c.totalSpent,
-    `"${c.lastOrderDate}"`,
-    `"${c.favoriteProducts.map((p) => `${p.name} (x${p.quantity})`).join("; ").replace(/"/g, '""')}"`,
+    c.averageTicket,
+    `"${c.lastOrderDate || ""}"`,
+    c.daysSinceLastOrder ?? "",
+    `"${c.followUpAt || ""}"`,
+    `"${c.tags.join("; ").replace(/"/g, '""')}"`,
+    `"${(c.notes || "").replace(/"/g, '""')}"`,
   ]);
   const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -54,177 +61,65 @@ function exportCustomersCsv(customers: CustomerData[]) {
 }
 
 export default function CustomersPanel() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<CustomerWithStats[]>([]);
+  const [kpis, setKpis] = useState<CustomersKpis>({
+    totalCustomers: 0,
+    vipCount: 0,
+    recurringCount: 0,
+    riskCount: 0,
+    newCount: 0,
+    todayPendingCount: 0,
+    totalRevenue: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [segment, setSegment] = useState<
-    "all" | "vip" | "recurring" | "risk" | "new"
-  >("all");
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(
-    null,
-  );
+  const [segment, setSegment] = useState<CustomerSegment>("all");
+  const [riskDays, setRiskDays] = useState(45);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
+  const [backfilling, setBackfilling] = useState(false);
+  const showToast = useAdminToast();
+
+  const loadCustomers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const q = new URLSearchParams();
+      if (search.trim()) q.set("search", search.trim());
+      if (segment !== "all") q.set("segment", segment);
+      q.set("riskDays", String(riskDays));
+
+      const res = await fetch(`/api/admin/customers?${q.toString()}`);
+      assertOk(res, "No se pudo cargar la base de clientes");
+      const data = await res.json();
+      setCustomers(data.customers || []);
+      if (data.kpis) setKpis(data.kpis);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  }, [search, segment, riskDays]);
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("/api/admin/orders");
-        assertOk(
-          res,
-          "No se pudieron cargar los pedidos para generar la base de clientes",
-        );
-        setOrders(await res.json());
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
+    loadCustomers();
+  }, [loadCustomers]);
 
-  // Aggregate orders by customer name / phone with CRM segmentation
-  const customers = useMemo(() => {
-    const map = new Map<string, CustomerData>();
-    const now = new Date().getTime();
-    const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
-    orders.forEach((o) => {
-      const key =
-        o.customerPhone?.trim() || o.customerName.trim().toLowerCase();
-      const existing = map.get(key);
-      const itemsList = o.items || [];
-
-      if (!existing) {
-        map.set(key, {
-          id: key,
-          name: o.customerName,
-          phone: o.customerPhone,
-          ordersCount: 1,
-          totalSpent: o.total,
-          lastOrderDate: o.createdAt,
-          orders: [
-            {
-              id: o.id,
-              total: o.total,
-              status: o.status,
-              createdAt: o.createdAt,
-              items: itemsList.map((i) => ({
-                productName: i.productName,
-                quantity: i.quantity,
-                price: i.price,
-              })),
-              comment: o.comment,
-            },
-          ],
-          favoriteProducts: [],
-        });
-      } else {
-        existing.ordersCount += 1;
-        existing.totalSpent += o.total;
-        if (new Date(o.createdAt) > new Date(existing.lastOrderDate)) {
-          existing.lastOrderDate = o.createdAt;
-        }
-        existing.orders.push({
-          id: o.id,
-          total: o.total,
-          status: o.status,
-          createdAt: o.createdAt,
-          items: itemsList.map((i) => ({
-            productName: i.productName,
-            quantity: i.quantity,
-            price: i.price,
-          })),
-          comment: o.comment,
-        });
-      }
-    });
-
-    const list = Array.from(map.values());
-    list.forEach((c) => {
-      // Compute favorite products
-      const prodMap = new Map<string, number>();
-      c.orders.forEach((ord) => {
-        ord.items.forEach((it) => {
-          prodMap.set(
-            it.productName,
-            (prodMap.get(it.productName) || 0) + it.quantity,
-          );
-        });
-      });
-      c.favoriteProducts = Array.from(prodMap.entries())
-        .map(([name, quantity]) => ({ name, quantity }))
-        .sort((a, b) => b.quantity - a.quantity)
-        .slice(0, 3);
-
-      // Compute Segment
-      const daysSinceLast =
-        (now - new Date(c.lastOrderDate).getTime()) / MS_PER_DAY;
-      if (c.totalSpent >= 90000 || c.ordersCount >= 3) {
-        c.segment = "vip";
-      } else if (c.ordersCount >= 2) {
-        c.segment = "recurring";
-      } else if (daysSinceLast > 45) {
-        c.segment = "risk";
-      } else {
-        c.segment = "new";
-      }
-    });
-
-    return list.sort((a, b) => b.totalSpent - a.totalSpent);
-  }, [orders]);
-
-  // Filtered list
-  const filtered = useMemo(() => {
-    let res = customers;
-
-    if (segment !== "all") {
-      res = res.filter((c) => c.segment === segment);
-    }
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      res = res.filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          (c.phone && c.phone.toLowerCase().includes(q)),
+  async function handleBackfill() {
+    setBackfilling(true);
+    try {
+      const res = await fetch("/api/admin/customers/backfill", { method: "POST" });
+      assertOk(res, "Error al sincronizar clientes históricos");
+      const result = await res.json();
+      showToast(
+        `Sincronización completa: ${result.linkedOrders} pedidos vinculados en ${result.mergedCustomers} clientes`,
       );
+      loadCustomers();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Error en sincronización", "error");
+    } finally {
+      setBackfilling(false);
     }
-
-    return res;
-  }, [customers, segment, search]);
-
-  // Overall CRM KPIs
-  const totalCustomers = customers.length;
-  const vipCount = customers.filter((c) => c.segment === "vip").length;
-  const recurringCount = customers.filter(
-    (c) => c.segment === "recurring" || c.segment === "vip",
-  ).length;
-  const riskCount = customers.filter((c) => c.segment === "risk").length;
-  const newCount = customers.filter((c) => c.segment === "new").length;
-
-  const totalRevenue = customers.reduce((acc, c) => acc + c.totalSpent, 0);
-  const avgLtv =
-    totalCustomers > 0 ? Math.round(totalRevenue / totalCustomers) : 0;
-  const retentionRate =
-    totalCustomers > 0
-      ? Math.round((recurringCount / totalCustomers) * 100)
-      : 0;
-
-  if (loading) {
-    return <TableSkeleton rows={6} />;
-  }
-
-  if (error) {
-    return (
-      <EmptyState
-        icon={Users}
-        title="Error al cargar clientes"
-        description={error}
-      />
-    );
   }
 
   return (
@@ -233,30 +128,46 @@ export default function CustomersPanel() {
       <div className="admin-kpi-grid">
         <AdminKpiCard
           label="Total de Clientes"
-          value={totalCustomers}
+          value={kpis.totalCustomers}
           icon={Users}
         />
         <AdminKpiCard
+          label="Seguimientos Pendientes (Hoy)"
+          value={kpis.todayPendingCount}
+          icon={Calendar}
+        />
+        <AdminKpiCard
           label="Clientes VIP / Clave"
-          value={vipCount}
+          value={kpis.vipCount}
           icon={Crown}
         />
         <AdminKpiCard
-          label="Tasa de Recompra"
-          value={`${retentionRate}%`}
-          icon={Award}
-        />
-        <AdminKpiCard
-          label="LTV Promedio"
-          value={formatPrice(avgLtv)}
+          label="Facturación Total Clientes"
+          value={formatPrice(kpis.totalRevenue)}
           icon={TrendingUp}
         />
       </div>
 
-      {/* Filter and Export Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+      {/* Filter and Action Bar */}
+      <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
         {/* Segment Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-none w-full lg:w-auto">
+          <button
+            type="button"
+            onClick={() => setSegment("today")}
+            className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 flex items-center gap-1.5 ${
+              segment === "today"
+                ? "bg-amber-500 text-stone-900 shadow-sm"
+                : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
+            }`}
+          >
+            <span>⭐ Hoy</span>
+            {kpis.todayPendingCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-stone-900 text-amber-400">
+                {kpis.todayPendingCount}
+              </span>
+            )}
+          </button>
           <button
             type="button"
             onClick={() => setSegment("all")}
@@ -266,7 +177,7 @@ export default function CustomersPanel() {
                 : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
             }`}
           >
-            Todos ({totalCustomers})
+            Todos ({kpis.totalCustomers})
           </button>
           <button
             type="button"
@@ -277,371 +188,313 @@ export default function CustomersPanel() {
                 : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
             }`}
           >
-            👑 VIPs ({vipCount})
+            👑 VIPs ({kpis.vipCount})
           </button>
           <button
             type="button"
             onClick={() => setSegment("recurring")}
             className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
               segment === "recurring"
-                ? "bg-emerald-500 text-white"
+                ? "bg-emerald-500 text-white shadow-sm"
                 : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
             }`}
           >
-            🔄 Recurrentes ({customers.filter((c) => c.segment === "recurring").length})
+            🔄 Recurrentes ({kpis.recurringCount})
           </button>
           <button
             type="button"
             onClick={() => setSegment("risk")}
             className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
               segment === "risk"
-                ? "bg-orange-500 text-white"
+                ? "bg-orange-500 text-white shadow-sm"
                 : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
             }`}
           >
-            ⚠️ En Riesgo ({riskCount})
+            ⚠️ En Riesgo ({kpis.riskCount})
           </button>
           <button
             type="button"
             onClick={() => setSegment("new")}
             className={`rounded-control px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer shrink-0 ${
               segment === "new"
-                ? "bg-blue-500 text-white"
+                ? "bg-blue-500 text-white shadow-sm"
                 : "bg-[var(--dash-surface-2)] text-[var(--dash-text)]/70 hover:text-[var(--dash-text)]"
             }`}
           >
-            🌟 Nuevos ({newCount})
+            ✨ Nuevos ({kpis.newCount})
           </button>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 sm:w-64">
+        {/* Secondary controls: Search, Risk threshold, Backfill, CSV */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Risk Days Configurator */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs text-[var(--dash-muted)]">
+            <span>Riesgo:</span>
+            <select
+              value={riskDays}
+              onChange={(e) => setRiskDays(Number(e.target.value))}
+              className="bg-transparent text-[var(--dash-text)] font-semibold outline-none cursor-pointer"
+            >
+              <option value={30}>+30 días</option>
+              <option value={45}>+45 días</option>
+              <option value={60}>+60 días</option>
+              <option value={90}>+90 días</option>
+            </select>
+          </div>
+
+          <div className="relative flex-1 sm:w-60 min-w-[180px]">
             <Search
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-text)]/40"
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-text)]/40 pointer-events-none"
             />
             <input
-              type="search"
-              placeholder="Buscar por nombre o celular..."
+              type="text"
+              placeholder="Buscar cliente, tel, tag..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-control bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-xs text-[var(--dash-text)] placeholder-[var(--dash-text)]/40 focus:outline-none focus:border-[var(--dash-accent)]"
+              className="admin-input pl-9 py-2 text-xs w-full"
             />
           </div>
 
-          {/* Export */}
-          <AdminButton
-            variant="secondary"
-            onClick={() => exportCustomersCsv(filtered)}
-            disabled={filtered.length === 0}
+          <button
+            type="button"
+            onClick={handleBackfill}
+            disabled={backfilling}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-control bg-[var(--dash-surface-2)] hover:bg-[var(--dash-surface-3)] text-xs font-semibold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer disabled:opacity-50"
+            title="Asociar pedidos históricos huérfanos a clientes por número de teléfono"
           >
-            <Download size={14} style={{ marginRight: 6, display: "inline" }} />
-            Exportar CRM
-          </AdminButton>
+            <RefreshCw size={13} className={backfilling ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">Sincronizar Histórico</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => exportCustomersCsv(customers)}
+            disabled={customers.length === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-control bg-[var(--dash-surface-2)] hover:bg-[var(--dash-surface-3)] text-xs font-semibold text-[var(--dash-text)] border border-[var(--dash-border)] transition-colors cursor-pointer disabled:opacity-40 shrink-0"
+          >
+            <Download size={13} />
+            <span className="hidden sm:inline">Exportar CSV</span>
+          </button>
         </div>
       </div>
 
-      {/* List / Table of Customers */}
-      {filtered.length === 0 ? (
+      {/* Main Customers Table */}
+      {loading ? (
+        <TableSkeleton rows={6} />
+      ) : error ? (
         <EmptyState
           icon={Users}
-          title="No se encontraron clientes"
+          title="Error al cargar clientes"
+          description={error}
+        />
+      ) : customers.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={segment === "today" ? "¡Todo al día!" : "No se encontraron clientes"}
           description={
-            search
-              ? "Probá ajustando los términos de búsqueda."
-              : "Aún no hay clientes registrados en este segmento."
+            segment === "today"
+              ? "No tenés seguimientos vencidos para hoy ni clientes inactivos según el umbral configurado."
+              : search
+              ? `No hay clientes que coincidan con "${search}".`
+              : "Aún no hay clientes registrados."
           }
         />
       ) : (
-        <>
-          {/* Desktop Table */}
-          <div className="admin-desktop-only rounded-2xl border border-[var(--dash-border)] bg-[var(--dash-surface)] overflow-hidden shadow-lg">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-[var(--dash-text)]">
-                <thead className="bg-[var(--dash-surface-2)] border-b border-[var(--dash-border)] text-[10px] uppercase font-bold tracking-wider text-[var(--dash-text)]/70">
-                  <tr>
-                    <th className="p-3.5 pl-5">Cliente & Segmento</th>
-                    <th className="p-3.5">Contacto</th>
-                    <th className="p-3.5 text-center">Pedidos</th>
-                    <th className="p-3.5">Total Gastado (LTV)</th>
-                    <th className="p-3.5">Última Compra</th>
-                    <th className="p-3.5">Favoritos</th>
-                    <th className="p-3.5 pr-5 text-right">Acciones CRM</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--dash-border)]">
-                  {filtered.map((c) => {
-                    const cleanPhone = c.phone?.replace(/\D/g, "");
-                    let formattedPhone = cleanPhone || "";
-                    if (formattedPhone.startsWith("0"))
-                      formattedPhone = formattedPhone.slice(1);
-                    if (formattedPhone.length === 10)
-                      formattedPhone = `549${formattedPhone}`;
-                    else if (
-                      formattedPhone.startsWith("54") &&
-                      !formattedPhone.startsWith("549") &&
-                      formattedPhone.length === 12
-                    ) {
-                      formattedPhone = `549${formattedPhone.slice(2)}`;
-                    }
+        <div className="admin-table-container">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Pedidos</th>
+                <th>Total Gastado</th>
+                <th>Última Compra</th>
+                <th>Próx. Seguimiento</th>
+                <th>Etiquetas</th>
+                <th className="text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map((customer) => {
+                const cleanPhone = customer.phoneNormalized.replace(/\D/g, "");
+                const waUrl = cleanPhone
+                  ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                      `¡Hola ${customer.name}! Te escribimos de Poné La Pava en Catriel para saludarte 🧉`,
+                    )}`
+                  : null;
 
-                    const whatsappUrl = formattedPhone
-                      ? `https://wa.me/${formattedPhone}?text=${encodeURIComponent(
-                          `¡Hola ${c.name}! Te escribimos de Poné La Pava. ¿Cómo estás? 🧉`,
-                        )}`
-                      : null;
-
-                    return (
-                      <tr
-                        key={c.id}
-                        className="hover:bg-[var(--dash-surface-2)]/60 transition-colors admin-stagger-item"
-                      >
-                        {/* Name & Segment Badge */}
-                        <td className="p-3.5 pl-5 font-semibold text-[var(--dash-text)]">
-                          <div className="flex items-center gap-2.5">
-                            <div className="relative">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--dash-accent)]/20 text-[var(--dash-accent)] font-bold text-xs">
-                                {c.name.charAt(0).toUpperCase()}
-                              </span>
-                              {c.segment === "vip" && (
-                                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-black text-[9px] font-bold shadow-sm">
-                                  ★
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span>{c.name}</span>
-                                {c.segment === "vip" && (
-                                  <span className="rounded-chip bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
-                                    VIP
-                                  </span>
-                                )}
-                                {c.segment === "recurring" && (
-                                  <span className="rounded-chip bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
-                                    Recurrente
-                                  </span>
-                                )}
-                                {c.segment === "risk" && (
-                                  <span className="rounded-chip bg-orange-500/20 text-orange-300 border border-orange-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
-                                    Inactivo
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Phone */}
-                        <td className="p-3.5 text-[var(--dash-text)]/80">
-                          {c.phone ? (
-                            <span className="flex items-center gap-1 font-mono text-[11px]">
-                              <Phone
-                                size={11}
-                                className="text-[var(--dash-text)]/40"
-                              />
-                              {c.phone}
-                            </span>
-                          ) : (
-                            <span className="text-[var(--dash-text)]/30">–</span>
-                          )}
-                        </td>
-
-                        {/* Orders count */}
-                        <td className="p-3.5 text-center">
-                          <span className="inline-block rounded-full bg-[var(--dash-surface-3)] px-2.5 py-0.5 font-bold text-[11px] text-[var(--dash-text)]">
-                            {c.ordersCount}
-                          </span>
-                        </td>
-
-                        {/* Total Spent (LTV) */}
-                        <td className="p-3.5 font-bold text-[var(--dash-accent)] text-sm">
-                          {formatPrice(c.totalSpent)}
-                        </td>
-
-                        {/* Last order date */}
-                        <td className="p-3.5 text-[var(--dash-text)]/70">
-                          {new Date(c.lastOrderDate).toLocaleDateString("es-AR", {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </td>
-
-                        {/* Top item */}
-                        <td className="p-3.5 text-[var(--dash-text)]/75 max-w-[200px] truncate">
-                          {c.favoriteProducts[0] ? (
-                            <span className="truncate">
-                              {c.favoriteProducts[0].name} (x
-                              {c.favoriteProducts[0].quantity})
-                            </span>
-                          ) : (
-                            <span className="text-[var(--dash-text)]/30">–</span>
-                          )}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="p-3.5 pr-5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {whatsappUrl && (
-                              <a
-                                href={whatsappUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={`WhatsApp con ${c.name}`}
-                                className="p-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/20 transition-colors cursor-pointer"
-                                title="Escribir por WhatsApp"
-                              >
-                                <MessageCircle size={15} />
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => setSelectedCustomer(c)}
-                              aria-label={`Ver ficha de ${c.name}`}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[var(--dash-accent)] bg-[var(--dash-surface-3)] hover:bg-[var(--dash-accent)] hover:text-[#182b1d] font-semibold text-[11px] transition-colors cursor-pointer"
-                              title="Ficha CRM Completa"
-                            >
-                              <Eye size={13} />
-                              Ficha CRM
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Mobile Cards List */}
-          <div className="admin-mobile-only space-y-3">
-            {filtered.map((c, index) => {
-              const cleanPhone = c.phone?.replace(/\D/g, "");
-              let formattedPhone = cleanPhone || "";
-              if (formattedPhone.startsWith("0"))
-                formattedPhone = formattedPhone.slice(1);
-              if (formattedPhone.length === 10)
-                formattedPhone = `549${formattedPhone}`;
-              else if (
-                formattedPhone.startsWith("54") &&
-                !formattedPhone.startsWith("549") &&
-                formattedPhone.length === 12
-              ) {
-                formattedPhone = `549${formattedPhone.slice(2)}`;
-              }
-
-              const whatsappUrl = formattedPhone
-                ? `https://wa.me/${formattedPhone}?text=${encodeURIComponent(
-                    `¡Hola ${c.name}! Te escribimos de Poné La Pava. ¿Cómo estás? 🧉`,
-                  )}`
-                : null;
-
-              return (
-                <div
-                  key={c.id}
-                  className="admin-row-in p-4 rounded-xl bg-[var(--dash-surface)] border border-[var(--dash-border)] shadow-md"
-                  style={{ "--i": index } as React.CSSProperties}
-                >
-                  {/* Top: Avatar, Name, Segment, WhatsApp */}
-                  <div className="flex items-center justify-between gap-2.5 mb-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="relative shrink-0">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dash-accent)]/20 text-[var(--dash-accent)] font-bold text-sm">
-                          {c.name.charAt(0).toUpperCase()}
+                return (
+                  <tr
+                    key={customer.id}
+                    className="hover:bg-[var(--dash-surface-2)]/50 transition-colors"
+                  >
+                    {/* Cliente / Nombre */}
+                    <td>
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dash-accent)]/20 text-[var(--dash-accent)] font-bold text-xs">
+                          {customer.name.charAt(0).toUpperCase()}
                         </span>
-                        {c.segment === "vip" && (
-                          <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-black text-[9px] font-bold shadow-sm">
-                            ★
+                        <div>
+                          <span className="font-bold text-[var(--dash-text)] text-xs block">
+                            {customer.name}
                           </span>
-                        )}
+                          <span className="text-[10px]">
+                            {customer.segment === "vip" && (
+                              <span className="text-amber-400 font-bold">👑 VIP</span>
+                            )}
+                            {customer.segment === "recurring" && (
+                              <span className="text-emerald-400 font-bold">🔄 Recurrente</span>
+                            )}
+                            {customer.segment === "risk" && (
+                              <span className="text-orange-400 font-bold">⚠️ En Riesgo</span>
+                            )}
+                            {customer.segment === "new" && (
+                              <span className="text-blue-400 font-bold">✨ Nuevo</span>
+                            )}
+                          </span>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-sm text-[var(--dash-text)] truncate">{c.name}</span>
-                          {c.segment === "vip" && (
-                            <span className="rounded-chip bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider shrink-0">
-                              VIP
-                            </span>
-                          )}
-                          {c.segment === "risk" && (
-                            <span className="rounded-chip bg-orange-500/20 text-orange-300 border border-orange-500/30 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider shrink-0">
-                              Inactivo
+                    </td>
+
+                    {/* Teléfono */}
+                    <td className="text-xs font-mono text-[var(--dash-text)]/85">
+                      {customer.displayPhone || customer.phoneNormalized || "—"}
+                    </td>
+
+                    {/* Pedidos & Ticket Promedio */}
+                    <td>
+                      <span className="text-xs font-bold text-[var(--dash-text)] block">
+                        {customer.ordersCount} pedidos
+                      </span>
+                      <span className="text-[11px] text-[var(--dash-muted)]">
+                        Prom: {formatPrice(customer.averageTicket)}
+                      </span>
+                    </td>
+
+                    {/* Total Gastado */}
+                    <td>
+                      <span className="font-display font-bold text-sm text-[var(--dash-text)]">
+                        {formatPrice(customer.totalSpent)}
+                      </span>
+                    </td>
+
+                    {/* Última Compra */}
+                    <td className="text-xs text-[var(--dash-muted)]">
+                      {customer.daysSinceLastOrder !== null ? (
+                        <div>
+                          <span
+                            className={
+                              customer.daysSinceLastOrder >= riskDays
+                                ? "text-orange-400 font-bold"
+                                : "text-[var(--dash-text)]"
+                            }
+                          >
+                            Hace {customer.daysSinceLastOrder} días
+                          </span>
+                          <span className="text-[10px] block opacity-70">
+                            {new Date(customer.lastOrderDate!).toLocaleDateString("es-AR", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+
+                    {/* Próximo Seguimiento */}
+                    <td className="text-xs">
+                      {customer.followUpAt ? (
+                        <div
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                            customer.isFollowUpOverdue
+                              ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                              : "bg-[var(--dash-surface-2)] text-[var(--dash-text)] border border-[var(--dash-border)]"
+                          }`}
+                        >
+                          <Calendar size={11} />
+                          <span>
+                            {new Date(customer.followUpAt).toLocaleDateString("es-AR", {
+                              day: "numeric",
+                              month: "short",
+                            })}
+                          </span>
+                          {customer.isFollowUpOverdue && (
+                            <span className="text-[9px] uppercase tracking-wider text-red-400">
+                              (Vencido)
                             </span>
                           )}
                         </div>
-                        {c.phone && (
-                          <span className="text-[11px] text-[var(--dash-text)]/60 font-mono block mt-0.5">
-                            {c.phone}
+                      ) : (
+                        <span className="text-[var(--dash-muted)] text-[11px]">—</span>
+                      )}
+                    </td>
+
+                    {/* Etiquetas */}
+                    <td>
+                      <div className="flex flex-wrap gap-1 max-w-[150px]">
+                        {customer.tags && customer.tags.length > 0 ? (
+                          customer.tags.slice(0, 2).map((t) => (
+                            <span
+                              key={t}
+                              className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-[var(--dash-surface-2)] border border-[var(--dash-border)] text-[var(--dash-text)]"
+                            >
+                              {t}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[var(--dash-muted)] text-[11px]">—</span>
+                        )}
+                        {customer.tags && customer.tags.length > 2 && (
+                          <span className="text-[10px] text-[var(--dash-muted)]">
+                            +{customer.tags.length - 2}
                           </span>
                         )}
                       </div>
-                    </div>
+                    </td>
 
-                    {whatsappUrl && (
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`WhatsApp con ${c.name}`}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0"
-                      >
-                        <MessageCircle size={16} />
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Metrics Row */}
-                  <div className="grid grid-cols-3 gap-2 py-2.5 px-3 rounded-lg bg-[var(--dash-surface-2)] border border-[var(--dash-border)] mb-3 text-center">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-[var(--dash-muted)] block">Pedidos</span>
-                      <span className="font-bold text-xs text-[var(--dash-text)]">{c.ordersCount}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-[var(--dash-muted)] block">LTV Gastado</span>
-                      <span className="font-bold text-xs text-[var(--dash-accent)]">{formatPrice(c.totalSpent)}</span>
-                    </div>
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-[var(--dash-muted)] block">Última compra</span>
-                      <span className="font-semibold text-[11px] text-[var(--dash-text)]/80">
-                        {new Date(c.lastOrderDate).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" })}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Favorite product & Action */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-[var(--dash-border)]">
-                    <div className="text-[11px] text-[var(--dash-muted)] min-w-0 truncate">
-                      {c.favoriteProducts[0] ? (
-                        <span>Top: <strong className="text-[var(--dash-text)]">{c.favoriteProducts[0].name}</strong></span>
-                      ) : (
-                        <span>Sin favoritos</span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCustomer(c)}
-                      aria-label={`Ver ficha de ${c.name}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--dash-accent)] bg-[var(--dash-surface-3)] hover:bg-[var(--dash-accent)] hover:text-[#182b1d] transition-colors shrink-0"
-                    >
-                      <Eye size={13} />
-                      Ficha CRM
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
+                    {/* Acciones */}
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCustomer(customer)}
+                          className="p-1.5 rounded-lg hover:bg-[var(--dash-surface-3)] text-[var(--dash-muted)] hover:text-[var(--dash-accent)] transition-colors cursor-pointer"
+                          title="Ver ficha completa de cliente"
+                        >
+                          <Eye size={15} />
+                        </button>
+                        {waUrl && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-[var(--dash-muted)] hover:text-emerald-400 transition-colors cursor-pointer"
+                            title="Escribir por WhatsApp"
+                          >
+                            <MessageCircle size={15} />
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
-      {/* Customer Detail Modal */}
+      {/* Customer Detail & CRM Follow-up Modal */}
       {selectedCustomer && (
         <CustomerDetailModal
           customer={selectedCustomer}
           onClose={() => setSelectedCustomer(null)}
+          onCustomerUpdated={() => {
+            loadCustomers();
+          }}
         />
       )}
     </div>

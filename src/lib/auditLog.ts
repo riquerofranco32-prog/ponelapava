@@ -4,7 +4,10 @@ export type AuditAction =
   | "order_status_change"
   | "product_update"
   | "product_delete"
-  | "settings_update";
+  | "settings_update"
+  | "customer_notes_update"
+  | "customer_tags_update"
+  | "customer_follow_up_update";
 
 interface LogAuditParams {
   actorEmail: string;

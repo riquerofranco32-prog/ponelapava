@@ -12,11 +12,20 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   product_update: "Producto actualizado",
   product_delete: "Producto eliminado",
   settings_update: "Configuración actualizada",
+  customer_notes_update: "Notas de cliente actualizadas",
+  customer_tags_update: "Etiquetas de cliente actualizadas",
+  customer_follow_up_update: "Seguimiento de cliente actualizado",
 };
 
 function describeDetails(entry: AuditLogEntry): string {
   const d = entry.details;
   switch (entry.action) {
+    case "customer_notes_update":
+      return d.notesPreview ? `Nota: "${d.notesPreview}"` : "Notas modificadas";
+    case "customer_tags_update":
+      return Array.isArray(d.tags) ? `Etiquetas: ${d.tags.join(", ")}` : "Etiquetas modificadas";
+    case "customer_follow_up_update":
+      return d.followUpAt ? `Fecha: ${d.followUpAt}` : "Seguimiento limpiado";
     case "order_status_change":
       return `Nuevo estado: ${d.status}`;
     case "product_update": {

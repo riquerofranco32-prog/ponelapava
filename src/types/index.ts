@@ -78,6 +78,7 @@ export type PaymentMethod = "transfer" | "card" | "cash";
 
 export interface Order {
   id?: string;
+  customerId?: string;
   customerName: string;
   customerPhone?: string;
   items: OrderItem[];

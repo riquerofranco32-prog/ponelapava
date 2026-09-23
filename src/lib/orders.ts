@@ -11,8 +11,11 @@ import {
   PaymentMethod,
 } from "@/lib/pricing";
 
+import { upsertCustomerForOrder } from "@/lib/customers";
+
 interface OrderRow {
   id: string;
+  customer_id?: string | null;
   customer_name: string;
   customer_phone?: string | null;
   items: OrderItem[];
@@ -26,6 +29,7 @@ interface OrderRow {
 function fromRow(row: OrderRow): Order {
   return {
     id: row.id,
+    customerId: row.customer_id ?? undefined,
     customerName: row.customer_name,
     customerPhone: row.customer_phone ?? undefined,
     items: row.items,
@@ -184,6 +188,19 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     payload.customer_phone = input.customerPhone.trim().slice(0, 30);
   }
 
+  // CRM: Asociar o crear cliente por teléfono normalizado
+  try {
+    const customerId = await upsertCustomerForOrder(
+      customerName,
+      input.customerPhone,
+    );
+    if (customerId) {
+      payload.customer_id = customerId;
+    }
+  } catch {
+    // Best-effort: si falla no bloquea la creación del pedido
+  }
+
   const admin = supabaseAdmin();
   const { data, error } = await admin
     .from("orders")
@@ -192,11 +209,10 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     .single();
 
   if (error) {
-    // If customer_phone column doesn't exist yet, retry without it. PostgREST
-    // reports this as PGRST204, not Postgres' 42703 — checking only the latter
-    // meant every order that carried a phone number failed outright.
-    if (MISSING_COLUMN_CODES.includes(error.code) && payload.customer_phone) {
-      delete payload.customer_phone;
+    // Si customer_id o customer_phone aún no existen en la base, reintentar sin ellos
+    if (MISSING_COLUMN_CODES.includes(error.code)) {
+      if (payload.customer_id) delete payload.customer_id;
+      if (payload.customer_phone) delete payload.customer_phone;
       const retry = await admin
         .from("orders")
         .insert(payload)

@@ -10,7 +10,7 @@ import Footer from "@/components/layout/Footer";
 import WhatsAppFAB from "@/components/ui/WhatsAppFAB";
 import { SITE_URL } from "@/lib/site";
 import { getSiteSettings } from "@/lib/settings";
-import { parseOpeningHoursRange, MIDWEEK_SCHEMA_DAYS } from "@/lib/hours";
+import { generateOpeningHoursSchema } from "@/lib/hours";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -89,13 +89,6 @@ export default async function RootLayout({
 }>) {
   const settings = await getSiteSettings();
 
-  const [weekdayOpens, weekdayCloses] = parseOpeningHoursRange(
-    settings.hoursWeekday,
-  );
-  const [saturdayOpens, saturdayCloses] = parseOpeningHoursRange(
-    settings.hoursSaturday,
-  );
-
   const businessJsonLd = {
     "@context": "https://schema.org",
     "@type": "Store",
@@ -112,22 +105,8 @@ export default async function RootLayout({
       addressLocality: settings.addressCity,
       addressCountry: "AR",
     },
-    // Martes a sábado, los mismos días que aplica isStoreOpenNow() — la
-    // lista sale de lib/hours para que no se puedan desincronizar.
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: MIDWEEK_SCHEMA_DAYS,
-        opens: weekdayOpens,
-        closes: weekdayCloses,
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Saturday"],
-        opens: saturdayOpens,
-        closes: saturdayCloses,
-      },
-    ],
+    // Días y horarios reales configurados en el sistema
+    openingHoursSpecification: generateOpeningHoursSchema(settings),
   };
 
   return (

@@ -1,5 +1,9 @@
 import { cache } from "react";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
+import {
+  OpeningHours,
+  normalizeOpeningHours,
+} from "@/lib/hours";
 
 export type AvailablePaymentMethod = "transfer" | "cash" | "card";
 
@@ -12,6 +16,8 @@ export interface SiteSettings {
   hoursWeekday: string;
   hoursSaturday: string;
   paymentMethods: AvailablePaymentMethod[];
+  openingHours: OpeningHours;
+  closedDates: string[];
 }
 
 interface SettingsRow {
@@ -23,6 +29,8 @@ interface SettingsRow {
   hours_weekday: string;
   hours_saturday: string;
   payment_methods?: string[] | null;
+  opening_hours?: OpeningHours | null;
+  closed_dates?: string[] | null;
 }
 
 function fromRow(row: SettingsRow): SiteSettings {
@@ -30,6 +38,13 @@ function fromRow(row: SettingsRow): SiteSettings {
   const validMethods = rawMethods.filter(
     (m): m is AvailablePaymentMethod => m === "transfer" || m === "cash" || m === "card",
   );
+
+  const openingHours = normalizeOpeningHours(
+    row.opening_hours,
+    row.hours_weekday,
+    row.hours_saturday,
+  );
+  const closedDates = Array.isArray(row.closed_dates) ? row.closed_dates : [];
 
   return {
     businessName: row.business_name,
@@ -40,6 +55,8 @@ function fromRow(row: SettingsRow): SiteSettings {
     hoursWeekday: row.hours_weekday,
     hoursSaturday: row.hours_saturday,
     paymentMethods: validMethods.length > 0 ? validMethods : ["transfer", "cash"],
+    openingHours,
+    closedDates,
   };
 }
 
@@ -61,15 +78,38 @@ export type SiteSettingsInput = SiteSettings;
 export async function updateSiteSettings(
   input: SiteSettingsInput,
 ): Promise<SiteSettings> {
+  const openingHours = normalizeOpeningHours(
+    input.openingHours,
+    input.hoursWeekday,
+    input.hoursSaturday,
+  );
+  const closedDates = Array.isArray(input.closedDates) ? input.closedDates : [];
+
+  const weekdayRange =
+    openingHours.tue.ranges[0] ||
+    openingHours.wed.ranges[0] ||
+    openingHours.thu.ranges[0] ||
+    openingHours.fri.ranges[0];
+  const saturdayRange = openingHours.sat.ranges[0];
+
+  const hoursWeekday = weekdayRange
+    ? `${weekdayRange.open} – ${weekdayRange.close}`
+    : input.hoursWeekday || "09:00 – 19:00";
+  const hoursSaturday = saturdayRange
+    ? `${saturdayRange.open} – ${saturdayRange.close}`
+    : input.hoursSaturday || "09:00 – 14:00";
+
   const payload: Record<string, unknown> = {
     business_name: input.businessName,
     whatsapp_number: input.whatsappNumber,
     whatsapp_display: input.whatsappDisplay,
     address_line: input.addressLine,
     address_city: input.addressCity,
-    hours_weekday: input.hoursWeekday,
-    hours_saturday: input.hoursSaturday,
+    hours_weekday: hoursWeekday,
+    hours_saturday: hoursSaturday,
     payment_methods: input.paymentMethods || ["transfer", "cash"],
+    opening_hours: openingHours,
+    closed_dates: closedDates,
   };
 
   const admin = supabaseAdmin();
@@ -81,7 +121,9 @@ export async function updateSiteSettings(
     .single();
 
   if (error) {
-    if ((error.code === "42703" || error.code === "PGRST204") && payload.payment_methods) {
+    if (error.code === "42703" || error.code === "PGRST204") {
+      delete payload.opening_hours;
+      delete payload.closed_dates;
       delete payload.payment_methods;
       const retry = await admin
         .from("site_settings")

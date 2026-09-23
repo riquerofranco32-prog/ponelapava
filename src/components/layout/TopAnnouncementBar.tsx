@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Sparkles, Truck, Clock, MapPin } from "lucide-react";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
-import { OPEN_DAYS_LABEL } from "@/lib/hours";
+import { getOpenDaysLabel, formatScheduleSummary } from "@/lib/hours";
 
 interface Announcement {
   id: string;
@@ -16,18 +16,21 @@ interface Announcement {
 
 export default function TopAnnouncementBar() {
   const settings = useSiteSettings();
-  // La dirección y el horario salen de settings, no escritos acá: la copia
-  // hardcodeada decía "San Martín 245" mientras el resto del sitio mostraba
-  // lo que cargan los dueños desde /admin.
+  // La dirección y el horario salen de settings, no escritos acá
   const ANNOUNCEMENTS: Announcement[] = useMemo(
-    () => [
-      {
-        id: "horario",
-        icon: Clock,
-        badge: OPEN_DAYS_LABEL,
-        text: `Te atendemos de ${settings.hoursWeekday} hs en ${settings.addressLine}`,
-        link: "/#el-local",
-      },
+    () => {
+      const openDaysBadge = getOpenDaysLabel(settings.openingHours);
+      const scheduleLines = formatScheduleSummary(settings).filter((s) => !s.endsWith("Cerrado"));
+      const scheduleSummaryText = scheduleLines.length > 0 ? scheduleLines.join(" · ") : `${settings.hoursWeekday} hs`;
+
+      return [
+        {
+          id: "horario",
+          icon: Clock,
+          badge: openDaysBadge,
+          text: `Te atendemos en ${settings.addressLine} · ${scheduleSummaryText}`,
+          link: "/#el-local",
+        },
       {
         id: "envios",
         icon: Truck,
@@ -49,9 +52,8 @@ export default function TopAnnouncementBar() {
         text: "Mates seleccionados de calabaza, alpaca y yerbas premium",
         link: "/catalogo",
       },
-    ],
-    [settings.hoursWeekday, settings.addressLine, settings.addressCity],
-  );
+    ];
+  }, [settings]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);

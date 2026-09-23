@@ -1,30 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isStoreOpenNow, getNextOpeningLabel } from "@/lib/hours";
+import { isStoreOpenNow, getNextOpeningLabel, ScheduleSource } from "@/lib/hours";
+import type { SiteSettings } from "@/lib/settings";
 
 export default function StoreLivePill({
+  settings,
   hoursWeekday,
   hoursSaturday,
 }: {
-  hoursWeekday: string;
-  hoursSaturday: string;
+  settings?: Partial<SiteSettings> | null;
+  hoursWeekday?: string;
+  hoursSaturday?: string;
 }) {
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   const [nextOpening, setNextOpening] = useState<string>("");
 
   useEffect(() => {
     function update() {
-      const open = isStoreOpenNow(hoursWeekday, hoursSaturday);
+      const source: ScheduleSource | string | undefined = settings || hoursWeekday;
+      const secondArg = settings ? undefined : hoursSaturday;
+      const open = isStoreOpenNow(source, secondArg);
       setIsOpen(open);
       if (!open) {
-        setNextOpening(getNextOpeningLabel(hoursWeekday, hoursSaturday));
+        setNextOpening(getNextOpeningLabel(source, secondArg));
       }
     }
     update();
     const timer = setInterval(update, 30_000);
     return () => clearInterval(timer);
-  }, [hoursWeekday, hoursSaturday]);
+  }, [settings, hoursWeekday, hoursSaturday]);
 
   if (isOpen === null) return null;
 

@@ -6,6 +6,7 @@ import { NAV_LINKS, UTILITY_LINKS } from "@/lib/nav";
 import { INSTAGRAM_URL } from "@/lib/site";
 import { getSiteSettings } from "@/lib/settings";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { formatScheduleSummary } from "@/lib/hours";
 
 const categories = [
   { href: "/catalogo?cat=yerbas", label: "Yerbas" },
@@ -142,10 +143,13 @@ export default async function Footer() {
                   className="mt-0.5 shrink-0 text-pava-cream/40"
                 />
                 <span>
-                  <span className="block">
-                    Mar–Vie: {settings.hoursWeekday}
-                  </span>
-                  <span className="block">Sáb: {settings.hoursSaturday}</span>
+                  {formatScheduleSummary(settings)
+                    .filter((line) => !line.endsWith("Cerrado"))
+                    .map((line) => (
+                      <span key={line} className="block">
+                        {line}
+                      </span>
+                    ))}
                 </span>
               </div>
               <a

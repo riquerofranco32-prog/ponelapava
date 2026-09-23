@@ -4,6 +4,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import StoreLivePill from "@/components/ui/StoreLivePill";
 import LocalMapEmbed from "@/components/home/LocalMapEmbed";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { formatScheduleSummary } from "@/lib/hours";
 import {
   getSiteSettings,
   buildMapsUrl,
@@ -136,16 +137,23 @@ export default async function LocalSection() {
                   <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-pava-cream/65">
                     Horarios
                   </span>
-                  <p className="mt-1 text-sm font-medium text-pava-cream">
-                    Mar–Vie: {settings.hoursWeekday} hs
-                  </p>
-                  <p className="text-sm text-pava-cream/70">
-                    Sáb: {settings.hoursSaturday} hs
-                  </p>
-                  <StoreLivePill
-                    hoursWeekday={settings.hoursWeekday}
-                    hoursSaturday={settings.hoursSaturday}
-                  />
+                  <div className="mt-1 space-y-0.5">
+                    {formatScheduleSummary(settings)
+                      .filter((line) => !line.endsWith("Cerrado"))
+                      .map((line, idx) => (
+                        <p
+                          key={line}
+                          className={`text-sm ${
+                            idx === 0
+                              ? "font-medium text-pava-cream"
+                              : "text-pava-cream/70"
+                          }`}
+                        >
+                          {line}
+                        </p>
+                      ))}
+                  </div>
+                  <StoreLivePill settings={settings} />
                 </div>
               </div>
               <div className="flex gap-4 border-t border-pava-cream/15 py-5">

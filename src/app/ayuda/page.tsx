@@ -17,6 +17,7 @@ import {
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { whatsappChatUrl } from "@/lib/whatsapp";
+import { formatScheduleSummary } from "@/lib/hours";
 
 interface FAQItem {
   id: string;
@@ -328,7 +329,7 @@ export default function HelpCenterPage() {
                 <p className="text-[11px] text-pava-brown-mid/70 mt-1">{settings.addressLine}, {settings.addressCity}.</p>
               </div>
               <span className="text-[11px] font-semibold text-pava-brown-mid/80 mt-3 flex items-center gap-1">
-                <Clock size={12} /> {settings.hoursWeekday}
+                <Clock size={12} /> {formatScheduleSummary(settings).filter((s) => !s.endsWith("Cerrado")).join(" · ") || `${settings.hoursWeekday} hs`}
               </span>
             </div>
           </div>

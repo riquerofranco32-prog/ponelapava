@@ -13,12 +13,12 @@ export default function OpenStatusBadge() {
 
   useEffect(() => {
     function check() {
-      setIsOpen(isStoreOpenNow(settings.hoursWeekday, settings.hoursSaturday));
+      setIsOpen(isStoreOpenNow(settings));
     }
     check();
     const id = setInterval(check, 60_000);
     return () => clearInterval(id);
-  }, [settings.hoursWeekday, settings.hoursSaturday]);
+  }, [settings]);
 
   if (isOpen === null) {
     return (

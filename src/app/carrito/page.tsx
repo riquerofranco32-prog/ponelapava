@@ -16,10 +16,12 @@ import {
   CreditCard,
   Banknote,
   Sparkles,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
-import { isStoreOpenNow, getNextOpeningLabel } from "@/lib/hours";
+import { isStoreOpenNow, getNextOpeningLabel, formatScheduleSummary } from "@/lib/hours";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
@@ -80,8 +82,8 @@ export default function CartPage() {
   // visitor's clock.
   const [isOpen, setIsOpen] = useState<boolean | null>(null);
   useEffect(() => {
-    setIsOpen(isStoreOpenNow(settings.hoursWeekday, settings.hoursSaturday));
-  }, [settings.hoursWeekday, settings.hoursSaturday]);
+    setIsOpen(isStoreOpenNow(settings));
+  }, [settings]);
 
   // Load complementary products for upsell
   useEffect(() => {
@@ -107,10 +109,10 @@ export default function CartPage() {
     })),
   });
 
-  const enabledPaymentMethods =
+  const enabledPaymentMethods: Array<"transfer" | "cash" | "card"> =
     settings.paymentMethods && settings.paymentMethods.length > 0
       ? settings.paymentMethods
-      : (["transfer", "cash"] as const);
+      : ["transfer", "cash"];
 
   const allowsCash =
     deliveryMethod === "pickup" && enabledPaymentMethods.includes("cash");
@@ -528,6 +530,22 @@ export default function CartPage() {
                   </button>
                 </div>
 
+                {/* Pickup details */}
+                {deliveryMethod === "pickup" && (
+                  <div className="mt-3 p-3 rounded-control bg-pava-cream-dark/60 border border-pava-brown/10 text-xs text-pava-brown/85 space-y-1 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-1.5 font-semibold text-pava-brown">
+                      <MapPin size={13} className="text-pava-green shrink-0" />
+                      <span>{settings.addressLine}, {settings.addressCity}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] text-pava-brown/70">
+                      <Clock size={12} className="text-pava-green shrink-0" />
+                      <span>
+                        {formatScheduleSummary(settings).filter((s) => !s.endsWith("Cerrado")).join(" · ") || `${settings.hoursWeekday} hs`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Delivery Address fields */}
                 {deliveryMethod === "delivery" && (
                   <div className="mt-3 space-y-2 p-3 rounded-control bg-pava-cream-dark/60 border border-pava-brown/10 animate-in fade-in duration-200">
@@ -709,7 +727,7 @@ export default function CartPage() {
 
               <p className="text-xs text-pava-brown/40 text-center mt-4 leading-relaxed">
                 {isOpen === false
-                  ? `Estamos cerrados — te respondemos ${getNextOpeningLabel(settings.hoursWeekday, settings.hoursSaturday)}.`
+                  ? `Estamos cerrados — te respondemos ${getNextOpeningLabel(settings)}.`
                   : "Se abrirá WhatsApp con tu pedido pre-armado y los datos de entrega para coordinar el pago."}
               </p>
             </div>

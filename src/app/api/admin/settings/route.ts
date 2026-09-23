@@ -4,6 +4,10 @@ import { getSiteSettings, updateSiteSettings } from "@/lib/settings";
 import { logAudit } from "@/lib/auditLog";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { handle, ValidationError } from "@/lib/api-guard";
+import {
+  validateOpeningHoursInput,
+  validateClosedDatesInput,
+} from "@/lib/hours";
 
 export async function GET() {
   return handle("GET /api/admin/settings", () => getSiteSettings());
@@ -28,9 +32,36 @@ export async function PUT(request: NextRequest) {
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
 
   return handle("PUT /api/admin/settings", async () => {
+    let openingHours;
+    if (body?.openingHours) {
+      try {
+        openingHours = validateOpeningHoursInput(body.openingHours);
+      } catch (err) {
+        throw new ValidationError(err instanceof Error ? err.message : "Horarios de apertura inválidos");
+      }
+    }
+
+    let closedDates: string[] | undefined;
+    if (body?.closedDates !== undefined) {
+      try {
+        closedDates = validateClosedDatesInput(body.closedDates);
+      } catch (err) {
+        throw new ValidationError(err instanceof Error ? err.message : "Fechas de cierre inválidas");
+      }
+    }
+
     const input = {} as Record<string, string>;
     for (const field of REQUIRED_FIELDS) {
-      const value = typeof body?.[field] === "string" ? (body[field] as string).trim() : "";
+      let value = typeof body?.[field] === "string" ? (body[field] as string).trim() : "";
+      if (!value && openingHours) {
+        if (field === "hoursWeekday") {
+          const r = openingHours.tue.ranges[0] || openingHours.wed.ranges[0];
+          value = r ? `${r.open} – ${r.close}` : "09:00 – 19:00";
+        } else if (field === "hoursSaturday") {
+          const r = openingHours.sat.ranges[0];
+          value = r ? `${r.open} – ${r.close}` : "09:00 – 14:00";
+        }
+      }
       if (!value) throw new ValidationError(`El campo "${field}" es obligatorio`);
       if (value.length > 200) {
         throw new ValidationError(`El campo "${field}" es demasiado largo`);
@@ -71,6 +102,8 @@ export async function PUT(request: NextRequest) {
     const settings = await updateSiteSettings({
       ...input,
       paymentMethods,
+      openingHours: openingHours || undefined,
+      closedDates: closedDates || undefined,
     } as Parameters<typeof updateSiteSettings>[0]);
 
     const supabase = await createSupabaseServerClient();
@@ -79,7 +112,7 @@ export async function PUT(request: NextRequest) {
       actorEmail: data.user?.email ?? "desconocido",
       action: "settings_update",
       entityType: "settings",
-      details: { ...input, paymentMethods },
+      details: { ...input, paymentMethods, openingHours, closedDates },
     });
 
     revalidatePath("/", "layout");

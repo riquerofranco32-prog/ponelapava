@@ -112,7 +112,7 @@ export default function CartPage() {
   const enabledPaymentMethods: Array<"transfer" | "cash" | "card"> =
     settings.paymentMethods && settings.paymentMethods.length > 0
       ? settings.paymentMethods
-      : ["transfer", "cash"];
+      : ["transfer", "cash", "card"];
 
   const allowsCash =
     deliveryMethod === "pickup" && enabledPaymentMethods.includes("cash");

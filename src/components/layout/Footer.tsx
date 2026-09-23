@@ -175,7 +175,7 @@ export default async function Footer() {
               {(settings.paymentMethods?.includes("transfer") ?? true) && (
                 <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Transferencia</span>
               )}
-              {settings.paymentMethods?.includes("card") && (
+              {(settings.paymentMethods?.includes("card") ?? true) && (
                 <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Mercado Pago</span>
               )}
               {(settings.paymentMethods?.includes("cash") ?? true) && (

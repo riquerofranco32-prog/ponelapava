@@ -54,7 +54,7 @@ function fromRow(row: SettingsRow): SiteSettings {
     addressCity: row.address_city,
     hoursWeekday: row.hours_weekday,
     hoursSaturday: row.hours_saturday,
-    paymentMethods: validMethods.length > 0 ? validMethods : ["transfer", "cash"],
+    paymentMethods: validMethods.length > 0 ? validMethods : ["transfer", "cash", "card"],
     openingHours,
     closedDates,
   };
@@ -107,7 +107,7 @@ export async function updateSiteSettings(
     address_city: input.addressCity,
     hours_weekday: hoursWeekday,
     hours_saturday: hoursSaturday,
-    payment_methods: input.paymentMethods || ["transfer", "cash"],
+    payment_methods: input.paymentMethods || ["transfer", "cash", "card"],
     opening_hours: openingHours,
     closed_dates: closedDates,
   };
@@ -142,18 +142,24 @@ export async function updateSiteSettings(
 export function getProductPaymentMethodsLabel(
   paymentMethods?: AvailablePaymentMethod[],
 ): string {
-  const methods = paymentMethods && paymentMethods.length > 0 ? paymentMethods : ["transfer", "cash"];
-  const filtered = methods.filter((m) => m === "cash" || m === "transfer");
-  const parts: string[] = [];
-  if (filtered.includes("cash")) parts.push("Efectivo");
-  if (filtered.includes("transfer")) parts.push("Transferencia");
-  return parts.join(" · ") || "Efectivo · Transferencia";
+  const methods =
+    paymentMethods && paymentMethods.length > 0
+      ? paymentMethods
+      : (["transfer", "cash", "card"] as AvailablePaymentMethod[]);
+  const labels: string[] = [];
+  if (methods.includes("transfer")) labels.push("Transferencia");
+  if (methods.includes("cash")) labels.push("Efectivo");
+  if (methods.includes("card")) labels.push("Mercado Pago");
+  return labels.join(" · ") || "Transferencia · Efectivo · Mercado Pago";
 }
 
 export function getStorePaymentMethodsSummary(
   paymentMethods?: AvailablePaymentMethod[],
 ): string {
-  const methods = paymentMethods && paymentMethods.length > 0 ? paymentMethods : ["transfer", "cash"];
+  const methods =
+    paymentMethods && paymentMethods.length > 0
+      ? paymentMethods
+      : (["transfer", "cash", "card"] as AvailablePaymentMethod[]);
   const names: string[] = [];
   if (methods.includes("transfer")) names.push("Transferencia");
   if (methods.includes("card")) names.push("Mercado Pago");

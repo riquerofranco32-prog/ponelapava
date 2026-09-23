@@ -27,7 +27,7 @@ interface FAQItem {
 }
 
 function buildHelpFaqs(settings: { paymentMethods?: string[] }): FAQItem[] {
-  const methods = settings.paymentMethods || ["transfer", "cash"];
+  const methods = settings.paymentMethods || ["transfer", "cash", "card"];
   const paymentDescriptions: string[] = [];
   if (methods.includes("transfer")) paymentDescriptions.push("transferencia bancaria");
   if (methods.includes("cash")) paymentDescriptions.push("efectivo al retirar en nuestro local de Catriel");

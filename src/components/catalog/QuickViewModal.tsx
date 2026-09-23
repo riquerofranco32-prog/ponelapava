@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { X, MessageCircle } from "lucide-react";
+import { X, MessageCircle, CreditCard } from "lucide-react";
 import { Product } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
+import { getProductPaymentMethodsLabel } from "@/lib/settings";
 import Badge from "@/components/ui/Badge";
 import AddToCartButton from "@/components/catalog/AddToCartButton";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
@@ -122,12 +123,16 @@ export default function QuickViewModal({
             {product.name}
           </h2>
 
-          {/* Pricing & Transfer Discount */}
+          {/* Pricing & Enabled payment methods */}
           <div className="mb-4">
             <div className="flex items-baseline gap-2">
               <span className="font-display text-2xl font-bold text-pava-green">
                 {formatPrice(product.price)}
               </span>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-xs text-pava-brown-mid/70 font-medium">
+              <CreditCard size={12} className="text-pava-green" />
+              <span>{getProductPaymentMethodsLabel(settings.paymentMethods)}</span>
             </div>
           </div>
 

@@ -158,7 +158,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     const settings = await getSiteSettings();
     const enabled = settings.paymentMethods && settings.paymentMethods.length > 0
       ? settings.paymentMethods
-      : ["transfer", "cash"];
+      : ["transfer", "cash", "card"];
     if (!enabled.includes(input.paymentMethod)) {
       throw new OrderValidationError(`El medio de pago "${input.paymentMethod}" no está habilitado.`);
     }

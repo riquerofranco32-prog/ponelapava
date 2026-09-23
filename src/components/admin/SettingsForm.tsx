@@ -484,7 +484,7 @@ export default function SettingsForm() {
                 type="checkbox"
                 checked={settings.paymentMethods?.includes("transfer") ?? true}
                 onChange={(e) => {
-                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const current = settings.paymentMethods || ["transfer", "cash", "card"];
                   const next = e.target.checked
                     ? [...current, "transfer"]
                     : current.filter((m) => m !== "transfer");
@@ -498,7 +498,7 @@ export default function SettingsForm() {
                 type="checkbox"
                 checked={settings.paymentMethods?.includes("cash") ?? true}
                 onChange={(e) => {
-                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const current = settings.paymentMethods || ["transfer", "cash", "card"];
                   const next = e.target.checked
                     ? [...current, "cash"]
                     : current.filter((m) => m !== "cash");
@@ -510,9 +510,9 @@ export default function SettingsForm() {
             <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
               <input
                 type="checkbox"
-                checked={settings.paymentMethods?.includes("card") ?? false}
+                checked={settings.paymentMethods?.includes("card") ?? true}
                 onChange={(e) => {
-                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const current = settings.paymentMethods || ["transfer", "cash", "card"];
                   const next = e.target.checked
                     ? [...current, "card"]
                     : current.filter((m) => m !== "card");

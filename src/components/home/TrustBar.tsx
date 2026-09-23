@@ -12,10 +12,17 @@ interface TrustItemData {
 }
 
 function buildTrustItems(settings: { paymentMethods?: string[] }): TrustItemData[] {
-  const methods = settings.paymentMethods || ["transfer", "cash"];
-  const paymentTitle = methods.includes("card")
-    ? "Transferencia o Mercado Pago"
-    : "Transferencia bancaria";
+  const methods = settings.paymentMethods || ["transfer", "cash", "card"];
+  let paymentTitle = "Transferencia o Mercado Pago";
+  if (methods.includes("transfer") && methods.includes("card")) {
+    paymentTitle = "Transferencia o Mercado Pago";
+  } else if (methods.includes("transfer")) {
+    paymentTitle = "Transferencia bancaria";
+  } else if (methods.includes("card")) {
+    paymentTitle = "Mercado Pago";
+  } else {
+    paymentTitle = "Pago al retirar";
+  }
 
   const trustItems: TrustItemData[] = [
     {

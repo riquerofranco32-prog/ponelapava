@@ -16,6 +16,7 @@ import {
 import { useFavorites } from "@/context/FavoritesContext";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
+import { getProductPaymentMethodsLabel } from "@/lib/settings";
 import { Product } from "@/types";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { whatsappChatUrl } from "@/lib/whatsapp";
@@ -194,6 +195,9 @@ export default function FavoritesDrawer({
                         {formatPrice(product.price)}
                       </span>
                     </div>
+                    <span className="text-[10px] text-pava-brown-mid/70 block mt-0.5">
+                      {getProductPaymentMethodsLabel(settings.paymentMethods)}
+                    </span>
 
                     {/* Quick Add Button */}
                     <div className="mt-2 flex items-center gap-2">

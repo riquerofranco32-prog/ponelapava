@@ -23,7 +23,7 @@ const CATEGORIES = [
 function buildFaqs(settings: { paymentMethods?: string[] }): FAQItem[] {
   const methods = settings.paymentMethods && settings.paymentMethods.length > 0
     ? settings.paymentMethods
-    : ["transfer", "cash"];
+    : ["transfer", "cash", "card"];
 
   const paymentDescriptions: string[] = [];
   if (methods.includes("transfer")) paymentDescriptions.push("transferencia bancaria");

@@ -3,6 +3,7 @@ import {
   Package,
   Tag,
   ShoppingCart,
+  ShoppingBag,
   TicketPercent,
   Users,
   Settings,
@@ -29,6 +30,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     items: [
       { href: "/admin/dashboard", label: "Hoy", icon: LayoutDashboard },
       { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
+      { href: "/admin/carritos", label: "Carritos", icon: ShoppingBag },
       { href: "/admin/clientes", label: "Clientes", icon: Users },
     ],
   },

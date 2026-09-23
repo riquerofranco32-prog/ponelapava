@@ -26,7 +26,7 @@ import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import PageHeader from "@/components/layout/PageHeader";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import GiftMessageModal from "@/components/cart/GiftMessageModal";
-import type { Product, ProductStatus } from "@/types";
+import type { Product, ProductStatus, CartItem } from "@/types";
 import { computeOrderTotals } from "@/lib/pricing";
 
 // Medios de pago configurados en settings. De cara al cliente el método histórico
@@ -100,6 +100,46 @@ export default function CartPage() {
       .catch(() => {});
   }, [items]);
 
+  // Abandoned cart tracking & URL recovery (?recover=<id>)
+  const cartSessionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("pava_cart_session_id");
+      if (saved) cartSessionIdRef.current = saved;
+    } catch {}
+
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const recoverId = params.get("recover");
+    if (!recoverId) return;
+
+    fetch(`/api/cart/abandoned?id=${encodeURIComponent(recoverId)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.cart) {
+          cartSessionIdRef.current = data.cart.id;
+          try {
+            sessionStorage.setItem("pava_cart_session_id", data.cart.id);
+          } catch {}
+          if (data.cart.customerName) {
+            setCustomerName((prev) => prev || data.cart.customerName);
+          }
+          if (data.cart.phone) {
+            setCustomerPhone((prev) => prev || data.cart.phone);
+          }
+          if (Array.isArray(data.cart.items) && data.cart.items.length > 0) {
+            data.cart.items.forEach((item: CartItem) => {
+              if (item.product && item.quantity) {
+                addItem(item.product, item.quantity);
+              }
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }, [addItem]);
+
   // Shipping & discounts — computed by the same module the server uses to
   // price the order, so what is shown here is what gets stored.
   const { total: finalTotal } = computeOrderTotals({
@@ -108,6 +148,45 @@ export default function CartPage() {
       quantity,
     })),
   });
+
+  // Debounced autosave (1200ms) to /api/cart/abandoned
+  useEffect(() => {
+    const cleanPhone = customerPhone.trim();
+    if (cleanPhone.length < 8 || items.length === 0) return;
+
+    const timer = setTimeout(() => {
+      const step = deliveryAddress.trim()
+        ? "payment"
+        : deliveryMethod === "delivery"
+        ? "delivery"
+        : "contact";
+
+      fetch("/api/cart/abandoned", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: cartSessionIdRef.current || undefined,
+          phone: cleanPhone,
+          customerName: customerName.trim() || undefined,
+          items,
+          total: finalTotal,
+          step,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.cart?.id) {
+            cartSessionIdRef.current = data.cart.id;
+            try {
+              sessionStorage.setItem("pava_cart_session_id", data.cart.id);
+            } catch {}
+          }
+        })
+        .catch(() => {});
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [customerPhone, customerName, items, finalTotal, deliveryMethod, deliveryAddress]);
 
   const enabledPaymentMethods: Array<"transfer" | "cash" | "card"> =
     settings.paymentMethods && settings.paymentMethods.length > 0

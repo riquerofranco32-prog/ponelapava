@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   Clock,
@@ -406,7 +407,16 @@ export default function OrdersTable() {
           </div>
 
           {/* View Mode Toggle: Table vs Kanban */}
-          <div className="inline-flex items-center bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-lg p-0.5">
+          <div className="flex items-center gap-2">
+            <Link
+              href="/admin/carritos"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-[var(--dash-text)] bg-[var(--dash-surface-2)] border border-[var(--dash-border)] hover:border-[var(--dash-accent)] transition-all"
+            >
+              <ShoppingBag size={13} className="text-[var(--dash-accent)]" />
+              <span>Carritos abandonados</span>
+            </Link>
+
+            <div className="inline-flex items-center bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-lg p-0.5">
             <button
               type="button"
               onClick={() => setViewMode("table")}
@@ -433,6 +443,7 @@ export default function OrdersTable() {
             </button>
           </div>
         </div>
+      </div>
 
         {/* Filters bar: Search, Payment Status, Date Pickers, CSV, Refresh */}
         <div className="flex gap-2 items-center flex-wrap w-full">

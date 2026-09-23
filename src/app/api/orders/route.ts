@@ -5,6 +5,7 @@ import {
   OrderValidationError,
 } from "@/lib/orders";
 import { recordFailedOrder } from "@/lib/failedOrders";
+import { markCartRecovered } from "@/lib/abandonedCarts";
 
 // Public endpoint — hit from /carrito when a customer checks out via WhatsApp.
 //
@@ -78,6 +79,12 @@ export async function POST(request: NextRequest) {
         ? String(body.comment).slice(0, 500).trim()
         : undefined,
     });
+
+    if (customerPhone) {
+      await markCartRecovered({ phone: customerPhone }).catch((err) =>
+        console.error("Failed to mark cart as recovered:", err)
+      );
+    }
 
     return NextResponse.json({ ok: true, order }, { status: 201 });
   } catch (error) {

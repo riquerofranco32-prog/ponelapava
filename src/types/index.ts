@@ -160,3 +160,26 @@ export interface AdminMetric {
   change?: string;
   trend?: "up" | "down" | "neutral";
 }
+
+// ── Abandoned Carts (Carritos Abandonados) ────────────────
+export interface AbandonedCart {
+  id: string;
+  phone: string;
+  customerName?: string;
+  items: CartItem[];
+  total: number;
+  step: "contact" | "delivery" | "payment";
+  lastActivity: string;
+  recovered: boolean;
+  createdAt: string;
+}
+
+export interface AbandonedCartInput {
+  id?: string;
+  phone: string;
+  customerName?: string;
+  items: CartItem[];
+  total: number;
+  step?: "contact" | "delivery" | "payment";
+}
+

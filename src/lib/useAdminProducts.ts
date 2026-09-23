@@ -95,6 +95,42 @@ export function useAdminProducts() {
     }
   }
 
+  async function handleCategoryChange(product: Product, nextCategory: string) {
+    if (product.category === nextCategory) return;
+    const { id, createdAt: _createdAt, ...rest } = product;
+    try {
+      await handleUpdate(id, { ...rest, category: nextCategory as Product["category"] });
+      showToast(`Categoría cambiada a ${nextCategory}`);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Error al cambiar categoría",
+        "error"
+      );
+      throw err;
+    }
+  }
+
+  async function handleBulkCategoryChange(productIds: string[], nextCategory: string) {
+    if (productIds.length === 0) return;
+    const toUpdate = products.filter((p) => productIds.includes(p.id));
+    try {
+      await Promise.all(
+        toUpdate.map((p) => {
+          const { id, createdAt: _createdAt, ...rest } = p;
+          return fetch(`/api/admin/products/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...rest, category: nextCategory }),
+          });
+        })
+      );
+      await loadProducts(true);
+      showToast(`${productIds.length} productos movidos a ${nextCategory}`);
+    } catch {
+      showToast("Error al mover productos a la categoría", "error");
+    }
+  }
+
   async function handleDelete(product: Product) {
     const res = await fetch(`/api/admin/products/${product.id}`, {
       method: "DELETE",
@@ -115,6 +151,8 @@ export function useAdminProducts() {
     handleUpdate,
     handleFormUpdate,
     handleStockChange,
+    handleCategoryChange,
+    handleBulkCategoryChange,
     handleDelete,
   };
 }

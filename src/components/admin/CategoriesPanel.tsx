@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2, ArrowRight } from "lucide-react";
 import { Category, Product } from "@/types";
 import { CategoryInput } from "@/lib/categories";
 import { assertOk } from "@/lib/admin-fetch";
@@ -216,6 +217,24 @@ export default function CategoriesPanel({
                       onClick={() => setDeleting(category)}
                     />
                   </div>
+                </div>
+
+                <div className="pt-2.5 border-t border-[var(--dash-border)] flex items-center justify-between gap-2 mt-3 text-xs">
+                  <Link
+                    href={`/admin/productos?categoria=${category.slug}&view=sections`}
+                    className="font-semibold text-[var(--dash-accent)] hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>Ver productos ({count})</span>
+                    <ArrowRight size={12} />
+                  </Link>
+
+                  <Link
+                    href={`/admin/productos?action=new&category=${category.slug}`}
+                    className="font-medium text-[var(--dash-muted)] hover:text-[var(--dash-text)] inline-flex items-center gap-1 transition-colors"
+                  >
+                    <Plus size={12} />
+                    <span>+ Producto</span>
+                  </Link>
                 </div>
               </AdminCard>
             );

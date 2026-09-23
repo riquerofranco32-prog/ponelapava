@@ -33,12 +33,14 @@ function slugify(text: string): string {
 export function ProductForm({
   product,
   categories,
+  defaultCategory,
   onSave,
   onClose,
   onCancel,
 }: {
   product?: Product;
   categories: Category[];
+  defaultCategory?: string;
   onSave: (data: ProductInput) => Promise<void>;
   onClose?: () => void;
   onCancel?: () => void;
@@ -56,7 +58,7 @@ export function ProductForm({
   );
   const [weight, setWeight] = useState(product?.weight ?? "");
   const [category, setCategory] = useState<ProductCategory>(
-    product?.category ?? categories[0]?.slug ?? "mates"
+    product?.category ?? (defaultCategory as ProductCategory) ?? categories[0]?.slug ?? "mates"
   );
   const [status, setStatus] = useState<ProductStatus>(
     product?.status ?? "available"

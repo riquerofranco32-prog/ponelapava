@@ -1,7 +1,7 @@
 "use client";
 
-import { Edit2, Trash2, Copy, ExternalLink, SlidersHorizontal, History, AlertTriangle } from "lucide-react";
-import { Product } from "@/types";
+import { Edit2, Trash2, Copy, ExternalLink, SlidersHorizontal, History, AlertTriangle, Tag } from "lucide-react";
+import { Product, Category } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
 import { StockStepper } from "./StockStepper";
@@ -10,22 +10,32 @@ import { IconButton } from "./IconButton";
 
 export function ProductDesktopRow({
   product,
+  categories,
   index = 0,
   compact = false,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
   onEdit,
   onDuplicate,
   onDelete,
   onStockChange,
+  onCategoryChange,
   onAdjustStock,
   onViewHistory,
 }: {
   product: Product;
+  categories?: Category[];
   index?: number;
   compact?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onCategoryChange?: (product: Product, nextCategory: string) => Promise<void>;
   onAdjustStock?: (product: Product) => void;
   onViewHistory?: (product: Product) => void;
 }) {
@@ -34,9 +44,20 @@ export function ProductDesktopRow({
 
   return (
     <tr
-      className="admin-row-in admin-row-hover"
+      className={`admin-row-in admin-row-hover ${selected ? "bg-[var(--dash-surface-2)]" : ""}`}
       style={{ "--i": index } as React.CSSProperties}
     >
+      {selectable && (
+        <td className="py-2.5 px-3 border-t border-[var(--dash-border)] align-middle text-center w-10">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={() => onToggleSelect?.(product.id)}
+            className="cursor-pointer rounded border-[var(--dash-border)] text-[var(--dash-accent)] focus:ring-[var(--dash-accent)]"
+            aria-label={`Seleccionar ${product.name}`}
+          />
+        </td>
+      )}
       <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
         <div className="flex items-center gap-2.5">
           <ProductThumb src={product.images[0]} />
@@ -53,8 +74,27 @@ export function ProductDesktopRow({
         </div>
       </td>
       {!compact && (
-        <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle text-[var(--dash-muted)]">
-          {getCategoryLabel(product.category)}
+        <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle">
+          {categories && onCategoryChange ? (
+            <div className="relative inline-block">
+              <select
+                value={product.category}
+                onChange={(e) => onCategoryChange(product, e.target.value)}
+                className="text-xs font-semibold py-1 px-2.5 rounded-lg border border-[var(--dash-border)] hover:border-[var(--dash-accent)] bg-[var(--dash-surface-2)] text-[var(--dash-text)] transition-colors outline-none cursor-pointer"
+                title="Cambiar categoría en 1 clic"
+              >
+                {categories.map((c) => (
+                  <option key={c.id} value={c.slug}>
+                    {c.icon ? `${c.icon} ` : ""}{c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <span className="text-xs text-[var(--dash-muted)] font-medium">
+              {getCategoryLabel(product.category)}
+            </span>
+          )}
         </td>
       )}
       <td className="py-2.5 px-3.5 border-t border-[var(--dash-border)] align-middle font-medium text-[var(--dash-text)]">

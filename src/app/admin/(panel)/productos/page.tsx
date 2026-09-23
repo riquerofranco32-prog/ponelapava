@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Plus, Search, PackageSearch, Zap, AlertTriangle, PackageX, CheckCircle2, Truck, LayoutGrid } from "lucide-react";
-import { Product, Supplier } from "@/types";
+import { Plus, Search, PackageSearch, Zap, AlertTriangle, PackageX, CheckCircle2, Truck, LayoutGrid, LayoutList, Layers, Tag, X } from "lucide-react";
+import { Product, Supplier, Category } from "@/types";
 import ProductForm from "@/components/admin/ProductForm";
 import { BulkPriceModal } from "@/components/admin/products/BulkPriceModal";
 import { AdminButton } from "@/components/admin/AdminButton";
@@ -17,6 +17,7 @@ import { StockAdjustModal } from "@/components/admin/stock/StockAdjustModal";
 import { StockHistoryModal } from "@/components/admin/stock/StockHistoryModal";
 import { ReplenishmentSection } from "@/components/admin/stock/ReplenishmentSection";
 import { SuppliersManagerModal } from "@/components/admin/stock/SuppliersManagerModal";
+import { ProductsCategorySections } from "@/components/admin/products/ProductsCategorySections";
 import { useAdminProducts } from "@/lib/useAdminProducts";
 import { useAdminUser } from "@/context/AdminUserContext";
 
@@ -31,13 +32,18 @@ export default function AdminProductosPage() {
     handleCreate,
     handleFormUpdate,
     handleStockChange,
+    handleCategoryChange,
+    handleBulkCategoryChange,
     handleDelete,
   } = useAdminProducts();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [activeView, setActiveView] = useState<"catalog" | "replenish">("catalog");
+  const [catalogDisplayMode, setCatalogDisplayMode] = useState<"table" | "sections">("table");
   const [searchProduct, setSearchProduct] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState<"all" | "low" | "out" | "available">("all");
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+  const [newProductCategory, setNewProductCategory] = useState<string | undefined>(undefined);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
@@ -74,17 +80,49 @@ export default function AdminProductosPage() {
     setCloningProduct(cloned);
   }
 
-  // Support ?action=new and ?search=... from command palette or direct links
+  // Support ?action=new, ?category=..., ?view=sections, and ?search=...
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("action") === "new") {
       setCreating(true);
+      const cat = params.get("category") || params.get("categoria");
+      if (cat) setNewProductCategory(cat);
+    }
+    const catParam = params.get("category") || params.get("categoria");
+    if (catParam) {
+      setCategoryFilter(catParam);
+    }
+    const viewParam = params.get("view");
+    if (viewParam === "sections") {
+      setCatalogDisplayMode("sections");
     }
     const q = params.get("search");
     if (q) {
       setSearchProduct(q);
     }
   }, []);
+
+  const toggleSelectProduct = (id: string) => {
+    setSelectedProductIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedProductIds.size === filteredProducts.length) {
+      setSelectedProductIds(new Set());
+    } else {
+      setSelectedProductIds(new Set(filteredProducts.map((p) => p.id)));
+    }
+  };
+
+  const handleAddProductToCategory = (categorySlug: string) => {
+    setNewProductCategory(categorySlug);
+    setCreating(true);
+  };
 
   // "/" jumps straight to the product search, mirroring the shortcut
   // shoppers already know from GitHub/Linear-style tools.
@@ -261,33 +299,53 @@ export default function AdminProductosPage() {
             </button>
           </div>
 
-          <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+          {/* Main Controls: Search, View Mode Switcher, Actions */}
+          <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search
                 size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)]"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--dash-muted)] pointer-events-none"
               />
               <input
                 ref={searchInputRef}
                 type="search"
-                placeholder="Buscar producto... (/)"
+                placeholder="Buscar por nombre o marca... (/)"
                 value={searchProduct}
                 onChange={(e) => setSearchProduct(e.target.value)}
                 className="admin-input pl-9 w-full text-xs"
               />
             </div>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="admin-input flex-1 min-w-[160px] w-auto text-xs"
-            >
-              <option value="all">Todas las categorías</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.slug}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+
+            {/* Display Mode: Tabla vs Por Categorías */}
+            <div className="inline-flex items-center bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-lg p-0.5">
+              <button
+                type="button"
+                onClick={() => setCatalogDisplayMode("table")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none transition-all ${
+                  catalogDisplayMode === "table"
+                    ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                    : "bg-transparent text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+                }`}
+                title="Vista en tabla general"
+              >
+                <LayoutList size={14} />
+                <span>Tabla</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCatalogDisplayMode("sections")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold cursor-pointer border-none transition-all ${
+                  catalogDisplayMode === "sections"
+                    ? "bg-[var(--dash-surface)] text-[var(--dash-text)] shadow-sm"
+                    : "bg-transparent text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+                }`}
+                title="Dividir en secciones por categoría"
+              >
+                <Layers size={14} />
+                <span>Por Categorías</span>
+              </button>
+            </div>
+
             {isOwner && (
               <AdminButton
                 variant="secondary"
@@ -303,6 +361,81 @@ export default function AdminProductosPage() {
               Nuevo producto
             </AdminButton>
           </div>
+
+          {/* Category Chips Bar with Live Counts */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-thin">
+            <button
+              type="button"
+              onClick={() => setCategoryFilter("all")}
+              className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                categoryFilter === "all" ? "admin-toolbar-pill--active" : ""
+              }`}
+            >
+              <span>Todas las categorías</span>
+              <span className="text-xs bg-[var(--dash-surface-3)] px-1.5 py-0.5 rounded-full font-bold">
+                {products.length}
+              </span>
+            </button>
+            {categories.map((cat) => {
+              const count = products.filter((p) => p.category === cat.slug).length;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategoryFilter(cat.slug)}
+                  className={`admin-toolbar-pill inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs ${
+                    categoryFilter === cat.slug ? "admin-toolbar-pill--active" : ""
+                  }`}
+                >
+                  {cat.icon && <span>{cat.icon}</span>}
+                  <span>{cat.name}</span>
+                  <span className="text-xs bg-[var(--dash-surface-3)] px-1.5 py-0.5 rounded-full font-bold">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bulk Reassignment Action Bar */}
+          {selectedProductIds.size > 0 && (
+            <div className="mb-4 p-3 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] flex items-center justify-between gap-3 animate-in fade-in flex-wrap shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[var(--dash-text)]">
+                  {selectedProductIds.size} producto{selectedProductIds.size !== 1 ? "s" : ""} seleccionado{selectedProductIds.size !== 1 ? "s" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProductIds(new Set())}
+                  className="text-xs text-[var(--dash-muted)] hover:text-[var(--dash-text)] underline cursor-pointer"
+                >
+                  Deseleccionar
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 text-xs text-[var(--dash-muted)]">
+                  <span>Mover a categoría:</span>
+                  <select
+                    onChange={async (e) => {
+                      if (!e.target.value) return;
+                      await handleBulkCategoryChange(Array.from(selectedProductIds), e.target.value);
+                      setSelectedProductIds(new Set());
+                    }}
+                    defaultValue=""
+                    className="admin-input py-1 px-2.5 text-xs font-semibold"
+                  >
+                    <option value="" disabled>Elegir categoría destino...</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.slug}>
+                        {c.icon ? `${c.icon} ` : ""}{c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           {loading ? (
             <TableSkeleton rows={6} />
@@ -320,15 +453,38 @@ export default function AdminProductosPage() {
                   : "Probá con otra búsqueda o categoría."
               }
             />
-          ) : (
-            <ProductsTable
-              data={filteredProducts}
+          ) : catalogDisplayMode === "sections" ? (
+            <ProductsCategorySections
+              categories={
+                categoryFilter === "all"
+                  ? categories
+                  : categories.filter((c) => c.slug === categoryFilter)
+              }
+              products={filteredProducts}
               onEdit={setEditingProduct}
               onDuplicate={handleDuplicate}
               onDelete={isOwner ? setDeletingProduct : undefined}
               onStockChange={handleStockChange}
+              onCategoryChange={handleCategoryChange}
               onAdjustStock={(p) => setAdjustingProduct(p)}
               onViewHistory={(p) => setHistoryProduct(p)}
+              onAddProductToCategory={handleAddProductToCategory}
+            />
+          ) : (
+            <ProductsTable
+              data={filteredProducts}
+              categories={categories}
+              onEdit={setEditingProduct}
+              onDuplicate={handleDuplicate}
+              onDelete={isOwner ? setDeletingProduct : undefined}
+              onStockChange={handleStockChange}
+              onCategoryChange={handleCategoryChange}
+              onAdjustStock={(p) => setAdjustingProduct(p)}
+              onViewHistory={(p) => setHistoryProduct(p)}
+              selectable={true}
+              selectedIds={selectedProductIds}
+              onToggleSelect={toggleSelectProduct}
+              onToggleSelectAll={toggleSelectAll}
             />
           )}
         </>
@@ -346,11 +502,16 @@ export default function AdminProductosPage() {
       {creating && (
         <ProductForm
           categories={categories}
+          defaultCategory={newProductCategory}
           onSave={async (input) => {
             await handleCreate(input);
             setCreating(false);
+            setNewProductCategory(undefined);
           }}
-          onCancel={() => setCreating(false)}
+          onCancel={() => {
+            setCreating(false);
+            setNewProductCategory(undefined);
+          }}
         />
       )}
       {cloningProduct && (
@@ -420,20 +581,32 @@ export default function AdminProductosPage() {
 
 function ProductsTable({
   data,
+  categories,
   onEdit,
   onDuplicate,
   onDelete,
   onStockChange,
+  onCategoryChange,
   onAdjustStock,
   onViewHistory,
+  selectable,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
 }: {
   data: Product[];
+  categories: Category[];
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onCategoryChange: (product: Product, nextCategory: string) => Promise<void>;
   onAdjustStock?: (product: Product) => void;
   onViewHistory?: (product: Product) => void;
+  selectable?: boolean;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
 }) {
   return (
     <>
@@ -442,6 +615,17 @@ function ProductsTable({
         <table className="admin-table w-full text-sm border-collapse">
           <thead>
             <tr>
+              {selectable && (
+                <th className="px-3 py-2.5 text-center w-10">
+                  <input
+                    type="checkbox"
+                    checked={data.length > 0 && selectedIds?.size === data.length}
+                    onChange={onToggleSelectAll}
+                    className="cursor-pointer rounded border-[var(--dash-border)] text-[var(--dash-accent)]"
+                    aria-label="Seleccionar todos los productos"
+                  />
+                </th>
+              )}
               <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Producto</th>
               <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Categoría</th>
               <th className="text-left px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)]">Precio</th>
@@ -456,10 +640,15 @@ function ProductsTable({
                 key={product.id}
                 index={index}
                 product={product}
+                categories={categories}
+                selectable={selectable}
+                selected={selectedIds?.has(product.id)}
+                onToggleSelect={onToggleSelect}
                 onEdit={onEdit}
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}
                 onStockChange={onStockChange}
+                onCategoryChange={onCategoryChange}
                 onAdjustStock={onAdjustStock}
                 onViewHistory={onViewHistory}
               />
@@ -475,10 +664,12 @@ function ProductsTable({
             key={product.id}
             index={index}
             product={product}
+            categories={categories}
             onEdit={onEdit}
             onDuplicate={onDuplicate}
             onDelete={onDelete}
             onStockChange={onStockChange}
+            onCategoryChange={onCategoryChange}
             onAdjustStock={onAdjustStock}
             onViewHistory={onViewHistory}
           />

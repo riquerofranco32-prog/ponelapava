@@ -1,7 +1,7 @@
 "use client";
 
 import { Edit2, Trash2, Copy, ExternalLink, SlidersHorizontal, History, AlertTriangle } from "lucide-react";
-import { Product } from "@/types";
+import { Product, Category } from "@/types";
 import { formatPrice, getCategoryLabel } from "@/lib/utils";
 import { ProductThumb } from "./ProductThumb";
 import { StockStepper } from "./StockStepper";
@@ -10,20 +10,24 @@ import { IconButton } from "./IconButton";
 
 export function ProductMobileCard({
   product,
+  categories,
   index = 0,
   onEdit,
   onDuplicate,
   onDelete,
   onStockChange,
+  onCategoryChange,
   onAdjustStock,
   onViewHistory,
 }: {
   product: Product;
+  categories?: Category[];
   index?: number;
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
   onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
+  onCategoryChange?: (product: Product, nextCategory: string) => Promise<void>;
   onAdjustStock?: (product: Product) => void;
   onViewHistory?: (product: Product) => void;
 }) {
@@ -52,8 +56,24 @@ export function ProductMobileCard({
             <div className="font-medium text-[var(--dash-text)] truncate">
               {product.name}
             </div>
-            <div className="text-xs text-[var(--dash-muted)] mt-0.5">
-              {getCategoryLabel(product.category)}
+            <div className="mt-1">
+              {categories && onCategoryChange ? (
+                <select
+                  value={product.category}
+                  onChange={(e) => onCategoryChange(product, e.target.value)}
+                  className="text-xs font-semibold py-0.5 px-2 rounded-lg border border-[var(--dash-border)] bg-[var(--dash-surface-2)] text-[var(--dash-text)] outline-none"
+                >
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className="text-xs text-[var(--dash-muted)]">
+                  {getCategoryLabel(product.category)}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex gap-1 shrink-0">

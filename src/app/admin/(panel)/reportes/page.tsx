@@ -19,6 +19,7 @@ import { KpiSkeleton } from "@/components/admin/TableSkeleton";
 import { AdminErrorBanner } from "@/components/admin/AdminErrorBanner";
 import { SalesAreaChart } from "@/components/admin/SalesAreaChart";
 import { assertOk } from "@/lib/admin-fetch";
+import { getPaymentMethodLabel } from "@/lib/orderPrint";
 
 const RANGES = [
   { days: 7, label: "7 días" },
@@ -246,7 +247,7 @@ export default function AdminReportesPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>⚡ Transferencia Bancaria (10% OFF)</span>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>⚡ {getPaymentMethodLabel("transfer")}</span>
                       <span style={{ color: "#10b981", fontWeight: 700 }}>
                         {transf} ({Math.round((transf / total) * 100)}%)
                       </span>
@@ -258,7 +259,7 @@ export default function AdminReportesPage() {
 
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💵 Efectivo / Contraentrega</span>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💵 {getPaymentMethodLabel("cash")}</span>
                       <span style={{ color: "var(--dash-accent)", fontWeight: 700 }}>
                         {cash} ({Math.round((cash / total) * 100)}%)
                       </span>
@@ -270,7 +271,7 @@ export default function AdminReportesPage() {
 
                   <div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💳 Tarjeta de Crédito / Débito</span>
+                      <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("card")}</span>
                       <span style={{ color: "#60a5fa", fontWeight: 700 }}>
                         {card} ({Math.round((card / total) * 100)}%)
                       </span>

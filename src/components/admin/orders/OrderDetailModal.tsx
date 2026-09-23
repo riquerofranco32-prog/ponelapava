@@ -5,7 +5,7 @@ import { Copy, Check, MessageCircle, Printer } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
-import { printOrderRemito } from "@/lib/orderPrint";
+import { printOrderRemito, getPaymentMethodLabel } from "@/lib/orderPrint";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminButton } from "@/components/admin/AdminButton";
 
@@ -152,7 +152,8 @@ export function OrderDetailModal({
               border: "1px solid var(--dash-border)",
             }}
           >
-            {order.paymentMethod === "transfer" ? "💳 Transferencia (10% OFF)" : order.paymentMethod === "cash" ? "💵 Efectivo (10% OFF)" : "💳 Tarjeta"}
+            {order.paymentMethod === "cash" ? "💵 " : "💳 "}
+            {getPaymentMethodLabel(order.paymentMethod)}
           </span>
         )}
         {order.deliveryMethod && (

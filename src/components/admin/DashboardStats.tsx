@@ -24,6 +24,7 @@ import { SalesAreaChart } from "./SalesAreaChart";
 import { RecentOrdersWidget } from "./orders/RecentOrdersWidget";
 import { SalesGoalWidget } from "./dashboard/SalesGoalWidget";
 import { assertOk } from "@/lib/admin-fetch";
+import { getPaymentMethodLabel } from "@/lib/orderPrint";
 
 // Renders as AdminKpiCard's change/trend props, or nothing when there's no
 // prior-period data to compare against (percentChange returned null).
@@ -172,19 +173,19 @@ export default function DashboardStats({
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 13 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💳 Transferencia (10% OFF)</span>
+                <span style={{ color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("transfer")}</span>
                 <span style={{ fontWeight: 700, color: "#10b981" }}>
                   {transfCount} ({Math.round((transfCount / totalOrders) * 100)}%)
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💵 Efectivo en Local</span>
+                <span style={{ color: "var(--dash-text)" }}>💵 {getPaymentMethodLabel("cash")}</span>
                 <span style={{ fontWeight: 600, color: "var(--dash-text)" }}>
                   {cashCount} ({Math.round((cashCount / totalOrders) * 100)}%)
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ color: "var(--dash-text)" }}>💳 Tarjetas / Otros</span>
+                <span style={{ color: "var(--dash-text)" }}>💳 {getPaymentMethodLabel("card")}</span>
                 <span style={{ fontWeight: 600, color: "var(--dash-muted)" }}>
                   {cardCount} ({Math.round((cardCount / totalOrders) * 100)}%)
                 </span>

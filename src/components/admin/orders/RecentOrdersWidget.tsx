@@ -424,7 +424,7 @@ export function RecentOrdersWidget({
                               border: "1px solid rgba(16, 185, 129, 0.25)",
                             }}
                           >
-                            💳 Transf 10% OFF
+                            💳 Transferencia
                           </span>
                         )}
                         {order.comment?.includes("[Cupón:") && (

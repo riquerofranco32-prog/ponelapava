@@ -510,7 +510,7 @@ export default function MarketingPanel() {
                         setContent({ ...content, announcements: next });
                       }}
                       className="admin-input"
-                      placeholder="Texto destacado (ej. 10% OFF EXTRA)"
+                      placeholder="Texto destacado (ej. NOVEDAD)"
                       style={{ fontSize: 12, fontWeight: 700 }}
                     />
                     <input
@@ -617,7 +617,7 @@ export default function MarketingPanel() {
                     })
                   }
                   className="admin-input"
-                  placeholder="Armá tu Set Matero con 10% OFF"
+                  placeholder="Armá tu Set Matero personalizado"
                 />
               </AdminField>
 

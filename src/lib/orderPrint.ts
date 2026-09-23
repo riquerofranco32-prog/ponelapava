@@ -2,6 +2,13 @@ import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { STATUS_LABELS } from "@/lib/orderStatus";
 
+export function getPaymentMethodLabel(method?: string | null): string {
+  if (method === "transfer") return "Transferencia";
+  if (method === "cash") return "Efectivo";
+  if (method === "card") return "Mercado Pago";
+  return method || "Sin especificar";
+}
+
 export function printOrderRemito(order: Order) {
   const printWindow = window.open("", "_blank", "width=640,height=800");
   if (!printWindow) return;
@@ -14,12 +21,7 @@ export function printOrderRemito(order: Order) {
     minute: "2-digit",
   });
 
-  const paymentLabel =
-    order.paymentMethod === "transfer"
-      ? "Transferencia Bancaria"
-      : order.paymentMethod === "cash"
-        ? "Efectivo en el Local"
-        : "Mercado Pago";
+  const paymentLabel = getPaymentMethodLabel(order.paymentMethod);
 
   const deliveryLabel =
     order.deliveryMethod === "pickup"

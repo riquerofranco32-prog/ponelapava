@@ -128,8 +128,8 @@ export function CustomerDetailModal({
   const templates = [
     {
       id: "gift",
-      title: "🎁 Agradecimiento + Cupón 10% OFF",
-      text: `¡Hola ${customer.name}! 👋 Gracias por elegir a Poné La Pava. Como cliente especial, te regalamos un 10% OFF con el código *MATEROVIP* en tu próxima compra de yerbas o accesorios. ¡Que disfrutes cada mate! 🧉✨`,
+      title: "🎁 Mensaje de agradecimiento",
+      text: `¡Hola ${customer.name}! 👋 Gracias por elegir a Poné La Pava. Te escribimos para agradecerte por tu compra y recordarte que estamos a tu disposición en Catriel para lo que necesites. ¡Que disfrutes cada mate! 🧉✨`,
     },
     {
       id: "restock",

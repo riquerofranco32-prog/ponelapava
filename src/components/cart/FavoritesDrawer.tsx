@@ -193,9 +193,6 @@ export default function FavoritesDrawer({
                       <span className="font-display text-sm font-bold text-pava-green">
                         {formatPrice(product.price)}
                       </span>
-                      <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">
-                        -10% c/ transf.
-                      </span>
                     </div>
 
                     {/* Quick Add Button */}

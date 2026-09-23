@@ -10,7 +10,9 @@ import {
 } from "@/lib/hours";
 
 export async function GET() {
-  return handle("GET /api/admin/settings", () => getSiteSettings());
+  return handle("GET /api/admin/settings", () => getSiteSettings(), {
+    requiredRole: "owner",
+  });
 }
 
 const REQUIRED_FIELDS = [
@@ -31,7 +33,9 @@ const HOURS_PATTERN = /^\s*\d{1,2}:\d{2}\s*[–—-]\s*\d{1,2}:\d{2}\s*$/;
 export async function PUT(request: NextRequest) {
   const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
 
-  return handle("PUT /api/admin/settings", async () => {
+  return handle(
+    "PUT /api/admin/settings",
+    async () => {
     let openingHours;
     if (body?.openingHours) {
       try {
@@ -117,5 +121,5 @@ export async function PUT(request: NextRequest) {
 
     revalidatePath("/", "layout");
     return settings;
-  });
+  }, { requiredRole: "owner" });
 }

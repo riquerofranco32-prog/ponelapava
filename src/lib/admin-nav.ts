@@ -60,3 +60,19 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = ADMIN_NAV_GROUPS.flatMap(
   (group) => group.items
 );
 
+export function getVisibleNavGroups(role?: string | null): AdminNavGroup[] {
+  if (role === "staff") {
+    return ADMIN_NAV_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        // Staff cannot access configuracion, reportes, cupones
+        if (item.href === "/admin/configuracion") return false;
+        if (item.href === "/admin/reportes") return false;
+        if (item.href === "/admin/cupones") return false;
+        return true;
+      }),
+    })).filter((group) => group.items.length > 0);
+  }
+  return ADMIN_NAV_GROUPS;
+}
+

@@ -4,13 +4,17 @@ import { handle, validateCoupon } from "@/lib/api-guard";
 
 
 export async function GET() {
-  return handle("GET /api/admin/coupons", () => getCoupons());
+  return handle("GET /api/admin/coupons", () => getCoupons(), {
+    requiredRole: "owner",
+  });
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
-  const result = await handle("POST /api/admin/coupons", () =>
-    createCoupon(validateCoupon(body)),
+  const result = await handle(
+    "POST /api/admin/coupons",
+    () => createCoupon(validateCoupon(body)),
+    { requiredRole: "owner" },
   );
   if (!result.ok) return result;
   return NextResponse.json(await result.json(), { status: 201 });

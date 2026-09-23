@@ -20,7 +20,7 @@ export function ProductMobileCard({
   index?: number;
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
   return (
@@ -72,12 +72,14 @@ export function ProductMobileCard({
               title="Editar"
               icon={Edit2}
             />
-            <IconButton
-              onClick={() => onDelete(product)}
-              title="Eliminar"
-              icon={Trash2}
-              danger
-            />
+            {onDelete && (
+              <IconButton
+                onClick={() => onDelete(product)}
+                title="Eliminar"
+                icon={Trash2}
+                danger
+              />
+            )}
           </div>
         </div>
 

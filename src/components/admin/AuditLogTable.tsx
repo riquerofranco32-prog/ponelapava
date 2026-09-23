@@ -16,11 +16,20 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   customer_notes_update: "Notas de cliente actualizadas",
   customer_tags_update: "Etiquetas de cliente actualizadas",
   customer_follow_up_update: "Seguimiento de cliente actualizado",
+  team_member_invite: "Miembro invitado al equipo",
+  team_member_role_change: "Cambio de rol de miembro",
+  team_member_toggle_active: "Cambio de estado de miembro",
 };
 
 function describeDetails(entry: AuditLogEntry): string {
   const d = entry.details;
   switch (entry.action) {
+    case "team_member_invite":
+      return d.email ? `${d.email} (rol: ${d.role})` : "Nuevo miembro";
+    case "team_member_role_change":
+      return d.email ? `${d.email}: rol ${d.before} → ${d.after}` : "Rol modificado";
+    case "team_member_toggle_active":
+      return d.email ? `${d.email}: ${d.active ? "activado" : "desactivado"}` : "Estado modificado";
     case "customer_notes_update":
       return d.notesPreview ? `Nota: "${d.notesPreview}"` : "Notas modificadas";
     case "customer_tags_update":

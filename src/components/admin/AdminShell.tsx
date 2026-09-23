@@ -15,7 +15,7 @@ import {
   X,
   HelpCircle,
 } from "lucide-react";
-import { useAdminUserEmail } from "@/context/AdminUserContext";
+import { useAdminUser } from "@/context/AdminUserContext";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { playOrderChime } from "@/lib/audioAlert";
 import PendingOrdersBadge from "@/components/admin/PendingOrdersBadge";
@@ -25,6 +25,7 @@ import {
   type AdminNavItem,
   ADMIN_NAV_GROUPS,
   ADMIN_NAV_ITEMS,
+  getVisibleNavGroups,
 } from "@/lib/admin-nav";
 import { getAdminHeaderScheduleBadge } from "@/lib/hours";
 import type { SiteSettings } from "@/lib/settings";
@@ -58,7 +59,8 @@ export default function AdminShell({
   });
 
   const prevCountRef = useRef<number | null>(null);
-  const email = useAdminUserEmail();
+  const { email, role, isOwner, isStaff } = useAdminUser();
+  const visibleNavGroups = getVisibleNavGroups(role);
   const pathname = usePathname();
 
   const activeItem =
@@ -291,7 +293,7 @@ export default function AdminShell({
             </div>
 
             <div className="space-y-5">
-              {ADMIN_NAV_GROUPS.map((group) => (
+              {visibleNavGroups.map((group) => (
                 <div key={group.name} className="space-y-1.5">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)] px-3 mb-1">
                     {group.name}
@@ -434,7 +436,7 @@ export default function AdminShell({
 
         {/* Grouped Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-4">
-          {ADMIN_NAV_GROUPS.map((group) => (
+          {visibleNavGroups.map((group) => (
             <div key={group.name} className="space-y-1">
               {!collapsed && (
                 <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)] px-3 py-1 opacity-70">
@@ -478,11 +480,24 @@ export default function AdminShell({
         {/* Bottom User & System Controls */}
         <div className="p-3 border-t border-[var(--dash-border)] shrink-0 space-y-1">
           {!collapsed && email && (
-            <div
-              className="px-3 py-1 text-xs text-[var(--dash-muted)] truncate mb-1"
-              title={email}
-            >
-              {email}
+            <div className="px-3 py-1 mb-1">
+              <div
+                className="text-xs font-medium text-[var(--dash-text)] truncate"
+                title={email}
+              >
+                {email}
+              </div>
+              <div className="mt-0.5">
+                <span
+                  className={`inline-block px-1.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
+                    isOwner
+                      ? "bg-[var(--dash-accent-subtle)] text-[var(--dash-accent)]"
+                      : "bg-[var(--dash-surface-3)] text-[var(--dash-muted)]"
+                  }`}
+                >
+                  {isOwner ? "Dueño" : "Staff"}
+                </span>
+              </div>
             </div>
           )}
           <Link

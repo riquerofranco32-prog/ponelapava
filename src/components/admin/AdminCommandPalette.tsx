@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Product } from "@/types";
+import { useAdminUser } from "@/context/AdminUserContext";
 
 interface CommandItem {
   id: string;
@@ -39,6 +40,7 @@ export default function AdminCommandPalette({
   onClose,
 }: AdminCommandPaletteProps) {
   const router = useRouter();
+  const { isStaff } = useAdminUser();
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -240,9 +242,18 @@ export default function AdminCommandPalette({
       },
     }));
 
+  const effectiveNavCommands = isStaff
+    ? navCommands.filter(
+        (c) =>
+          c.id !== "nav-coupons" &&
+          c.id !== "nav-settings" &&
+          c.id !== "nav-reports"
+      )
+    : navCommands;
+
   const allFiltered: CommandItem[] = query.trim()
     ? [
-        ...navCommands.filter((c) =>
+        ...effectiveNavCommands.filter((c) =>
           c.title.toLowerCase().includes(query.toLowerCase()) ||
           c.subtitle?.toLowerCase().includes(query.toLowerCase()),
         ),
@@ -251,7 +262,7 @@ export default function AdminCommandPalette({
           c.title.toLowerCase().includes(query.toLowerCase()),
         ),
       ]
-    : [...navCommands, ...actionCommands];
+    : [...effectiveNavCommands, ...actionCommands];
 
   // Handle keyboard navigation
   function handleInputKeyDown(e: React.KeyboardEvent) {

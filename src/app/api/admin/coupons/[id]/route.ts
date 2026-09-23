@@ -10,15 +10,21 @@ interface RouteParams {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
   const body = await request.json().catch(() => null);
-  return handle(`PUT /api/admin/coupons/${id}`, () =>
-    updateCoupon(id, validateCoupon(body)),
+  return handle(
+    `PUT /api/admin/coupons/${id}`,
+    () => updateCoupon(id, validateCoupon(body)),
+    { requiredRole: "owner" },
   );
 }
 
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  return handle(`DELETE /api/admin/coupons/${id}`, async () => {
-    await deleteCoupon(id);
-    return { ok: true };
-  });
+  return handle(
+    `DELETE /api/admin/coupons/${id}`,
+    async () => {
+      await deleteCoupon(id);
+      return { ok: true };
+    },
+    { requiredRole: "owner" },
+  );
 }

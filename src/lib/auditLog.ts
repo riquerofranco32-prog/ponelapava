@@ -8,7 +8,10 @@ export type AuditAction =
   | "customer_notes_update"
   | "customer_tags_update"
   | "customer_follow_up_update"
-  | "order_payment_status_change";
+  | "order_payment_status_change"
+  | "team_member_invite"
+  | "team_member_role_change"
+  | "team_member_toggle_active";
 
 interface LogAuditParams {
   actorEmail: string;

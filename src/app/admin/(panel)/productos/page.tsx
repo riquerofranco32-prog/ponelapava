@@ -14,8 +14,10 @@ import { ProductDesktopRow } from "@/components/admin/products/ProductDesktopRow
 import { ProductMobileCard } from "@/components/admin/products/ProductMobileCard";
 import { InventoryValuationWidget } from "@/components/admin/products/InventoryValuationWidget";
 import { useAdminProducts } from "@/lib/useAdminProducts";
+import { useAdminUser } from "@/context/AdminUserContext";
 
 export default function AdminProductosPage() {
+  const { isOwner } = useAdminUser();
   const {
     products,
     categories,
@@ -200,14 +202,16 @@ export default function AdminProductosPage() {
             </option>
           ))}
         </select>
-        <AdminButton
-          variant="secondary"
-          onClick={() => setBulkPriceOpen(true)}
-          className="whitespace-nowrap"
-        >
-          <Zap size={14} className="text-[var(--dash-accent)] mr-1" />
-          Ajuste Masivo
-        </AdminButton>
+        {isOwner && (
+          <AdminButton
+            variant="secondary"
+            onClick={() => setBulkPriceOpen(true)}
+            className="whitespace-nowrap"
+          >
+            <Zap size={14} className="text-[var(--dash-accent)] mr-1" />
+            Ajuste Masivo
+          </AdminButton>
+        )}
         <AdminButton onClick={() => setCreating(true)} className="whitespace-nowrap">
           <Plus size={15} />
           Nuevo producto
@@ -235,7 +239,7 @@ export default function AdminProductosPage() {
           data={filteredProducts}
           onEdit={setEditingProduct}
           onDuplicate={handleDuplicate}
-          onDelete={setDeletingProduct}
+          onDelete={isOwner ? setDeletingProduct : undefined}
           onStockChange={handleStockChange}
         />
       )}
@@ -306,7 +310,7 @@ function ProductsTable({
   data: Product[];
   onEdit: (product: Product) => void;
   onDuplicate?: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  onDelete?: (product: Product) => void;
   onStockChange: (product: Product, next: number) => Promise<void>;
 }) {
   return (

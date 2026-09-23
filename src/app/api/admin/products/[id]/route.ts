@@ -77,5 +77,5 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
 
     revalidateProduct(id);
     return { ok: true };
-  });
+  }, { requiredRole: "owner" });
 }

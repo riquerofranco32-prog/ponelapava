@@ -25,6 +25,7 @@ import Badge from "@/components/ui/Badge";
 import ProductCard from "@/components/catalog/ProductCard";
 import { whatsappChatUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { getProductPaymentMethodsLabel } from "@/lib/settings";
 
 interface ProductDetailProps {
   product: Product;
@@ -242,10 +243,8 @@ export default function ProductDetail({
               <div className="flex flex-wrap items-center gap-2 text-xs text-pava-brown-mid/80 pt-2 border-t border-pava-brown/8">
                 <span className="inline-flex items-center gap-1.5 font-semibold text-pava-brown">
                   <CreditCard size={13} className="text-pava-green" />
-                  Transferencia, Mercado Pago
+                  {getProductPaymentMethodsLabel(settings.paymentMethods)}
                 </span>
-                <span className="text-pava-brown/30">•</span>
-                <span>Efectivo al retirar en el local</span>
               </div>
             </div>
 
@@ -549,7 +548,7 @@ export default function ProductDetail({
                 </div>
                 <div className="text-xs">
                   <span className="font-bold text-pava-brown block">Medios de pago</span>
-                  <span className="text-pava-brown-mid/70">Transferencia, Mercado Pago o efectivo en el local</span>
+                  <span className="text-pava-brown-mid/70">{getProductPaymentMethodsLabel(settings.paymentMethods)}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">

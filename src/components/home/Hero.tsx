@@ -7,9 +7,13 @@ import { Sparkles } from "lucide-react";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { LandingHero } from "@/types/landing";
 import { DEFAULT_LANDING_CONTENT } from "@/lib/landing";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { getStorePaymentMethodsSummary } from "@/lib/settings";
 
 export default function Hero({ content }: { content?: LandingHero }) {
   const hero = content || DEFAULT_LANDING_CONTENT.hero;
+  const settings = useSiteSettings();
+  const paymentSummary = getStorePaymentMethodsSummary(settings.paymentMethods);
   const [loaded, setLoaded] = useState(false);
   const [allowVideo, setAllowVideo] = useState(false);
   const bgRef = useRef<HTMLDivElement>(null);
@@ -259,7 +263,7 @@ export default function Hero({ content }: { content?: LandingHero }) {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/40 bg-pava-gold/15 px-3.5 py-1.5 backdrop-blur-md text-xs font-bold text-pava-gold shadow-lg shadow-pava-gold/10">
               <span className="text-pava-gold text-xs">💳</span>
-              <span>Transferencia o Mercado Pago</span>
+              <span>{paymentSummary}</span>
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-pava-gold/30 bg-pava-green-dark/60 px-3.5 py-1.5 backdrop-blur-md text-xs text-pava-cream shadow-lg shadow-black/20 transition-transform duration-300 hover:scale-105 hover:border-pava-gold/60">
               <span className="flex text-pava-gold text-xs tracking-tight" aria-hidden="true">★★★★★</span>

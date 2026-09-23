@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronDown, HelpCircle, MessageCircle, CreditCard, Truck, Sparkles, ShieldCheck } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { whatsappChatUrl } from "@/lib/whatsapp";
@@ -20,13 +20,30 @@ const CATEGORIES = [
   { id: "garantia", label: "Garantía & Local", icon: ShieldCheck },
 ] as const;
 
-const FAQS: FAQItem[] = [
-  {
-    category: "pagos",
-    question: "¿Qué medios de pago aceptan?",
-    answer:
-      "Transferencia bancaria, Mercado Pago y efectivo al retirar en nuestro local de Catriel. Cuando confirmás el pedido por WhatsApp te pasamos los datos para transferir o el link de Mercado Pago. Si desde tu Mercado Pago pagás con una tarjeta en cuotas, los intereses los define tu tarjeta.",
-  },
+function buildFaqs(settings: { paymentMethods?: string[] }): FAQItem[] {
+  const methods = settings.paymentMethods && settings.paymentMethods.length > 0
+    ? settings.paymentMethods
+    : ["transfer", "cash"];
+
+  const paymentDescriptions: string[] = [];
+  if (methods.includes("transfer")) paymentDescriptions.push("transferencia bancaria");
+  if (methods.includes("cash")) paymentDescriptions.push("efectivo al retirar en nuestro local de Catriel");
+  if (methods.includes("card")) paymentDescriptions.push("Mercado Pago");
+
+  const summary = paymentDescriptions.length > 1
+    ? `${paymentDescriptions.slice(0, -1).join(", ")} y ${paymentDescriptions[paymentDescriptions.length - 1]}`
+    : paymentDescriptions[0] || "transferencia bancaria";
+
+  const paymentAnswer = methods.includes("card")
+    ? `Aceptamos ${summary}. Cuando confirmás el pedido por WhatsApp te pasamos los datos para transferir o el link de pago.`
+    : `Aceptamos ${summary}. Cuando confirmás el pedido por WhatsApp te pasamos los datos para transferir y coordinar tu pedido.`;
+
+  return [
+    {
+      category: "pagos",
+      question: "¿Qué medios de pago aceptan?",
+      answer: paymentAnswer,
+    },
   {
     category: "pagos",
     question: "¿Cómo es el proceso de compra directa por WhatsApp?",
@@ -63,14 +80,16 @@ const FAQS: FAQItem[] = [
     answer:
       "Todos nuestros mates de calabaza y cuero cuentan con garantía artesanal sobre costuras y virolas de alpaca. Los termos Stanley y Lumilagro cuentan con garantía oficial de rendimiento térmico. Te asesoramos siempre ante cualquier consulta.",
   },
-];
+  ];
+}
 
 export default function FAQSection() {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const settings = useSiteSettings();
+  const faqs = useMemo(() => buildFaqs(settings), [settings]);
 
-  const filteredFaqs = activeCat === "all" ? FAQS : FAQS.filter((f) => f.category === activeCat);
+  const filteredFaqs = activeCat === "all" ? faqs : faqs.filter((f) => f.category === activeCat);
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -79,7 +98,7 @@ export default function FAQSection() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQS.map((faq) => ({
+    mainEntity: faqs.map((faq) => ({
       "@type": "Question",
       name: faq.question,
       acceptedAnswer: {

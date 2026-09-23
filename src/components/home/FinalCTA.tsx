@@ -87,12 +87,22 @@ export default function FinalCTA() {
               </div>
 
               <h3 className="font-display text-2xl font-bold text-pava-cream">
-                Transferencia, Mercado Pago <br />
-                <span className="text-pava-gold font-normal text-lg">o efectivo en el local</span>
+                {settings.paymentMethods?.includes("card") ? (
+                  <>Transferencia o Mercado Pago <br /></>
+                ) : (
+                  <>Transferencia Bancaria <br /></>
+                )}
+                <span className="text-pava-gold font-normal text-lg">
+                  {(settings.paymentMethods?.includes("cash") ?? true)
+                    ? "o efectivo en el local"
+                    : "coordinado por WhatsApp"}
+                </span>
               </h3>
 
               <p className="mt-2 text-xs leading-relaxed text-pava-cream/75">
-                Coordinamos todo por WhatsApp: te pasamos los datos para transferir o el link de Mercado Pago, y confirmás cuando quieras.
+                {settings.paymentMethods?.includes("card")
+                  ? "Coordinamos todo por WhatsApp: te pasamos los datos para transferir o el link de Mercado Pago, y confirmás cuando quieras."
+                  : "Coordinamos todo por WhatsApp: te pasamos los datos para transferir y coordinar tu pedido cuando quieras."}
               </p>
 
               <div className="mt-5 flex flex-col gap-2 rounded-control border border-dashed border-pava-gold/50 bg-black/30 p-3.5 text-xs text-pava-cream/85">

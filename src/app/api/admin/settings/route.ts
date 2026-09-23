@@ -50,9 +50,28 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const settings = await updateSiteSettings(
-      input as unknown as Parameters<typeof updateSiteSettings>[0],
-    );
+    const paymentMethodsRaw = body?.paymentMethods;
+    let paymentMethods: ("transfer" | "cash" | "card")[] = [];
+    if (Array.isArray(paymentMethodsRaw)) {
+      const allowed = new Set(["transfer", "cash", "card"]);
+      for (const m of paymentMethodsRaw) {
+        if (typeof m !== "string" || !allowed.has(m)) {
+          throw new ValidationError(`Método de pago inválido: "${m}"`);
+        }
+      }
+      paymentMethods = Array.from(new Set(paymentMethodsRaw)) as ("transfer" | "cash" | "card")[];
+    } else {
+      paymentMethods = ["transfer", "cash"];
+    }
+
+    if (paymentMethods.length === 0) {
+      throw new ValidationError("Debe haber al menos un medio de pago habilitado");
+    }
+
+    const settings = await updateSiteSettings({
+      ...input,
+      paymentMethods,
+    } as Parameters<typeof updateSiteSettings>[0]);
 
     const supabase = await createSupabaseServerClient();
     const { data } = await supabase.auth.getUser();
@@ -60,7 +79,7 @@ export async function PUT(request: NextRequest) {
       actorEmail: data.user?.email ?? "desconocido",
       action: "settings_update",
       entityType: "settings",
-      details: { ...input },
+      details: { ...input, paymentMethods },
     });
 
     revalidatePath("/", "layout");

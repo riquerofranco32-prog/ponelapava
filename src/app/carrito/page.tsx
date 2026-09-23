@@ -27,12 +27,9 @@ import GiftMessageModal from "@/components/cart/GiftMessageModal";
 import type { Product, ProductStatus } from "@/types";
 import { computeOrderTotals } from "@/lib/pricing";
 
-// Lo que el local cobra de verdad. El id "card" es el valor histórico del
-// tercer medio y se mantiene para no romper el registro de pedidos; de cara
-// al cliente es Mercado Pago. No hay cuotas ni descuento por medio de pago:
-// si el comprador paga con tarjeta desde su Mercado Pago, los intereses
-// corren por su cuenta.
-const PAYMENT_OPTIONS = [
+// Medios de pago configurados en settings. De cara al cliente el método histórico
+// "card" se muestra como Mercado Pago (sin cuotas garantizadas).
+const ALL_PAYMENT_OPTIONS = [
   {
     id: "transfer" as const,
     label: "Transferencia",
@@ -40,16 +37,16 @@ const PAYMENT_OPTIONS = [
     icon: Banknote,
   },
   {
-    id: "card" as const,
-    label: "Mercado Pago",
-    hint: "Te pasamos el link",
-    icon: CreditCard,
-  },
-  {
     id: "cash" as const,
     label: "Efectivo",
     hint: "Al retirar en el local",
     icon: Store,
+  },
+  {
+    id: "card" as const,
+    label: "Mercado Pago",
+    hint: "Te pasamos el link",
+    icon: CreditCard,
   },
 ];
 
@@ -110,12 +107,27 @@ export default function CartPage() {
     })),
   });
 
-  // El efectivo sólo existe si el comprador va al local. Se deriva en vez de
-  // sincronizarse con un efecto: si eligió efectivo y después cambia a envío,
-  // la opción deja de aplicar sin que haya que reescribir el estado.
-  const allowsCash = deliveryMethod === "pickup";
+  const enabledPaymentMethods =
+    settings.paymentMethods && settings.paymentMethods.length > 0
+      ? settings.paymentMethods
+      : (["transfer", "cash"] as const);
+
+  const allowsCash =
+    deliveryMethod === "pickup" && enabledPaymentMethods.includes("cash");
+
+  const visiblePaymentOptions = ALL_PAYMENT_OPTIONS.filter(
+    (opt) => enabledPaymentMethods.includes(opt.id) && (opt.id !== "cash" || allowsCash),
+  );
+
+  const defaultPaymentOption =
+    visiblePaymentOptions.find((o) => o.id !== "cash")?.id ||
+    visiblePaymentOptions[0]?.id ||
+    "transfer";
+
   const effectivePayment =
-    paymentMethod === "cash" && !allowsCash ? "transfer" : paymentMethod;
+    !enabledPaymentMethods.includes(paymentMethod) || (paymentMethod === "cash" && !allowsCash)
+      ? defaultPaymentOption
+      : paymentMethod;
 
   // Re-check price/stock/status against the DB on load — the cart snapshot
   // in localStorage can be days old. Runs once against the items present
@@ -550,11 +562,12 @@ export default function CartPage() {
                   2. Forma de pago
                 </label>
                 <div
-                  className={`grid gap-2 ${allowsCash ? "grid-cols-3" : "grid-cols-2"}`}
+                  className="grid gap-2"
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.max(1, visiblePaymentOptions.length)}, minmax(0, 1fr))`,
+                  }}
                 >
-                  {PAYMENT_OPTIONS.filter(
-                    (opt) => opt.id !== "cash" || allowsCash,
-                  ).map((opt) => {
+                  {visiblePaymentOptions.map((opt) => {
                     const Icon = opt.icon;
                     const isSelected = effectivePayment === opt.id;
                     return (

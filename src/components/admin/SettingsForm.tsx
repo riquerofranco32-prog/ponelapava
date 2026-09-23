@@ -182,6 +182,53 @@ export default function SettingsForm() {
           </AdminField>
         </div>
 
+        <AdminField label="Medios de pago habilitados en la tienda">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+              <input
+                type="checkbox"
+                checked={settings.paymentMethods?.includes("transfer") ?? true}
+                onChange={(e) => {
+                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const next = e.target.checked
+                    ? [...current, "transfer"]
+                    : current.filter((m) => m !== "transfer");
+                  update("paymentMethods", next as typeof settings.paymentMethods);
+                }}
+              />
+              <span>💳 Transferencia bancaria</span>
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+              <input
+                type="checkbox"
+                checked={settings.paymentMethods?.includes("cash") ?? true}
+                onChange={(e) => {
+                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const next = e.target.checked
+                    ? [...current, "cash"]
+                    : current.filter((m) => m !== "cash");
+                  update("paymentMethods", next as typeof settings.paymentMethods);
+                }}
+              />
+              <span>💵 Efectivo en el local</span>
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: "var(--dash-text)" }}>
+              <input
+                type="checkbox"
+                checked={settings.paymentMethods?.includes("card") ?? false}
+                onChange={(e) => {
+                  const current = settings.paymentMethods || ["transfer", "cash"];
+                  const next = e.target.checked
+                    ? [...current, "card"]
+                    : current.filter((m) => m !== "card");
+                  update("paymentMethods", next as typeof settings.paymentMethods);
+                }}
+              />
+              <span>💳 Mercado Pago (link de pago)</span>
+            </label>
+          </div>
+        </AdminField>
+
         {error && (
           <p style={{ fontSize: 13, color: "var(--dash-danger)" }}>{error}</p>
         )}

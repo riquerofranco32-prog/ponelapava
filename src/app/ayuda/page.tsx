@@ -25,30 +25,44 @@ interface FAQItem {
   answer: string;
 }
 
-const FAQS: FAQItem[] = [
-  // Envíos
-  {
-    id: "env-1",
-    category: "envios",
-    question: "¿Cómo realizan los envíos y cuánto sale?",
-    answer:
-      "Despachamos a todo el país. El costo del envío lo coordinamos por WhatsApp al confirmar tu pedido, según tu localidad. También podés retirar sin cargo en nuestro local de Catriel.",
-  },
-  {
-    id: "env-2",
-    category: "envios",
-    question: "¿Cómo hago el seguimiento de mi pedido?",
-    answer:
-      "Podés ingresar a la sección 'Seguimiento' de la web con tu número de pedido o tu teléfono para ver en qué estado está. Cualquier novedad también te la contamos por WhatsApp.",
-  },
-  // Pagos
-  {
-    id: "pag-1",
-    category: "pagos",
-    question: "¿Qué formas de pago aceptan?",
-    answer:
-      "Transferencia bancaria, Mercado Pago y efectivo al retirar en nuestro local de Catriel. Coordinamos el pago por WhatsApp cuando confirmás el pedido. Si pagás desde tu Mercado Pago con una tarjeta en cuotas, los intereses los define tu tarjeta y corren por tu cuenta.",
-  },
+function buildHelpFaqs(settings: { paymentMethods?: string[] }): FAQItem[] {
+  const methods = settings.paymentMethods || ["transfer", "cash"];
+  const paymentDescriptions: string[] = [];
+  if (methods.includes("transfer")) paymentDescriptions.push("transferencia bancaria");
+  if (methods.includes("cash")) paymentDescriptions.push("efectivo al retirar en nuestro local de Catriel");
+  if (methods.includes("card")) paymentDescriptions.push("Mercado Pago");
+
+  const summary = paymentDescriptions.length > 1
+    ? `${paymentDescriptions.slice(0, -1).join(", ")} y ${paymentDescriptions[paymentDescriptions.length - 1]}`
+    : paymentDescriptions[0] || "transferencia bancaria";
+
+  const paymentAnswer = methods.includes("card")
+    ? `Aceptamos ${summary}. Coordinamos el pago por WhatsApp cuando confirmás el pedido pasándote los datos para transferir o el link de pago.`
+    : `Aceptamos ${summary}. Coordinamos el pago por WhatsApp cuando confirmás el pedido pasándote los datos de transferencia.`;
+
+  return [
+    // Envíos
+    {
+      id: "env-1",
+      category: "envios",
+      question: "¿Cómo realizan los envíos y cuánto sale?",
+      answer:
+        "Despachamos a todo el país. El costo del envío lo coordinamos por WhatsApp al confirmar tu pedido, según tu localidad. También podés retirar sin cargo en nuestro local de Catriel.",
+    },
+    {
+      id: "env-2",
+      category: "envios",
+      question: "¿Cómo hago el seguimiento de mi pedido?",
+      answer:
+        "Podés ingresar a la sección 'Seguimiento' de la web con tu número de pedido o tu teléfono para ver en qué estado está. Cualquier novedad también te la contamos por WhatsApp.",
+    },
+    // Pagos
+    {
+      id: "pag-1",
+      category: "pagos",
+      question: "¿Qué formas de pago aceptan?",
+      answer: paymentAnswer,
+    },
   // Curado
   {
     id: "cur-1",
@@ -100,8 +114,9 @@ const FAQS: FAQItem[] = [
     question: "¿Realizan regalos empresariales o ventas corporativas?",
     answer:
       "Sí, armamos cajas de regalo personalizadas con termos, mates y yerbas seleccionadas. Escribinos directamente por WhatsApp para solicitar cotización y asesoramiento corporativo.",
-  },
-];
+    },
+  ];
+}
 
 const CATEGORIES = [
   { id: "all", label: "Todas las preguntas", icon: HelpCircle },
@@ -124,9 +139,11 @@ export default function HelpCenterPage() {
     );
   };
 
+  const faqs = useMemo(() => buildHelpFaqs(settings), [settings]);
+
   const filteredFaqs = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return FAQS.filter((faq) => {
+    return faqs.filter((faq) => {
       const matchesCategory =
         activeCategory === "all" || faq.category === activeCategory;
       const matchesSearch =
@@ -135,7 +152,7 @@ export default function HelpCenterPage() {
         faq.answer.toLowerCase().includes(q);
       return matchesCategory && matchesSearch;
     });
-  }, [search, activeCategory]);
+  }, [search, activeCategory, faqs]);
 
   return (
     <div className="min-h-screen bg-pava-cream">

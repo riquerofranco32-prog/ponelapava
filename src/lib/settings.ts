@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
+export type AvailablePaymentMethod = "transfer" | "cash" | "card";
+
 export interface SiteSettings {
   businessName: string;
   whatsappNumber: string;
@@ -9,6 +11,7 @@ export interface SiteSettings {
   addressCity: string;
   hoursWeekday: string;
   hoursSaturday: string;
+  paymentMethods: AvailablePaymentMethod[];
 }
 
 interface SettingsRow {
@@ -19,9 +22,15 @@ interface SettingsRow {
   address_city: string;
   hours_weekday: string;
   hours_saturday: string;
+  payment_methods?: string[] | null;
 }
 
 function fromRow(row: SettingsRow): SiteSettings {
+  const rawMethods = Array.isArray(row.payment_methods) ? row.payment_methods : [];
+  const validMethods = rawMethods.filter(
+    (m): m is AvailablePaymentMethod => m === "transfer" || m === "cash" || m === "card",
+  );
+
   return {
     businessName: row.business_name,
     whatsappNumber: row.whatsapp_number,
@@ -30,6 +39,7 @@ function fromRow(row: SettingsRow): SiteSettings {
     addressCity: row.address_city,
     hoursWeekday: row.hours_weekday,
     hoursSaturday: row.hours_saturday,
+    paymentMethods: validMethods.length > 0 ? validMethods : ["transfer", "cash"],
   };
 }
 
@@ -51,22 +61,64 @@ export type SiteSettingsInput = SiteSettings;
 export async function updateSiteSettings(
   input: SiteSettingsInput,
 ): Promise<SiteSettings> {
-  const { data, error } = await supabaseAdmin()
+  const payload: Record<string, unknown> = {
+    business_name: input.businessName,
+    whatsapp_number: input.whatsappNumber,
+    whatsapp_display: input.whatsappDisplay,
+    address_line: input.addressLine,
+    address_city: input.addressCity,
+    hours_weekday: input.hoursWeekday,
+    hours_saturday: input.hoursSaturday,
+    payment_methods: input.paymentMethods || ["transfer", "cash"],
+  };
+
+  const admin = supabaseAdmin();
+  const { data, error } = await admin
     .from("site_settings")
-    .update({
-      business_name: input.businessName,
-      whatsapp_number: input.whatsappNumber,
-      whatsapp_display: input.whatsappDisplay,
-      address_line: input.addressLine,
-      address_city: input.addressCity,
-      hours_weekday: input.hoursWeekday,
-      hours_saturday: input.hoursSaturday,
-    })
+    .update(payload)
     .eq("id", "default")
     .select()
     .single();
-  if (error) throw error;
+
+  if (error) {
+    if ((error.code === "42703" || error.code === "PGRST204") && payload.payment_methods) {
+      delete payload.payment_methods;
+      const retry = await admin
+        .from("site_settings")
+        .update(payload)
+        .eq("id", "default")
+        .select()
+        .single();
+      if (retry.error) throw retry.error;
+      return fromRow(retry.data as SettingsRow);
+    }
+    throw error;
+  }
   return fromRow(data as SettingsRow);
+}
+
+export function getProductPaymentMethodsLabel(
+  paymentMethods?: AvailablePaymentMethod[],
+): string {
+  const methods = paymentMethods && paymentMethods.length > 0 ? paymentMethods : ["transfer", "cash"];
+  const filtered = methods.filter((m) => m === "cash" || m === "transfer");
+  const parts: string[] = [];
+  if (filtered.includes("cash")) parts.push("Efectivo");
+  if (filtered.includes("transfer")) parts.push("Transferencia");
+  return parts.join(" · ") || "Efectivo · Transferencia";
+}
+
+export function getStorePaymentMethodsSummary(
+  paymentMethods?: AvailablePaymentMethod[],
+): string {
+  const methods = paymentMethods && paymentMethods.length > 0 ? paymentMethods : ["transfer", "cash"];
+  const names: string[] = [];
+  if (methods.includes("transfer")) names.push("Transferencia");
+  if (methods.includes("card")) names.push("Mercado Pago");
+  if (methods.includes("cash")) names.push("Efectivo");
+  if (names.length <= 1) return names[0] || "Transferencia";
+  if (names.length === 2) return `${names[0]} o ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")} o ${names[names.length - 1]}`;
 }
 
 export const GOOGLE_MAPS_PLACE_URL =

@@ -10,12 +10,13 @@ import {
   ArrowRight,
   CheckCircle,
   CreditCard,
-  MapPin,
   ShieldCheck,
 } from "lucide-react";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { BorderBeam } from "@/components/ui/BorderBeam";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { getStorePaymentMethodsSummary } from "@/lib/settings";
 
 interface StepItem {
   number: string;
@@ -68,6 +69,8 @@ const STEPS: StepItem[] = [
 
 export default function HowToBuy() {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+  const settings = useSiteSettings();
+  const paymentSummary = getStorePaymentMethodsSummary(settings.paymentMethods);
 
   return (
     <section
@@ -105,7 +108,7 @@ export default function HowToBuy() {
           <div className="hidden lg:flex items-center gap-6 bg-white/5 border border-white/10 px-5 py-3 rounded-control backdrop-blur-md">
             <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">
               <CreditCard size={16} className="text-pava-gold" />
-              <span>Transferencia o Mercado Pago</span>
+              <span>{paymentSummary}</span>
             </div>
             <div className="h-4 w-px bg-white/20" />
             <div className="flex items-center gap-2.5 text-xs text-pava-cream/90">

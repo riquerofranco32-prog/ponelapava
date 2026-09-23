@@ -168,9 +168,15 @@ export default async function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-pava-cream/70 text-center md:text-left">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
               <span className="font-semibold text-pava-cream mr-1">Medios de pago:</span>
-              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Transferencia</span>
-              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Mercado Pago</span>
-              <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Efectivo en local</span>
+              {(settings.paymentMethods?.includes("transfer") ?? true) && (
+                <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Transferencia</span>
+              )}
+              {settings.paymentMethods?.includes("card") && (
+                <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Mercado Pago</span>
+              )}
+              {(settings.paymentMethods?.includes("cash") ?? true) && (
+                <span className="rounded-chip bg-pava-cream/10 border border-pava-cream/15 px-2.5 py-1 text-[11px]">Efectivo en local</span>
+              )}
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-end gap-2">
               <span className="font-semibold text-pava-cream mr-1">Entrega:</span>

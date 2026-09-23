@@ -1,5 +1,8 @@
+"use client";
+
 import { CreditCard, Sparkles, Truck, MapPin, Star, ShieldCheck } from "lucide-react";
 import OpenStatusBadge from "@/components/ui/OpenStatusBadge";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface TrustItemData {
   icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
@@ -8,44 +11,59 @@ interface TrustItemData {
   badge?: string;
 }
 
-const items: TrustItemData[] = [
-  {
-    icon: CreditCard,
-    title: "Transferencia o Mercado Pago",
-    subtitle: "Coordinamos el pago por WhatsApp",
-    badge: "PAGO SIMPLE",
-  },
-  {
-    icon: Sparkles,
-    title: "Efectivo en el Local",
-    subtitle: "Pagás al retirar tu pedido",
-    badge: "EFECTIVO",
-  },
-  {
-    icon: Truck,
-    title: "Envíos a todo el país",
-    subtitle: "Coordinamos el costo por WhatsApp",
-    badge: "ENVÍOS",
-  },
-  {
-    icon: MapPin,
-    title: "Local Oficial en Catriel",
-    subtitle: null,
-    badge: "RETIRO IN SITU",
-  },
-  {
-    icon: Star,
-    title: "Calificación 5.0 en Google",
-    subtitle: "Reseñas 100% reales de clientes",
-    badge: "★★★★★",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Garantía Artesanal",
-    subtitle: "Calabaza gruesa y alpaca maciza",
-    badge: "CALIDAD",
-  },
-];
+function buildTrustItems(settings: { paymentMethods?: string[] }): TrustItemData[] {
+  const methods = settings.paymentMethods || ["transfer", "cash"];
+  const paymentTitle = methods.includes("card")
+    ? "Transferencia o Mercado Pago"
+    : "Transferencia bancaria";
+
+  const trustItems: TrustItemData[] = [
+    {
+      icon: CreditCard,
+      title: paymentTitle,
+      subtitle: "Coordinamos el pago por WhatsApp",
+      badge: "PAGO SIMPLE",
+    },
+  ];
+
+  if (methods.includes("cash")) {
+    trustItems.push({
+      icon: Sparkles,
+      title: "Efectivo en el Local",
+      subtitle: "Pagás al retirar tu pedido",
+      badge: "EFECTIVO",
+    });
+  }
+
+  trustItems.push(
+    {
+      icon: Truck,
+      title: "Envíos a todo el país",
+      subtitle: "Coordinamos el costo por WhatsApp",
+      badge: "ENVÍOS",
+    },
+    {
+      icon: MapPin,
+      title: "Local Oficial en Catriel",
+      subtitle: null,
+      badge: "RETIRO IN SITU",
+    },
+    {
+      icon: Star,
+      title: "Calificación 5.0 en Google",
+      subtitle: "Reseñas 100% reales de clientes",
+      badge: "★★★★★",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Garantía Artesanal",
+      subtitle: "Calabaza gruesa y alpaca maciza",
+      badge: "CALIDAD",
+    },
+  );
+
+  return trustItems;
+}
 
 function TrustItem({ icon: Icon, title, subtitle, badge }: TrustItemData) {
   return (
@@ -83,6 +101,9 @@ function TrustItem({ icon: Icon, title, subtitle, badge }: TrustItemData) {
 }
 
 export default function TrustBar() {
+  const settings = useSiteSettings();
+  const items = buildTrustItems(settings);
+
   return (
     <section className="overflow-hidden border-y border-pava-gold/20 bg-[#0f1d13] py-4.5 shadow-inner">
       {/* Duplicated track for a seamless infinite loop */}

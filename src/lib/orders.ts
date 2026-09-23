@@ -3,6 +3,7 @@ import { Order, OrderItem, ProductStatus } from "@/types";
 import { STORE_TIMEZONE } from "@/lib/hours";
 import { isOrderStatus } from "@/lib/orderStatus";
 import { checkCoupon } from "@/lib/coupons";
+import { getSiteSettings } from "@/lib/settings";
 import {
   computeOrderTotals,
   DeliveryMethod,
@@ -142,6 +143,19 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
       item.quantity > MAX_QUANTITY_PER_ITEM
     ) {
       throw new OrderValidationError("Cantidades del pedido inválidas.");
+    }
+  }
+
+  if (input.paymentMethod) {
+    const settings = await getSiteSettings();
+    const enabled = settings.paymentMethods && settings.paymentMethods.length > 0
+      ? settings.paymentMethods
+      : ["transfer", "cash"];
+    if (!enabled.includes(input.paymentMethod)) {
+      throw new OrderValidationError(`El medio de pago "${input.paymentMethod}" no está habilitado.`);
+    }
+    if (input.paymentMethod === "cash" && input.deliveryMethod === "delivery") {
+      throw new OrderValidationError("El pago en efectivo solo está disponible para retiro en el local.");
     }
   }
 

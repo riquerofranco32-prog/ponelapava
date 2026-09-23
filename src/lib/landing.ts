@@ -19,7 +19,7 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
   announcements: [
     {
       id: "pagos",
-      highlight: "Transferencia o Mercado Pago",
+      highlight: "Transferencia bancaria",
       text: "y efectivo al retirar en el local",
     },
     {

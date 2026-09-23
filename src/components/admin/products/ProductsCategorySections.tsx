@@ -53,7 +53,7 @@ export function ProductsCategorySections({
           <div
             key={category.id}
             id={`section-${category.slug}`}
-            className="rounded-2xl border border-[var(--dash-border)] bg-[var(--dash-surface-1)] overflow-hidden shadow-xs transition-all"
+            className="rounded-2xl border border-[var(--dash-border)] bg-[var(--dash-surface)] overflow-hidden shadow-xs transition-all"
           >
             {/* Section Header */}
             <div className="p-4 sm:px-5 flex items-center justify-between gap-3 bg-[var(--dash-surface-2)]/60 border-b border-[var(--dash-border)]">
@@ -184,7 +184,7 @@ export function ProductsCategorySections({
 
       {/* Uncategorized products section if any */}
       {uncategorizedProducts.length > 0 && (
-        <div className="rounded-2xl border border-[var(--dash-warning)]/30 bg-[var(--dash-surface-1)] overflow-hidden">
+        <div className="rounded-2xl border border-[var(--dash-warning)]/30 bg-[var(--dash-surface)] overflow-hidden">
           <div className="p-4 sm:px-5 flex items-center justify-between gap-3 bg-[var(--dash-warning-bg)]/20 border-b border-[var(--dash-warning)]/20">
             <div className="flex items-center gap-2">
               <span className="text-base">⚠️</span>

@@ -41,7 +41,7 @@ export default function AdminProductosPage() {
   const [catalogDisplayMode, setCatalogDisplayMode] = useState<"table" | "sections">("table");
   const [searchProduct, setSearchProduct] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out" | "available">("all");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out" | "available" | "featured">("all");
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
   const [newProductCategory, setNewProductCategory] = useState<string | undefined>(undefined);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -80,7 +80,7 @@ export default function AdminProductosPage() {
     setCloningProduct(cloned);
   }
 
-  // Support ?action=new, ?category=..., ?view=sections, and ?search=...
+  // Support ?action=new, ?category=..., ?view=sections, ?search=..., ?stock=..., and ?featured=true
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("action") === "new") {
@@ -99,6 +99,13 @@ export default function AdminProductosPage() {
     const q = params.get("search");
     if (q) {
       setSearchProduct(q);
+    }
+    const stockParam = params.get("stock");
+    if (stockParam === "low" || stockParam === "out" || stockParam === "available") {
+      setStockFilter(stockParam);
+    }
+    if (params.get("featured") === "true") {
+      setStockFilter("featured");
     }
   }, []);
 
@@ -141,7 +148,7 @@ export default function AdminProductosPage() {
   const lowStockCount = products.filter(
     (p) => p.stock > 0 && p.stock <= (p.minStock ?? 5),
   ).length;
-  const outOfStockCount = products.filter((p) => p.stock === 0).length;
+  const outOfStockCount = products.filter((p) => p.stock === 0 || p.status === "out_of_stock").length;
   const inStockCount = products.filter((p) => p.stock > 0).length;
   const criticalReplenishmentCount = products.filter(
     (p) => p.stock <= (p.minStock ?? 5)
@@ -157,9 +164,11 @@ export default function AdminProductosPage() {
     if (stockFilter === "low") {
       matchStock = p.stock <= (p.minStock ?? 5) && p.stock > 0;
     } else if (stockFilter === "out") {
-      matchStock = p.stock === 0;
+      matchStock = p.stock === 0 || p.status === "out_of_stock";
     } else if (stockFilter === "available") {
       matchStock = p.stock > 0;
+    } else if (stockFilter === "featured") {
+      matchStock = Boolean(p.featured);
     }
     return matchCategory && matchSearch && matchStock;
   });

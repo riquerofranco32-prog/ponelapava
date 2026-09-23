@@ -223,43 +223,65 @@ export default function AdminShell({
       style={{ "--admin-sidebar-w": sidebarWidth } as React.CSSProperties}
     >
       {/* ── MOBILE TOP BAR ── */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[var(--dash-surface)] border-b border-[var(--dash-border)] z-40 flex items-center justify-between px-3">
-        <button
-          onClick={() => setMobileOpen((v) => !v)}
-          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-          className="w-11 h-11 flex items-center justify-center text-[var(--dash-text)] rounded-lg hover:bg-[var(--dash-surface-2)] transition-colors"
-        >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[var(--dash-surface)]/95 backdrop-blur-md border-b border-[var(--dash-border)] z-40 flex items-center justify-between px-3 shadow-sm">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-bold text-sm text-[var(--dash-text)] truncate">
-            {activeItem.label}
-          </span>
-          <span className="text-xs text-[var(--dash-muted)]">•</span>
-          <span className="text-xs text-[var(--dash-accent)] font-semibold">
-            Admin
-          </span>
+          <button
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+            className="w-10 h-10 flex items-center justify-center text-[var(--dash-text)] rounded-xl hover:bg-[var(--dash-surface-2)] active:scale-95 transition-all shrink-0"
+          >
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-bold text-sm text-[var(--dash-text)] truncate max-w-[130px]">
+              {activeItem.label}
+            </span>
+            {isOwner && (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--dash-accent-bg)] text-[var(--dash-accent)] border border-[var(--dash-accent-border)] shrink-0">
+                👑 Dueño
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* Center/Right Store Status & Quick Actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Store status pill */}
+          <div
+            className={`hidden sm:flex items-center gap-1.5 px-2 py-0.8 rounded-full text-[11px] font-semibold border ${
+              scheduleStatus.isOpen
+                ? "bg-[var(--dash-success-bg)] text-[var(--dash-success)] border-[var(--dash-success-border)]"
+                : "bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] border-[var(--dash-warning-border)]"
+            }`}
+          >
+            <span
+              className={`admin-live-dot ${
+                scheduleStatus.isOpen
+                  ? "admin-live-dot--success"
+                  : "admin-live-dot--warning"
+              } w-1.5 h-1.5`}
+            />
+            <span>{scheduleStatus.isOpen ? "Abierto" : "Cerrado"}</span>
+          </div>
+
           <button
             onClick={toggleSound}
             aria-label={soundEnabled ? "Silenciar timbre" : "Activar timbre"}
-            className="w-10 h-10 flex items-center justify-center text-[var(--dash-muted)] hover:text-[var(--dash-text)] rounded-lg"
+            className="w-9 h-9 flex items-center justify-center text-[var(--dash-muted)] hover:text-[var(--dash-text)] rounded-lg active:scale-95 transition-all"
           >
             {soundEnabled ? (
-              <Volume2 size={18} className="text-[var(--dash-accent)]" />
+              <Volume2 size={17} className="text-[var(--dash-accent)]" />
             ) : (
-              <VolumeX size={18} />
+              <VolumeX size={17} />
             )}
           </button>
           <button
             onClick={() => setPaletteOpen(true)}
             aria-label="Buscar"
-            className="w-10 h-10 flex items-center justify-center text-[var(--dash-text)] rounded-lg hover:bg-[var(--dash-surface-2)]"
+            className="w-9 h-9 flex items-center justify-center text-[var(--dash-text)] rounded-lg hover:bg-[var(--dash-surface-2)] active:scale-95 transition-all"
           >
-            <Search size={18} />
+            <Search size={17} />
           </button>
         </div>
       </header>
@@ -271,30 +293,65 @@ export default function AdminShell({
           onClick={() => setMobileOpen(false)}
         >
           <div
-            className="w-full max-h-[85vh] bg-[var(--dash-surface)] border-t border-[var(--dash-border)] rounded-t-2xl p-5 overflow-y-auto space-y-6 shadow-2xl animate-sheet-in"
+            className="w-full max-h-[85vh] bg-[var(--dash-surface)] border-t border-[var(--dash-border)] rounded-t-2xl p-5 overflow-y-auto space-y-5 shadow-2xl animate-sheet-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--dash-border)]">
-              <div>
-                <span className="font-serif font-bold text-base text-[var(--dash-text)]">
-                  Poné La Pava
-                </span>
-                <span className="block text-xs text-[var(--dash-muted)]">
-                  {email || "Administrador"}
-                </span>
+            {/* User Profile & Store Status Header */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--dash-border)]">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-[var(--dash-surface-3)] border border-[var(--dash-accent-border)] flex items-center justify-center text-[var(--dash-accent)] font-bold text-base shadow-sm shrink-0">
+                  {isOwner ? "👑" : "P"}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-serif font-bold text-base text-[var(--dash-text)]">
+                      Poné La Pava
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded text-[10px] font-extrabold uppercase bg-[var(--dash-accent-bg)] text-[var(--dash-accent)] border border-[var(--dash-accent-border)]">
+                      {isOwner ? "Dueño" : "Staff"}
+                    </span>
+                  </div>
+                  <span className="block text-xs text-[var(--dash-muted)] truncate max-w-[210px]">
+                    {email || "Administrador"}
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="admin-icon-btn"
+                className="admin-icon-btn shrink-0"
                 aria-label="Cerrar menú"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-5">
+            {/* Store Schedule Card */}
+            <div className="p-3 rounded-xl bg-[var(--dash-surface-2)] border border-[var(--dash-border)] flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs">
+                <span
+                  className={`admin-live-dot ${
+                    scheduleStatus.isOpen ? "admin-live-dot--success" : "admin-live-dot--warning"
+                  } w-2 h-2`}
+                />
+                <span className="font-semibold text-[var(--dash-text)]">
+                  Local Catriel:
+                </span>
+                <span className={scheduleStatus.isOpen ? "text-[var(--dash-success)] font-medium" : "text-[var(--dash-warning)] font-medium"}>
+                  {scheduleStatus.label}
+                </span>
+              </div>
+              <Link
+                href="/admin/configuracion"
+                onClick={() => setMobileOpen(false)}
+                className="text-xs text-[var(--dash-accent)] hover:underline"
+              >
+                Ajustar
+              </Link>
+            </div>
+
+            <div className="space-y-4">
               {visibleNavGroups.map((group) => (
-                <div key={group.name} className="space-y-1.5">
+                <div key={group.name} className="space-y-1">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--dash-muted)] px-3 mb-1">
                     {group.name}
                   </h4>
@@ -306,8 +363,10 @@ export default function AdminShell({
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         aria-current={isActive ? "page" : undefined}
-                        className={`admin-nav-item py-2.5 px-3 rounded-lg flex items-center justify-between text-sm ${
-                          isActive ? "bg-[var(--dash-accent)] text-[var(--dash-bg)] font-semibold" : ""
+                        className={`admin-nav-item py-2.5 px-3 rounded-xl flex items-center justify-between text-sm transition-all ${
+                          isActive
+                            ? "bg-[var(--dash-accent)] text-[var(--dash-bg)] font-semibold shadow-md"
+                            : "text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-2)]"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -322,18 +381,18 @@ export default function AdminShell({
               ))}
             </div>
 
-            <div className="pt-4 border-t border-[var(--dash-border)] space-y-2">
+            <div className="pt-3 border-t border-[var(--dash-border)] space-y-2">
               <Link
                 href="/"
                 target="_blank"
-                className="flex items-center gap-2.5 py-2.5 px-3 rounded-lg text-sm text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-2)]"
+                className="flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-2)]"
               >
                 <ExternalLink size={16} />
-                <span>Ver Tienda</span>
+                <span>Ver Tienda Online</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-lg text-sm text-[var(--dash-danger)] hover:bg-[var(--dash-danger-bg)] text-left"
+                className="w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm text-[var(--dash-danger)] hover:bg-[var(--dash-danger-bg)] text-left"
               >
                 <LogOut size={16} />
                 <span>Cerrar sesión</span>
@@ -344,7 +403,7 @@ export default function AdminShell({
       )}
 
       {/* ── MOBILE BOTTOM NAVIGATION BAR ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 h-16 bg-[var(--dash-surface)] border-t border-[var(--dash-border)] flex items-center justify-around px-1 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 h-16 bg-[var(--dash-surface)]/95 border-t border-[var(--dash-border)] flex items-center justify-around px-2 backdrop-blur-md pb-[max(env(safe-area-inset-bottom),0.25rem)] shadow-2xl">
         {mobileMainItems.map((item) => {
           const isActive = item.href === activeItem.href;
           return (
@@ -352,15 +411,17 @@ export default function AdminShell({
               key={item.href}
               href={item.href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex-1 min-h-[48px] flex flex-col items-center justify-center gap-1 transition-colors ${
-                isActive ? "text-[var(--dash-accent)]" : "text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
+              className={`flex-1 min-h-[48px] flex flex-col items-center justify-center gap-0.5 transition-all rounded-xl py-1 ${
+                isActive
+                  ? "text-[var(--dash-accent)] bg-[var(--dash-surface-2)] font-semibold shadow-inner"
+                  : "text-[var(--dash-muted)] hover:text-[var(--dash-text)]"
               }`}
             >
-              <span className="relative inline-flex">
-                <item.icon size={20} strokeWidth={isActive ? 2.3 : 1.8} />
+              <span className="relative inline-flex items-center justify-center">
+                <item.icon size={19} strokeWidth={isActive ? 2.4 : 1.8} />
                 {item.href === "/admin/pedidos" && <PendingOrdersBadge collapsed />}
               </span>
-              <span className="text-xs font-medium tracking-tight">
+              <span className="text-[11px] font-medium tracking-tight">
                 {item.label}
               </span>
             </Link>
@@ -371,11 +432,11 @@ export default function AdminShell({
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className={`flex-1 min-h-[48px] flex flex-col items-center justify-center gap-1 text-[var(--dash-muted)] hover:text-[var(--dash-text)] transition-colors`}
+          className={`flex-1 min-h-[48px] flex flex-col items-center justify-center gap-0.5 text-[var(--dash-muted)] hover:text-[var(--dash-text)] transition-colors rounded-xl py-1`}
           aria-label="Más secciones"
         >
-          <Menu size={20} />
-          <span className="text-xs font-medium tracking-tight">Más</span>
+          <Menu size={19} />
+          <span className="text-[11px] font-medium tracking-tight">Más</span>
         </button>
       </nav>
 
@@ -526,7 +587,7 @@ export default function AdminShell({
       </aside>
 
       {/* ── MAIN CONTENT AREA ── */}
-      <main className="flex-1 min-h-screen pt-20 pb-24 px-4 sm:px-6 lg:pt-6 lg:pb-12 lg:px-8">
+      <main className="flex-1 min-h-screen pt-16 pb-24 px-3 sm:px-6 lg:pt-6 lg:pb-12 lg:px-8">
         {/* Desktop Sticky Header Bar */}
         <header className="hidden lg:flex items-center justify-between sticky top-4 z-30 mb-8 px-5 py-3 rounded-xl bg-[var(--dash-surface)]/90 backdrop-blur-md border border-[var(--dash-border)] shadow-md">
           {/* Breadcrumb + Status Badge */}

@@ -41,7 +41,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero content={landing.hero} />
-      <TrustBar />
+      <TrustBar announcements={landing.announcements} />
       <Categories />
       <FeaturedProducts />
       <ComboPacksSection />
@@ -49,12 +49,12 @@ export default async function HomePage() {
       <MateAnatomy />
       <BrandsSection />
       <HowToBuy />
-      <LocalSection />
-      <GoogleReviews />
-      <AboutSection />
-      <FAQSection />
+      <LocalSection content={landing.local} />
+      <GoogleReviews reviews={landing.reviews} />
+      <AboutSection content={landing.about} />
+      <FAQSection faqs={landing.faqs} />
       <InstagramSection posts={landing.galleryPosts} />
-      <FinalCTA />
+      <FinalCTA content={landing.finalCta} />
     </>
   );
 }

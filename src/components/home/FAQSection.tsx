@@ -83,11 +83,14 @@ function buildFaqs(settings: { paymentMethods?: string[] }): FAQItem[] {
   ];
 }
 
-export default function FAQSection() {
+import { LandingFAQItem } from "@/types/landing";
+
+export default function FAQSection({ faqs: customFaqs }: { faqs?: LandingFAQItem[] }) {
   const [activeCat, setActiveCat] = useState<string>("all");
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const settings = useSiteSettings();
-  const faqs = useMemo(() => buildFaqs(settings), [settings]);
+  const defaultFaqs = useMemo(() => buildFaqs(settings), [settings]);
+  const faqs = customFaqs && customFaqs.length > 0 ? customFaqs : defaultFaqs;
 
   const filteredFaqs = activeCat === "all" ? faqs : faqs.filter((f) => f.category === activeCat);
 

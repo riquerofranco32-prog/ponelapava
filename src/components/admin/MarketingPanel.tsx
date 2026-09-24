@@ -11,6 +11,11 @@ import {
   Grid,
   Loader2,
   Eye,
+  BookOpen,
+  Store,
+  ShieldCheck,
+  HelpCircle,
+  Star,
 } from "lucide-react";
 import { LandingContent } from "@/types/landing";
 import { DEFAULT_LANDING_CONTENT } from "@/lib/landing";
@@ -21,8 +26,23 @@ import { assertOk } from "@/lib/admin-fetch";
 import { HeroSettingsSection } from "./marketing/HeroSettingsSection";
 import { PromosSettingsSection } from "./marketing/PromosSettingsSection";
 import { GallerySettingsSection } from "./marketing/GallerySettingsSection";
+import { AboutSettingsSection } from "./marketing/AboutSettingsSection";
+import { LocalSettingsSection } from "./marketing/LocalSettingsSection";
+import { TrustSettingsSection } from "./marketing/TrustSettingsSection";
+import { FaqSettingsSection } from "./marketing/FaqSettingsSection";
+import { ReviewsSettingsSection } from "./marketing/ReviewsSettingsSection";
+import { FinalCtaSettingsSection } from "./marketing/FinalCtaSettingsSection";
 
-type MarketingTab = "hero" | "promos" | "gallery";
+type MarketingTab =
+  | "hero"
+  | "about"
+  | "local"
+  | "promos"
+  | "trust"
+  | "faqs"
+  | "reviews"
+  | "finalCta"
+  | "gallery";
 
 export default function MarketingPanel() {
   const [content, setContent] = useState<LandingContent | null>(null);
@@ -62,7 +82,7 @@ export default function MarketingPanel() {
       assertOk(res, "No se pudo guardar la configuración");
       const updated = await res.json();
       setContent(updated);
-      showToast("¡Cambios de la landing guardados con éxito!", "success");
+      showToast("¡Toda la landing se actualizó y guardó con éxito!", "success");
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Error al guardar", "error");
     } finally {
@@ -103,6 +123,26 @@ export default function MarketingPanel() {
           ...content,
           promoBanner: { ...content.promoBanner, image: url },
         });
+      } else if (currentUploadField === "about.image") {
+        setContent({
+          ...content,
+          about: { ...(content.about || DEFAULT_LANDING_CONTENT.about!), image: url },
+        });
+      } else if (currentUploadField.startsWith("local.photos.")) {
+        const photoIdx = parseInt(currentUploadField.split(".")[2], 10);
+        const currentPhotos = [
+          ...(content.local?.photos || DEFAULT_LANDING_CONTENT.local!.photos),
+        ];
+        if (currentPhotos[photoIdx]) {
+          currentPhotos[photoIdx] = { ...currentPhotos[photoIdx], src: url };
+          setContent({
+            ...content,
+            local: {
+              ...(content.local || DEFAULT_LANDING_CONTENT.local!),
+              photos: currentPhotos,
+            },
+          });
+        }
       } else if (currentUploadField.startsWith("gallery.")) {
         const index = parseInt(currentUploadField.split(".")[1], 10);
         const newPosts = [...content.galleryPosts];
@@ -131,7 +171,7 @@ export default function MarketingPanel() {
     return (
       <div className="py-20 text-center text-[var(--dash-muted)] space-y-3">
         <Loader2 size={32} className="animate-spin mx-auto text-[var(--dash-accent)]" />
-        <p className="text-sm">Cargando editor de landing y fotos...</p>
+        <p className="text-sm">Cargando editor integral de landing...</p>
       </div>
     );
   }
@@ -152,10 +192,10 @@ export default function MarketingPanel() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--dash-text)] flex items-center gap-2">
             <Sparkles size={22} className="text-[var(--dash-accent)]" />
-            <span>Personalizar Landing & Fotos</span>
+            <span>Editor Integral de la Landing Page</span>
           </h1>
           <p className="text-xs text-[var(--dash-muted)] mt-1">
-            Fotos principales, textos del hero, banners de promociones y la galería de Instagram.
+            Personalizá todos los textos, imágenes, historia, local, beneficios, preguntas y llamados a la acción de tu tienda.
           </p>
         </div>
 
@@ -197,10 +237,16 @@ export default function MarketingPanel() {
       <Tabs
         tabs={[
           { id: "hero", label: "Hero Principal", icon: <Layers size={14} /> },
-          { id: "promos", label: "Banners & Anuncios", icon: <Megaphone size={14} /> },
+          { id: "about", label: "Nosotros & Historia", icon: <BookOpen size={14} /> },
+          { id: "local", label: "El Local & Fotos", icon: <Store size={14} /> },
+          { id: "promos", label: "Banner Promocional", icon: <Megaphone size={14} /> },
+          { id: "trust", label: "Cinta de Confianza", icon: <ShieldCheck size={14} /> },
+          { id: "faqs", label: "Preguntas Frecuentes", icon: <HelpCircle size={14} /> },
+          { id: "reviews", label: "Reseñas de Clientes", icon: <Star size={14} /> },
+          { id: "finalCta", label: "Llamado a la Acción", icon: <Sparkles size={14} /> },
           {
             id: "gallery",
-            label: "Fotos de Instagram",
+            label: "Instagram",
             count: content.galleryPosts.length,
             icon: <Grid size={14} />,
           },
@@ -219,6 +265,24 @@ export default function MarketingPanel() {
         />
       )}
 
+      {activeTab === "about" && (
+        <AboutSettingsSection
+          content={content}
+          onChange={setContent}
+          onTriggerUpload={triggerUpload}
+          uploadingTarget={uploadingTarget}
+        />
+      )}
+
+      {activeTab === "local" && (
+        <LocalSettingsSection
+          content={content}
+          onChange={setContent}
+          onTriggerUpload={triggerUpload}
+          uploadingTarget={uploadingTarget}
+        />
+      )}
+
       {activeTab === "promos" && (
         <PromosSettingsSection
           content={content}
@@ -226,6 +290,22 @@ export default function MarketingPanel() {
           onTriggerUpload={triggerUpload}
           uploadingTarget={uploadingTarget}
         />
+      )}
+
+      {activeTab === "trust" && (
+        <TrustSettingsSection content={content} onChange={setContent} />
+      )}
+
+      {activeTab === "faqs" && (
+        <FaqSettingsSection content={content} onChange={setContent} />
+      )}
+
+      {activeTab === "reviews" && (
+        <ReviewsSettingsSection content={content} onChange={setContent} />
+      )}
+
+      {activeTab === "finalCta" && (
+        <FinalCtaSettingsSection content={content} onChange={setContent} />
       )}
 
       {activeTab === "gallery" && (
@@ -239,3 +319,4 @@ export default function MarketingPanel() {
     </div>
   );
 }
+

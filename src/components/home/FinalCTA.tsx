@@ -7,9 +7,22 @@ import { useSiteSettings } from "@/context/SiteSettingsContext";
 import MagneticButton from "@/components/ui/MagneticButton";
 import FinalCTABackground from "./FinalCTABackground";
 import { BorderBeam } from "@/components/ui/BorderBeam";
+import { LandingFinalCta } from "@/types/landing";
 
-export default function FinalCTA() {
+export default function FinalCTA({ content }: { content?: LandingFinalCta }) {
   const settings = useSiteSettings();
+
+  const eyebrow = content?.eyebrow || "Tu próximo mate empieza acá";
+  const titleLine1 = content?.titleLine1 || "¿Listo para renovar";
+  const titleHighlight = content?.titleHighlight || "tu ritual diario?";
+  const description =
+    content?.description ||
+    "Yerbas seleccionadas, mates de calabaza brasilera con virola de alpaca y accesorios duraderos. Hacé tu pedido online en minutos con atención personalizada.";
+  const primaryButtonText = content?.primaryButtonText || "Explorar Catálogo Completo";
+  const primaryButtonLink = content?.primaryButtonLink || "/catalogo";
+  const secondaryButtonText = content?.secondaryButtonText || "Asesoramiento por WhatsApp";
+  const secondaryButtonMessage =
+    content?.secondaryButtonMessage || "¡Hola! Quiero consultar por productos y envíos.";
 
   return (
     <section className="focus-ring-gold grain-overlay relative overflow-hidden bg-pava-brown py-24 sm:py-28 lg:py-36 text-pava-cream border-t border-pava-cream/10">
@@ -27,40 +40,40 @@ export default function FinalCTA() {
             <div className="mb-6 flex items-center gap-3">
               <span className="h-px w-10 bg-pava-gold" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.26em] text-pava-gold">
-                Tu próximo mate empieza acá
+                {eyebrow}
               </span>
             </div>
             
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[0.92] tracking-tight text-pava-cream">
-              ¿Listo para renovar <br />
-              <em className="text-shine not-italic text-pava-gold">tu ritual diario?</em>
+              {titleLine1} <br />
+              <em className="text-shine not-italic text-pava-gold">{titleHighlight}</em>
             </h2>
             
             <p className="mt-6 max-w-xl text-sm sm:text-base leading-relaxed text-pava-cream/80">
-              Yerbas seleccionadas, mates de calabaza brasilera con virola de alpaca y accesorios duraderos. Hacé tu pedido online en minutos con atención personalizada.
+              {description}
             </p>
 
             <div className="mt-9 flex flex-col gap-3.5 sm:flex-row sm:gap-4">
               <MagneticButton>
                 <Link
-                  href="/catalogo"
+                  href={primaryButtonLink}
                   className="cta-pulse-ring inline-flex items-center justify-center gap-3 rounded-control bg-pava-gold px-8 py-4 text-sm font-bold tracking-wide text-pava-brown shadow-xl shadow-pava-gold/15 transition-all duration-200 hover:bg-pava-gold-light active:scale-[0.98]"
                 >
                   <ShoppingBag size={18} />
-                  <span>Explorar Catálogo Completo</span>
+                  <span>{primaryButtonText}</span>
                   <span aria-hidden="true">→</span>
                 </Link>
               </MagneticButton>
 
               <MagneticButton>
                 <a
-                  href={whatsappChatUrl(settings.whatsappNumber, "¡Hola! Quiero consultar por productos y envíos.")}
+                  href={whatsappChatUrl(settings.whatsappNumber, secondaryButtonMessage)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2.5 rounded-control border border-white/20 bg-white/5 px-8 py-4 text-sm font-semibold tracking-wide text-pava-cream backdrop-blur-md transition-all duration-200 hover:border-whatsapp hover:bg-whatsapp hover:text-white hover:shadow-lg hover:shadow-whatsapp/20"
                 >
                   <MessageCircle size={18} />
-                  <span>Asesoramiento por WhatsApp</span>
+                  <span>{secondaryButtonText}</span>
                 </a>
               </MagneticButton>
             </div>

@@ -173,22 +173,46 @@ function Column({
   );
 }
 
-export default function GoogleReviews() {
+import { LandingReviewItem } from "@/types/landing";
+
+export default function GoogleReviews({ reviews: customReviews }: { reviews?: LandingReviewItem[] }) {
   const [filter, setFilter] = useState<"all" | "written" | "rating">("all");
+
+  const writtenReviews: WrittenReview[] =
+    customReviews && customReviews.length > 0
+      ? customReviews.map((r) => ({
+          name: r.name,
+          meta: r.meta || "Reseña de Google",
+          time: r.time || "Cliente verificado",
+          text: r.text,
+        }))
+      : WRITTEN;
+
+  const colA = [
+    ...writtenReviews,
+    RATING_ONLY[0],
+    RATING_ONLY[1],
+  ];
+
+  const colB = [
+    ...(writtenReviews.length > 1 ? [...writtenReviews].reverse() : writtenReviews),
+    RATING_ONLY[2],
+    RATING_ONLY[3],
+  ];
 
   const filteredColumnA =
     filter === "written"
-      ? COLUMN_A.filter(isWritten)
+      ? colA.filter(isWritten)
       : filter === "rating"
-        ? COLUMN_A.filter((r) => !isWritten(r))
-        : COLUMN_A;
+        ? colA.filter((r) => !isWritten(r))
+        : colA;
 
   const filteredColumnB =
     filter === "written"
-      ? COLUMN_B.filter(isWritten)
+      ? colB.filter(isWritten)
       : filter === "rating"
-        ? COLUMN_B.filter((r) => !isWritten(r))
-        : COLUMN_B;
+        ? colB.filter((r) => !isWritten(r))
+        : colB;
 
   return (
     <section className="overflow-hidden bg-pava-cream-dark py-20 sm:py-24 lg:py-28 border-y border-pava-brown/10">

@@ -27,10 +27,17 @@ const LOCAL_PHOTOS = [
   { src: "/local/local-6.jpg", alt: "Vista interior del salón matero" },
 ];
 
-export default async function LocalSection() {
+import { LandingLocal } from "@/types/landing";
+
+export default async function LocalSection({ content }: { content?: LandingLocal }) {
   const settings = await getSiteSettings();
   const mapsUrl = buildMapsUrl();
   const mapsEmbedUrl = buildMapsEmbedUrl();
+  const photos = content?.photos && content.photos.length > 0 ? content.photos : LOCAL_PHOTOS;
+  const eyebrow = content?.eyebrow || "El local";
+  const title = content?.title || "Vení, elegí";
+  const titleHighlight = content?.titleHighlight || "y quedate un rato.";
+  const description = content?.description || "Nuestro local físico es el punto de encuentro de los mateadores. Venís, tocás los productos, los olés y encontrás ese detalle que hace propio a tu ritual.";
 
   return (
     <section
@@ -71,8 +78,8 @@ export default async function LocalSection() {
                 </a>
               </div>
 
-              {/* Real photos of the store — same ones on the Maps listing */}
-              {LOCAL_PHOTOS.map((photo) => (
+              {/* Real photos of the store */}
+              {photos.map((photo) => (
                 <a
                   key={photo.src}
                   href={mapsUrl}
@@ -98,18 +105,16 @@ export default async function LocalSection() {
             <div className="mb-6 flex items-center gap-3">
               <span className="h-px w-9 bg-pava-gold" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-pava-gold">
-                El local
+                {eyebrow}
               </span>
             </div>
             <h2 className="font-display text-4xl font-bold leading-[0.95] tracking-tight text-pava-cream sm:text-5xl lg:text-6xl">
-              Vení, elegí
+              {title}
               <br />
-              <em className="not-italic text-pava-gold">y quedate un rato.</em>
+              <em className="not-italic text-pava-gold">{titleHighlight}</em>
             </h2>
             <p className="mt-6 max-w-md leading-relaxed text-pava-cream/70">
-              Nuestro local físico es el punto de encuentro de los mateadores.
-              Venís, tocás los productos, los olés y encontrás ese detalle que
-              hace propio a tu ritual.
+              {description}
             </p>
 
             <div className="mt-10 space-y-0 border-y border-pava-cream/15">

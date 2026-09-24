@@ -107,9 +107,20 @@ function TrustItem({ icon: Icon, title, subtitle, badge }: TrustItemData) {
   );
 }
 
-export default function TrustBar() {
+import { LandingAnnouncementItem } from "@/types/landing";
+
+export default function TrustBar({ announcements }: { announcements?: LandingAnnouncementItem[] }) {
   const settings = useSiteSettings();
-  const items = buildTrustItems(settings);
+  const defaultItems = buildTrustItems(settings);
+  const items: TrustItemData[] =
+    announcements && announcements.length > 0
+      ? announcements.map((a, idx) => ({
+          icon: [Sparkles, Truck, MapPin, Star, ShieldCheck, CreditCard][idx % 6],
+          title: a.highlight,
+          subtitle: a.text,
+          badge: a.badge || "DESTACADO",
+        }))
+      : defaultItems;
 
   return (
     <section className="overflow-hidden border-y border-pava-gold/20 bg-[#0f1d13] py-4.5 shadow-inner">

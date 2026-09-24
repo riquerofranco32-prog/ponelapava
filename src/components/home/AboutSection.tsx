@@ -1,7 +1,24 @@
 import Image from "next/image";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { LandingAbout } from "@/types/landing";
 
-export default function AboutSection() {
+export default function AboutSection({ content }: { content?: LandingAbout }) {
+  const eyebrow = content?.eyebrow || "Nosotros";
+  const title = content?.title || "Más que una yerba.";
+  const titleHighlight = content?.titleHighlight || "Una forma de compartir.";
+  const quote = content?.quote || "El mate no se toma solo. Y tampoco se elige solo.";
+  const paragraph1 = content?.paragraph1 || "En Poné La Pava creemos que el mate no es solo una bebida: es un ritual, un pretexto para estar juntos, para bajar el ritmo y conectar.";
+  const paragraph2 = content?.paragraph2 || "Nacimos con la misión de reunir todo lo que necesitás para vivir ese ritual como se merece. Desde la yerba más cuidadosamente seleccionada hasta el mate que se convierte en tuyo con el tiempo.";
+  const image = content?.image || "/local/local-1.jpg";
+  const badgeTop = content?.badgeTop || "Desde Argentina";
+  const badgeBottom = content?.badgeBottom || "Para cada ronda";
+  const stats = content?.stats && content.stats.length > 0 ? content.stats : [
+    { value: "100%", label: "Artesanal" },
+    { value: "Premium", label: "Selección" },
+    { value: "Local", label: "Argentino" },
+    { value: "Ritual", label: "Compartido" },
+  ];
+
   return (
     <section
       id="nosotros"
@@ -16,7 +33,7 @@ export default function AboutSection() {
           >
             <div className="relative aspect-[3/4] overflow-hidden bg-pava-brown lg:aspect-auto lg:h-full lg:min-h-[580px]">
               <Image
-                src="/local/local-1.jpg"
+                src={image}
                 alt="Local Poné La Pava en Catriel, Río Negro"
                 fill
                 className="object-cover transition-transform duration-700 hover:scale-[1.02]"
@@ -27,15 +44,12 @@ export default function AboutSection() {
             </div>
 
             {/* Floating card */}
-            {/* Superficie sólida a propósito: con /90 la foto se filtraba y el
-                dorado de "Desde Argentina" quedaba en 3,84:1; sobre el verde
-                sólido da 4,94:1 (AA). */}
             <div className="absolute bottom-4 right-3 translate-x-0 border border-pava-cream/30 bg-pava-brown px-4 py-3 text-pava-cream backdrop-blur-sm sm:bottom-8 sm:right-0 sm:translate-x-6 sm:px-5 sm:py-4 lg:translate-x-8">
               <span className="block text-[9px] font-semibold uppercase tracking-[0.22em] text-pava-gold">
-                Desde Argentina
+                {badgeTop}
               </span>
               <span className="mt-1 block font-display text-base font-bold sm:text-lg">
-                Para cada ronda
+                {badgeBottom}
               </span>
             </div>
 
@@ -60,19 +74,19 @@ export default function AboutSection() {
             <div className="mb-7 flex items-center gap-3">
               <span className="h-px w-8 bg-pava-terracotta" />
               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-pava-terracotta">
-                Nosotros
+                {eyebrow}
               </span>
             </div>
 
             {/* Headline */}
             <h2 className="font-display mb-8 text-4xl font-bold leading-[0.96] tracking-tight text-pava-brown sm:text-5xl lg:text-[3.25rem]">
-              Más que una yerba.{" "}
+              {title}{" "}
               <em className="not-italic text-pava-terracotta">
-                Una forma de compartir.
+                {titleHighlight}
               </em>
             </h2>
 
-            {/* Pull quote — oversized quotation mark instead of a template-style border accent */}
+            {/* Pull quote */}
             <div className="relative mb-7">
               <span
                 aria-hidden="true"
@@ -81,33 +95,19 @@ export default function AboutSection() {
                 &ldquo;
               </span>
               <p className="font-script relative pl-6 text-3xl leading-snug text-pava-brown-mid/85 sm:pl-8 sm:text-4xl">
-                El mate no se toma solo. Y tampoco se elige solo.
+                {quote}
               </p>
             </div>
 
             {/* Body text */}
             <div className="space-y-4 text-[15px] leading-relaxed text-pava-brown-mid/75">
-              <p>
-                En Poné La Pava creemos que el mate no es solo una bebida: es un
-                ritual, un pretexto para estar juntos, para bajar el ritmo y
-                conectar.
-              </p>
-              <p>
-                Nacimos con la misión de reunir todo lo que necesitás para vivir
-                ese ritual como se merece. Desde la yerba más cuidadosamente
-                seleccionada hasta el mate que se convierte en tuyo con el
-                tiempo.
-              </p>
+              <p>{paragraph1}</p>
+              {paragraph2 && <p>{paragraph2}</p>}
             </div>
 
-            {/* Stats — divided bar, echoes the thin-rule language used in the Hero */}
+            {/* Stats */}
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-6 border-t border-pava-brown/8 pt-8">
-              {[
-                { value: "100%", label: "Artesanal" },
-                { value: "Premium", label: "Selección" },
-                { value: "Local", label: "Argentino" },
-                { value: "Ritual", label: "Compartido" },
-              ].map(({ value, label }, i) => (
+              {stats.map(({ value, label }, i) => (
                 <div key={label} className="flex items-center gap-8">
                   <div>
                     <div className="font-display text-2xl font-bold text-pava-brown">
@@ -117,7 +117,7 @@ export default function AboutSection() {
                       {label}
                     </div>
                   </div>
-                  {i < 3 && (
+                  {i < stats.length - 1 && (
                     <span
                       className="hidden h-9 w-px bg-pava-brown/12 sm:block"
                       aria-hidden="true"

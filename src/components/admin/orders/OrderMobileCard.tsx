@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MessageCircle, Printer } from "lucide-react";
+import { Eye, MessageCircle, Printer, Trash2 } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice, truncate } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
@@ -13,6 +13,7 @@ export function OrderMobileCard({
   onStatusChange,
   onPaymentStatusChange,
   onView,
+  onDelete,
   selected,
   onToggleSelect,
 }: {
@@ -21,6 +22,7 @@ export function OrderMobileCard({
   onStatusChange: (id: string, status: Order["status"]) => void;
   onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
   onView: (order: Order) => void;
+  onDelete?: (order: Order) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
 }) {
@@ -76,6 +78,17 @@ export function OrderMobileCard({
             >
               <MessageCircle size={15} />
             </a>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(order)}
+              title="Eliminar pedido permanentemente"
+              className="bg-transparent border-none text-[var(--dash-muted)] p-1 cursor-pointer inline-flex items-center shrink-0 rounded hover:text-[var(--dash-danger)] transition-colors opacity-70 hover:opacity-100"
+            >
+              <Trash2 size={14} />
+            </button>
           )}
         </div>
         <span className="text-xs text-[var(--dash-muted)] whitespace-nowrap shrink-0">

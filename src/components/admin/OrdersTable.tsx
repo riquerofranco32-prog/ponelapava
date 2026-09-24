@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Truck,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
@@ -33,6 +35,8 @@ import { OrderDesktopRow } from "./orders/OrderDesktopRow";
 import { OrderMobileCard } from "./orders/OrderMobileCard";
 import { OrderDetailModal } from "./orders/OrderDetailModal";
 import { OrdersKanbanView } from "./orders/OrdersKanbanView";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { CreateOrderModal } from "./orders/CreateOrderModal";
 
 type StatusFilter = "all" | Order["status"];
 type PaymentFilter = "all" | "unpaid" | "paid";
@@ -114,6 +118,10 @@ export default function OrdersTable() {
   const [viewingOrder, setViewingOrder] = useState<Order | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const [sortColumn, setSortColumn] = useState<SortColumn>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -286,6 +294,61 @@ export default function OrdersTable() {
     }
   }
 
+  async function handleDeleteSingleOrder(order: Order) {
+    if (!order.id) return;
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}`, {
+        method: "DELETE",
+      });
+      assertOk(res, "No se pudo eliminar el pedido");
+      setOrders((prev) => prev.filter((o) => o.id !== order.id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(order.id!);
+        return next;
+      });
+      setTotalCount((prev) => Math.max(0, prev - 1));
+      if (viewingOrder?.id === order.id) {
+        setViewingOrder(null);
+      }
+      setOrderToDelete(null);
+      showToast("Pedido eliminado permanentemente");
+      loadOrders(true);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Error al eliminar el pedido",
+        "error"
+      );
+    }
+  }
+
+  async function handleBulkDeleteOrders() {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      assertOk(res, "No se pudieron eliminar los pedidos seleccionados");
+      setOrders((prev) => prev.filter((o) => !ids.includes(o.id!)));
+      setSelectedIds(new Set());
+      setTotalCount((prev) => Math.max(0, prev - ids.length));
+      setShowBulkDeleteConfirm(false);
+      showToast(`${ids.length} pedidos eliminados permanentemente`);
+      loadOrders(true);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Error al eliminar pedidos en lote",
+        "error"
+      );
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
   const sortedOrders = [...orders].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
     if (sortColumn === "total") return (a.total - b.total) * dir;
@@ -406,11 +469,19 @@ export default function OrdersTable() {
             ))}
           </div>
 
-          {/* View Mode Toggle: Table vs Kanban */}
+          {/* View Mode Toggle: Table vs Kanban & Actions */}
           <div className="flex items-center gap-2">
+            <AdminButton
+              variant="primary"
+              onClick={() => setCreateModalOpen(true)}
+            >
+              <Plus size={13} className="mr-1 inline" />
+              Nuevo pedido
+            </AdminButton>
+
             <Link
               href="/admin/carritos"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-[var(--dash-text)] bg-[var(--dash-surface-2)] border border-[var(--dash-border)] hover:border-[var(--dash-accent)] transition-all"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--dash-text)] bg-[var(--dash-surface-2)] border border-[var(--dash-border)] hover:border-[var(--dash-accent)] transition-all"
             >
               <ShoppingBag size={13} className="text-[var(--dash-accent)]" />
               <span>Carritos abandonados</span>
@@ -612,6 +683,15 @@ export default function OrdersTable() {
             </AdminButton>
           ))}
           <button
+            type="button"
+            onClick={() => setShowBulkDeleteConfirm(true)}
+            disabled={bulkUpdating || bulkDeleting}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--dash-danger-bg)] text-[var(--dash-danger)] border border-[var(--dash-danger-border)] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            <Trash2 size={13} />
+            <span>Eliminar ({selectedIds.size})</span>
+          </button>
+          <button
             onClick={() => setSelectedIds(new Set())}
             disabled={bulkUpdating}
             className="ml-auto bg-transparent border-none text-xs text-[var(--dash-muted)] cursor-pointer underline hover:text-[var(--dash-text)]"
@@ -638,6 +718,7 @@ export default function OrdersTable() {
           onStatusChange={handleStatusChange}
           onPaymentStatusChange={handlePaymentStatusChange}
           onViewOrder={setViewingOrder}
+          onDelete={(o) => setOrderToDelete(o)}
         />
       ) : (
         <>
@@ -704,6 +785,7 @@ export default function OrdersTable() {
                     onStatusChange={handleStatusChange}
                     onPaymentStatusChange={handlePaymentStatusChange}
                     onView={setViewingOrder}
+                    onDelete={(o) => setOrderToDelete(o)}
                   />
                 ))}
               </tbody>
@@ -721,6 +803,7 @@ export default function OrdersTable() {
                 onStatusChange={handleStatusChange}
                 onPaymentStatusChange={handlePaymentStatusChange}
                 onView={setViewingOrder}
+                onDelete={(o) => setOrderToDelete(o)}
               />
             ))}
           </div>
@@ -759,6 +842,43 @@ export default function OrdersTable() {
         <OrderDetailModal
           order={viewingOrder}
           onClose={() => setViewingOrder(null)}
+          onStatusChange={handleStatusChange}
+          onPaymentStatusChange={handlePaymentStatusChange}
+          onDelete={(o) => setOrderToDelete(o)}
+        />
+      )}
+
+      {orderToDelete && (
+        <ConfirmDialog
+          title="¿Eliminar pedido?"
+          message={`¿Estás seguro de que deseas eliminar permanentemente el pedido de "${orderToDelete.customerName}" (${formatPrice(orderToDelete.total)})? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar pedido"
+          onConfirm={() => handleDeleteSingleOrder(orderToDelete)}
+          onCancel={() => setOrderToDelete(null)}
+        />
+      )}
+
+      {showBulkDeleteConfirm && (
+        <ConfirmDialog
+          title="¿Eliminar pedidos en lote?"
+          message={`¿Estás seguro de que deseas eliminar permanentemente los ${selectedIds.size} pedidos seleccionados? Esta acción no se puede deshacer.`}
+          confirmLabel={`Eliminar ${selectedIds.size} pedidos`}
+          onConfirm={handleBulkDeleteOrders}
+          onCancel={() => setShowBulkDeleteConfirm(false)}
+        />
+      )}
+
+      {createModalOpen && (
+        <CreateOrderModal
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          onOrderCreated={(newOrder) => {
+            setCreateModalOpen(false);
+            setOrders((prev) => [newOrder, ...prev]);
+            setTotalCount((c) => c + 1);
+            showToast("Pedido creado exitosamente");
+            loadOrders(true);
+          }}
         />
       )}
     </div>

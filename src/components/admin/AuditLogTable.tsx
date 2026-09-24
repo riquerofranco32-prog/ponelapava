@@ -19,11 +19,26 @@ const ACTION_LABELS: Record<AuditAction, string> = {
   team_member_invite: "Miembro invitado al equipo",
   team_member_role_change: "Cambio de rol de miembro",
   team_member_toggle_active: "Cambio de estado de miembro",
+  order_delete: "Pedido eliminado",
+  order_bulk_delete: "Eliminación de pedidos en lote",
+  order_create_manual: "Pedido registrado en mostrador",
+  cart_delete: "Carrito abandonado eliminado",
+  customer_delete: "Cliente eliminado del CRM",
 };
 
 function describeDetails(entry: AuditLogEntry): string {
   const d = entry.details;
   switch (entry.action) {
+    case "order_delete":
+      return d.customerName ? `Pedido de ${d.customerName} eliminado` : "Pedido eliminado";
+    case "order_bulk_delete":
+      return `${d.count || "?"} pedidos eliminados`;
+    case "order_create_manual":
+      return d.customerName ? `Venta para ${d.customerName} (${d.itemsCount} productos)` : "Pedido manual creado";
+    case "cart_delete":
+      return d.customerName ? `Carrito de ${d.customerName} eliminado` : "Carrito abandonado eliminado";
+    case "customer_delete":
+      return d.name ? `Cliente ${d.name} (${d.phone}) eliminado` : "Cliente eliminado";
     case "team_member_invite":
       return d.email ? `${d.email} (rol: ${d.role})` : "Nuevo miembro";
     case "team_member_role_change":

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { updateOrderStatus, updateOrderPaymentStatus } from "@/lib/orders";
+import { updateOrderStatus, updateOrderPaymentStatus, deleteOrder } from "@/lib/orders";
 import { isOrderStatus } from "@/lib/orderStatus";
 import { logAudit } from "@/lib/auditLog";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
@@ -56,3 +56,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return { ok: true };
   });
 }
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  const { id } = await params;
+
+  return handle(`DELETE /api/admin/orders/${id}`, async (adminUser) => {
+    await deleteOrder(id);
+
+    await logAudit({
+      actorEmail: adminUser.email,
+      action: "order_delete",
+      entityType: "order",
+      entityId: id,
+      details: { deletedAt: new Date().toISOString() },
+    });
+
+    return { ok: true, deletedId: id };
+  });
+}
+

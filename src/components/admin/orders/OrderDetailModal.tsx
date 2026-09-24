@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   XCircle,
   Tag,
+  Trash2,
 } from "lucide-react";
 import { Order, OrderStatus } from "@/types";
 import { formatPrice } from "@/lib/utils";
@@ -23,6 +24,7 @@ import { printOrderRemito, getPaymentMethodLabel } from "@/lib/orderPrint";
 import { Drawer } from "@/components/admin/ui/Drawer";
 import { Button } from "@/components/admin/ui/Button";
 import { StatusPill } from "@/components/admin/ui/Badge";
+import { OrderStatusSelect } from "./OrderStatusSelect";
 
 function buildSummary(order: Order): string {
   const lines = [
@@ -51,9 +53,15 @@ const WORKFLOW_STEPS: { status: OrderStatus; label: string; icon: typeof Clock }
 export function OrderDetailModal({
   order,
   onClose,
+  onStatusChange,
+  onPaymentStatusChange,
+  onDelete,
 }: {
   order: Order;
   onClose: () => void;
+  onStatusChange?: (id: string, status: OrderStatus) => void;
+  onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
+  onDelete?: (order: Order) => void;
 }) {
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
@@ -91,7 +99,7 @@ export function OrderDetailModal({
       })}
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-          <div>
+          <div className="flex items-center gap-2">
             {hasPhone && (
               <a
                 href={buildAdminCustomerWhatsAppUrl(
@@ -112,6 +120,16 @@ export function OrderDetailModal({
                 <MessageCircle size={15} />
                 <span>WhatsApp</span>
               </a>
+            )}
+            {onDelete && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(order)}
+                icon={<Trash2 size={14} />}
+              >
+                Eliminar
+              </Button>
             )}
           </div>
 
@@ -141,6 +159,60 @@ export function OrderDetailModal({
         </div>
       }
     >
+      {/* Quick Action Bar: Status & Payment Direct Controls */}
+      {(onStatusChange || onPaymentStatusChange) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[var(--dash-surface-2)] border border-[var(--dash-border)] rounded-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[var(--dash-muted)] uppercase tracking-wider">
+              Estado:
+            </span>
+            {onStatusChange ? (
+              <OrderStatusSelect
+                status={order.status}
+                onChange={(next) => onStatusChange(order.id!, next)}
+              />
+            ) : (
+              <StatusPill type="order" value={order.status} />
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-[var(--dash-muted)] uppercase tracking-wider">
+              Cobro:
+            </span>
+            {onPaymentStatusChange ? (
+              <button
+                type="button"
+                onClick={() =>
+                  onPaymentStatusChange(
+                    order.id!,
+                    order.paymentStatus === "paid" ? "unpaid" : "paid"
+                  )
+                }
+                className={`inline-flex items-center gap-1.5 border rounded-full px-3 py-1 text-xs font-semibold cursor-pointer transition-all ${
+                  order.paymentStatus === "paid"
+                    ? "bg-[var(--dash-success-bg)] text-[var(--dash-success)] border-[var(--dash-success-border)]"
+                    : "bg-[var(--dash-warning-bg)] text-[var(--dash-warning)] border-[var(--dash-warning-border)]"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    order.paymentStatus === "paid"
+                      ? "bg-[var(--dash-success)]"
+                      : "bg-[var(--dash-warning)]"
+                  }`}
+                />
+                {order.paymentStatus === "paid" ? "Cobrado" : "Sin cobrar"}
+              </button>
+            ) : (
+              <StatusPill
+                type="payment"
+                value={order.paymentStatus || "unpaid"}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Status & Key Badges */}
       <div className="flex flex-wrap items-center gap-2">
         <StatusPill type="order" value={order.status} />

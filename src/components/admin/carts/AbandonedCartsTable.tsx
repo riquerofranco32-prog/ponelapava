@@ -15,6 +15,7 @@ import {
   Check,
   RotateCcw,
   X,
+  Trash2,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "../AdminCard";
@@ -25,6 +26,7 @@ import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { AbandonedCart, CartItem } from "@/types";
 import { buildRecoveryWhatsAppMessage } from "@/lib/abandonedCarts";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 function formatRelativeTime(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime();
@@ -52,8 +54,24 @@ export default function AbandonedCartsTable() {
   const [search, setSearch] = useState("");
   const [selectedCart, setSelectedCart] = useState<AbandonedCart | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [cartToDelete, setCartToDelete] = useState<AbandonedCart | null>(null);
 
   const showToast = useAdminToast();
+
+  const handleDeleteCart = async (cart: AbandonedCart) => {
+    try {
+      const res = await fetch(`/api/admin/abandoned-carts/${cart.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Error al eliminar carrito");
+      setCarts((prev) => prev.filter((c) => c.id !== cart.id));
+      if (selectedCart?.id === cart.id) setSelectedCart(null);
+      setCartToDelete(null);
+      showToast("Carrito abandonado eliminado permanentemente", "success");
+    } catch {
+      showToast("No se pudo eliminar el carrito abandonado", "error");
+    }
+  };
 
   const fetchCarts = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -410,6 +428,15 @@ export default function AbandonedCartsTable() {
                               <Check size={14} className="text-emerald-500" />
                             )}
                           </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setCartToDelete(cart)}
+                            className="p-1.5 rounded-lg border border-[var(--dash-border)] hover:bg-[var(--dash-danger-bg)] text-[var(--dash-muted)] hover:text-[var(--dash-danger)] hover:border-[var(--dash-danger-border)] transition-colors"
+                            title="Eliminar carrito abandonado"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -514,6 +541,16 @@ export default function AbandonedCartsTable() {
             </div>
           </div>
         </div>
+      )}
+
+      {cartToDelete && (
+        <ConfirmDialog
+          title="¿Eliminar carrito abandonado?"
+          message={`¿Estás seguro de que deseas eliminar permanentemente el carrito de ${cartToDelete.customerName || cartToDelete.phone} (${formatPrice(cartToDelete.total)})? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar carrito"
+          onConfirm={() => handleDeleteCart(cartToDelete)}
+          onCancel={() => setCartToDelete(null)}
+        />
       )}
     </div>
   );

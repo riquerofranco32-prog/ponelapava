@@ -38,3 +38,27 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return data;
   });
 }
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  const { id } = await params;
+
+  return handle(`DELETE /api/admin/abandoned-carts/${id}`, async (adminUser) => {
+    const { error } = await supabaseAdmin()
+      .from("abandoned_carts")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    await logAudit({
+      actorEmail: adminUser.email,
+      action: "cart_delete",
+      entityType: "abandoned_cart",
+      entityId: id,
+      details: { deletedAt: new Date().toISOString() },
+    });
+
+    return { ok: true, deletedId: id };
+  });
+}
+

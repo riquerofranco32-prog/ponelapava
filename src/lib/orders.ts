@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase";
-import { Order, OrderItem } from "@/types";
+import { Order, OrderItem, OrderStatus } from "@/types";
 import { STORE_TIMEZONE } from "@/lib/hours";
 import { isOrderStatus } from "@/lib/orderStatus";
 import { checkCoupon } from "@/lib/coupons";
@@ -722,4 +722,120 @@ export async function getDashboardStats(
     pendingOrdersCount,
     overdueFollowupsCount,
   };
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  const { error } = await supabaseAdmin()
+    .from("orders")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function deleteOrdersBulk(ids: string[]): Promise<number> {
+  if (!ids || ids.length === 0) return 0;
+  const { error, count } = await supabaseAdmin()
+    .from("orders")
+    .delete({ count: "exact" })
+    .in("id", ids);
+  if (error) throw error;
+  return count ?? ids.length;
+}
+
+export interface CreateAdminOrderInput {
+  customerName: string;
+  customerPhone?: string;
+  items: { productId: string; quantity: number }[];
+  paymentMethod?: "transfer" | "cash" | "card";
+  paymentStatus?: "unpaid" | "paid";
+  status?: OrderStatus;
+  deliveryMethod?: "pickup" | "delivery";
+  deliveryAddress?: string;
+  comment?: string;
+}
+
+export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Order> {
+  const customerName = input.customerName.trim();
+  if (customerName.length < 2) {
+    throw new OrderValidationError("El nombre del cliente debe tener al menos 2 caracteres.");
+  }
+  if (!Array.isArray(input.items) || input.items.length === 0) {
+    throw new OrderValidationError("Debe seleccionar al menos un producto.");
+  }
+
+  const orderItems = await priceItems(input.items);
+  const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
+  const total = subtotal;
+
+  const commentParts: string[] = [];
+  if (input.paymentMethod) {
+    const methodNames = {
+      transfer: "Transferencia",
+      cash: "Efectivo en mostrador",
+      card: "Tarjeta / Débito",
+    };
+    commentParts.push(`[Pago: ${methodNames[input.paymentMethod]}]`);
+  }
+  if (input.deliveryMethod === "pickup") {
+    commentParts.push("[Retiro en Local Catriel]");
+  } else if (input.deliveryAddress?.trim()) {
+    commentParts.push(`[Envío a Domicilio: ${input.deliveryAddress.trim()}]`);
+  }
+  if (input.comment?.trim()) {
+    commentParts.push(input.comment.trim());
+  }
+
+  const payload: Record<string, unknown> = {
+    customer_name: customerName,
+    items: orderItems,
+    subtotal,
+    total,
+    comment: commentParts.join(" ") || null,
+    status: input.status || "confirmed",
+    payment_status: input.paymentStatus || "paid",
+  };
+
+  if (input.paymentStatus === "paid") {
+    payload.paid_at = new Date().toISOString();
+  }
+
+  if (input.customerPhone?.trim()) {
+    payload.customer_phone = input.customerPhone.trim().slice(0, 30);
+  }
+
+  try {
+    const customerId = await upsertCustomerForOrder(
+      customerName,
+      input.customerPhone,
+    );
+    if (customerId) {
+      payload.customer_id = customerId;
+    }
+  } catch {
+    // best-effort
+  }
+
+  const { data, error } = await supabaseAdmin()
+    .from("orders")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if (error) {
+    if (MISSING_COLUMN_CODES.includes(error.code)) {
+      if (payload.customer_id) delete payload.customer_id;
+      if (payload.customer_phone) delete payload.customer_phone;
+      if (payload.payment_status) delete payload.payment_status;
+      const retry = await supabaseAdmin()
+        .from("orders")
+        .insert(payload)
+        .select("*")
+        .single();
+      if (retry.error) throw retry.error;
+      return fromRow(retry.data as OrderRow);
+    }
+    throw error;
+  }
+
+  return fromRow(data as OrderRow);
 }

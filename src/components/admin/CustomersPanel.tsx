@@ -16,6 +16,7 @@ import {
   UserCheck,
   Clock,
   Phone,
+  Trash2,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { AdminKpiCard } from "./AdminCard";
@@ -27,6 +28,7 @@ import { CustomerWithStats, CustomersKpis, CustomerSegment } from "@/lib/custome
 import { CustomerDetailModal } from "./CustomerDetailModal";
 import { StatusPill } from "./ui/Badge";
 import { Button } from "./ui/Button";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 function exportCustomersCsv(customers: CustomerWithStats[]) {
   const header = [
@@ -84,8 +86,28 @@ export default function CustomersPanel() {
   const [segment, setSegment] = useState<CustomerSegment>("all");
   const [riskDays, setRiskDays] = useState(45);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerWithStats | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<CustomerWithStats | null>(null);
   const [backfilling, setBackfilling] = useState(false);
   const showToast = useAdminToast();
+
+  const handleDeleteCustomer = async (customer: CustomerWithStats) => {
+    try {
+      const res = await fetch(`/api/admin/customers/${customer.id}`, {
+        method: "DELETE",
+      });
+      assertOk(res, "No se pudo eliminar el cliente");
+      setCustomers((prev) => prev.filter((c) => c.id !== customer.id));
+      if (selectedCustomer?.id === customer.id) setSelectedCustomer(null);
+      setCustomerToDelete(null);
+      showToast("Cliente eliminado permanentemente");
+      loadCustomers();
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Error al eliminar cliente",
+        "error"
+      );
+    }
+  };
 
   const loadCustomers = useCallback(async () => {
     setLoading(true);
@@ -483,6 +505,14 @@ export default function CustomersPanel() {
                         >
                           <Eye size={14} />
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setCustomerToDelete(customer)}
+                          className="admin-icon-btn hover:text-[var(--dash-danger)] hover:border-[var(--dash-danger-border)] transition-colors"
+                          title="Eliminar Cliente"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -501,6 +531,16 @@ export default function CustomersPanel() {
           onCustomerUpdated={() => {
             loadCustomers();
           }}
+        />
+      )}
+
+      {customerToDelete && (
+        <ConfirmDialog
+          title="¿Eliminar cliente del CRM?"
+          message={`¿Estás seguro de que deseas eliminar permanentemente a "${customerToDelete.name}" (${customerToDelete.displayPhone || customerToDelete.phoneNormalized})? Esta acción no se puede deshacer.`}
+          confirmLabel="Eliminar cliente"
+          onConfirm={() => handleDeleteCustomer(customerToDelete)}
+          onCancel={() => setCustomerToDelete(null)}
         />
       )}
     </div>

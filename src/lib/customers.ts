@@ -691,3 +691,12 @@ export async function backfillCustomers(): Promise<{
     errors,
   };
 }
+
+export async function deleteCustomer(id: string): Promise<void> {
+  const { error } = await supabaseAdmin()
+    .from("customers")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
+

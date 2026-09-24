@@ -1,7 +1,8 @@
-﻿import { NextRequest } from "next/server";
-import { getCustomerDetail, updateCustomer } from "@/lib/customers";
+import { NextRequest } from "next/server";
+import { getCustomerDetail, updateCustomer, deleteCustomer } from "@/lib/customers";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { handle, ValidationError } from "@/lib/api-guard";
+import { logAudit } from "@/lib/auditLog";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -39,3 +40,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return updated;
   });
 }
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  const { id } = await params;
+
+  return handle(`DELETE /api/admin/customers/${id}`, async (adminUser) => {
+    await deleteCustomer(id);
+
+    await logAudit({
+      actorEmail: adminUser.email,
+      action: "customer_delete",
+      entityType: "customer",
+      entityId: id,
+      details: { deletedAt: new Date().toISOString() },
+    });
+
+    return { ok: true, deletedId: id };
+  });
+}
+

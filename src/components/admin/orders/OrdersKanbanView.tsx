@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Printer, MessageCircle, GripVertical } from "lucide-react";
+import { Eye, Printer, MessageCircle, GripVertical, Trash2 } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
@@ -26,6 +26,7 @@ export interface OrdersKanbanViewProps {
   onStatusChange: (id: string, status: Order["status"]) => void;
   onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
   onViewOrder: (order: Order) => void;
+  onDelete?: (order: Order) => void;
 }
 
 export function OrdersKanbanView({
@@ -33,6 +34,7 @@ export function OrdersKanbanView({
   onStatusChange,
   onPaymentStatusChange,
   onViewOrder,
+  onDelete,
 }: OrdersKanbanViewProps) {
   const [dragOverCol, setDragOverCol] = useState<Order["status"] | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -163,6 +165,16 @@ export function OrdersKanbanView({
                           >
                             <Eye size={13} />
                           </button>
+                          {onDelete && (
+                            <button
+                              type="button"
+                              onClick={() => onDelete(order)}
+                              title="Eliminar pedido"
+                              className="bg-transparent border-none text-[var(--dash-muted)] cursor-pointer p-0.5 inline-flex hover:text-[var(--dash-danger)] transition-colors opacity-70 hover:opacity-100"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       </div>
 

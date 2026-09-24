@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MessageCircle, Printer } from "lucide-react";
+import { Eye, MessageCircle, Printer, Trash2 } from "lucide-react";
 import { Order } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { buildAdminCustomerWhatsAppUrl } from "@/lib/whatsapp";
@@ -13,6 +13,7 @@ export function OrderDesktopRow({
   onStatusChange,
   onPaymentStatusChange,
   onView,
+  onDelete,
   selected,
   onToggleSelect,
 }: {
@@ -21,6 +22,7 @@ export function OrderDesktopRow({
   onStatusChange: (id: string, status: Order["status"]) => void;
   onPaymentStatusChange?: (id: string, status: "unpaid" | "paid") => void;
   onView: (order: Order) => void;
+  onDelete?: (order: Order) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
 }) {
@@ -71,6 +73,17 @@ export function OrderDesktopRow({
             >
               <MessageCircle size={14} />
             </a>
+          )}
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(order)}
+              title="Eliminar pedido permanentemente"
+              className="bg-transparent border-none text-[var(--dash-muted)] p-0.5 cursor-pointer inline-flex items-center rounded hover:text-[var(--dash-danger)] transition-colors opacity-70 hover:opacity-100"
+            >
+              <Trash2 size={13} />
+            </button>
           )}
         </div>
         {order.comment && (

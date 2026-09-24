@@ -11,7 +11,12 @@ export type AuditAction =
   | "order_payment_status_change"
   | "team_member_invite"
   | "team_member_role_change"
-  | "team_member_toggle_active";
+  | "team_member_toggle_active"
+  | "order_delete"
+  | "order_bulk_delete"
+  | "order_create_manual"
+  | "cart_delete"
+  | "customer_delete";
 
 interface LogAuditParams {
   actorEmail: string;

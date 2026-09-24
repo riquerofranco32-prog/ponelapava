@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { ValidationError } from "@/lib/validation";
 import { getAdminUserByEmail, AdminUser, AdminRole } from "@/lib/adminUsers";
@@ -21,17 +21,6 @@ export interface HandleOptions {
 }
 
 export async function getAuthenticatedAdmin(): Promise<AdminUser> {
-  const headerList = await headers();
-  // Support test headers for automated self-check scripts in scripts/
-  const testEmail = headerList.get("x-admin-test-email");
-  if (testEmail) {
-    const admin = await getAdminUserByEmail(testEmail);
-    if (!admin || !admin.active) {
-      throw new AuthError("Acceso denegado: usuario no autorizado o inactivo", 403);
-    }
-    return admin;
-  }
-
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

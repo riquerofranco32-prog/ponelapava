@@ -62,6 +62,9 @@ export async function DELETE(request: NextRequest) {
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new ValidationError("Debe enviar un array 'ids' con los identificadores a eliminar");
     }
+    if (ids.length > 200 || !ids.every((id) => typeof id === "string")) {
+      throw new ValidationError("Máximo 200 pedidos por eliminación");
+    }
 
     const deletedCount = await deleteOrdersBulk(ids);
 
@@ -73,6 +76,6 @@ export async function DELETE(request: NextRequest) {
     });
 
     return { ok: true, deletedCount };
-  });
+  }, { requiredRole: "owner" });
 }
 

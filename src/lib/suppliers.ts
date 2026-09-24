@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { Supplier, SupplierInput } from "@/types";
 
 interface SupplierRow {
@@ -26,7 +26,7 @@ function fromRow(row: SupplierRow): Supplier {
 }
 
 export async function getSuppliers(): Promise<Supplier[]> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin()
     .from("suppliers")
     .select("*")
     .order("name");
@@ -42,7 +42,7 @@ export async function getSuppliers(): Promise<Supplier[]> {
 }
 
 export async function getSupplierById(id: string): Promise<Supplier | undefined> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin()
     .from("suppliers")
     .select("*")
     .eq("id", id)

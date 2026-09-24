@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { StockMovement, StockMovementReason, ProductStatus } from "@/types";
 
 interface StockMovementRow {
@@ -27,7 +27,7 @@ export async function getStockMovements(
   productId?: string,
   limit = 50
 ): Promise<StockMovement[]> {
-  let query = supabase
+  let query = supabaseAdmin()
     .from("stock_movements")
     .select("*")
     .order("created_at", { ascending: false })

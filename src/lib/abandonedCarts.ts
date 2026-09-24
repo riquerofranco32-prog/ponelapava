@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { AbandonedCart, AbandonedCartInput, CartItem } from "@/types";
 import { normalizeArPhone } from "@/lib/phone";
 
@@ -89,7 +89,7 @@ export async function getAbandonedCarts(filter?: {
   recovered?: boolean;
   timeFilter?: "all" | "1h" | "24h";
 }): Promise<AbandonedCart[]> {
-  let query = supabase
+  let query = supabaseAdmin()
     .from("abandoned_carts")
     .select("*")
     .order("last_activity", { ascending: false });
@@ -120,7 +120,7 @@ export async function getAbandonedCarts(filter?: {
 export async function getAbandonedCartById(
   id: string
 ): Promise<AbandonedCart | null> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin()
     .from("abandoned_carts")
     .select("*")
     .eq("id", id)

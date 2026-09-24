@@ -72,6 +72,6 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     });
 
     return { ok: true, deletedId: id };
-  });
+  }, { requiredRole: "owner" });
 }
 

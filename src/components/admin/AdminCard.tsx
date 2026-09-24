@@ -98,7 +98,7 @@ export function AdminKpiCard({
         )}
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="admin-kpi-number text-2xl sm:text-[28px] font-bold text-[var(--dash-text)] tabular-nums font-serif">
+        <span className="admin-kpi-number text-2xl sm:text-[28px] font-bold text-[var(--dash-text)] tabular-nums tracking-tight font-sans">
           {isNumeric ? countedValue : value}
         </span>
         {change && trend && trend !== "neutral" && (

@@ -365,7 +365,7 @@ export default function AdminShell({
                         aria-current={isActive ? "page" : undefined}
                         className={`admin-nav-item py-2.5 px-3 rounded-xl flex items-center justify-between text-sm transition-all ${
                           isActive
-                            ? "bg-[var(--dash-accent)] text-[var(--dash-bg)] font-semibold shadow-md"
+                            ? "bg-[var(--dash-accent-bg)] text-[var(--dash-accent)] border border-[var(--dash-accent-border)] font-semibold shadow-xs"
                             : "text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-2)]"
                         }`}
                       >
@@ -520,7 +520,7 @@ export default function AdminShell({
                       collapsed ? "justify-center px-0" : ""
                     } ${
                       isActive
-                        ? "bg-[var(--dash-accent)] text-[var(--dash-bg)] font-semibold"
+                        ? "bg-[var(--dash-accent-bg)] text-[var(--dash-accent)] border border-[var(--dash-accent-border)] font-semibold shadow-xs"
                         : "text-[var(--dash-muted)] hover:text-[var(--dash-text)] hover:bg-[var(--dash-surface-2)]"
                     }`}
                   >

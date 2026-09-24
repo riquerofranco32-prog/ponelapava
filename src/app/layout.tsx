@@ -117,7 +117,7 @@ export default async function RootLayout({
       <body className="antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd).replace(/</g, "\\u003c") }}
         />
         <SiteSettingsProvider settings={settings}>
           <FavoritesProvider>

@@ -118,7 +118,7 @@ export default function FAQSection({ faqs: customFaqs }: { faqs?: LandingFAQItem
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <div className="mx-auto max-w-4xl px-5 sm:px-8 lg:px-10">
         {/* Header */}

@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import { Order, OrderItem, OrderStatus } from "@/types";
-import { STORE_TIMEZONE } from "@/lib/hours";
+import { STORE_TIMEZONE, STORE_UTC_OFFSET, storeDateKey } from "@/lib/hours";
 import { isOrderStatus } from "@/lib/orderStatus";
 import { checkCoupon } from "@/lib/coupons";
 import { getSiteSettings } from "@/lib/settings";
@@ -12,6 +12,9 @@ import {
 } from "@/lib/pricing";
 
 import { upsertCustomerForOrder } from "@/lib/customers";
+import { parseOrderComment } from "@/lib/orderTags";
+export { parseOrderComment };
+import { ValidationError } from "@/lib/validation";
 
 interface OrderRow {
   id: string;
@@ -30,6 +33,7 @@ interface OrderRow {
 
 function fromRow(row: OrderRow): Order {
   return {
+    ...parseOrderComment(row.comment),
     id: row.id,
     customerId: row.customer_id ?? undefined,
     customerName: row.customer_name,
@@ -59,9 +63,44 @@ export interface CreateOrderInput {
   comment?: string;
 }
 
-export class OrderValidationError extends Error {}
+// Extends ValidationError so admin routes answer 400 with the message, not 500.
+export class OrderValidationError extends ValidationError {}
 
 const MAX_QUANTITY_PER_ITEM = 100;
+const MAX_LINES_PER_ORDER = 50;
+
+function validateOrderShape(customerName: string, items: CreateOrderInput["items"]): void {
+  if (customerName.length < 2 || customerName.length > 100) {
+    throw new OrderValidationError("Nombre de cliente inválido.");
+  }
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new OrderValidationError("El pedido no tiene productos.");
+  }
+  if (items.length > MAX_LINES_PER_ORDER) {
+    throw new OrderValidationError("El pedido tiene demasiados productos.");
+  }
+  for (const item of items) {
+    if (
+      typeof item?.productId !== "string" ||
+      !Number.isInteger(item.quantity) ||
+      item.quantity <= 0 ||
+      item.quantity > MAX_QUANTITY_PER_ITEM
+    ) {
+      throw new OrderValidationError("Cantidades del pedido inválidas.");
+    }
+  }
+}
+
+// Same product on two lines must be checked against stock as one quantity.
+function mergeLines(
+  items: CreateOrderInput["items"],
+): CreateOrderInput["items"] {
+  const byId = new Map<string, number>();
+  for (const { productId, quantity } of items) {
+    byId.set(productId, (byId.get(productId) ?? 0) + quantity);
+  }
+  return [...byId].map(([productId, quantity]) => ({ productId, quantity }));
+}
 
 // Builds the order's lines from the products table — the request only says
 // *which* product and *how many*; name, price and subtotal come from the DB.
@@ -136,23 +175,8 @@ function buildComment(
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
-  const customerName = input.customerName.trim();
-  if (customerName.length < 2 || customerName.length > 100) {
-    throw new OrderValidationError("Nombre de cliente inválido.");
-  }
-  if (!Array.isArray(input.items) || input.items.length === 0) {
-    throw new OrderValidationError("El pedido no tiene productos.");
-  }
-  for (const item of input.items) {
-    if (
-      !item?.productId ||
-      !Number.isInteger(item.quantity) ||
-      item.quantity <= 0 ||
-      item.quantity > MAX_QUANTITY_PER_ITEM
-    ) {
-      throw new OrderValidationError("Cantidades del pedido inválidas.");
-    }
-  }
+  const customerName = String(input.customerName ?? "").trim();
+  validateOrderShape(customerName, input.items);
 
   if (input.paymentMethod) {
     const settings = await getSiteSettings();
@@ -167,7 +191,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     }
   }
 
-  const orderItems = await priceItems(input.items);
+  const orderItems = await priceItems(mergeLines(input.items));
 
   // A coupon code that no longer validates is simply not applied — the order
   // still goes through at full price rather than failing at the last step.
@@ -202,8 +226,9 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     if (customerId) {
       payload.customer_id = customerId;
     }
-  } catch {
+  } catch (err) {
     // Best-effort: si falla no bloquea la creación del pedido
+    console.error("[orders] CRM upsert failed:", err);
   }
 
   const admin = supabaseAdmin();
@@ -268,12 +293,17 @@ export async function getOrders(params?: GetOrdersParams): Promise<GetOrdersResu
     query = query.eq("payment_status", params.paymentStatus);
   }
 
+  const isDay = (d?: string) => !d || /^\d{4}-\d{2}-\d{2}$/.test(d);
+  if (!isDay(params?.startDate) || !isDay(params?.endDate)) {
+    throw new ValidationError("Fecha inválida (formato AAAA-MM-DD)");
+  }
+
   if (params?.startDate) {
-    query = query.gte("created_at", `${params.startDate}T00:00:00.000Z`);
+    query = query.gte("created_at", `${params.startDate}T00:00:00${STORE_UTC_OFFSET}`);
   }
 
   if (params?.endDate) {
-    query = query.lte("created_at", `${params.endDate}T23:59:59.999Z`);
+    query = query.lte("created_at", `${params.endDate}T23:59:59.999${STORE_UTC_OFFSET}`);
   }
 
   if (params?.search && params.search.trim()) {
@@ -383,6 +413,10 @@ async function adjustStock(
       : `Devolución por cancelación de pedido #${orderId}`
     : undefined;
 
+  // ponytail: per-item RPC calls, not one transaction. A failure mid-order is
+  // surfaced to the admin instead of swallowed; a single apply_order_stock RPC
+  // is the upgrade if this ever happens in practice.
+  const failed: string[] = [];
   for (const item of items) {
     if (!item.productId) continue;
     try {
@@ -395,6 +429,36 @@ async function adjustStock(
       });
     } catch (err) {
       console.error(`[orders] Error al ajustar stock para producto ${item.productId}:`, err);
+      failed.push(item.productName);
+    }
+  }
+  if (failed.length) {
+    throw new Error(
+      `El pedido se actualizó pero no se pudo ajustar el stock de: ${failed.join(", ")}. Corregilo a mano en Productos.`,
+    );
+  }
+}
+
+// Re-checked at confirm time, not just at checkout: two pending orders can
+// both pass creation. Refusing here also keeps cancel exact — the RPC clamps
+// at 0, so deducting more than exists would make a later cancel invent stock.
+async function assertStockCovers(items: OrderItem[]): Promise<void> {
+  const need = new Map<string, number>();
+  for (const i of items) {
+    if (i.productId) need.set(i.productId, (need.get(i.productId) ?? 0) + i.quantity);
+  }
+  if (need.size === 0) return;
+  const { data, error } = await supabaseAdmin()
+    .from("products")
+    .select("id, name, stock")
+    .in("id", [...need.keys()]);
+  if (error) throw error;
+  for (const p of data as { id: string; name: string; stock: number }[]) {
+    const qty = need.get(p.id) ?? 0;
+    if (qty > (p.stock ?? 0)) {
+      throw new OrderValidationError(
+        `Stock insuficiente: ${p.name} tiene ${p.stock ?? 0} y el pedido lleva ${qty}. Ajustá el stock antes de confirmar.`,
+      );
     }
   }
 }
@@ -449,6 +513,7 @@ export async function updateOrderStatus(
 
   if (isFulfillment && !wasFulfillment) {
     sign = -1;
+    await assertStockCovers(items);
     const res = await admin
       .from("orders")
       .update({ status, stock_applied: true })
@@ -571,14 +636,13 @@ export async function getDashboardStats(
   const orderCountChange = percentChange(orderCount, previousOrderCount);
   const avgTicketChange = percentChange(avgTicket, previousAvgTicket);
 
+  const DAY_MS = 24 * 60 * 60 * 1000;
   const byDay = new Map<string, number>();
   for (let i = windowDays - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    byDay.set(d.toISOString().slice(0, 10), 0);
+    byDay.set(storeDateKey(new Date(Date.now() - i * DAY_MS)), 0);
   }
   for (const order of orders) {
-    const day = order.created_at.slice(0, 10);
+    const day = storeDateKey(order.created_at);
     if (byDay.has(day)) {
       byDay.set(day, (byDay.get(day) ?? 0) + order.total);
     }
@@ -618,16 +682,16 @@ export async function getDashboardStats(
     const hour = Number(hourOfDay.format(new Date(order.created_at))) % 24;
     ordersByHour.set(hour, (ordersByHour.get(hour) ?? 0) + 1);
 
-    const c = order.comment || "";
-    if (c.includes("[Pago: Transferencia")) {
+    const tags = parseOrderComment(order.comment);
+    if (tags.paymentMethod === "transfer") {
       paymentMethods.transfer += 1;
-    } else if (c.includes("[Pago: Efectivo")) {
+    } else if (tags.paymentMethod === "cash") {
       paymentMethods.cash += 1;
     } else {
       paymentMethods.card += 1;
     }
 
-    if (c.includes("[Retiro en Local")) {
+    if (tags.deliveryMethod === "pickup") {
       deliveryMethods.pickup += 1;
     } else {
       deliveryMethods.delivery += 1;
@@ -656,28 +720,15 @@ export async function getDashboardStats(
   }
 
   // Métricas del día de hoy en la zona horaria del local
-  const todayDateStr = new Intl.DateTimeFormat("en-CA", {
-    timeZone: STORE_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-
-  const lastWeekDate = new Date();
-  lastWeekDate.setDate(lastWeekDate.getDate() - 7);
-  const lastWeekDateStr = new Intl.DateTimeFormat("en-CA", {
-    timeZone: STORE_TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(lastWeekDate);
+  const todayDateStr = storeDateKey();
+  const lastWeekDateStr = storeDateKey(new Date(Date.now() - 7 * DAY_MS));
 
   const todayRevenue = allOrders
-    .filter((o) => o.created_at.slice(0, 10) === todayDateStr)
+    .filter((o) => storeDateKey(o.created_at) === todayDateStr)
     .reduce((sum, o) => sum + (o.total || 0), 0);
 
   const lastWeekTodayRevenue = allOrders
-    .filter((o) => o.created_at.slice(0, 10) === lastWeekDateStr)
+    .filter((o) => storeDateKey(o.created_at) === lastWeekDateStr)
     .reduce((sum, o) => sum + (o.total || 0), 0);
 
   const todayRevenueChange = percentChange(todayRevenue, lastWeekTodayRevenue);
@@ -690,17 +741,14 @@ export async function getDashboardStats(
   }
 
   let overdueFollowupsCount = 0;
-  try {
-    const { data: followups } = await supabaseAdmin()
-      .from("customers")
-      .select("id")
-      .not("follow_up_date", "is", null)
-      .lt("follow_up_date", todayDateStr);
-    if (followups) {
-      overdueFollowupsCount = followups.length;
-    }
-  } catch {
-    // table might not exist before migration
+  const { count: followupCount, error: followupError } = await supabaseAdmin()
+    .from("customers")
+    .select("id", { count: "exact", head: true })
+    .lt("follow_up_at", `${todayDateStr}T00:00:00${STORE_UTC_OFFSET}`);
+  if (followupError) {
+    console.error("[stats] overdue follow-ups query failed:", followupError);
+  } else {
+    overdueFollowupsCount = followupCount ?? 0;
   }
 
   return {
@@ -724,22 +772,33 @@ export async function getDashboardStats(
   };
 }
 
-export async function deleteOrder(id: string): Promise<void> {
-  const { error } = await supabaseAdmin()
-    .from("orders")
-    .delete()
-    .eq("id", id);
-  if (error) throw error;
-}
-
+// Deleting a confirmed-but-not-delivered order puts its stock back: the goods
+// never left the shop. Delivered orders keep their deduction.
 export async function deleteOrdersBulk(ids: string[]): Promise<number> {
   if (!ids || ids.length === 0) return 0;
-  const { error, count } = await supabaseAdmin()
+  const admin = supabaseAdmin();
+  const { data, error, count } = await admin
     .from("orders")
     .delete({ count: "exact" })
-    .in("id", ids);
+    .in("id", ids)
+    .select("id, items, status, stock_applied");
   if (error) throw error;
-  return count ?? ids.length;
+  const rows = (data ?? []) as {
+    id: string;
+    items: OrderItem[];
+    status: OrderStatus;
+    stock_applied?: boolean;
+  }[];
+  for (const row of rows) {
+    if (row.stock_applied && row.status !== "delivered") {
+      await adjustStock(row.items, 1, row.id);
+    }
+  }
+  return count ?? rows.length;
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  await deleteOrdersBulk([id]);
 }
 
 export interface CreateAdminOrderInput {
@@ -755,15 +814,24 @@ export interface CreateAdminOrderInput {
 }
 
 export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Order> {
-  const customerName = input.customerName.trim();
-  if (customerName.length < 2) {
-    throw new OrderValidationError("El nombre del cliente debe tener al menos 2 caracteres.");
+  // Walk-in sales often have no name; the ticket still needs one.
+  const customerName = String(input.customerName ?? "").trim() || "Venta mostrador";
+  validateOrderShape(customerName, input.items);
+  const status = input.status ?? "confirmed";
+  if (!isOrderStatus(status)) {
+    throw new OrderValidationError("Estado de pedido inválido.");
   }
-  if (!Array.isArray(input.items) || input.items.length === 0) {
-    throw new OrderValidationError("Debe seleccionar al menos un producto.");
+  if (input.paymentMethod && !["transfer", "cash", "card"].includes(input.paymentMethod)) {
+    throw new OrderValidationError("Medio de pago inválido.");
   }
+  if (input.paymentStatus && !["paid", "unpaid"].includes(input.paymentStatus)) {
+    throw new OrderValidationError("Estado de cobro inválido.");
+  }
+  // Counter sales take stock at creation when they start in a fulfillment
+  // status — same rule as updateOrderStatus, which never runs for them.
+  const takesStock = FULFILLMENT_STATUSES.includes(status);
 
-  const orderItems = await priceItems(input.items);
+  const orderItems = await priceItems(mergeLines(input.items));
   const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
   const total = subtotal;
 
@@ -779,10 +847,10 @@ export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Or
   if (input.deliveryMethod === "pickup") {
     commentParts.push("[Retiro en Local Catriel]");
   } else if (input.deliveryAddress?.trim()) {
-    commentParts.push(`[Envío a Domicilio: ${input.deliveryAddress.trim()}]`);
+    commentParts.push(`[Envío a Domicilio: ${input.deliveryAddress.trim().slice(0, 200)}]`);
   }
   if (input.comment?.trim()) {
-    commentParts.push(input.comment.trim());
+    commentParts.push(input.comment.trim().slice(0, 500));
   }
 
   const payload: Record<string, unknown> = {
@@ -791,8 +859,9 @@ export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Or
     subtotal,
     total,
     comment: commentParts.join(" ") || null,
-    status: input.status || "confirmed",
+    status,
     payment_status: input.paymentStatus || "paid",
+    stock_applied: takesStock,
   };
 
   if (input.paymentStatus === "paid") {
@@ -826,6 +895,7 @@ export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Or
       if (payload.customer_id) delete payload.customer_id;
       if (payload.customer_phone) delete payload.customer_phone;
       if (payload.payment_status) delete payload.payment_status;
+      delete payload.stock_applied;
       const retry = await supabaseAdmin()
         .from("orders")
         .insert(payload)
@@ -837,5 +907,7 @@ export async function createAdminOrder(input: CreateAdminOrderInput): Promise<Or
     throw error;
   }
 
-  return fromRow(data as OrderRow);
+  const order = fromRow(data as OrderRow);
+  if (takesStock) await adjustStock(orderItems, -1, order.id);
+  return order;
 }

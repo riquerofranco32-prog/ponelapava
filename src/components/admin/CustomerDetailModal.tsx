@@ -158,7 +158,7 @@ export function CustomerDetailModal({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          follow_up_at: newDate ? new Date(`${newDate}T12:00:00Z`).toISOString() : null,
+          follow_up_at: newDate ? new Date(`${newDate}T12:00:00-03:00`).toISOString() : null,
         }),
       });
       if (res.ok) {

@@ -9,6 +9,17 @@ export function getPaymentMethodLabel(method?: string | null): string {
   return method || "Sin especificar";
 }
 
+// Customer name, address and comment come from the public checkout: escape
+// them, the print window shares the admin's origin and session.
+function esc(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function printOrderRemito(order: Order) {
   const printWindow = window.open("", "_blank", "width=640,height=800");
   if (!printWindow) return;
@@ -26,7 +37,9 @@ export function printOrderRemito(order: Order) {
   const deliveryLabel =
     order.deliveryMethod === "pickup"
       ? "Retiro en Tienda (Punto de Entrega)"
-      : "Envío a Domicilio / Cadetería";
+      : order.deliveryMethod === "delivery"
+        ? "Envío a Domicilio / Cadetería"
+        : "Sin especificar";
 
   const shortId = (order.id || "NUEVO").slice(0, 8).toUpperCase();
 
@@ -35,7 +48,7 @@ export function printOrderRemito(order: Order) {
     <html lang="es">
       <head>
         <meta charset="utf-8">
-        <title>Remito de Despacho #${shortId} - ${order.customerName}</title>
+        <title>Remito de Despacho #${shortId} - ${esc(order.customerName)}</title>
         <style>
           @page {
             margin: 8mm;
@@ -192,18 +205,18 @@ export function printOrderRemito(order: Order) {
 
         <div class="section">
           <div class="section-title">Datos del Destinatario</div>
-          <div class="field"><strong>Cliente:</strong> ${order.customerName}</div>
-          ${order.customerPhone ? `<div class="field"><strong>Teléfono / WhatsApp:</strong> ${order.customerPhone}</div>` : ""}
+          <div class="field"><strong>Cliente:</strong> ${esc(order.customerName)}</div>
+          ${order.customerPhone ? `<div class="field"><strong>Teléfono / WhatsApp:</strong> ${esc(order.customerPhone)}</div>` : ""}
           <div class="field"><strong>Fecha:</strong> ${dateStr}</div>
           <div class="field"><strong>Entrega:</strong> ${deliveryLabel}</div>
-          ${order.deliveryAddress ? `<div class="field"><strong>Dirección:</strong> ${order.deliveryAddress}</div>` : ""}
+          ${order.deliveryAddress ? `<div class="field"><strong>Dirección:</strong> ${esc(order.deliveryAddress)}</div>` : ""}
           <div class="field"><strong>Pago:</strong> ${paymentLabel}</div>
         </div>
 
         ${order.comment ? `
           <div class="notes">
             <strong>💬 Observaciones del Cliente:</strong><br>
-            ${order.comment}
+            ${esc(order.comment)}
           </div>
         ` : ""}
 
@@ -225,7 +238,7 @@ export function printOrderRemito(order: Order) {
                   <td><span class="check-box"></span></td>
                   <td style="font-weight: 800; font-size: 14px;">${item.quantity}x</td>
                   <td>
-                    <strong>${item.productName}</strong>
+                    <strong>${esc(item.productName)}</strong>
                   </td>
                   <td class="right" style="font-weight: 600;">${formatPrice(item.subtotal)}</td>
                 </tr>

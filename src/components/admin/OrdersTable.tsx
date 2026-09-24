@@ -25,6 +25,7 @@ import {
 import { Order } from "@/types";
 import { STATUS_LABELS } from "@/lib/orderStatus";
 import { formatPrice } from "@/lib/utils";
+import { storeDateKey } from "@/lib/hours";
 import { AdminKpiCard } from "./AdminCard";
 import { AdminButton } from "./AdminButton";
 import { TableSkeleton } from "./TableSkeleton";
@@ -556,7 +557,7 @@ export default function OrdersTable() {
             <button
               type="button"
               onClick={() => {
-                const today = new Date().toISOString().slice(0, 10);
+                const today = storeDateKey();
                 setDateFrom(today);
                 setDateTo(today);
                 setPage(1);
@@ -570,8 +571,8 @@ export default function OrdersTable() {
               onClick={() => {
                 const to = new Date();
                 const from = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
-                setDateFrom(from.toISOString().slice(0, 10));
-                setDateTo(to.toISOString().slice(0, 10));
+                setDateFrom(storeDateKey(from));
+                setDateTo(storeDateKey(to));
                 setPage(1);
               }}
               className="admin-toolbar-pill text-xs px-2 py-1"
@@ -581,10 +582,9 @@ export default function OrdersTable() {
             <button
               type="button"
               onClick={() => {
-                const to = new Date();
-                const from = new Date(to.getFullYear(), to.getMonth(), 1);
-                setDateFrom(from.toISOString().slice(0, 10));
-                setDateTo(to.toISOString().slice(0, 10));
+                const today = storeDateKey();
+                setDateFrom(`${today.slice(0, 8)}01`);
+                setDateTo(today);
                 setPage(1);
               }}
               className="admin-toolbar-pill text-xs px-2 py-1"

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Tag, Percent, DollarSign, Sparkles } from "lucide-react";
 import { Coupon, CouponInput } from "@/types";
+import { storeDateKey, STORE_UTC_OFFSET } from "@/lib/hours";
 import { AdminModal } from "@/components/admin/AdminModal";
 import { AdminField } from "@/components/admin/AdminField";
 import { AdminButton } from "@/components/admin/AdminButton";
@@ -29,10 +30,10 @@ export default function CouponFormModal({
     coupon?.discountValue ? String(coupon.discountValue) : "",
   );
   const [validFrom, setValidFrom] = useState(
-    coupon?.validFrom ? coupon.validFrom.split("T")[0] : "",
+    coupon?.validFrom ? storeDateKey(coupon.validFrom) : "",
   );
   const [validUntil, setValidUntil] = useState(
-    coupon?.validUntil ? coupon.validUntil.split("T")[0] : "",
+    coupon?.validUntil ? storeDateKey(coupon.validUntil) : "",
   );
   const [active, setActive] = useState(coupon?.active ?? true);
   const [saving, setSaving] = useState(false);
@@ -61,9 +62,11 @@ export default function CouponFormModal({
         code: code.trim().toUpperCase(),
         discountType,
         discountValue: val,
-        validFrom: validFrom ? new Date(validFrom).toISOString() : undefined,
+        validFrom: validFrom
+          ? new Date(`${validFrom}T00:00:00${STORE_UTC_OFFSET}`).toISOString()
+          : undefined,
         validUntil: validUntil
-          ? new Date(`${validUntil}T23:59:59.999Z`).toISOString()
+          ? new Date(`${validUntil}T23:59:59.999${STORE_UTC_OFFSET}`).toISOString()
           : undefined,
         active,
       });

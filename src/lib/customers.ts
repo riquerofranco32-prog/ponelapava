@@ -152,6 +152,15 @@ export async function upsertCustomerForOrder(
 
     if (insertError) {
       if (MISSING_TABLE_CODES.includes(insertError.code)) return null;
+      // Unique violation: a concurrent order from the same phone created it first.
+      if (insertError.code === "23505") {
+        const { data: winner } = await admin
+          .from("customers")
+          .select("id")
+          .eq("phone_normalized", normalizedPhone)
+          .maybeSingle();
+        if (winner) return winner.id;
+      }
       throw insertError;
     }
 

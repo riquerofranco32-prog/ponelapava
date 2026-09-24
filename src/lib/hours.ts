@@ -1,4 +1,11 @@
 export const STORE_TIMEZONE = "America/Argentina/Buenos_Aires";
+// ponytail: Argentina has no DST since 2009; switch to Intl offset lookup if that changes.
+export const STORE_UTC_OFFSET = "-03:00";
+
+// "YYYY-MM-DD" of an instant in store-local time (not the UTC date of toISOString).
+export function storeDateKey(date: Date | string = new Date()): string {
+  return getStoreTimeParts(typeof date === "string" ? new Date(date) : date).dateStr;
+}
 
 export type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "node scripts/pricing-check.mjs"
+    "check": "node scripts/pricing-check.mjs && node --no-warnings --experimental-strip-types scripts/order-tags-check.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
